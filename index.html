@@ -1418,18 +1418,29 @@
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
-    // On page load: if the stored day differs from today, reset all food votes
+    // On page load: reset votes if no one has done it today yet
     async function dailyReset() {
-      const lastDay = localStorage.getItem('food_vote_day') ?? '';
       const today = getTodayKey();
-      if (lastDay === today) return;  // same day, nothing to do
 
-      // Clear local vote tracking
-      localStorage.removeItem('food_voted');
-      localStorage.setItem('food_vote_day', today);
+      // Check Firestore meta doc (shared across all users)
+      const metaRef = db.collection('_meta').doc('daily_reset');
+      const metaDoc = await metaRef.get();
+      const lastResetDay = metaDoc.exists ? (metaDoc.data().day ?? '') : '';
 
-      // Reset votes in Firestore for all food docs
+      // Always clear local vote tracking if the local day differs
+      const localDay = localStorage.getItem('food_vote_day') ?? '';
+      if (localDay !== today) {
+        localStorage.removeItem('food_voted');
+        localStorage.setItem('food_vote_day', today);
+      }
+
+      // Only reset Firestore votes if no client has reset today yet
+      if (lastResetDay === today) return;
+
       try {
+        // Mark reset day in Firestore FIRST to prevent other clients from also resetting
+        await metaRef.set({ day: today });
+
         const allFood = await foodRef.get();
         if (allFood.empty) return;
         const batch = db.batch();
