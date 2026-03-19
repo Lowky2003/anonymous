@@ -560,19 +560,36 @@
     }
 
     /* ── Render bubbles ── */
+    let knownIds = new Set();
+
     function render(items) {
       if (!items.length) {
         wrap.innerHTML =
           '<div class="empty-state"><span class="icon">💬</span>No answers yet — be the first!</div>';
+        knownIds.clear();
         return;
       }
 
-      wrap.innerHTML = '';
+      const newIds = new Set(items.map(a => a.id));
+      // Remove bubbles that no longer exist
+      wrap.querySelectorAll('.bubble').forEach(el => {
+        if (!newIds.has(el.dataset.id)) el.remove();
+      });
+
       const now = Date.now();
       items.forEach((a, i) => {
+        const existing = wrap.querySelector('[data-id="' + a.id + '"]');
+        if (existing) {
+          // Update timer only
+          const timer = existing.querySelector('.timer');
+          if (timer) timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
+          return;
+        }
+        // New bubble — animate in
         const bubble = document.createElement('div');
         bubble.className = 'bubble c' + (i % COLORS);
-        bubble.style.animationDelay = (i * 0.07) + 's, ' + (i * 0.07) + 's';
+        bubble.dataset.id = a.id;
+        bubble.style.animationDelay = '0s, 0s';
 
         const txt = document.createElement('span');
         txt.textContent = a.text;
@@ -585,6 +602,7 @@
 
         wrap.appendChild(bubble);
       });
+      knownIds = newIds;
     }
 
     /* ── (Bubble real-time listener is below, after sidebar setup) ── */
