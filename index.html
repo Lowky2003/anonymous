@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Bubble Answers</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .page-title {
+      text-align: center;
+      padding: 36px 20px 6px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .page-subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      padding-bottom: 20px;
+    }
+
+    /* ── Input area (fixed bottom) ── */
+    .input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+      padding: 14px 20px;
+      background: rgba(15, 12, 41, 0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .input-area textarea {
+      flex: 1;
+      padding: 12px 18px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 15px;
+      resize: none;
+      height: 48px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-area textarea::placeholder { color: rgba(255,255,255,0.4); }
+    .input-area textarea:focus { border-color: rgba(138, 120, 255, 0.6); }
+
+    .input-area button {
+      padding: 0 28px;
+      border: none;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .input-area button:hover { opacity: 0.9; }
+    .input-area button:active { transform: scale(0.96); }
+
+    /* ── Bubble container ── */
+    .bubble-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: flex-start;
+      gap: 18px;
+      padding: 16px 20px 110px;
+      min-height: calc(100vh - 130px);
+    }
+
+    /* ── Bubble ── */
+    .bubble {
+      position: relative;
+      max-width: 280px;
+      min-width: 110px;
+      padding: 20px 24px 14px;
+      border-radius: 30px;
+      color: #fff;
+      font-size: 14.5px;
+      line-height: 1.6;
+      word-break: break-word;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.3);
+      opacity: 0;
+      animation: floatIn 0.5s ease-out forwards,
+                 bobbing 5s ease-in-out infinite;
+      cursor: default;
+      transition: transform 0.2s;
+    }
+    .bubble:hover { transform: scale(1.06); }
+
+    .bubble .timer {
+      display: block;
+      margin-top: 10px;
+      font-size: 11px;
+      opacity: 0.5;
+      text-align: right;
+    }
+
+    /* 8 colour variants */
+    .bubble.c0 { background: linear-gradient(135deg, #7b5ea7cc, #5b6abfcc); }
+    .bubble.c1 { background: linear-gradient(135deg, #e06377cc, #f0939bcc); }
+    .bubble.c2 { background: linear-gradient(135deg, #3ab0a2cc, #58c5b5cc); }
+    .bubble.c3 { background: linear-gradient(135deg, #f2a154cc, #f7c97ecc); }
+    .bubble.c4 { background: linear-gradient(135deg, #6886c5cc, #8ea8dbcc); }
+    .bubble.c5 { background: linear-gradient(135deg, #c06c84cc, #f67280cc); }
+    .bubble.c6 { background: linear-gradient(135deg, #45b7a0cc, #61d4b3cc); }
+    .bubble.c7 { background: linear-gradient(135deg, #9b72cfcc, #c49bdbcc); }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.8); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes bobbing {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      width: 100%;
+      text-align: center;
+      color: rgba(255,255,255,0.28);
+      font-size: 17px;
+      margin-top: 100px;
+    }
+    .empty-state .icon { font-size: 56px; display: block; margin-bottom: 14px; }
+
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      padding: 12px 26px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 200;
+      transition: transform 0.35s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: rgba(58,176,162,0.93); color: #fff; }
+    .toast.error   { background: rgba(224,99,119,0.93); color: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .page-title { font-size: 22px; }
+      .bubble { max-width: 90vw; font-size: 14px; padding: 16px 18px 12px; }
+      .input-area { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="page-title">Anonymous Bubble Answers</h1>
+  <p class="page-subtitle">Answers disappear after 6 hours &#8987;</p>
+
+  <div class="bubble-wrap" id="bubbleWrap"></div>
+
+  <div class="input-area">
+    <textarea id="answerInput" placeholder="Type your anonymous answer…" maxlength="500"></textarea>
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       Firebase config loaded from firebase-config.js
+       ═══════════════════════════════════════════ */
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const answersRef = db.collection('answers');
+
+    const SIX_HOURS = 6 * 60 * 60 * 1000;
+    const COLORS = 8;
+
+    const wrap = document.getElementById('bubbleWrap');
+    const input = document.getElementById('answerInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+
+    /* ── Helpers ── */
+    function showToast(msg, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast ' + type + ' show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+    }
+
+    function fmtRemaining(ms) {
+      if (ms <= 0) return 'expiring…';
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      return h > 0 ? h + 'h ' + m + 'm left' : m + 'm left';
+    }
+
+    /* ── Render bubbles ── */
+    function render(items) {
+      if (!items.length) {
+        wrap.innerHTML =
+          '<div class="empty-state"><span class="icon">💬</span>No answers yet — be the first!</div>';
+        return;
+      }
+
+      wrap.innerHTML = '';
+      const now = Date.now();
+      items.forEach((a, i) => {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble c' + (i % COLORS);
+        bubble.style.animationDelay = (i * 0.07) + 's, ' + (i * 0.07) + 's';
+
+        const txt = document.createElement('span');
+        txt.textContent = a.text;
+        bubble.appendChild(txt);
+
+        const timer = document.createElement('span');
+        timer.className = 'timer';
+        timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
+        bubble.appendChild(timer);
+
+        wrap.appendChild(bubble);
+      });
+    }
+
+    /* ── Real-time listener — every user sees live updates ── */
+    answersRef
+      .orderBy('ts', 'asc')
+      .onSnapshot((snapshot) => {
+        const now = Date.now();
+        const items = [];
+        snapshot.forEach((doc) => {
+          const d = doc.data();
+          if (now - d.ts < SIX_HOURS) {
+            items.push({ id: doc.id, text: d.text, ts: d.ts });
+          }
+        });
+        render(items);
+      }, (err) => {
+        console.error('Firestore error:', err);
+        showToast('Connection error — check console (F12)', 'error');
+      });
+
+    /* ── Submit answer to Firestore ── */
+    async function submit() {
+      const text = input.value.trim();
+      if (!text) return;
+      if (text.length > 500) {
+        showToast('Max 500 characters', 'error');
+        return;
+      }
+
+      sendBtn.disabled = true;
+      try {
+        await answersRef.add({ text, ts: Date.now() });
+        input.value = '';
+        showToast('Answer sent!', 'success');
+      } catch {
+        showToast('Failed to send — try again', 'error');
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submit();
+      }
+    });
+
+    /* ── Cleanup: delete expired docs (runs once on each page load) ── */
+    (async function cleanup() {
+      const expiredCutoff = Date.now() - SIX_HOURS;
+      const expired = await answersRef.where('ts', '<=', expiredCutoff).get();
+      const batch = db.batch();
+      expired.forEach((doc) => batch.delete(doc.ref));
+      if (!expired.empty) batch.commit();
+    })();
+  </script>
+</body>
+</html>
