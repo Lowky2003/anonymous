@@ -334,7 +334,8 @@
     .vote-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 6px;
       padding: 10px 14px;
       border-radius: 14px;
       background: rgba(255,255,255,0.06);
@@ -374,6 +375,27 @@
       background: rgba(123, 94, 167, 0.85);
       color: #f7c97e;
     }
+    .vote-item .vote-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .vote-item .vote-action {
+      border: none;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.12s;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.5);
+    }
+    .vote-item .vote-action:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .vote-item .vote-action:active { transform: scale(0.88); }
+    .vote-item .vote-action.del:hover { background: rgba(224,99,119,0.4); }
     .vote-empty {
       text-align: center;
       color: rgba(255,255,255,0.25);
@@ -440,6 +462,11 @@
       body.sidebar-open .page-title,
       body.sidebar-open .page-subtitle,
       body.sidebar-open .bubble-wrap { margin-left: 0; }
+
+      .vote-item { padding: 8px 10px; gap: 5px; }
+      .vote-item .vote-text { font-size: 13px; }
+      .vote-item .vote-btn { width: 32px; height: 32px; font-size: 14px; }
+      .vote-item .vote-action { width: 32px; height: 32px; font-size: 13px; }
     }
   </style>
 </head>
@@ -678,14 +705,24 @@
 
         const count = document.createElement('span');
         count.className = 'vote-count';
-        count.textContent = item.votes ?? 0;
+        count.textContent = Math.max(0, item.votes ?? 0);
 
         const btn = document.createElement('button');
         btn.className = 'vote-btn' + (voted.has(item.id) ? ' voted' : '');
         btn.innerHTML = voted.has(item.id) ? '&#9989;' : '&#128077;';
         btn.addEventListener('click', () => castVote(item.id));
 
-        li.append(txt, count, btn);
+        const actions = document.createElement('div');
+        actions.className = 'vote-actions';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'vote-action del';
+        delBtn.innerHTML = '&#128465;';
+        delBtn.title = 'Delete';
+        delBtn.addEventListener('click', () => deleteFood(item.id, item.text));
+
+        actions.append(delBtn);
+        li.append(txt, count, btn, actions);
         voteListEl.appendChild(li);
       });
     }
@@ -693,6 +730,17 @@
     async function castVote(docId) {
       const voted = getVotedSet();
       const alreadyVoted = voted.has(docId);
+
+      // If "undoing" but Firestore votes is already 0, just clear local state
+      if (alreadyVoted) {
+        const item = foodItems.find(f => f.id === docId);
+        if (item && (item.votes ?? 0) <= 0) {
+          voted.delete(docId);
+          saveVotedSet(voted);
+          renderVoteList();
+          return;
+        }
+      }
 
       // Update localStorage FIRST so onSnapshot render picks up the new state
       if (alreadyVoted) {
@@ -718,6 +766,17 @@
         saveVotedSet(voted);
         renderVoteList();
         showToast('Vote failed — try again', 'error');
+      }
+    }
+
+    /* ── Delete food ── */
+    async function deleteFood(docId, name) {
+      if (!confirm('Delete "' + name + '" from the list?')) return;
+      try {
+        await foodRef.doc(docId).delete();
+        showToast('Deleted!', 'success');
+      } catch {
+        showToast('Delete failed', 'error');
       }
     }
 
@@ -855,7 +914,7 @@
         if (allFood.empty) return;
         const batch = db.batch();
         allFood.forEach((doc) => {
-          if ((doc.data().votes ?? 0) > 0) {
+          if ((doc.data().votes ?? 0) !== 0) {
             batch.update(doc.ref, { votes: 0 });
           }
         });
