@@ -164,15 +164,325 @@
     .toast.success { background: rgba(58,176,162,0.93); color: #fff; }
     .toast.error   { background: rgba(224,99,119,0.93); color: #fff; }
 
+    /* ── Sidebar toggle button ── */
+    .sidebar-toggle {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 310;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(123, 94, 167, 0.85);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+      backdrop-filter: blur(8px);
+    }
+    .sidebar-toggle:hover { background: rgba(123, 94, 167, 1); }
+    .sidebar-toggle:active { transform: scale(0.92); }
+
+    /* ── Left sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -320px;
+      width: 300px;
+      height: 100vh;
+      z-index: 300;
+      background: rgba(20, 17, 50, 0.97);
+      backdrop-filter: blur(18px);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 290;
+      background: rgba(0,0,0,0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
+
+    .sidebar-header {
+      padding: 22px 20px 10px;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-section {
+      padding: 16px 18px;
+    }
+    .sidebar-section h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 12px;
+    }
+
+    /* ── Random pick ── */
+    .random-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f2a154, #f7c97e);
+      color: #1a1a2e;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-bottom: 10px;
+    }
+    .random-btn:hover { opacity: 0.9; }
+    .random-btn:active { transform: scale(0.96); }
+
+    .random-result {
+      text-align: center;
+      padding: 18px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      font-size: 18px;
+      font-weight: 600;
+      color: #f7c97e;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    .random-result.spinning {
+      animation: slotSpin 0.1s linear infinite;
+    }
+    @keyframes slotSpin {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* ── Spin action buttons ── */
+    .spin-actions {
+      display: none;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .spin-actions.show { display: flex; }
+    .spin-actions button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.12s;
+    }
+    .spin-actions button:hover { opacity: 0.9; }
+    .spin-actions button:active { transform: scale(0.94); }
+    .spin-actions .remove-btn {
+      background: linear-gradient(135deg, #e06377, #f0939b);
+      color: #fff;
+    }
+    .spin-actions .keep-btn {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* ── Restore removed ── */
+    .restore-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: color 0.2s, border-color 0.2s;
+      display: none;
+    }
+    .restore-btn.show { display: block; }
+    .restore-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* ── Vote list ── */
+    .vote-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .vote-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      transition: background 0.2s;
+    }
+    .vote-item:hover { background: rgba(255,255,255,0.1); }
+    .vote-item .vote-text {
+      flex: 1;
+      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+      word-break: break-word;
+    }
+    .vote-item .vote-count {
+      font-size: 13px;
+      font-weight: 700;
+      color: #c8b6ff;
+      min-width: 24px;
+      text-align: center;
+    }
+    .vote-item .vote-btn {
+      border: none;
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.12s;
+      background: rgba(123, 94, 167, 0.4);
+      color: #fff;
+    }
+    .vote-item .vote-btn:hover { background: rgba(123, 94, 167, 0.7); }
+    .vote-item .vote-btn:active { transform: scale(0.88); }
+    .vote-item .vote-btn.voted {
+      background: rgba(123, 94, 167, 0.85);
+      color: #f7c97e;
+    }
+    .vote-empty {
+      text-align: center;
+      color: rgba(255,255,255,0.25);
+      font-size: 13px;
+      padding: 20px 0;
+    }
+    .reset-info {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      padding: 6px 0 10px;
+      letter-spacing: 0.3px;
+    }
+    .reset-info.just-reset {
+      color: #58c5b5;
+    }
+
+    /* ── Food input row ── */
+    .food-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .food-input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .food-input-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .food-input-row input:focus { border-color: rgba(138, 120, 255, 0.6); }
+    .food-input-row button {
+      width: 42px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3ab0a2, #58c5b5);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.12s;
+    }
+    .food-input-row button:hover { opacity: 0.9; }
+    .food-input-row button:active { transform: scale(0.9); }
+
+    /* ── Main content offset when sidebar open (desktop) ── */
+    body.sidebar-open .page-title,
+    body.sidebar-open .page-subtitle,
+    body.sidebar-open .bubble-wrap {
+      margin-left: 300px;
+      transition: margin-left 0.3s ease;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 480px) {
       .page-title { font-size: 22px; }
       .bubble { max-width: 90vw; font-size: 14px; padding: 16px 18px 12px; }
       .input-area { padding: 10px 12px; }
+      .sidebar { width: 85vw; left: -85vw; }
+      body.sidebar-open .page-title,
+      body.sidebar-open .page-subtitle,
+      body.sidebar-open .bubble-wrap { margin-left: 0; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Sidebar toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">&#9776;</button>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Left sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">What to Eat?</div>
+
+    <!-- Add food suggestion -->
+    <div class="sidebar-section">
+      <h3>&#127860; Add Food</h3>
+      <div class="food-input-row">
+        <input type="text" id="foodInput" placeholder="e.g. Nasi Lemak" maxlength="100">
+        <button id="addFoodBtn">+</button>
+      </div>
+    </div>
+
+    <!-- Random pick section -->
+    <div class="sidebar-section">
+      <h3>&#127922; Random Pick</h3>
+      <button class="random-btn" id="randomBtn">Spin &amp; Decide!</button>
+      <div class="random-result" id="randomResult">Press the button!</div>
+      <div class="spin-actions" id="spinActions">
+        <button class="remove-btn" id="spinRemoveBtn">&#10060; Remove</button>
+        <button class="keep-btn" id="spinKeepBtn">&#9989; Keep</button>
+      </div>
+      <button class="restore-btn" id="restoreBtn">&#128260; Restore removed food</button>
+    </div>
+
+    <!-- Vote section -->
+    <div class="sidebar-section" style="flex:1;overflow-y:auto">
+      <h3>&#128077; Vote for Food</h3>
+      <div class="reset-info" id="resetInfo"></div>
+      <ul class="vote-list" id="voteList">
+        <li class="vote-empty">No suggestions yet</li>
+      </ul>
+    </div>
+  </aside>
 
   <h1 class="page-title">Anonymous Bubble Answers</h1>
   <p class="page-subtitle">Answers disappear after 6 hours &#8987;</p>
@@ -199,6 +509,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const answersRef = db.collection('answers');
+    const foodRef    = db.collection('food_suggestions');
 
     const SIX_HOURS = 6 * 60 * 60 * 1000;
     const COLORS = 8;
@@ -252,23 +563,7 @@
       });
     }
 
-    /* ── Real-time listener — every user sees live updates ── */
-    answersRef
-      .orderBy('ts', 'asc')
-      .onSnapshot((snapshot) => {
-        const now = Date.now();
-        const items = [];
-        snapshot.forEach((doc) => {
-          const d = doc.data();
-          if (now - d.ts < SIX_HOURS) {
-            items.push({ id: doc.id, text: d.text, ts: d.ts });
-          }
-        });
-        render(items);
-      }, (err) => {
-        console.error('Firestore error:', err);
-        showToast('Connection error — check console (F12)', 'error');
-      });
+    /* ── (Bubble real-time listener is below, after sidebar setup) ── */
 
     /* ── Submit answer to Firestore ── */
     async function submit() {
@@ -298,6 +593,285 @@
         submit();
       }
     });
+
+    /* ═══════════════════════════════════════════
+       Sidebar toggle
+       ═══════════════════════════════════════════ */
+    const sidebar      = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle  = document.getElementById('sidebarToggle');
+
+    function toggleSidebar() {
+      const open = sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('show', open);
+      document.body.classList.toggle('sidebar-open', open);
+    }
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    /* ═══════════════════════════════════════════
+       Food suggestion system (separate collection)
+       ═══════════════════════════════════════════ */
+    const voteListEl   = document.getElementById('voteList');
+    const randomBtn    = document.getElementById('randomBtn');
+    const randomResult = document.getElementById('randomResult');
+    const foodInput    = document.getElementById('foodInput');
+    const addFoodBtn   = document.getElementById('addFoodBtn');
+    const resetInfoEl  = document.getElementById('resetInfo');
+
+    // Track which food docs this browser already voted on
+    function getVotedSet() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem('food_voted') ?? '[]'));
+      } catch { return new Set(); }
+    }
+    function saveVotedSet(set) {
+      localStorage.setItem('food_voted', JSON.stringify([...set]));
+    }
+
+    let foodItems = [];   // kept in sync by the food onSnapshot listener
+
+    /* ── Add food suggestion ── */
+    async function addFood() {
+      const text = foodInput.value.trim();
+      if (!text) return;
+      if (text.length > 100) {
+        showToast('Max 100 characters', 'error');
+        return;
+      }
+      addFoodBtn.disabled = true;
+      try {
+        await foodRef.add({ text, ts: Date.now(), votes: 0 });
+        foodInput.value = '';
+        showToast('Food added!', 'success');
+      } catch {
+        showToast('Failed to add — try again', 'error');
+      } finally {
+        addFoodBtn.disabled = false;
+      }
+    }
+    addFoodBtn.addEventListener('click', addFood);
+    foodInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addFood(); }
+    });
+
+    /* ── Render vote list ── */
+    function renderVoteList() {
+      const voted = getVotedSet();
+      const activeFood = foodItems.filter(f => !f.removed);
+      if (!activeFood.length) {
+        voteListEl.innerHTML = '<li class="vote-empty">No suggestions yet</li>';
+        return;
+      }
+
+      const sorted = [...activeFood].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
+      voteListEl.innerHTML = '';
+      sorted.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'vote-item';
+
+        const txt = document.createElement('span');
+        txt.className = 'vote-text';
+        txt.textContent = item.text;
+
+        const count = document.createElement('span');
+        count.className = 'vote-count';
+        count.textContent = item.votes ?? 0;
+
+        const btn = document.createElement('button');
+        btn.className = 'vote-btn' + (voted.has(item.id) ? ' voted' : '');
+        btn.innerHTML = voted.has(item.id) ? '&#9989;' : '&#128077;';
+        btn.addEventListener('click', () => castVote(item.id));
+
+        li.append(txt, count, btn);
+        voteListEl.appendChild(li);
+      });
+    }
+
+    async function castVote(docId) {
+      const voted = getVotedSet();
+      const alreadyVoted = voted.has(docId);
+      try {
+        await foodRef.doc(docId).update({
+          votes: firebase.firestore.FieldValue.increment(alreadyVoted ? -1 : 1)
+        });
+        if (alreadyVoted) {
+          voted.delete(docId);
+          showToast('Vote removed', 'success');
+        } else {
+          voted.add(docId);
+          showToast('Vote counted!', 'success');
+        }
+        saveVotedSet(voted);
+      } catch {
+        showToast('Vote failed — try again', 'error');
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       Random pick (slot-machine style)
+       ═══════════════════════════════════════════ */
+    const spinActions   = document.getElementById('spinActions');
+    const spinRemoveBtn = document.getElementById('spinRemoveBtn');
+    const spinKeepBtn   = document.getElementById('spinKeepBtn');
+    const restoreBtn    = document.getElementById('restoreBtn');
+    let lastSpinDocId   = null;
+
+    randomBtn.addEventListener('click', () => {
+      // Only spin on active (non-removed) items
+      const active = foodItems.filter(f => !f.removed);
+      if (!active.length) {
+        randomResult.textContent = 'No food to spin!';
+        return;
+      }
+      randomBtn.disabled = true;
+      spinActions.classList.remove('show');
+      randomResult.classList.add('spinning');
+      lastSpinDocId = null;
+      let ticks = 0;
+      const totalTicks = 18 + Math.floor(Math.random() * 8);
+      let picked;
+      const interval = setInterval(() => {
+        picked = active[Math.floor(Math.random() * active.length)];
+        randomResult.textContent = picked.text;
+        ticks++;
+        if (ticks >= totalTicks) {
+          clearInterval(interval);
+          randomResult.classList.remove('spinning');
+          randomResult.textContent = '\uD83C\uDF7D\uFE0F ' + picked.text + ' \uD83C\uDF89';
+          lastSpinDocId = picked.id;
+          spinActions.classList.add('show');
+          randomBtn.disabled = false;
+        }
+      }, 90);
+    });
+
+    // Remove the spun food
+    spinRemoveBtn.addEventListener('click', async () => {
+      if (!lastSpinDocId) return;
+      try {
+        await foodRef.doc(lastSpinDocId).update({ removed: true });
+        showToast('Removed from list!', 'success');
+      } catch {
+        showToast('Remove failed', 'error');
+      }
+      spinActions.classList.remove('show');
+      randomResult.textContent = 'Spin again!';
+      lastSpinDocId = null;
+    });
+
+    // Keep — just dismiss the buttons
+    spinKeepBtn.addEventListener('click', () => {
+      spinActions.classList.remove('show');
+      lastSpinDocId = null;
+    });
+
+    // Restore all removed food
+    restoreBtn.addEventListener('click', async () => {
+      const removed = foodItems.filter(f => f.removed);
+      if (!removed.length) return;
+      try {
+        const batch = db.batch();
+        removed.forEach(f => batch.update(foodRef.doc(f.id), { removed: false }));
+        await batch.commit();
+        showToast('All removed food restored!', 'success');
+      } catch {
+        showToast('Restore failed', 'error');
+      }
+    });
+
+    // Show/hide restore button based on whether removed items exist
+    function updateRestoreBtn() {
+      const hasRemoved = foodItems.some(f => f.removed);
+      restoreBtn.classList.toggle('show', hasRemoved);
+    }
+
+    /* ═══════════════════════════════════════════
+       Real-time listeners
+       ═══════════════════════════════════════════ */
+    // Bubble answers (gossip, etc.)
+    answersRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
+      const now = Date.now();
+      const items = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        if (now - d.ts < SIX_HOURS) {
+          items.push({ id: doc.id, text: d.text, ts: d.ts });
+        }
+      });
+      render(items);
+    }, (err) => {
+      console.error('Firestore error:', err);
+      showToast('Connection error — check console (F12)', 'error');
+    });
+
+    // Food suggestions (vote & random)
+    foodRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
+      foodItems = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        foodItems.push({ id: doc.id, text: d.text, ts: d.ts, votes: d.votes ?? 0, removed: !!d.removed });
+      });
+      renderVoteList();
+      updateRestoreBtn();
+    }, (err) => {
+      console.error('Food Firestore error:', err);
+    });
+
+    /* ═══════════════════════════════════════════
+       Daily vote reset at 12 AM
+       ═══════════════════════════════════════════ */
+    function getTodayKey() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    // On page load: if the stored day differs from today, reset all food votes
+    async function dailyReset() {
+      const lastDay = localStorage.getItem('food_vote_day') ?? '';
+      const today = getTodayKey();
+      if (lastDay === today) return;  // same day, nothing to do
+
+      // Clear local vote tracking
+      localStorage.removeItem('food_voted');
+      localStorage.setItem('food_vote_day', today);
+
+      // Reset votes in Firestore for all food docs
+      try {
+        const allFood = await foodRef.get();
+        if (allFood.empty) return;
+        const batch = db.batch();
+        allFood.forEach((doc) => {
+          if ((doc.data().votes ?? 0) > 0) {
+            batch.update(doc.ref, { votes: 0 });
+          }
+        });
+        await batch.commit();
+        resetInfoEl.textContent = '\uD83D\uDD04 Votes reset for today (' + today + ')';
+        resetInfoEl.className = 'reset-info just-reset';
+      } catch (e) {
+        console.error('Daily vote reset failed:', e);
+      }
+    }
+    dailyReset();
+
+    // Show current day info if no reset was needed
+    if (!resetInfoEl.textContent) {
+      resetInfoEl.textContent = 'Votes reset daily at 12:00 AM';
+    }
+
+    // Also schedule a reset if the page stays open past midnight
+    function scheduleMidnightReset() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      const msUntilMidnight = midnight - now;
+      setTimeout(() => {
+        dailyReset();
+        scheduleMidnightReset();  // schedule next day
+      }, msUntilMidnight + 500);  // +500ms buffer
+    }
+    scheduleMidnightReset();
 
     /* ── Cleanup: delete expired docs (runs once on each page load) ── */
     (async function cleanup() {
