@@ -194,6 +194,7 @@
       left: -320px;
       width: 300px;
       height: 100vh;
+      height: 100dvh;
       z-index: 300;
       background: rgba(20, 17, 50, 0.97);
       backdrop-filter: blur(18px);
@@ -201,7 +202,7 @@
       transition: left 0.3s ease;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      overflow: hidden;
     }
     .sidebar.open { left: 0; }
     .sidebar-overlay {
@@ -227,6 +228,7 @@
 
     .sidebar-section {
       padding: 16px 18px;
+      flex-shrink: 0;
     }
     .sidebar-section h3 {
       font-size: 13px;
@@ -475,7 +477,7 @@
     </div>
 
     <!-- Vote section -->
-    <div class="sidebar-section" style="flex:1;overflow-y:auto">
+    <div class="sidebar-section" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch">
       <h3>&#128077; Vote for Food</h3>
       <div class="reset-info" id="resetInfo"></div>
       <ul class="vote-list" id="voteList">
