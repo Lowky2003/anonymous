@@ -693,19 +693,30 @@
     async function castVote(docId) {
       const voted = getVotedSet();
       const alreadyVoted = voted.has(docId);
+
+      // Update localStorage FIRST so onSnapshot render picks up the new state
+      if (alreadyVoted) {
+        voted.delete(docId);
+      } else {
+        voted.add(docId);
+      }
+      saveVotedSet(voted);
+      renderVoteList();
+
       try {
         await foodRef.doc(docId).update({
           votes: firebase.firestore.FieldValue.increment(alreadyVoted ? -1 : 1)
         });
+        showToast(alreadyVoted ? 'Vote removed' : 'Vote counted!', 'success');
+      } catch {
+        // Revert localStorage on failure
         if (alreadyVoted) {
-          voted.delete(docId);
-          showToast('Vote removed', 'success');
-        } else {
           voted.add(docId);
-          showToast('Vote counted!', 'success');
+        } else {
+          voted.delete(docId);
         }
         saveVotedSet(voted);
-      } catch {
+        renderVoteList();
         showToast('Vote failed — try again', 'error');
       }
     }
