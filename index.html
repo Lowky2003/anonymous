@@ -214,7 +214,8 @@
       pointer-events: none;
       transition: opacity 0.3s;
     }
-    .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
+    .sidebar-overlay.show { opacity: 1; pointer-events: auto; touch-action: none; }
+    body.sidebar-open { overflow: hidden; touch-action: none; }
 
     .sidebar-header {
       padding: 22px 20px 10px 60px;
