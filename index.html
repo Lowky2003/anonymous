@@ -198,30 +198,86 @@
     }
     .reply-input-row {
       display: flex;
+      align-items: center;
       gap: 6px;
       margin-top: 6px;
     }
     .reply-input-row input {
       flex: 1;
-      padding: 6px 10px;
+      padding: 5px 10px;
+      height: 30px;
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 14px;
       background: rgba(255,255,255,0.08);
       color: #fff;
       font-size: 12px;
       outline: none;
+      box-sizing: border-box;
     }
     .reply-input-row input::placeholder { color: rgba(255,255,255,0.35); }
-    .reply-input-row button {
-      padding: 4px 12px;
+    .reply-input-row .reply-send-btn {
+      padding: 0 10px;
+      height: 30px;
       border: none;
       border-radius: 14px;
       background: rgba(255,255,255,0.18);
       color: #fff;
       font-size: 12px;
       cursor: pointer;
+      white-space: nowrap;
+      line-height: 30px;
     }
-    .reply-input-row button:hover { background: rgba(255,255,255,0.28); }
+    .reply-input-row .reply-send-btn:hover { background: rgba(255,255,255,0.28); }
+    .reply-attach {
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .reply-attach:hover { background: rgba(255,255,255,0.2); }
+    .reply-preview {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .reply-preview img {
+      max-height: 40px;
+      max-width: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .reply-preview .remove-reply-img {
+      background: rgba(224,99,119,0.8);
+      border: none;
+      color: #fff;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .reply-img {
+      max-width: 100%;
+      max-height: 120px;
+      border-radius: 8px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .reply-img:hover { opacity: 0.85; }
 
     /* ── Bubble container ── */
     .bubble-wrap {
@@ -611,8 +667,9 @@
       .vote-item .vote-btn { width: 32px; height: 32px; font-size: 14px; }
       .vote-item .vote-action { width: 32px; height: 32px; font-size: 13px; }
 
-      .reply-input-row input { font-size: 14px; padding: 8px 10px; }
-      .reply-input-row button { font-size: 13px; padding: 6px 14px; }
+      .reply-input-row input { font-size: 14px; padding: 5px 10px; height: 34px; }
+      .reply-input-row .reply-send-btn { font-size: 14px; height: 34px; line-height: 34px; }
+      .reply-attach { width: 34px; min-width: 34px; height: 34px; }
       .reply-item { font-size: 13px; }
       .attach-btn { width: 42px; min-width: 42px; height: 42px; font-size: 18px; }
     }
@@ -899,14 +956,7 @@
       const inputRow = container.querySelector('.reply-input-row');
       container.innerHTML = '';
       a.replies.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'reply-item';
-        div.textContent = r.text;
-        const time = document.createElement('span');
-        time.className = 'reply-time';
-        time.textContent = fmtReplyTime(r.ts);
-        div.appendChild(time);
-        container.appendChild(div);
+        container.appendChild(buildReplyItem(r));
       });
       // Re-add input row
       container.appendChild(buildReplyInput(a.id));
@@ -921,37 +971,128 @@
       container = document.createElement('div');
       container.className = 'replies-container';
       a.replies.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'reply-item';
-        div.textContent = r.text;
-        const time = document.createElement('span');
-        time.className = 'reply-time';
-        time.textContent = fmtReplyTime(r.ts);
-        div.appendChild(time);
-        container.appendChild(div);
+        container.appendChild(buildReplyItem(r));
       });
       container.appendChild(buildReplyInput(a.id));
       bubble.appendChild(container);
     }
 
+    function buildReplyItem(r) {
+      const div = document.createElement('div');
+      div.className = 'reply-item';
+      if (r.image) {
+        const img = document.createElement('img');
+        img.className = 'reply-img';
+        img.src = r.image;
+        img.alt = 'reply image';
+        img.addEventListener('click', (e) => {
+          e.stopPropagation();
+          lightboxImg.src = r.image;
+          lightbox.classList.add('show');
+        });
+        div.appendChild(img);
+      }
+      if (r.text) {
+        const txt = document.createElement('span');
+        txt.textContent = r.text;
+        div.appendChild(txt);
+      }
+      const time = document.createElement('span');
+      time.className = 'reply-time';
+      time.textContent = fmtReplyTime(r.ts);
+      div.appendChild(time);
+      return div;
+    }
+
     function buildReplyInput(docId) {
+      const wrapper = document.createElement('div');
       const row = document.createElement('div');
       row.className = 'reply-input-row';
+      let replyPendingImage = null;
+
+      // Attach button
+      const attachBtn = document.createElement('button');
+      attachBtn.className = 'reply-attach';
+      attachBtn.textContent = '📷';
+      attachBtn.title = 'Attach image';
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      attachBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+
+      // Preview area
+      const preview = document.createElement('div');
+      preview.className = 'reply-preview';
+      preview.style.display = 'none';
+      const previewImg = document.createElement('img');
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-reply-img';
+      removeBtn.textContent = '✕';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        replyPendingImage = null;
+        preview.style.display = 'none';
+      });
+      preview.appendChild(previewImg);
+      preview.appendChild(removeBtn);
+
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        try {
+          replyPendingImage = await compressImage(file);
+          previewImg.src = replyPendingImage;
+          preview.style.display = 'flex';
+        } catch {
+          showToast('Failed to load image', 'error');
+        }
+        fileInput.value = '';
+      });
+
       const inp = document.createElement('input');
       inp.type = 'text';
       inp.placeholder = 'Write a reply…';
       inp.maxLength = 300;
+
+      // Paste image into reply
+      inp.addEventListener('paste', async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            if (!file) return;
+            try {
+              replyPendingImage = await compressImage(file);
+              previewImg.src = replyPendingImage;
+              preview.style.display = 'flex';
+            } catch {
+              showToast('Failed to load pasted image', 'error');
+            }
+            return;
+          }
+        }
+      });
+
       const btn = document.createElement('button');
-      btn.textContent = 'Send';
+      btn.className = 'reply-send-btn';
+      btn.textContent = '➤';
       const doSend = async () => {
         const text = inp.value.trim();
-        if (!text) return;
+        if (!text && !replyPendingImage) return;
         btn.disabled = true;
         try {
+          const reply = { ts: Date.now() };
+          if (text) reply.text = text;
+          if (replyPendingImage) reply.image = replyPendingImage;
           await answersRef.doc(docId).update({
-            replies: firebase.firestore.FieldValue.arrayUnion({ text, ts: Date.now() })
+            replies: firebase.firestore.FieldValue.arrayUnion(reply)
           });
           inp.value = '';
+          replyPendingImage = null;
+          preview.style.display = 'none';
         } catch {
           showToast('Reply failed', 'error');
         } finally {
@@ -964,9 +1105,13 @@
         if (e.key === 'Enter') { e.preventDefault(); doSend(); }
       });
       inp.addEventListener('click', (e) => e.stopPropagation());
+      row.appendChild(fileInput);
+      row.appendChild(attachBtn);
       row.appendChild(inp);
       row.appendChild(btn);
-      return row;
+      wrapper.appendChild(row);
+      wrapper.appendChild(preview);
+      return wrapper;
     }
 
     /* ── (Bubble real-time listener is below, after sidebar setup) ── */
