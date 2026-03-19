@@ -302,10 +302,6 @@
       background: linear-gradient(135deg, #e06377, #f0939b);
       color: #fff;
     }
-    .spin-actions .keep-btn {
-      background: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.8);
-    }
 
     /* ── Restore removed ── */
     .restore-btn {
@@ -497,8 +493,7 @@
       <button class="random-btn" id="randomBtn">Spin &amp; Decide!</button>
       <div class="random-result" id="randomResult">Press the button!</div>
       <div class="spin-actions" id="spinActions">
-        <button class="remove-btn" id="spinRemoveBtn">&#10060; Remove</button>
-        <button class="keep-btn" id="spinKeepBtn">&#9989; Keep</button>
+        <button class="remove-btn" id="spinRemoveBtn">&#10060; Remove from spin</button>
       </div>
       <button class="restore-btn" id="restoreBtn">&#128260; Restore removed food</button>
     </div>
@@ -785,7 +780,6 @@
        ═══════════════════════════════════════════ */
     const spinActions   = document.getElementById('spinActions');
     const spinRemoveBtn = document.getElementById('spinRemoveBtn');
-    const spinKeepBtn   = document.getElementById('spinKeepBtn');
     const restoreBtn    = document.getElementById('restoreBtn');
     let lastSpinDocId   = null;
 
@@ -829,12 +823,6 @@
       }
       spinActions.classList.remove('show');
       randomResult.textContent = 'Spin again!';
-      lastSpinDocId = null;
-    });
-
-    // Keep — just dismiss the buttons
-    spinKeepBtn.addEventListener('click', () => {
-      spinActions.classList.remove('show');
       lastSpinDocId = null;
     });
 
