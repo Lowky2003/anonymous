@@ -78,6 +78,151 @@
     .input-area button:hover { opacity: 0.9; }
     .input-area button:active { transform: scale(0.96); }
 
+    /* ── Attach image button ── */
+    .attach-btn {
+      width: 48px;
+      min-width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .attach-btn:hover { background: rgba(255,255,255,0.18); }
+    .attach-btn:active { transform: scale(0.92); }
+
+    /* ── Image preview strip ── */
+    .img-preview-strip {
+      display: none;
+      position: fixed;
+      bottom: 76px;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 8px 20px;
+      background: rgba(15, 12, 41, 0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .img-preview-strip.show { display: flex; align-items: center; gap: 10px; }
+    .img-preview-strip img {
+      max-height: 60px;
+      max-width: 100px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .img-preview-strip .remove-preview {
+      background: rgba(224,99,119,0.85);
+      border: none;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Bubble image ── */
+    .bubble-img {
+      max-width: 100%;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .bubble-img:hover { transform: scale(1.03); }
+
+    /* ── Image lightbox ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .lightbox.show { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    /* ── Bubble reply section ── */
+    .bubble-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .reply-toggle {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .reply-toggle:hover { color: #fff; background: rgba(255,255,255,0.12); }
+    .replies-container {
+      margin-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 6px;
+    }
+    .reply-item {
+      font-size: 12.5px;
+      padding: 4px 0;
+      color: rgba(255,255,255,0.85);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      word-break: break-word;
+    }
+    .reply-item:last-child { border-bottom: none; }
+    .reply-time {
+      font-size: 10px;
+      opacity: 0.4;
+      margin-left: 6px;
+    }
+    .reply-input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .reply-input-row input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+    }
+    .reply-input-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .reply-input-row button {
+      padding: 4px 12px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .reply-input-row button:hover { background: rgba(255,255,255,0.28); }
+
     /* ── Bubble container ── */
     .bubble-wrap {
       display: flex;
@@ -455,6 +600,7 @@
       .page-title { font-size: 22px; }
       .bubble { max-width: 90vw; font-size: 14px; padding: 16px 18px 12px; }
       .input-area { padding: 10px 12px; }
+      .img-preview-strip { bottom: 68px; padding: 6px 12px; }
       .sidebar { width: 85vw; left: -85vw; }
       body.sidebar-open .page-title,
       body.sidebar-open .page-subtitle,
@@ -464,6 +610,11 @@
       .vote-item .vote-text { font-size: 13px; }
       .vote-item .vote-btn { width: 32px; height: 32px; font-size: 14px; }
       .vote-item .vote-action { width: 32px; height: 32px; font-size: 13px; }
+
+      .reply-input-row input { font-size: 14px; padding: 8px 10px; }
+      .reply-input-row button { font-size: 13px; padding: 6px 14px; }
+      .reply-item { font-size: 13px; }
+      .attach-btn { width: 42px; min-width: 42px; height: 42px; font-size: 18px; }
     }
   </style>
 </head>
@@ -514,10 +665,19 @@
 
   <div class="bubble-wrap" id="bubbleWrap"></div>
 
+  <div class="img-preview-strip" id="imgPreviewStrip">
+    <img id="imgPreviewThumb" src="" alt="preview">
+    <button class="remove-preview" id="removePreview" title="Remove image">✕</button>
+  </div>
+
   <div class="input-area">
+    <button class="attach-btn" id="attachBtn" title="Attach image">📷</button>
+    <input type="file" id="imageInput" accept="image/*" style="display:none">
     <textarea id="answerInput" placeholder="Type your anonymous answer…" maxlength="500"></textarea>
     <button id="sendBtn">Send</button>
   </div>
+
+  <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="full"></div>
 
   <div class="toast" id="toast"></div>
 
@@ -543,7 +703,15 @@
     const input = document.getElementById('answerInput');
     const sendBtn = document.getElementById('sendBtn');
     const toastEl = document.getElementById('toast');
+    const attachBtn = document.getElementById('attachBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imgPreviewStrip = document.getElementById('imgPreviewStrip');
+    const imgPreviewThumb = document.getElementById('imgPreviewThumb');
+    const removePreview = document.getElementById('removePreview');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
     let toastTimer = null;
+    let pendingImage = null;  // base64 string of compressed image
 
     /* ── Helpers ── */
     function showToast(msg, type) {
@@ -559,6 +727,79 @@
       const m = Math.floor((ms % 3600000) / 60000);
       return h > 0 ? h + 'h ' + m + 'm left' : m + 'm left';
     }
+
+    /* ── Image compression ── */
+    function compressImage(file, maxW, maxH, quality) {
+      maxW = maxW || 400;
+      maxH = maxH || 400;
+      quality = quality || 0.5;
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxW || h > maxH) {
+              const ratio = Math.min(maxW / w, maxH / h);
+              w = Math.round(w * ratio);
+              h = Math.round(h * ratio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /* ── Attach image handlers ── */
+    attachBtn.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', async () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+      try {
+        pendingImage = await compressImage(file);
+        imgPreviewThumb.src = pendingImage;
+        imgPreviewStrip.classList.add('show');
+      } catch {
+        showToast('Failed to load image', 'error');
+      }
+      imageInput.value = '';
+    });
+    removePreview.addEventListener('click', () => {
+      pendingImage = null;
+      imgPreviewStrip.classList.remove('show');
+    });
+
+    /* ── Paste image from clipboard ── */
+    input.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) return;
+          try {
+            pendingImage = await compressImage(file);
+            imgPreviewThumb.src = pendingImage;
+            imgPreviewStrip.classList.add('show');
+          } catch {
+            showToast('Failed to load pasted image', 'error');
+          }
+          return;
+        }
+      }
+    });
+
+    /* ── Lightbox ── */
+    lightbox.addEventListener('click', () => lightbox.classList.remove('show'));
 
     /* ── Render bubbles ── */
     let knownIds = new Set();
@@ -581,9 +822,10 @@
       items.forEach((a, i) => {
         const existing = wrap.querySelector('[data-id="' + a.id + '"]');
         if (existing) {
-          // Update timer only
-          const timer = existing.querySelector('.timer');
+          // Update timer and replies
+          const timer = existing.querySelector('.bubble-footer .timer');
           if (timer) timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
+          updateReplies(existing, a);
           return;
         }
         // New bubble — animate in
@@ -592,18 +834,139 @@
         bubble.dataset.id = a.id;
         bubble.style.animationDelay = '0s, 0s';
 
+        if (a.image) {
+          const img = document.createElement('img');
+          img.className = 'bubble-img';
+          img.src = a.image;
+          img.alt = 'image';
+          img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            lightboxImg.src = a.image;
+            lightbox.classList.add('show');
+          });
+          bubble.appendChild(img);
+        }
+
         const txt = document.createElement('span');
         txt.textContent = a.text;
         bubble.appendChild(txt);
 
+        const footer = document.createElement('div');
+        footer.className = 'bubble-footer';
+
+        const replyBtn = document.createElement('button');
+        replyBtn.className = 'reply-toggle';
+        replyBtn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
+        replyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const container = bubble.querySelector('.replies-container');
+          if (container) {
+            container.remove();
+            replyBtn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
+          } else {
+            openReplies(bubble, a);
+          }
+        });
+        footer.appendChild(replyBtn);
+
         const timer = document.createElement('span');
         timer.className = 'timer';
         timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
-        bubble.appendChild(timer);
+        footer.appendChild(timer);
+
+        bubble.appendChild(footer);
 
         wrap.appendChild(bubble);
       });
       knownIds = newIds;
+    }
+
+    /* ── Reply helpers ── */
+    function fmtReplyTime(ts) {
+      const d = new Date(ts);
+      return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+    }
+
+    function updateReplies(bubble, a) {
+      const container = bubble.querySelector('.replies-container');
+      if (!container) {
+        // Update reply count on the toggle button
+        const btn = bubble.querySelector('.reply-toggle');
+        if (btn) btn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
+        return;
+      }
+      // Re-render replies inside open container
+      const inputRow = container.querySelector('.reply-input-row');
+      container.innerHTML = '';
+      a.replies.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'reply-item';
+        div.textContent = r.text;
+        const time = document.createElement('span');
+        time.className = 'reply-time';
+        time.textContent = fmtReplyTime(r.ts);
+        div.appendChild(time);
+        container.appendChild(div);
+      });
+      // Re-add input row
+      container.appendChild(buildReplyInput(a.id));
+      // Update button count
+      const btn = bubble.querySelector('.reply-toggle');
+      if (btn) btn.textContent = '💬 Reply (' + a.replies.length + ')';
+    }
+
+    function openReplies(bubble, a) {
+      let container = bubble.querySelector('.replies-container');
+      if (container) container.remove();
+      container = document.createElement('div');
+      container.className = 'replies-container';
+      a.replies.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'reply-item';
+        div.textContent = r.text;
+        const time = document.createElement('span');
+        time.className = 'reply-time';
+        time.textContent = fmtReplyTime(r.ts);
+        div.appendChild(time);
+        container.appendChild(div);
+      });
+      container.appendChild(buildReplyInput(a.id));
+      bubble.appendChild(container);
+    }
+
+    function buildReplyInput(docId) {
+      const row = document.createElement('div');
+      row.className = 'reply-input-row';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'Write a reply…';
+      inp.maxLength = 300;
+      const btn = document.createElement('button');
+      btn.textContent = 'Send';
+      const doSend = async () => {
+        const text = inp.value.trim();
+        if (!text) return;
+        btn.disabled = true;
+        try {
+          await answersRef.doc(docId).update({
+            replies: firebase.firestore.FieldValue.arrayUnion({ text, ts: Date.now() })
+          });
+          inp.value = '';
+        } catch {
+          showToast('Reply failed', 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      btn.addEventListener('click', (e) => { e.stopPropagation(); doSend(); });
+      inp.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') { e.preventDefault(); doSend(); }
+      });
+      inp.addEventListener('click', (e) => e.stopPropagation());
+      row.appendChild(inp);
+      row.appendChild(btn);
+      return row;
     }
 
     /* ── (Bubble real-time listener is below, after sidebar setup) ── */
@@ -611,7 +974,7 @@
     /* ── Submit answer to Firestore ── */
     async function submit() {
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !pendingImage) return;
       if (text.length > 500) {
         showToast('Max 500 characters', 'error');
         return;
@@ -619,8 +982,13 @@
 
       sendBtn.disabled = true;
       try {
-        await answersRef.add({ text, ts: Date.now() });
+        const doc = { ts: Date.now() };
+        if (text) doc.text = text;
+        if (pendingImage) doc.image = pendingImage;
+        await answersRef.add(doc);
         input.value = '';
+        pendingImage = null;
+        imgPreviewStrip.classList.remove('show');
         showToast('Answer sent!', 'success');
       } catch {
         showToast('Failed to send — try again', 'error');
@@ -875,7 +1243,7 @@
       snapshot.forEach((doc) => {
         const d = doc.data();
         if (now - d.ts < SIX_HOURS) {
-          items.push({ id: doc.id, text: d.text, ts: d.ts });
+          items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [] });
         }
       });
       render(items);
