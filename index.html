@@ -752,6 +752,7 @@
     const db = firebase.firestore();
     const answersRef = db.collection('answers');
     const foodRef    = db.collection('food_suggestions');
+    const spinResultRef = db.doc('app_state/spin_result');
 
     const SIX_HOURS = 6 * 60 * 60 * 1000;
     const COLORS = 8;
@@ -914,14 +915,17 @@
         const replyBtn = document.createElement('button');
         replyBtn.className = 'reply-toggle';
         replyBtn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
+        // Store latest data on bubble for reply toggling
+        bubble._replyData = a;
         replyBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const container = bubble.querySelector('.replies-container');
+          const latest = bubble._replyData || a;
           if (container) {
             container.remove();
-            replyBtn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
+            replyBtn.textContent = '💬 Reply' + (latest.replies.length ? ' (' + latest.replies.length + ')' : '');
           } else {
-            openReplies(bubble, a);
+            openReplies(bubble, latest);
           }
         });
         footer.appendChild(replyBtn);
@@ -945,6 +949,8 @@
     }
 
     function updateReplies(bubble, a) {
+      // Always keep latest data on bubble so reopen works
+      bubble._replyData = a;
       const container = bubble.querySelector('.replies-container');
       if (!container) {
         // Update reply count on the toggle button
@@ -1340,6 +1346,8 @@
           lastSpinDocId = picked.id;
           spinActions.classList.add('show');
           randomBtn.disabled = false;
+          // Sync result to Firestore so all users see it
+          spinResultRef.set({ text: picked.text, foodId: picked.id, ts: Date.now() }).catch(() => {});
         }
       }, 90);
     });
@@ -1349,6 +1357,8 @@
       if (!lastSpinDocId) return;
       try {
         await foodRef.doc(lastSpinDocId).update({ removed: true });
+        // Clear shared spin result so all users see the removal
+        await spinResultRef.set({ text: null, foodId: null, ts: Date.now() }).catch(() => {});
         showToast('Removed from list!', 'success');
       } catch {
         showToast('Remove failed', 'error');
@@ -1377,6 +1387,18 @@
       const hasRemoved = foodItems.some(f => f.removed);
       restoreBtn.classList.toggle('show', hasRemoved);
     }
+
+    // Listen for shared spin result so all users see it in real-time
+    spinResultRef.onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const d = snap.data();
+      if (d.text) {
+        randomResult.textContent = '\uD83C\uDF7D\uFE0F ' + d.text + ' \uD83C\uDF89';
+      } else {
+        randomResult.textContent = 'Spin again!';
+        spinActions.classList.remove('show');
+      }
+    });
 
     /* ═══════════════════════════════════════════
        Real-time listeners
