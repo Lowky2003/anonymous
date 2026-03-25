@@ -1069,6 +1069,14 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    // Enable Firestore offline persistence (IndexedDB cache)
+    db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Firestore persistence unavailable: multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Firestore persistence not supported in this browser');
+      }
+    });
     const answersRef = db.collection('answers');
     const foodRef    = db.collection('food_suggestions');
     const spinResultRef = db.doc('app_state/spin_result');
@@ -1090,6 +1098,14 @@
     let toastTimer = null;
     let pendingImage = null;  // base64 string of compressed image
     let suppressNextNotif = false; // suppress notification for self-sent messages
+
+    /* ── Local cache helpers ── */
+    function cacheSet(key, data) {
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+    }
+    function cacheGet(key) {
+      try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
+    }
 
     /* ── Helpers ── */
     function showToast(msg, type) {
@@ -1976,6 +1992,28 @@
     }
 
     /* ═══════════════════════════════════════════
+       Load cached data instantly (before Firestore)
+       ═══════════════════════════════════════════ */
+    (function loadCache() {
+      const cachedAnswers = cacheGet('cache_answers');
+      if (cachedAnswers && cachedAnswers.length) {
+        // Filter out expired items
+        const now = Date.now();
+        const valid = cachedAnswers.filter(a => now - a.ts < SIX_HOURS);
+        if (valid.length) {
+          knownIds = new Set(valid.map(a => a.id));
+          render(valid);
+        }
+      }
+      const cachedFood = cacheGet('cache_food');
+      if (cachedFood && cachedFood.length) {
+        foodItems = cachedFood;
+        renderVoteList();
+        updateRestoreBtn();
+      }
+    })();
+
+    /* ═══════════════════════════════════════════
        Real-time listeners
        ═══════════════════════════════════════════ */
     // Bubble answers (gossip, etc.)
@@ -1988,6 +2026,14 @@
           items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [], reactions: d.reactions ?? {} });
         }
       });
+      // Cache to localStorage (strip large images from replies to save space)
+      try {
+        const lite = items.map(a => ({
+          ...a,
+          replies: (a.replies || []).map(r => ({ text: r.text, ts: r.ts })),
+        }));
+        cacheSet('cache_answers', lite);
+      } catch {}
       // Detect new messages for notifications
       notifyNewMessages(items);
       render(items);
@@ -2003,6 +2049,7 @@
         const d = doc.data();
         foodItems.push({ id: doc.id, text: d.text, ts: d.ts, votes: d.votes ?? 0, removed: !!d.removed });
       });
+      cacheSet('cache_food', foodItems);
       renderVoteList();
       updateRestoreBtn();
     }, (err) => {
