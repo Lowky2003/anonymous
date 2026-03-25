@@ -587,34 +587,20 @@
     async function submitScore(s) {
       if (s <= 0) return;
       const name = getPlayerName();
-      const playerId = getPlayerId();
       try {
-        const docRef = lbRef.doc(playerId);
+        const docRef = lbRef.doc(name);
         const doc = await docRef.get();
         if (doc.exists) {
           const oldScore = doc.data().score || 0;
           if (s > oldScore) {
-            await docRef.update({ score: s, name, ts: Date.now() });
-          } else if (doc.data().name !== name) {
-            await docRef.update({ name });
+            await docRef.update({ score: s, ts: Date.now() });
           }
         } else {
-          await docRef.set({ playerId, name, score: s, ts: Date.now() });
+          await docRef.set({ name, score: s, ts: Date.now() });
         }
       } catch (e) {
         console.error('Leaderboard submit error:', e);
       }
-    }
-
-    function getPlayerId() {
-      const name = getPlayerName();
-      let map = {};
-      try { map = JSON.parse(localStorage.getItem('flappy_id_map') || '{}'); } catch(e) {}
-      if (map[name]) return map[name];
-      const id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-      map[name] = id;
-      localStorage.setItem('flappy_id_map', JSON.stringify(map));
-      return id;
     }
 
     function renderLeaderboard(containerId, entries) {
@@ -623,10 +609,10 @@
         el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
         return;
       }
-      const myId = getPlayerId();
+      const myName = getPlayerName();
       el.innerHTML = entries.map((e, i) => {
         const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-        const meClass = e.playerId === myId ? ' me' : '';
+        const meClass = e.name === myName ? ' me' : '';
         const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
         return '<div class="lb-row' + meClass + '">' +
           '<span class="lb-rank ' + rankClass + '">' + rankIcon + '</span>' +
@@ -647,7 +633,7 @@
       const entries = [];
       snap.forEach(doc => {
         const d = doc.data();
-        entries.push({ playerId: d.playerId, name: d.name || 'Anonymous', score: d.score });
+        entries.push({ name: d.name || 'Anonymous', score: d.score });
       });
       renderLeaderboard('startLbBody', entries);
       renderLeaderboard('overLbBody', entries);
