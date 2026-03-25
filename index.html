@@ -1035,6 +1035,25 @@
       </div>
     </div>
 
+    <!-- Mini Games section (collapsible) -->
+    <div class="sidebar-section">
+      <h3 class="collapse-toggle" id="miniGamesToggle" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin:-16px -18px 12px;border-radius:12px;background:rgba(255,255,255,0.06);transition:background 0.2s">
+        <span>&#127918; Mini Games</span>
+        <span class="collapse-arrow" id="miniGamesArrow" style="font-size:10px;transition:transform 0.25s;color:rgba(255,255,255,0.5)">&#9660;</span>
+      </h3>
+      <div id="miniGamesBody">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="flappy.html" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.06);text-decoration:none;color:#fff;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+            <span style="font-size:28px">🐦</span>
+            <div>
+              <div style="font-size:14px;font-weight:600">Flappy Bird</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.45)">Tap to fly — beat the high score!</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
     </div><!-- end sidebar-body -->
   </aside>
 
@@ -1108,6 +1127,8 @@
     let toastTimer = null;
     let pendingImage = null;  // base64 string of compressed image
     let suppressNextNotif = false; // suppress notification for self-sent messages
+    let suppressNextReplyNotif = false; // suppress notification for self-sent replies
+    let knownReplyCounts = {}; // track reply counts per bubble ID
 
     /* ── Local cache helpers ── */
     function cacheSet(key, data) {
@@ -1542,6 +1563,7 @@
           const reply = { ts: Date.now() };
           if (text) reply.text = text;
           if (replyPendingImage) reply.image = replyPendingImage;
+          suppressNextReplyNotif = true;
           await answersRef.doc(docId).update({
             replies: firebase.firestore.FieldValue.arrayUnion(reply)
           });
@@ -1674,6 +1696,49 @@
       foodVoteOpen = !foodVoteOpen;
       localStorage.setItem('foodVoteOpen', foodVoteOpen ? '1' : '0');
       applyFoodVoteCollapse(true);
+    });
+
+    /* ── Mini Games collapse toggle ── */
+    const miniGamesToggle = document.getElementById('miniGamesToggle');
+    const miniGamesBody   = document.getElementById('miniGamesBody');
+    const miniGamesArrow  = document.getElementById('miniGamesArrow');
+    let miniGamesOpen = localStorage.getItem('miniGamesOpen') !== '0'; // default open
+    function applyMiniGamesCollapse(animate) {
+      miniGamesArrow.style.transform = miniGamesOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+      miniGamesToggle.style.background = miniGamesOpen ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)';
+      if (!animate) {
+        miniGamesBody.style.display = miniGamesOpen ? '' : 'none';
+        return;
+      }
+      if (miniGamesOpen) {
+        miniGamesBody.style.display = '';
+        miniGamesBody.style.overflow = 'hidden';
+        const h = miniGamesBody.scrollHeight;
+        miniGamesBody.style.maxHeight = '0px';
+        miniGamesBody.style.opacity = '0';
+        requestAnimationFrame(() => {
+          miniGamesBody.style.transition = 'max-height 0.3s ease, opacity 0.25s ease';
+          miniGamesBody.style.maxHeight = h + 'px';
+          miniGamesBody.style.opacity = '1';
+          setTimeout(() => { miniGamesBody.style.maxHeight = ''; miniGamesBody.style.overflow = ''; miniGamesBody.style.transition = ''; }, 320);
+        });
+      } else {
+        const h = miniGamesBody.scrollHeight;
+        miniGamesBody.style.maxHeight = h + 'px';
+        miniGamesBody.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+          miniGamesBody.style.transition = 'max-height 0.3s ease, opacity 0.2s ease';
+          miniGamesBody.style.maxHeight = '0px';
+          miniGamesBody.style.opacity = '0';
+          setTimeout(() => { miniGamesBody.style.display = 'none'; miniGamesBody.style.maxHeight = ''; miniGamesBody.style.overflow = ''; miniGamesBody.style.opacity = ''; miniGamesBody.style.transition = ''; }, 320);
+        });
+      }
+    }
+    applyMiniGamesCollapse(false);
+    miniGamesToggle.addEventListener('click', () => {
+      miniGamesOpen = !miniGamesOpen;
+      localStorage.setItem('miniGamesOpen', miniGamesOpen ? '1' : '0');
+      applyMiniGamesCollapse(true);
     });
 
     /* ═══════════════════════════════════════════
@@ -2009,28 +2074,76 @@
 
     function notifyNewMessages(items) {
       if (isFirstSnapshot) {
-        // On first load, just record the known IDs — don't notify
+        // On first load, just record the known IDs & reply counts — don't notify
         isFirstSnapshot = false;
         knownIds = new Set(items.map(a => a.id));
+        items.forEach(a => { knownReplyCounts[a.id] = (a.replies || []).length; });
         return;
       }
 
       const newItems = items.filter(a => !knownIds.has(a.id));
-      if (!newItems.length) return;
 
-      // Skip notification if this was our own message
-      if (suppressNextNotif) {
-        suppressNextNotif = false;
-        return;
+      // Check for new replies on existing bubbles
+      let newReplyCount = 0;
+      let newestReplyText = '';
+      items.forEach(a => {
+        const currentCount = (a.replies || []).length;
+        const oldCount = knownReplyCounts[a.id] || 0;
+        if (knownIds.has(a.id) && currentCount > oldCount) {
+          const diff = currentCount - oldCount;
+          newReplyCount += diff;
+          // Get the newest reply text for the notification
+          const lastReply = a.replies[a.replies.length - 1];
+          if (lastReply) {
+            newestReplyText = lastReply.text || '📷 Image reply';
+          }
+        }
+        knownReplyCounts[a.id] = currentCount;
+      });
+
+      // Handle new bubble notifications
+      if (newItems.length) {
+        if (suppressNextNotif) {
+          suppressNextNotif = false;
+        } else {
+          fireNotification(
+            newItems.length,
+            newItems[newItems.length - 1].text
+              ? (newItems[newItems.length - 1].text.length > 80 ? newItems[newItems.length - 1].text.slice(0, 80) + '…' : newItems[newItems.length - 1].text)
+              : '📷 Image message',
+            'New Anonymous Message',
+            'anon-bubble'
+          );
+        }
       }
 
+      // Handle new reply notifications
+      if (newReplyCount > 0) {
+        if (suppressNextReplyNotif) {
+          suppressNextReplyNotif = false;
+        } else {
+          const replyBody = newestReplyText.length > 80 ? newestReplyText.slice(0, 80) + '…' : newestReplyText;
+          fireNotification(
+            newReplyCount,
+            replyBody,
+            'New Reply',
+            'anon-reply'
+          );
+        }
+      }
+
+      // Update known IDs
+      items.forEach(a => knownIds.add(a.id));
+    }
+
+    function fireNotification(count, bodyText, title, tag) {
       // Ring the bell animation + play sound
       ringBell();
       if (notifEnabled) playNotifSound();
 
       // If tab not focused → badge + title flash
       if (document.hidden) {
-        unseenCount += newItems.length;
+        unseenCount += count;
         notifBadge.textContent = unseenCount > 99 ? '99+' : unseenCount;
         notifBadge.classList.add('show');
         flashTitle();
@@ -2038,16 +2151,12 @@
 
       // Browser push notification (if enabled + tab hidden)
       if (notifEnabled && document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-        const newest = newItems[newItems.length - 1];
-        const body = newest.text
-          ? (newest.text.length > 80 ? newest.text.slice(0, 80) + '…' : newest.text)
-          : '📷 Image message';
-        const n = new Notification('New Anonymous Message', {
-          body: newItems.length > 1
-            ? newItems.length + ' new messages — ' + body
-            : body,
+        const n = new Notification(title, {
+          body: count > 1
+            ? count + ' new — ' + bodyText
+            : bodyText,
           icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>',
-          tag: 'anon-bubble'
+          tag: tag
         });
         n.addEventListener('click', () => {
           window.focus();
@@ -2067,6 +2176,7 @@
         const valid = cachedAnswers.filter(a => now - a.ts < SIX_HOURS);
         if (valid.length) {
           knownIds = new Set(valid.map(a => a.id));
+          valid.forEach(a => { knownReplyCounts[a.id] = (a.replies || []).length; });
           render(valid);
         }
       }
