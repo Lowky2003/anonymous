@@ -161,6 +161,78 @@
     }
 
     /* ── Bubble reply section ── */
+    .bubble-reactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.12s;
+      user-select: none;
+    }
+    .reaction-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.25); }
+    .reaction-btn:active { transform: scale(0.9); }
+    .reaction-btn.reacted {
+      background: rgba(138, 120, 255, 0.2);
+      border-color: rgba(138, 120, 255, 0.5);
+    }
+    .reaction-btn .r-emoji { font-size: 15px; line-height: 1; }
+    .reaction-btn .r-count { font-size: 11px; font-weight: 700; min-width: 8px; text-align: center; }
+    .reaction-picker {
+      display: flex;
+      gap: 2px;
+    }
+    .reaction-add {
+      width: 28px;
+      height: 28px;
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(255,255,255,0.35);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .reaction-add:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .reaction-picker-popup {
+      display: none;
+      gap: 2px;
+      padding: 4px 6px;
+      border-radius: 14px;
+      background: rgba(30, 25, 70, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .reaction-picker-popup.show { display: flex; }
+    .reaction-picker-popup button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .reaction-picker-popup button:hover { background: rgba(255,255,255,0.15); }
+    .reaction-picker-popup button:active { transform: scale(0.85); }
     .bubble-footer {
       display: flex;
       align-items: center;
@@ -388,6 +460,56 @@
     .sidebar-toggle:hover { background: rgba(123, 94, 167, 1); }
     .sidebar-toggle:active { transform: scale(0.92); }
 
+    /* ── Notification bell ── */
+    .notif-bell {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 310;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(123, 94, 167, 0.85);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+      backdrop-filter: blur(8px);
+    }
+    .notif-bell:hover { background: rgba(123, 94, 167, 1); }
+    .notif-bell:active { transform: scale(0.92); }
+    .notif-bell.enabled { background: rgba(58, 176, 162, 0.85); }
+    .notif-bell.enabled:hover { background: rgba(58, 176, 162, 1); }
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: #e06377;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 18px;
+      text-align: center;
+      display: none;
+    }
+    .notif-badge.show { display: block; }
+    @keyframes bellShake {
+      0%, 100% { transform: rotate(0); }
+      20% { transform: rotate(14deg); }
+      40% { transform: rotate(-14deg); }
+      60% { transform: rotate(8deg); }
+      80% { transform: rotate(-8deg); }
+    }
+    .notif-bell.ring .bell-icon { animation: bellShake 0.5s ease; }
+
     /* ── Left sidebar ── */
     .sidebar {
       position: fixed;
@@ -406,6 +528,11 @@
       overflow: hidden;
     }
     .sidebar.open { left: 0; }
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     .sidebar-overlay {
       position: fixed;
       inset: 0;
@@ -534,10 +661,11 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 6px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       border-radius: 14px;
       background: rgba(255,255,255,0.06);
       transition: background 0.2s;
+      min-height: 52px;
     }
     .vote-item:hover { background: rgba(255,255,255,0.1); }
     .vote-item .vote-text {
@@ -556,9 +684,9 @@
     .vote-item .vote-btn {
       border: none;
       border-radius: 10px;
-      width: 36px;
-      height: 36px;
-      font-size: 16px;
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -580,9 +708,9 @@
     .vote-item .vote-action {
       border: none;
       border-radius: 8px;
-      width: 28px;
-      height: 28px;
-      font-size: 12px;
+      width: 36px;
+      height: 36px;
+      font-size: 14px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -643,6 +771,165 @@
     .food-input-row button:hover { opacity: 0.9; }
     .food-input-row button:active { transform: scale(0.9); }
 
+    /* ── Countdown timer ── */
+    .countdown-display {
+      text-align: center;
+      padding: 18px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      margin-top: 10px;
+    }
+    .countdown-digits {
+      font-size: 32px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.3;
+    }
+    .countdown-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+    .countdown-done {
+      font-size: 28px;
+      animation: cdPulse 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes cdPulse {
+      from { transform: scale(1); }
+      to   { transform: scale(1.12); }
+    }
+    .countdown-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .countdown-input-row input[type="time"] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      color-scheme: dark;
+    }
+    .countdown-input-row input[type="time"]:focus {
+      border-color: rgba(138, 120, 255, 0.6);
+    }
+    .countdown-input-row button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.12s;
+      white-space: nowrap;
+    }
+    .countdown-input-row button:hover { opacity: 0.9; }
+    .countdown-input-row button:active { transform: scale(0.94); }
+    .countdown-clear {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .countdown-clear:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+    .countdown-schedule {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* ── Celebration overlay ── */
+    .celebration-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 12, 41, 0.92);
+      backdrop-filter: blur(12px);
+    }
+    .celebration-overlay.show { display: flex; }
+    .celebration-text {
+      font-size: 48px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(90deg, #f7c97e, #f2a154, #e06377, #c8b6ff, #7ec8e3);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: celebrate-gradient 2s ease infinite;
+      line-height: 1.3;
+    }
+    .celebration-sub {
+      font-size: 20px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 12px;
+    }
+    .celebration-emojis {
+      font-size: 60px;
+      margin-top: 20px;
+      animation: celebrate-bounce 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes celebrate-gradient {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes celebrate-bounce {
+      from { transform: translateY(0) scale(1); }
+      to   { transform: translateY(-18px) scale(1.1); }
+    }
+    .celebration-close {
+      margin-top: 36px;
+      padding: 14px 36px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 16px;
+      background: transparent;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .celebration-close:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.5);
+    }
+    /* confetti particles */
+    .confetti {
+      position: fixed;
+      z-index: 601;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall {
+      0%   { opacity: 1; transform: translateY(-10vh) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(110vh) rotate(720deg); }
+    }
+
     /* ── Main content offset when sidebar open (desktop) ── */
     body.sidebar-open .page-title,
     body.sidebar-open .page-subtitle,
@@ -680,12 +967,35 @@
   <!-- Sidebar toggle -->
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">&#9776;</button>
 
+  <!-- Notification bell -->
+  <button class="notif-bell" id="notifBell" title="Toggle notifications">
+    <span class="bell-icon">🔔</span>
+    <span class="notif-badge" id="notifBadge">0</span>
+  </button>
+
   <!-- Overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Left sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">What to Eat?</div>
+
+    <div class="sidebar-body">
+
+    <!-- Countdown timer -->
+    <div class="sidebar-section">
+      <h3>&#9203; Countdown to Off Work</h3>
+      <div class="countdown-input-row">
+        <input type="time" id="countdownTime" value="18:00">
+        <button id="countdownSetBtn">Set</button>
+      </div>
+      <div class="countdown-display" id="countdownDisplay">
+        <div class="countdown-digits" id="countdownDigits">--:--:--</div>
+        <div class="countdown-label" id="countdownLabel">Loading…</div>
+      </div>
+      <button class="countdown-clear" id="countdownClear">&#128260; Clear countdown</button>
+      <div class="countdown-schedule">Default: Mon–Fri, 9:00 AM → 6:00 PM</div>
+    </div>
 
     <!-- Add food suggestion -->
     <div class="sidebar-section">
@@ -708,13 +1018,14 @@
     </div>
 
     <!-- Vote section -->
-    <div class="sidebar-section" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div class="sidebar-section">
       <h3>&#128077; Vote for Food</h3>
       <div class="reset-info" id="resetInfo"></div>
       <ul class="vote-list" id="voteList">
         <li class="vote-empty">No suggestions yet</li>
       </ul>
     </div>
+    </div><!-- end sidebar-body -->
   </aside>
 
   <h1 class="page-title">Anonymous Bubble Answers</h1>
@@ -737,6 +1048,14 @@
   <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="full"></div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Celebration overlay -->
+  <div class="celebration-overlay" id="celebrationOverlay">
+    <div class="celebration-emojis">🎉🥳🎊</div>
+    <div class="celebration-text">OFF WORK!</div>
+    <div class="celebration-sub">Time to go home! You did great today 💪</div>
+    <button class="celebration-close" id="celebrationClose">Dismiss</button>
+  </div>
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -770,6 +1089,7 @@
     const lightboxImg = document.getElementById('lightboxImg');
     let toastTimer = null;
     let pendingImage = null;  // base64 string of compressed image
+    let suppressNextNotif = false; // suppress notification for self-sent messages
 
     /* ── Helpers ── */
     function showToast(msg, type) {
@@ -784,6 +1104,104 @@
       const h = Math.floor(ms / 3600000);
       const m = Math.floor((ms % 3600000) / 60000);
       return h > 0 ? h + 'h ' + m + 'm left' : m + 'm left';
+    }
+
+    /* ── Emoji reactions ── */
+    const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+
+    // Track which reactions this browser has toggled: { docId: Set(['👍', ...]) }
+    function getMyReactions(docId) {
+      try {
+        const all = JSON.parse(localStorage.getItem('my_reactions') || '{}');
+        return new Set(all[docId] || []);
+      } catch { return new Set(); }
+    }
+    function saveMyReaction(docId, emoji, added) {
+      try {
+        const all = JSON.parse(localStorage.getItem('my_reactions') || '{}');
+        if (!all[docId]) all[docId] = [];
+        const set = new Set(all[docId]);
+        if (added) set.add(emoji); else set.delete(emoji);
+        all[docId] = [...set];
+        localStorage.setItem('my_reactions', JSON.stringify(all));
+      } catch {}
+    }
+
+    async function toggleReaction(docId, emoji) {
+      const mine = getMyReactions(docId);
+      const removing = mine.has(emoji);
+      // Optimistic local update
+      saveMyReaction(docId, emoji, !removing);
+      try {
+        const key = 'reactions.' + emoji;
+        await answersRef.doc(docId).update({
+          [key]: firebase.firestore.FieldValue.increment(removing ? -1 : 1)
+        });
+      } catch {
+        // Revert on failure
+        saveMyReaction(docId, emoji, removing);
+        showToast('Reaction failed', 'error');
+      }
+    }
+
+    function buildReactionsRow(a) {
+      const row = document.createElement('div');
+      row.className = 'bubble-reactions';
+      const mine = getMyReactions(a.id);
+
+      // Show emojis that have counts > 0
+      REACTION_EMOJIS.forEach(emoji => {
+        const count = Math.max(0, (a.reactions && a.reactions[emoji]) || 0);
+        if (count > 0 || mine.has(emoji)) {
+          const btn = document.createElement('button');
+          btn.className = 'reaction-btn' + (mine.has(emoji) ? ' reacted' : '');
+          btn.innerHTML = '<span class="r-emoji">' + emoji + '</span><span class="r-count">' + (count || '') + '</span>';
+          btn.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(a.id, emoji); });
+          row.appendChild(btn);
+        }
+      });
+
+      // "+" button to pick a new emoji
+      const pickerWrap = document.createElement('div');
+      pickerWrap.className = 'reaction-picker';
+      const addBtn = document.createElement('button');
+      addBtn.className = 'reaction-add';
+      addBtn.textContent = '+';
+      addBtn.title = 'React';
+
+      const popup = document.createElement('div');
+      popup.className = 'reaction-picker-popup';
+      REACTION_EMOJIS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.textContent = emoji;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popup.classList.remove('show');
+          toggleReaction(a.id, emoji);
+        });
+        popup.appendChild(btn);
+      });
+
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popup.classList.toggle('show');
+      });
+
+      // Close picker when clicking elsewhere
+      document.addEventListener('click', () => popup.classList.remove('show'));
+
+      pickerWrap.appendChild(addBtn);
+      pickerWrap.appendChild(popup);
+      row.appendChild(pickerWrap);
+
+      return row;
+    }
+
+    function updateReactions(bubble, a) {
+      const oldRow = bubble.querySelector('.bubble-reactions');
+      if (!oldRow) return;
+      const newRow = buildReactionsRow(a);
+      oldRow.replaceWith(newRow);
     }
 
     /* ── Image compression ── */
@@ -880,10 +1298,11 @@
       items.forEach((a, i) => {
         const existing = wrap.querySelector('[data-id="' + a.id + '"]');
         if (existing) {
-          // Update timer and replies
+          // Update timer, replies, and reactions
           const timer = existing.querySelector('.bubble-footer .timer');
           if (timer) timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
           updateReplies(existing, a);
+          updateReactions(existing, a);
           return;
         }
         // New bubble — animate in
@@ -908,6 +1327,10 @@
         const txt = document.createElement('span');
         txt.textContent = a.text;
         bubble.appendChild(txt);
+
+        // Reactions row
+        const reactionsRow = buildReactionsRow(a);
+        bubble.appendChild(reactionsRow);
 
         const footer = document.createElement('div');
         footer.className = 'bubble-footer';
@@ -1136,7 +1559,8 @@
         const doc = { ts: Date.now() };
         if (text) doc.text = text;
         if (pendingImage) doc.image = pendingImage;
-        await answersRef.add(doc);
+        suppressNextNotif = true;
+        const docRef = await answersRef.add(doc);
         input.value = '';
         pendingImage = null;
         imgPreviewStrip.classList.remove('show');
@@ -1401,6 +1825,142 @@
     });
 
     /* ═══════════════════════════════════════════
+       Notifications — browser push + tab badge
+       ═══════════════════════════════════════════ */
+    const notifBell  = document.getElementById('notifBell');
+    const notifBadge = document.getElementById('notifBadge');
+    const originalTitle = document.title;
+    let notifEnabled = localStorage.getItem('notif_enabled') === '1';
+    let isFirstSnapshot = true;
+    let unseenCount = 0;
+    let titleFlashInterval = null;
+
+    // Notification sound using Web Audio API (no external file needed)
+    let audioCtx = null;
+    function playNotifSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Two-tone chime: boop-boop
+        [0, 0.15].forEach((delay, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = i === 0 ? 660 : 880; // two rising notes
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.25);
+          osc.start(audioCtx.currentTime + delay);
+          osc.stop(audioCtx.currentTime + delay + 0.25);
+        });
+      } catch {}
+    }
+
+    function updateBellUI() {
+      notifBell.classList.toggle('enabled', notifEnabled);
+      notifBell.title = notifEnabled ? 'Notifications ON — click to turn off' : 'Notifications OFF — click to turn on';
+    }
+    updateBellUI();
+
+    notifBell.addEventListener('click', async () => {
+      if (!notifEnabled) {
+        // Request permission
+        if ('Notification' in window && Notification.permission === 'default') {
+          const perm = await Notification.requestPermission();
+          if (perm !== 'granted') {
+            showToast('Notifications blocked by browser', 'error');
+            return;
+          }
+        }
+        if ('Notification' in window && Notification.permission === 'denied') {
+          showToast('Notifications blocked — enable in browser settings', 'error');
+          return;
+        }
+        notifEnabled = true;
+        localStorage.setItem('notif_enabled', '1');
+        showToast('Notifications enabled! 🔔', 'success');
+      } else {
+        notifEnabled = false;
+        localStorage.setItem('notif_enabled', '0');
+        showToast('Notifications disabled', 'success');
+      }
+      updateBellUI();
+    });
+
+    // Clear badge when user focuses the tab
+    window.addEventListener('focus', () => {
+      unseenCount = 0;
+      notifBadge.classList.remove('show');
+      document.title = originalTitle;
+      clearInterval(titleFlashInterval);
+      titleFlashInterval = null;
+    });
+
+    function ringBell() {
+      notifBell.classList.remove('ring');
+      void notifBell.offsetWidth; // force reflow
+      notifBell.classList.add('ring');
+    }
+
+    function flashTitle() {
+      if (titleFlashInterval) return;
+      let on = true;
+      titleFlashInterval = setInterval(() => {
+        document.title = on ? '(' + unseenCount + ') New message!' : originalTitle;
+        on = !on;
+      }, 1000);
+    }
+
+    function notifyNewMessages(items) {
+      if (isFirstSnapshot) {
+        // On first load, just record the known IDs — don't notify
+        isFirstSnapshot = false;
+        knownIds = new Set(items.map(a => a.id));
+        return;
+      }
+
+      const newItems = items.filter(a => !knownIds.has(a.id));
+      if (!newItems.length) return;
+
+      // Skip notification if this was our own message
+      if (suppressNextNotif) {
+        suppressNextNotif = false;
+        return;
+      }
+
+      // Ring the bell animation + play sound
+      ringBell();
+      if (notifEnabled) playNotifSound();
+
+      // If tab not focused → badge + title flash
+      if (document.hidden) {
+        unseenCount += newItems.length;
+        notifBadge.textContent = unseenCount > 99 ? '99+' : unseenCount;
+        notifBadge.classList.add('show');
+        flashTitle();
+      }
+
+      // Browser push notification (if enabled + tab hidden)
+      if (notifEnabled && document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        const newest = newItems[newItems.length - 1];
+        const body = newest.text
+          ? (newest.text.length > 80 ? newest.text.slice(0, 80) + '…' : newest.text)
+          : '📷 Image message';
+        const n = new Notification('New Anonymous Message', {
+          body: newItems.length > 1
+            ? newItems.length + ' new messages — ' + body
+            : body,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>',
+          tag: 'anon-bubble'
+        });
+        n.addEventListener('click', () => {
+          window.focus();
+          n.close();
+        });
+      }
+    }
+
+    /* ═══════════════════════════════════════════
        Real-time listeners
        ═══════════════════════════════════════════ */
     // Bubble answers (gossip, etc.)
@@ -1410,9 +1970,11 @@
       snapshot.forEach((doc) => {
         const d = doc.data();
         if (now - d.ts < SIX_HOURS) {
-          items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [] });
+          items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [], reactions: d.reactions ?? {} });
         }
       });
+      // Detect new messages for notifications
+      notifyNewMessages(items);
       render(items);
     }, (err) => {
       console.error('Firestore error:', err);
@@ -1497,6 +2059,159 @@
       }, msUntilMidnight + 500);  // +500ms buffer
     }
     scheduleMidnightReset();
+
+    /* ═══════════════════════════════════════════
+       Countdown timer
+       ═══════════════════════════════════════════ */
+    const countdownTimeInput = document.getElementById('countdownTime');
+    const countdownSetBtn    = document.getElementById('countdownSetBtn');
+    const countdownDigits    = document.getElementById('countdownDigits');
+    const countdownLabel     = document.getElementById('countdownLabel');
+    const countdownClear     = document.getElementById('countdownClear');
+    const countdownRef       = db.doc('app_state/countdown');
+    const celebrationOverlay = document.getElementById('celebrationOverlay');
+    const celebrationClose   = document.getElementById('celebrationClose');
+    let countdownInterval    = null;
+
+    // Only show celebration once per day — persist across refresh
+    function getCelebrationKey() {
+      const d = new Date();
+      return 'celebration_' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    function wasCelebrationShown() {
+      return localStorage.getItem(getCelebrationKey()) === '1';
+    }
+    function markCelebrationShown() {
+      localStorage.setItem(getCelebrationKey(), '1');
+    }
+
+    function padZ(n) { return String(n).padStart(2, '0'); }
+
+    // Confetti burst
+    function spawnConfetti() {
+      const colors = ['#f7c97e','#e06377','#7ec8e3','#c8b6ff','#58c5b5','#f2a154','#9b72cf'];
+      for (let i = 0; i < 80; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.width = (6 + Math.random() * 8) + 'px';
+        el.style.height = (6 + Math.random() * 8) + 'px';
+        el.style.animationDuration = (2 + Math.random() * 3) + 's';
+        el.style.animationDelay = (Math.random() * 1.5) + 's';
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }
+    }
+
+    function showCelebration() {
+      if (wasCelebrationShown()) return;
+      markCelebrationShown();
+      celebrationOverlay.classList.add('show');
+      spawnConfetti();
+      setTimeout(spawnConfetti, 1200);
+    }
+
+    celebrationClose.addEventListener('click', () => {
+      celebrationOverlay.classList.remove('show');
+    });
+
+    // Default target: today at 6 PM (only active Mon-Fri, 9 AM - 6 PM)
+    function getDefaultTarget() {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun, 6=Sat
+      const h = now.getHours();
+      // Only weekdays (Mon=1 to Fri=5)
+      if (day === 0 || day === 6) return null;
+      // Between 9 AM and 6 PM: count down to 6 PM
+      if (h >= 9 && h < 18) {
+        const target = new Date(now);
+        target.setHours(18, 0, 0, 0);
+        return target.getTime();
+      }
+      return null; // outside work hours
+    }
+
+    function tickCountdown(targetTs) {
+      clearInterval(countdownInterval);
+      function update() {
+        const diff = targetTs - Date.now();
+        if (diff <= 0) {
+          clearInterval(countdownInterval);
+          countdownDigits.innerHTML = '<span class="countdown-done">🎉 Off work! 🎉</span>';
+          countdownLabel.textContent = 'Time to go home!';
+          showCelebration();
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        countdownDigits.textContent = padZ(h) + ':' + padZ(m) + ':' + padZ(s);
+        countdownLabel.textContent = 'until freedom 🏃';
+      }
+      update();
+      countdownInterval = setInterval(update, 1000);
+    }
+
+    // Set custom countdown — synced to Firebase so all users see same timer
+    countdownSetBtn.addEventListener('click', async () => {
+      const val = countdownTimeInput.value;
+      if (!val) return;
+      const [hh, mm] = val.split(':').map(Number);
+      const target = new Date();
+      target.setHours(hh, mm, 0, 0);
+      if (target.getTime() <= Date.now()) {
+        target.setDate(target.getDate() + 1);
+      }
+      try {
+        await countdownRef.set({ targetTs: target.getTime() });
+        showToast('Countdown set! ⏰', 'success');
+      } catch {
+        showToast('Failed to set countdown', 'error');
+      }
+    });
+
+    // Clear custom countdown (falls back to auto default)
+    countdownClear.addEventListener('click', async () => {
+      try {
+        await countdownRef.delete();
+        clearInterval(countdownInterval);
+        applyDefaultCountdown();
+        showToast('Countdown cleared — using default', 'success');
+      } catch {
+        showToast('Failed to clear', 'error');
+      }
+    });
+
+    function applyDefaultCountdown() {
+      const target = getDefaultTarget();
+      if (target) {
+        tickCountdown(target);
+      } else {
+        const now = new Date();
+        const day = now.getDay();
+        const h = now.getHours();
+        countdownDigits.textContent = '--:--:--';
+        if (day === 0 || day === 6) {
+          countdownLabel.textContent = 'It\u2019s the weekend! Enjoy \ud83c\udf1f';
+        } else if (h < 9) {
+          countdownLabel.textContent = 'Work starts at 9:00 AM \u2615';
+        } else {
+          countdownDigits.innerHTML = '<span class="countdown-done">\ud83c\udf89 Off work! \ud83c\udf89</span>';
+          countdownLabel.textContent = 'Enjoy your evening!';
+        }
+      }
+    }
+
+    // Real-time listener — custom override from Firebase; falls back to auto default
+    countdownRef.onSnapshot((snap) => {
+      if (!snap.exists || !snap.data().targetTs) {
+        clearInterval(countdownInterval);
+        applyDefaultCountdown();
+        return;
+      }
+      tickCountdown(snap.data().targetTs);
+    });
 
     /* ── Cleanup: delete expired docs (runs once on each page load) ── */
     (async function cleanup() {
