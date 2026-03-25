@@ -514,8 +514,8 @@
     .sidebar {
       position: fixed;
       top: 0;
-      left: -320px;
-      width: 300px;
+      left: -380px;
+      width: 360px;
       height: 100vh;
       height: 100dvh;
       z-index: 300;
@@ -532,6 +532,11 @@
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;           /* Firefox */
+      -ms-overflow-style: none;        /* IE/Edge */
+    }
+    .sidebar-body::-webkit-scrollbar {
+      display: none;                   /* Chrome/Safari */
     }
     .sidebar-overlay {
       position: fixed;
@@ -797,6 +802,10 @@
     }
     .countdown-done {
       font-size: 28px;
+      -webkit-text-fill-color: #fff;
+      color: #fff;
+      background: none;
+      -webkit-background-clip: initial;
       animation: cdPulse 0.6s ease-in-out infinite alternate;
     }
     @keyframes cdPulse {
@@ -934,7 +943,7 @@
     body.sidebar-open .page-title,
     body.sidebar-open .page-subtitle,
     body.sidebar-open .bubble-wrap {
-      margin-left: 300px;
+      margin-left: 360px;
       transition: margin-left 0.3s ease;
     }
 
@@ -997,34 +1006,35 @@
       <div class="countdown-schedule">Default: Mon–Fri, 9:00 AM → 6:00 PM</div>
     </div>
 
-    <!-- Add food suggestion -->
+    <!-- Food & Vote section (combined, collapsible) -->
     <div class="sidebar-section">
-      <h3>&#127860; Add Food</h3>
-      <div class="food-input-row">
-        <input type="text" id="foodInput" placeholder="e.g. Nasi Lemak" maxlength="100">
-        <button id="addFoodBtn">+</button>
+      <h3 class="collapse-toggle" id="foodVoteToggle" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin:-16px -18px 12px;border-radius:12px;background:rgba(255,255,255,0.06);transition:background 0.2s">
+        <span>&#127860; Food &amp; Vote</span>
+        <span class="collapse-arrow" id="foodVoteArrow" style="font-size:10px;transition:transform 0.25s;color:rgba(255,255,255,0.5)">&#9660;</span>
+      </h3>
+      <div id="foodVoteBody">
+        <!-- Add food -->
+        <div class="food-input-row" style="margin-bottom:12px">
+          <input type="text" id="foodInput" placeholder="e.g. Nasi Lemak" maxlength="100">
+          <button id="addFoodBtn">+</button>
+        </div>
+
+        <!-- Random pick -->
+        <button class="random-btn" id="randomBtn" style="margin-bottom:8px">&#127922; Spin &amp; Decide!</button>
+        <div class="random-result" id="randomResult">Press the button!</div>
+        <div class="spin-actions" id="spinActions">
+          <button class="remove-btn" id="spinRemoveBtn">&#10060; Remove from spin</button>
+        </div>
+        <button class="restore-btn" id="restoreBtn">&#128260; Restore removed food</button>
+
+        <!-- Vote list -->
+        <div class="reset-info" id="resetInfo" style="margin-top:12px"></div>
+        <ul class="vote-list" id="voteList">
+          <li class="vote-empty">No suggestions yet</li>
+        </ul>
       </div>
     </div>
 
-    <!-- Random pick section -->
-    <div class="sidebar-section">
-      <h3>&#127922; Random Pick</h3>
-      <button class="random-btn" id="randomBtn">Spin &amp; Decide!</button>
-      <div class="random-result" id="randomResult">Press the button!</div>
-      <div class="spin-actions" id="spinActions">
-        <button class="remove-btn" id="spinRemoveBtn">&#10060; Remove from spin</button>
-      </div>
-      <button class="restore-btn" id="restoreBtn">&#128260; Restore removed food</button>
-    </div>
-
-    <!-- Vote section -->
-    <div class="sidebar-section">
-      <h3>&#128077; Vote for Food</h3>
-      <div class="reset-info" id="resetInfo"></div>
-      <ul class="vote-list" id="voteList">
-        <li class="vote-empty">No suggestions yet</li>
-      </ul>
-    </div>
     </div><!-- end sidebar-body -->
   </aside>
 
@@ -1610,6 +1620,61 @@
     }
     sidebarToggle.addEventListener('click', toggleSidebar);
     sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    /* ── Food & Vote collapse toggle ── */
+    const foodVoteToggle = document.getElementById('foodVoteToggle');
+    const foodVoteBody   = document.getElementById('foodVoteBody');
+    const foodVoteArrow  = document.getElementById('foodVoteArrow');
+    let foodVoteOpen = localStorage.getItem('foodVoteOpen') === '1'; // default closed
+    function applyFoodVoteCollapse(animate) {
+      foodVoteArrow.style.transform = foodVoteOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+      foodVoteToggle.style.background = foodVoteOpen ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)';
+      if (!animate) {
+        foodVoteBody.style.display = foodVoteOpen ? '' : 'none';
+        return;
+      }
+      if (foodVoteOpen) {
+        // Expand
+        foodVoteBody.style.display = '';
+        foodVoteBody.style.overflow = 'hidden';
+        const h = foodVoteBody.scrollHeight;
+        foodVoteBody.style.maxHeight = '0px';
+        foodVoteBody.style.opacity = '0';
+        requestAnimationFrame(() => {
+          foodVoteBody.style.transition = 'max-height 0.3s ease, opacity 0.25s ease';
+          foodVoteBody.style.maxHeight = h + 'px';
+          foodVoteBody.style.opacity = '1';
+          setTimeout(() => {
+            foodVoteBody.style.maxHeight = '';
+            foodVoteBody.style.overflow = '';
+            foodVoteBody.style.transition = '';
+          }, 320);
+        });
+      } else {
+        // Collapse
+        const h = foodVoteBody.scrollHeight;
+        foodVoteBody.style.maxHeight = h + 'px';
+        foodVoteBody.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+          foodVoteBody.style.transition = 'max-height 0.3s ease, opacity 0.2s ease';
+          foodVoteBody.style.maxHeight = '0px';
+          foodVoteBody.style.opacity = '0';
+          setTimeout(() => {
+            foodVoteBody.style.display = 'none';
+            foodVoteBody.style.maxHeight = '';
+            foodVoteBody.style.overflow = '';
+            foodVoteBody.style.opacity = '';
+            foodVoteBody.style.transition = '';
+          }, 320);
+        });
+      }
+    }
+    applyFoodVoteCollapse(false);
+    foodVoteToggle.addEventListener('click', () => {
+      foodVoteOpen = !foodVoteOpen;
+      localStorage.setItem('foodVoteOpen', foodVoteOpen ? '1' : '0');
+      applyFoodVoteCollapse(true);
+    });
 
     /* ═══════════════════════════════════════════
        Food suggestion system (separate collection)
@@ -2253,10 +2318,11 @@
         const now = new Date();
         const day = now.getDay();
         const h = now.getHours();
-        countdownDigits.textContent = '--:--:--';
         if (day === 0 || day === 6) {
+          countdownDigits.textContent = '--:--:--';
           countdownLabel.textContent = 'It\u2019s the weekend! Enjoy \ud83c\udf1f';
         } else if (h < 9) {
+          countdownDigits.textContent = '--:--:--';
           countdownLabel.textContent = 'Work starts at 9:00 AM \u2615';
         } else {
           countdownDigits.innerHTML = '<span class="countdown-done">\ud83c\udf89 Off work! \ud83c\udf89</span>';
