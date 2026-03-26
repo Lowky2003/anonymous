@@ -1721,7 +1721,7 @@
         }
 
         const txt = document.createElement('span');
-        txt.textContent = a.text;
+        safeTextWithBreaks(txt, a.text);
         bubble.appendChild(txt);
 
         // Reactions row
@@ -1754,6 +1754,13 @@
         wrap.appendChild(bubble);
       });
       knownIds = newIds;
+    }
+
+    /* ── Safe text with line-break rendering ── */
+    function safeTextWithBreaks(el, text) {
+      if (!text) return;
+      const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      el.innerHTML = escaped.replace(/\n/g, '<br>');
     }
 
     /* ── Reply helpers ── */
@@ -1814,7 +1821,7 @@
       }
       if (r.text) {
         const txt = document.createElement('span');
-        txt.textContent = r.text;
+        safeTextWithBreaks(txt, r.text);
         div.appendChild(txt);
       }
       const time = document.createElement('span');
