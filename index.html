@@ -97,6 +97,96 @@
     .attach-btn:hover { background: rgba(255,255,255,0.18); }
     .attach-btn:active { transform: scale(0.92); }
 
+    /* ── GIF picker ── */
+    .gif-btn {
+      width: 48px;
+      min-width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      letter-spacing: -0.5px;
+    }
+    .gif-btn:hover { background: rgba(255,255,255,0.18); }
+    .gif-btn:active { transform: scale(0.92); }
+
+    .gif-picker {
+      position: fixed;
+      bottom: 76px;
+      left: 14px;
+      right: 14px;
+      max-width: 420px;
+      z-index: 110;
+      background: rgba(20, 16, 50, 0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .gif-picker.show { display: flex; }
+    .gif-picker-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .gif-picker-header input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .gif-picker-header input::placeholder { color: rgba(255,255,255,0.35); }
+    .gif-picker-close {
+      width: 28px; height: 28px;
+      border: none; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gif-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      padding: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    .gif-grid img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: block;
+    }
+    .gif-grid img:hover { transform: scale(1.03); }
+    .gif-grid .gif-loading {
+      grid-column: span 2;
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 12px;
+      padding: 20px;
+    }
+
     /* ── Image preview strip ── */
     .img-preview-strip {
       display: none;
@@ -1371,9 +1461,20 @@
 
   <div class="input-area">
     <button class="attach-btn" id="attachBtn" title="Attach image">📷</button>
+    <button class="gif-btn" id="gifBtn" title="Search GIFs">GIF</button>
     <input type="file" id="imageInput" accept="image/*" style="display:none">
     <textarea id="answerInput" placeholder="Type your anonymous answer…" maxlength="500"></textarea>
     <button id="sendBtn">Send</button>
+  </div>
+
+  <div class="gif-picker" id="gifPicker">
+    <div class="gif-picker-header">
+      <input type="text" id="gifSearchInput" placeholder="Search GIFs…">
+      <button class="gif-picker-close" id="gifPickerClose">✕</button>
+    </div>
+    <div class="gif-grid" id="gifGrid">
+      <div class="gif-loading">Search for a GIF above</div>
+    </div>
   </div>
 
   <div class="lightbox" id="lightbox">
@@ -1619,8 +1720,22 @@
       oldRow.replaceWith(newRow);
     }
 
-    /* ── Image compression ── */
+    /* ── Image compression (GIFs pass through as-is) ── */
+    const MAX_GIF_SIZE = 500 * 1024; // ~500KB (base64 → ~670KB, safe for Firestore 1MB limit)
     function compressImage(file, maxW, maxH, quality) {
+      // GIFs: skip canvas compression to preserve animation
+      if (file.type === 'image/gif') {
+        return new Promise((resolve, reject) => {
+          if (file.size > MAX_GIF_SIZE) {
+            reject(new Error('GIF too large (max 500KB). Try a smaller GIF'));
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
       maxW = maxW || 400;
       maxH = maxH || 400;
       quality = quality || 0.5;
@@ -1658,8 +1773,8 @@
         pendingImage = await compressImage(file);
         imgPreviewThumb.src = pendingImage;
         imgPreviewStrip.classList.add('show');
-      } catch {
-        showToast('Failed to load image', 'error');
+      } catch (err) {
+        showToast(err.message || 'Failed to load image', 'error');
       }
       imageInput.value = '';
     });
@@ -1681,13 +1796,88 @@
             pendingImage = await compressImage(file);
             imgPreviewThumb.src = pendingImage;
             imgPreviewStrip.classList.add('show');
-          } catch {
-            showToast('Failed to load pasted image', 'error');
+          } catch (err) {
+            showToast(err.message || 'Failed to load pasted image', 'error');
           }
           return;
         }
       }
     });
+
+    /* ── GIF Picker (Tenor API v2) ── */
+    const TENOR_KEY = 'AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ'; // Free Tenor/Google API key
+    const gifPickerEl = document.getElementById('gifPicker');
+    const gifGridEl = document.getElementById('gifGrid');
+    const gifSearchInput = document.getElementById('gifSearchInput');
+    const gifBtnEl = document.getElementById('gifBtn');
+    const gifCloseBtn = document.getElementById('gifPickerClose');
+
+    gifBtnEl.addEventListener('click', () => {
+      gifPickerEl.classList.toggle('show');
+      if (gifPickerEl.classList.contains('show')) {
+        gifSearchInput.focus();
+        if (!gifGridEl.querySelector('img')) loadTrendingGifs();
+      }
+    });
+    gifCloseBtn.addEventListener('click', () => gifPickerEl.classList.remove('show'));
+
+    let gifSearchTimer = null;
+    gifSearchInput.addEventListener('input', () => {
+      clearTimeout(gifSearchTimer);
+      gifSearchTimer = setTimeout(() => {
+        const q = gifSearchInput.value.trim();
+        if (q) searchGifs(q);
+        else loadTrendingGifs();
+      }, 400);
+    });
+
+    async function loadTrendingGifs() {
+      gifGridEl.innerHTML = '<div class="gif-loading">Loading…</div>';
+      try {
+        const res = await fetch('https://tenor.googleapis.com/v2/featured?key=' + TENOR_KEY + '&limit=20&media_filter=tinygif');
+        const data = await res.json();
+        renderGifs(data.results || []);
+      } catch {
+        gifGridEl.innerHTML = '<div class="gif-loading">Failed to load GIFs</div>';
+      }
+    }
+
+    async function searchGifs(query) {
+      gifGridEl.innerHTML = '<div class="gif-loading">Searching…</div>';
+      try {
+        const res = await fetch('https://tenor.googleapis.com/v2/search?key=' + TENOR_KEY + '&q=' + encodeURIComponent(query) + '&limit=20&media_filter=tinygif');
+        const data = await res.json();
+        renderGifs(data.results || []);
+      } catch {
+        gifGridEl.innerHTML = '<div class="gif-loading">Search failed</div>';
+      }
+    }
+
+    function renderGifs(results) {
+      gifGridEl.innerHTML = '';
+      if (!results.length) {
+        gifGridEl.innerHTML = '<div class="gif-loading">No GIFs found</div>';
+        return;
+      }
+      results.forEach(r => {
+        const url = r.media_formats?.tinygif?.url;
+        if (!url) return;
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = r.content_description || 'GIF';
+        img.loading = 'lazy';
+        img.addEventListener('click', () => selectGif(url));
+        gifGridEl.appendChild(img);
+      });
+    }
+
+    function selectGif(url) {
+      pendingImage = url; // Store Tenor URL directly (not base64)
+      imgPreviewThumb.src = url;
+      imgPreviewStrip.classList.add('show');
+      gifPickerEl.classList.remove('show');
+      gifSearchInput.value = '';
+    }
 
     /* ── Lightbox with pan & zoom ── */
     let lbZoomed = false, lbScale = 1, lbX = 0, lbY = 0;
@@ -2079,8 +2269,8 @@
               replyPendingImage = await compressImage(file);
               previewImg.src = replyPendingImage;
               preview.style.display = 'flex';
-            } catch {
-              showToast('Failed to load pasted image', 'error');
+            } catch (err) {
+              showToast(err.message || 'Failed to load pasted image', 'error');
             }
             return;
           }
