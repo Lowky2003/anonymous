@@ -305,8 +305,6 @@
       color: #e06377;
       min-height: 20px;
     }
-    .app-content { display: none; }
-    .app-content.visible { display: block; }
   </style>
 </head>
 <body>
@@ -324,8 +322,6 @@
       <div class="login-error" id="loginError"></div>
     </div>
   </div>
-
-  <div class="app-content" id="appContent">
 
   <a href="index.html" class="back-btn">← Back</a>
 
@@ -365,7 +361,7 @@
     </div>
   </div>
 
-  </div> <!-- /app-content -->
+  </div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -381,7 +377,6 @@
 
     /* ── Google Auth Gate ── */
     const loginOverlay = document.getElementById('loginOverlay');
-    const appContent = document.getElementById('appContent');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const loginError = document.getElementById('loginError');
 
@@ -420,7 +415,6 @@
       loginOverlay.classList.remove('loading');
       if (user) {
         loginOverlay.classList.add('hidden');
-        appContent.classList.add('visible');
         const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
         localStorage.setItem('flappy_name', displayName);
         document.getElementById('playerDisplayName').textContent = displayName;
@@ -428,7 +422,6 @@
         if (!lbUnsubscribe) startLeaderboardListener();
       } else {
         loginOverlay.classList.remove('hidden');
-        appContent.classList.remove('visible');
         if (lbUnsubscribe) { lbUnsubscribe(); lbUnsubscribe = null; }
       }
     });
