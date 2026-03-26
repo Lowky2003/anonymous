@@ -2,383 +2,491 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Plant Preview — All Types × All Levels</title>
+  <title>Plant Preview — 30 Levels</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff; padding: 20px;
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh;
+      background:linear-gradient(180deg,#e8dcc8 0%,#d4c4a8 40%,#a8c4a0 100%);
+      font-family:'Segoe UI',sans-serif;
+      color:#3a2a1a;padding:10px;
     }
-    h1 { text-align: center; margin-bottom: 8px; font-size: 20px; color: #f7c97e; }
-    .subtitle { text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      max-width: 720px;
-      margin: 0 auto 32px;
-    }
-    .cell {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      text-align: center;
-      padding: 8px 4px;
-    }
-    .cell canvas { display: block; margin: 0 auto; }
-    .cell-label { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-    .type-header {
-      grid-column: 1 / -1;
-      font-size: 15px; font-weight: 700;
-      padding: 8px 0 2px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 4px;
-    }
-    .level-headers {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      max-width: 720px;
-      margin: 0 auto 8px;
-      text-align: center;
-      font-size: 11px;
-      color: #f7c97e;
-      font-weight: 600;
-    }
+    h1{text-align:center;margin-bottom:4px;font-size:20px;color:#5a3e28}
+    .subtitle{text-align:center;font-size:11px;color:#8a7a6a;margin-bottom:14px}
+    .type-section{max-width:880px;margin:0 auto 18px}
+    .type-title{font-size:14px;font-weight:700;color:#5a3e28;border-bottom:2px solid #c4a87a;padding-bottom:3px;margin-bottom:5px}
+    .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-bottom:3px}
+    .cell{background:rgba(255,255,255,0.35);border:1px solid rgba(0,0,0,0.06);border-radius:6px;text-align:center;padding:3px 1px}
+    .cell canvas{display:block;margin:0 auto}
+    .cell-label{font-size:8px;color:#6a5a4a;margin-top:1px}
   </style>
 </head>
 <body>
-  <h1>🌱 Plant Canvas Preview</h1>
-  <div class="subtitle">All 6 plant types × 5 levels</div>
-  <div class="level-headers">
-    <div>Lv.1 Sprout</div>
-    <div>Lv.2 Growing</div>
-    <div>Lv.3 Mature</div>
-    <div>Lv.4 Full</div>
-    <div>Lv.5 Max ★</div>
-  </div>
+  <h1>🌱 Plant Growth Preview</h1>
+  <div class="subtitle">6 plant types × 30 growth levels — from seed to majestic</div>
   <div id="container"></div>
 
-  <script>
-    /* ── Copy of plant drawing code from room.html ── */
-    const PLANT_COLORS = {
-      seedling:  { stem: '#4a7c3f', leaf: '#6db85a', flower: '#a8d97a', pot: '#8B6347' },
-      tulip:     { stem: '#3d7a3d', leaf: '#5daa5d', flower: '#e74c6f', pot: '#8B6347' },
-      sunflower: { stem: '#3d6b2b', leaf: '#5d9b3b', flower: '#f5c542', center: '#6b3a1a', pot: '#8B6347' },
-      tree:      { stem: '#6b4226', leaf: '#2d8a4e', flower: null, pot: '#8B6347' },
-      cherry:    { stem: '#6b4226', leaf: '#3a9e5a', flower: '#f5a0c0', pot: '#8B6347' },
-      cactus:    { stem: '#2d7a3a', leaf: '#3da84e', flower: '#f5c5d0', pot: '#8B6347' },
-    };
-
-    const TYPES = [
-      { id: 'seedling', name: '🌱 Seedling' },
-      { id: 'tulip',    name: '🌷 Tulip' },
-      { id: 'sunflower',name: '🌻 Sunflower' },
-      { id: 'tree',     name: '🌳 Tree' },
-      { id: 'cherry',   name: '🌸 Cherry Tree' },
-      { id: 'cactus',   name: '🌵 Cactus' },
-    ];
-
-    const container = document.getElementById('container');
-    const allCanvases = []; // {canvas, type, level}
-
-    TYPES.forEach(t => {
-      const grid = document.createElement('div');
-      grid.className = 'grid';
-
-      const header = document.createElement('div');
-      header.className = 'type-header';
-      header.textContent = t.name;
-      grid.appendChild(header);
-
-      for (let lv = 1; lv <= 5; lv++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        const cvs = document.createElement('canvas');
-        cvs.width = 120; cvs.height = 140;
-        cell.appendChild(cvs);
-        const label = document.createElement('div');
-        label.className = 'cell-label';
-        label.textContent = 'Lv.' + lv;
-        cell.appendChild(label);
-        grid.appendChild(cell);
-        allCanvases.push({ canvas: cvs, type: t.id, level: lv });
-      }
-      container.appendChild(grid);
-    });
-
-    /* ── Drawing functions (same as room.html) ── */
-    function drawPot(ctx, cx, by, color) {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(cx - 20, by - 24);
-      ctx.lineTo(cx + 20, by - 24);
-      ctx.lineTo(cx + 16, by);
-      ctx.lineTo(cx - 16, by);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = '#a07050';
-      ctx.fillRect(cx - 22, by - 28, 44, 6);
-      ctx.fillStyle = '#5a3a20';
-      ctx.beginPath();
-      ctx.ellipse(cx, by - 24, 18, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
+<script>
+const TYPES=[
+  {id:'seedling',name:'🌱 Herb'},
+  {id:'tulip',name:'🌷 Tulip'},
+  {id:'sunflower',name:'🌻 Sunflower'},
+  {id:'tree',name:'🌳 Oak Tree'},
+  {id:'cherry',name:'🌸 Cherry Blossom'},
+  {id:'cactus',name:'🌵 Cactus'}
+];
+const container=document.getElementById('container');
+const allC=[];
+TYPES.forEach(tp=>{
+  const sec=document.createElement('div');sec.className='type-section';
+  const tit=document.createElement('div');tit.className='type-title';tit.textContent=tp.name;
+  sec.appendChild(tit);
+  for(let row=0;row<3;row++){
+    const g=document.createElement('div');g.className='grid';
+    for(let col=0;col<10;col++){
+      const lv=row*10+col+1;
+      const cell=document.createElement('div');cell.className='cell';
+      const cvs=document.createElement('canvas');cvs.width=80;cvs.height=100;
+      cell.appendChild(cvs);
+      const lb=document.createElement('div');lb.className='cell-label';lb.textContent='Lv.'+lv;
+      cell.appendChild(lb);g.appendChild(cell);
+      allC.push({canvas:cvs,type:tp.id,level:lv});
     }
+    sec.appendChild(g);
+  }
+  container.appendChild(sec);
+});
 
-    function drawStem(ctx, h, thickness, color) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = thickness;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(2, -h / 2, 0, -h);
-      ctx.stroke();
+/* ═══ HELPERS ═══ */
+function mp(lv,a,b,c,d){return c+(d-c)*Math.max(0,Math.min(1,(lv-a)/(b-a)))}
+
+function drawPot(ctx,cx,by){
+  ctx.fillStyle='#8B6347';ctx.beginPath();
+  ctx.moveTo(cx-14,by-16);ctx.lineTo(cx+14,by-16);ctx.lineTo(cx+11,by);ctx.lineTo(cx-11,by);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle='#a07050';ctx.fillRect(cx-16,by-20,32,5);
+  ctx.fillStyle='#5a3a20';ctx.beginPath();ctx.ellipse(cx,by-16,12,3,0,0,Math.PI*2);ctx.fill();
+}
+
+function drawSeedPhase(ctx,lv,seedCol){
+  if(lv>=2){
+    ctx.fillStyle=seedCol||'#7a5a3a';ctx.beginPath();ctx.ellipse(0,-2,3,2,0.3,0,Math.PI*2);ctx.fill();
+    if(lv>=3){
+      ctx.strokeStyle='#9a8a6a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(-1,-3);ctx.lineTo(0,-1);ctx.lineTo(1,-3);ctx.stroke();
+      ctx.strokeStyle='#c8b89a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(1,3);ctx.stroke();
     }
-
-    function drawLeaf(ctx, x, y, size, angle, color) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, size, size * 0.4, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.8, 0);
-      ctx.lineTo(size * 0.8, 0);
-      ctx.stroke();
-      ctx.restore();
+    if(lv>=4){
+      ctx.strokeStyle='#6db85a';ctx.lineWidth=1;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(0,-7);ctx.stroke();
+      ctx.fillStyle='#7ac868';ctx.beginPath();ctx.ellipse(0,-7,1.5,1,0,0,Math.PI*2);ctx.fill();
     }
+  }
+}
 
-    function drawGenericPlant(ctx, col, level, t) {
-      const heights = [20, 35, 50, 65, 80];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 2 + level * 0.3, col.stem);
-      const leafCount = level;
-      for (let i = 0; i < leafCount; i++) {
-        const ly = -(h * (0.3 + i * 0.15));
-        const side = i % 2 === 0 ? 1 : -1;
-        const leafSway = Math.sin(t / 600 + i) * 0.1;
-        drawLeaf(ctx, side * (4 + level), ly, 6 + level * 1.5, side * (0.5 + leafSway), col.leaf);
-      }
-      if (level >= 3) {
-        ctx.fillStyle = col.flower || '#a8d97a';
-        ctx.beginPath();
-        ctx.arc(0, -h, 3 + level, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+function dStem(ctx,h,w,col,cv){
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(cv||2,-h/2,0,-h);ctx.stroke();
+}
 
-    function drawTulip(ctx, col, level, t) {
-      const heights = [18, 32, 48, 60, 75];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 2 + level * 0.3, col.stem);
-      for (let i = 0; i < Math.min(level, 3); i++) {
-        const ly = -(h * (0.25 + i * 0.2));
-        const side = i % 2 === 0 ? 1 : -1;
-        drawLeaf(ctx, side * (5 + level), ly, 7 + level, side * 0.6, col.leaf);
-      }
-      if (level >= 2) {
-        const petalCount = Math.min(level + 1, 6);
-        for (let i = 0; i < petalCount; i++) {
-          const angle = (i / petalCount) * Math.PI * 2 + Math.sin(t / 1000) * 0.05;
-          ctx.save();
-          ctx.translate(0, -h);
-          ctx.rotate(angle);
-          ctx.fillStyle = col.flower;
-          ctx.beginPath();
-          ctx.ellipse(0, -(4 + level), 3 + level * 0.5, 6 + level, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-        ctx.fillStyle = '#f5e060';
-        ctx.beginPath();
-        ctx.arc(0, -h, 2 + level * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+function dLeaf(ctx,x,y,sz,ang,col,vein){
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+  ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,0,sz,sz*0.38,0,0,Math.PI*2);ctx.fill();
+  if(vein){
+    ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=0.4;
+    ctx.beginPath();ctx.moveTo(-sz*0.7,0);ctx.lineTo(sz*0.7,0);ctx.stroke();
+    for(let i=-2;i<=2;i++){if(!i)continue;ctx.beginPath();ctx.moveTo(i*sz*0.18,0);ctx.lineTo(i*sz*0.3,i>0?-sz*0.18:sz*0.18);ctx.stroke();}
+  }
+  ctx.restore();
+}
 
-    function drawSunflower(ctx, col, level, t) {
-      const heights = [20, 36, 52, 66, 82];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 3 + level * 0.5, col.stem);
-      for (let i = 0; i < Math.min(level, 4); i++) {
-        const ly = -(h * (0.2 + i * 0.18));
-        const side = i % 2 === 0 ? 1 : -1;
-        drawLeaf(ctx, side * (6 + level * 1.5), ly, 8 + level * 2, side * 0.5, col.leaf);
-      }
-      if (level >= 2) {
-        const r = 6 + level * 3;
-        const petals = 8 + level * 2;
-        for (let i = 0; i < petals; i++) {
-          const angle = (i / petals) * Math.PI * 2 + Math.sin(t / 2000) * 0.03;
-          ctx.save();
-          ctx.translate(0, -h);
-          ctx.rotate(angle);
-          ctx.fillStyle = col.flower;
-          ctx.beginPath();
-          ctx.ellipse(0, -r, 3 + level * 0.5, r * 0.7, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-        ctx.fillStyle = col.center;
-        ctx.beginPath();
-        ctx.arc(0, -h, r * 0.55, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        for (let i = 0; i < level * 2; i++) {
-          const a = i * 2.4;
-          const d = (i / (level * 2)) * r * 0.4;
-          ctx.beginPath();
-          ctx.arc(Math.cos(a) * d, -h + Math.sin(a) * d, 1, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
+function dFlower(ctx,x,y,pc,ps,pcol,ccol,op){
+  if(op<=0)return;
+  for(let i=0;i<pc;i++){const a=(i/pc)*Math.PI*2;ctx.save();ctx.translate(x,y);ctx.rotate(a);
+    ctx.fillStyle=pcol;ctx.beginPath();ctx.ellipse(0,-ps*op*0.7,ps*0.38,ps*op,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+  ctx.fillStyle=ccol||'#f5e060';ctx.beginPath();ctx.arc(x,y,ps*0.32,0,Math.PI*2);ctx.fill();
+}
 
-    function drawTree(ctx, col, level, type, t) {
-      const heights = [16, 30, 48, 64, 80];
-      const h = heights[level - 1];
-      ctx.fillStyle = col.stem;
-      const tw = 3 + level * 1.2;
-      ctx.fillRect(-tw / 2, -h, tw, h);
-      const layers = Math.min(level, 4);
-      for (let i = 0; i < layers; i++) {
-        const cy = -h + 2 - i * (6 + level * 2);
-        const cr = 10 + level * 4 - i * 4;
-        ctx.fillStyle = i === 0 ? col.leaf : shadeColor(col.leaf, -i * 10);
-        ctx.beginPath();
-        ctx.arc(0, cy, cr, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      if (type === 'cherry' && level >= 3) {
-        ctx.fillStyle = col.flower;
-        for (let i = 0; i < level * 4; i++) {
-          const bx = (Math.sin(i * 7 + t / 3000) * (8 + level * 3));
-          const by = -h - (Math.cos(i * 5) * (6 + level * 3));
-          const br = 2 + Math.sin(t / 500 + i) * 0.5;
-          ctx.beginPath();
-          ctx.arc(bx, by, br, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
+function dBud(ctx,x,y,sz,col){
+  ctx.fillStyle='#4a7a3f';ctx.beginPath();ctx.ellipse(x,y,sz*0.55,sz,0,0,Math.PI*2);ctx.fill();
+  if(col){ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(x,y-sz*0.3,sz*0.25,sz*0.35,0,0,Math.PI*2);ctx.fill();}
+}
 
-    function drawCactus(ctx, col, level, t) {
-      const heights = [20, 32, 45, 58, 70];
-      const h = heights[level - 1];
-      const w = 8 + level * 2;
-      ctx.fillStyle = col.stem;
-      roundRect(ctx, -w / 2, -h, w, h, 6);
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.lineWidth = 0.8;
-      for (let i = 1; i < 4; i++) {
-        const x = -w / 2 + (w / 4) * i;
-        ctx.beginPath();
-        ctx.moveTo(x, -h + 6);
-        ctx.lineTo(x, -2);
-        ctx.stroke();
-      }
-      if (level >= 3) {
-        const armH = 10 + (level - 3) * 8;
-        ctx.fillStyle = col.stem;
-        roundRect(ctx, -w / 2 - 8, -h * 0.6 - armH, 7, armH, 4);
-        if (level >= 4) {
-          roundRect(ctx, w / 2 + 1, -h * 0.45 - armH * 0.7, 7, armH * 0.7, 4);
-        }
-      }
-      if (level >= 4) {
-        const fc = level === 5 ? '#ff6b9d' : col.flower;
-        ctx.fillStyle = fc;
-        for (let i = 0; i < 5; i++) {
-          const a = (i / 5) * Math.PI * 2 + Math.sin(t / 1000) * 0.1;
-          ctx.beginPath();
-          ctx.ellipse(Math.cos(a) * 4, -h - 3 + Math.sin(a) * 4, 3, 5, a, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.fillStyle = '#ffe066';
-        ctx.beginPath();
-        ctx.arc(0, -h - 3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+function dDew(ctx,x,y){
+  ctx.fillStyle='rgba(180,220,255,0.55)';ctx.beginPath();ctx.arc(x,y,1.4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.65)';ctx.beginPath();ctx.arc(x-0.4,y-0.4,0.45,0,Math.PI*2);ctx.fill();
+}
 
-    function drawSparkles(ctx, W, H, t, level) {
-      const count = level === 5 ? 6 : 3;
-      for (let i = 0; i < count; i++) {
-        const x = W * 0.2 + (W * 0.6) * ((Math.sin(t / 1200 + i * 2.3) + 1) / 2);
-        const y = H * 0.1 + (H * 0.5) * ((Math.cos(t / 900 + i * 1.7) + 1) / 2);
-        const alpha = (Math.sin(t / 400 + i * 1.1) + 1) / 2;
-        const r = 1.5 + alpha;
-        ctx.fillStyle = 'rgba(255,255,200,' + (alpha * 0.7) + ')';
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,200,' + (alpha * 0.4) + ')';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y);
-        ctx.moveTo(x, y - 4); ctx.lineTo(x, y + 4);
-        ctx.stroke();
-      }
-    }
+function dButterfly(ctx,x,y,t,col){
+  const wa=Math.sin(t/200)*0.4;ctx.save();ctx.translate(x,y);
+  ctx.fillStyle=col||'#e8a0c0';
+  ctx.save();ctx.rotate(-0.3-wa);ctx.beginPath();ctx.ellipse(-3,0,3.5,2.2,-0.3,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.save();ctx.rotate(0.3+wa);ctx.beginPath();ctx.ellipse(3,0,3.5,2.2,0.3,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.fillStyle='#3a2a1a';ctx.fillRect(-0.3,-2.5,0.6,5);
+  ctx.strokeStyle='#3a2a1a';ctx.lineWidth=0.3;ctx.beginPath();ctx.moveTo(0,-2.5);ctx.lineTo(-1.5,-4.5);ctx.moveTo(0,-2.5);ctx.lineTo(1.5,-4.5);ctx.stroke();
+  ctx.restore();
+}
 
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.arcTo(x + w, y, x + w, y + r, r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-      ctx.lineTo(x + r, y + h);
-      ctx.arcTo(x, y + h, x, y + h - r, r);
-      ctx.lineTo(x, y + r);
-      ctx.arcTo(x, y, x + r, y, r);
-      ctx.closePath();
-      ctx.fill();
-    }
+function dBird(ctx,x,y,col){
+  ctx.save();ctx.translate(x,y);ctx.fillStyle=col||'#8a5a3a';
+  ctx.beginPath();ctx.ellipse(0,0,4.5,2.8,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(3.5,-1.8,2.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(4.3,-2.2,0.7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(4.6,-2.2,0.35,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8a040';ctx.beginPath();ctx.moveTo(5.7,-1.8);ctx.lineTo(7.2,-1.3);ctx.lineTo(5.7,-0.8);ctx.closePath();ctx.fill();
+  ctx.fillStyle=col||'#8a5a3a';ctx.beginPath();ctx.moveTo(-3.5,-0.8);ctx.lineTo(-7,-3.5);ctx.lineTo(-6,0.3);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
 
-    function shadeColor(hex, percent) {
-      let r = parseInt(hex.slice(1, 3), 16);
-      let g = parseInt(hex.slice(3, 5), 16);
-      let b = parseInt(hex.slice(5, 7), 16);
-      r = Math.max(0, Math.min(255, r + Math.round(r * percent / 100)));
-      g = Math.max(0, Math.min(255, g + Math.round(g * percent / 100)));
-      b = Math.max(0, Math.min(255, b + Math.round(b * percent / 100)));
-      return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
-    }
+function dBee(ctx,x,y,t){
+  ctx.save();ctx.translate(x,y);const wa=Math.sin(t/100)*0.3;
+  ctx.fillStyle='rgba(200,220,255,0.45)';
+  ctx.save();ctx.rotate(-0.3-wa);ctx.beginPath();ctx.ellipse(-1.5,0,2.5,1.3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.save();ctx.rotate(0.3+wa);ctx.beginPath();ctx.ellipse(1.5,0,2.5,1.3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.fillStyle='#e8c020';ctx.beginPath();ctx.ellipse(0,0,2.5,1.8,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#2a1a00';ctx.fillRect(-0.3,-1.8,0.6,3.6);ctx.fillRect(-1.8,-1,0.6,2);
+  ctx.restore();
+}
 
-    /* ── Animate all canvases ── */
-    function animateAll(t) {
-      allCanvases.forEach(({ canvas, type, level }) => {
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width, H = canvas.height;
-        const col = PLANT_COLORS[type];
+function dPetals(ctx,W,H,t,n,col){
+  for(let i=0;i<n;i++){
+    const px=W*0.1+W*0.8*((Math.sin(t/1200+i*2.7)+1)/2);
+    const py=H*0.08+H*0.5*((t/2000+i*0.3)%1);
+    ctx.save();ctx.translate(px,py);ctx.rotate(t/500+i*1.5);
+    ctx.fillStyle=col||'#f5a0b0';ctx.globalAlpha=0.55;
+    ctx.beginPath();ctx.ellipse(0,0,2.2,1,0,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;ctx.restore();
+  }
+}
 
-        ctx.clearRect(0, 0, W, H);
-        const sway = Math.sin(t / 800) * 2 * (level >= 2 ? 1 : 0);
+function dBerry(ctx,x,y,sz,col){
+  ctx.fillStyle=col||'#cc3344';ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.28)';ctx.beginPath();ctx.arc(x-sz*0.3,y-sz*0.3,sz*0.28,0,Math.PI*2);ctx.fill();
+}
 
-        drawPot(ctx, W / 2, H - 4, col.pot);
-        ctx.save();
-        ctx.translate(W / 2, H - 28);
-        ctx.rotate(sway * Math.PI / 180);
+function rRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();
+}
 
-        if (type === 'cactus') drawCactus(ctx, col, level, t);
-        else if (type === 'tree' || type === 'cherry') drawTree(ctx, col, level, type, t);
-        else if (type === 'sunflower') drawSunflower(ctx, col, level, t);
-        else if (type === 'tulip') drawTulip(ctx, col, level, t);
-        else drawGenericPlant(ctx, col, level, t);
+function shade(hex,p){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  r=Math.max(0,Math.min(255,r+Math.round(r*p/100)));g=Math.max(0,Math.min(255,g+Math.round(g*p/100)));
+  b=Math.max(0,Math.min(255,b+Math.round(b*p/100)));
+  return'#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');
+}
 
-        ctx.restore();
-        if (level >= 4) drawSparkles(ctx, W, H, t, level);
-      });
-      requestAnimationFrame(animateAll);
-    }
-    requestAnimationFrame(animateAll);
-  </script>
+/* ═══ SEEDLING / HERB — 30 levels ═══ */
+function drawSeedling(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#7a5a3a');ctx.restore();return;}
+  const bY=by-16,sH=mp(lv,5,30,8,55),sW=mp(lv,5,30,1.5,4.5);
+  const lSz=mp(lv,5,30,4,13),lCol=lv>=28?'#a8aa40':lv>=26?'#88a850':'#6db85a';
+  // falling petals (canvas coords)
+  if(lv>=26)dPetals(ctx,W,H,t,Math.min(lv-25,4),'#f0a0b0');
+  ctx.save();ctx.translate(cx,bY);
+  ctx.rotate(Math.sin(t/900+lv*0.5)*(0.5+lv*0.06)*Math.PI/180);
+  dStem(ctx,sH,sW,'#4a7c3f',1+lv*0.08);
+  // cotyledon lv5-12
+  if(lv>=5&&lv<=12){const cs=lv<=8?4:3;dLeaf(ctx,-5,-3,cs,-0.8,'#8ac870',false);dLeaf(ctx,5,-3,cs,0.8,'#8ac870',false);}
+  // true leaves
+  const lC=Math.min(Math.floor(mp(lv,6,25,0,10)),10);
+  for(let i=0;i<lC;i++){const ly=-(sH*(0.15+i*0.075));if(ly<-sH)break;const s=i%2===0?1:-1;
+    dLeaf(ctx,s*(3+sW+lSz*0.3),ly,lSz*(0.6+0.4*(1-i/10)),s*(0.4+i*0.05),lCol,lv>=13);}
+  // branches lv12+
+  if(lv>=12){const bc=Math.min(Math.floor(mp(lv,12,25,1,4)),4);
+    for(let b=0;b<bc;b++){const bh=sH*(0.35+b*0.15),bl=mp(lv,12,30,6,16),s=b%2===0?1:-1;
+      ctx.save();ctx.translate(0,-bh);ctx.rotate(s*0.6);dStem(ctx,bl,sW*0.45,'#5a8a4f',s*2);
+      if(lv>=14)dLeaf(ctx,s*2,-bl+2,lSz*0.55,s*0.3,lCol,false);ctx.restore();}}
+  // bud lv15-17
+  if(lv>=15&&lv<18){const bs=mp(lv,15,17,2,4);dBud(ctx,0,-sH,bs,lv>=16?'#e8a0c0':null);}
+  // flower lv18+
+  if(lv>=18)dFlower(ctx,0,-sH,lv>=22?6:5,4+lv*0.18,'#e87090','#f5e060',mp(lv,18,20,0.3,1));
+  // extra flowers lv21+
+  if(lv>=21){const ef=Math.min(Math.floor(mp(lv,21,28,1,5)),5);
+    const cs2=['#e87090','#d060a0','#f090a0','#e0a070','#c070c0'];
+    for(let f=0;f<ef;f++){const fy=-(sH*(0.45+f*0.09)),fx=(f%2===0?1:-1)*(7+f*2);
+      dFlower(ctx,fx,fy,5,2.8,lv>=24?cs2[f%5]:'#e87090','#f5e060',1);}}
+  // berries lv27+
+  if(lv>=27){const bn=Math.min(lv-26,6);for(let i=0;i<bn;i++){
+    dBerry(ctx,(i%2?1:-1)*(5+i*2.5),-(sH*(0.28+i*0.07)),1.8,lv>=29?'#cc2244':'#cc6644');}}
+  ctx.restore();
+  // dewdrops lv20-25
+  if(lv>=20&&lv<=25){dDew(ctx,cx-8,bY-sH*0.38);if(lv>=22)dDew(ctx,cx+10,bY-sH*0.28);}
+  // butterfly lv23-28
+  if(lv>=23&&lv<=28)dButterfly(ctx,cx+16+Math.sin(t/600)*5,bY-sH*0.55+Math.cos(t/800)*3,t,'#d8a0d0');
+  // bird lv30
+  if(lv>=30)dBird(ctx,cx+8,bY-sH-8,'#8a6a4a');
+}
+
+/* ═══ TULIP — 30 levels ═══ */
+function drawTulip(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#8a6a40');ctx.restore();return;}
+  const bY=by-16,sH=mp(lv,5,30,6,55),sW=mp(lv,5,30,1.2,3);
+  if(lv>=26)dPetals(ctx,W,H,t,lv-25,'#f0a0c0');
+  ctx.save();ctx.translate(cx,bY);
+  ctx.rotate(Math.sin(t/1000+lv*0.3)*(0.3+lv*0.04)*Math.PI/180);
+  // blade leaves
+  const blC=Math.min(Math.floor(mp(lv,5,15,1,5)),5);
+  for(let i=0;i<blC;i++){const s=i%2===0?1:-1,bH=mp(lv,5,20,8,28-i*3);
+    ctx.fillStyle='#5daa5d';ctx.beginPath();ctx.moveTo(s*2,0);
+    ctx.quadraticCurveTo(s*(8+i*2),-bH*0.6,s*(3+i),-bH);
+    ctx.quadraticCurveTo(s*(6+i),-bH*0.4,s*2,0);ctx.fill();}
+  dStem(ctx,sH,sW,'#3d7a3d',1);
+  // bud lv13-17
+  if(lv>=13&&lv<18){const bs=mp(lv,13,17,3,7);
+    ctx.fillStyle='#3d7a3d';ctx.beginPath();ctx.ellipse(0,-sH,bs*0.5,bs,0,0,Math.PI*2);ctx.fill();
+    if(lv>=16){ctx.fillStyle='#e74c6f';ctx.beginPath();ctx.ellipse(0,-sH-bs*0.3,bs*0.3,bs*0.3,0,0,Math.PI*2);ctx.fill();}}
+  // tulip flower lv18+
+  if(lv>=18){const op=mp(lv,18,22,0.3,1);
+    const cols=['#e74c6f','#d43a6f','#ff6090','#e050a0','#f0a040','#c040c0'];
+    const fc=lv>=24?cols[(lv-24)%6]:'#e74c6f';
+    for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.save();ctx.translate(0,-sH);ctx.rotate(a);
+      ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(0,-(5+lv*0.18)*op*0.7,2.8+lv*0.12,(5+lv*0.18)*op,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+    ctx.fillStyle='#f5e060';ctx.beginPath();ctx.arc(0,-sH,2+op,0,Math.PI*2);ctx.fill();}
+  // extra tulips lv22+
+  if(lv>=22){const es=Math.min(Math.floor(mp(lv,22,30,1,5)),5);
+    const sc=['#e74c6f','#f5a040','#d060d0','#e04060','#f07060'];
+    for(let s=0;s<es;s++){const sx=(s%2===0?1:-1)*(5+s*3),sh=sH*(0.45+s*0.06);
+      ctx.save();ctx.translate(sx,0);dStem(ctx,sh,1.3,'#3d7a3d',sx>0?2:-2);
+      const c=sc[s%5];for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2;ctx.save();ctx.translate(0,-sh);ctx.rotate(a);
+        ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(0,-3.5,1.8,3.5,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+      ctx.restore();}}
+  ctx.restore();
+  if(lv>=19&&lv<=24)dDew(ctx,cx-10,bY-8);
+  if(lv>=25&&lv<=29)dButterfly(ctx,cx+17+Math.sin(t/700)*4,bY-sH*0.45+Math.cos(t/900)*3,t,'#f0c080');
+  if(lv>=30)dBird(ctx,cx-12,12,'#c08040');
+}
+
+/* ═══ SUNFLOWER — 30 levels ═══ */
+function drawSunflower(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#4a4a4a');ctx.restore();return;}
+  const bY=by-16,sH=mp(lv,5,30,8,55),sW=mp(lv,5,30,2,5.5);
+  ctx.save();ctx.translate(cx,bY);
+  ctx.rotate(Math.sin(t/1100+lv*0.2)*(0.3+lv*0.04)*Math.PI/180);
+  dStem(ctx,sH,sW,'#3d6b2b',lv>=25?4:2);
+  // stem hairs lv8+
+  if(lv>=8){ctx.strokeStyle='#5a8a3b';ctx.lineWidth=0.3;const hc=Math.min(lv-7,8);
+    for(let i=0;i<hc;i++){const hy=-(sH*(0.1+i*0.1)),s=i%2===0?1:-1;
+      ctx.beginPath();ctx.moveTo(sW/2*s,hy);ctx.lineTo((sW/2+2)*s,hy-1);ctx.stroke();}}
+  // big leaves
+  const lC=Math.min(Math.floor(mp(lv,5,20,1,6)),6);
+  for(let i=0;i<lC;i++){const ly=-(sH*(0.1+i*0.11));if(ly<-sH+5)break;const s=i%2===0?1:-1;
+    const ls=mp(lv,5,25,6,15)*(1-i*0.07);
+    ctx.save();ctx.translate(s*(sW/2+1),ly);ctx.rotate(s*0.45);
+    ctx.fillStyle='#5d9b3b';ctx.beginPath();ctx.ellipse(s*ls*0.5,0,ls,ls*0.42,0,0,Math.PI*2);ctx.fill();
+    if(lv>=11){ctx.strokeStyle='#4d8b2b';ctx.lineWidth=0.4;for(let j=0;j<4;j++){
+      ctx.beginPath();ctx.moveTo(s*(ls*0.15+j*ls*0.15),-ls*0.25);ctx.lineTo(s*(ls*0.15+j*ls*0.15+1.2),-ls*0.4);ctx.stroke();}}
+    ctx.restore();}
+  // pre-head lv12-16
+  if(lv>=12&&lv<17){const hs=mp(lv,12,16,4,10);ctx.fillStyle='#5d8b3b';ctx.beginPath();ctx.arc(0,-sH,hs,0,Math.PI*2);ctx.fill();
+    if(lv>=15){ctx.fillStyle='#e8c040';for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;
+      ctx.beginPath();ctx.arc(Math.cos(a)*hs*0.8,-sH+Math.sin(a)*hs*0.8,1.3,0,Math.PI*2);ctx.fill();}}}
+  // sunflower head lv17+
+  if(lv>=17){const hR=mp(lv,17,28,6,14),op=mp(lv,17,20,0.3,1),droop=lv>=25?mp(lv,25,30,0,0.3):0;
+    ctx.save();ctx.translate(0,-sH);ctx.rotate(droop);
+    const pc=10+lv;for(let i=0;i<pc;i++){const a=(i/pc)*Math.PI*2;ctx.save();ctx.rotate(a);
+      ctx.fillStyle=lv>=29?'#c8a030':'#f5c542';ctx.beginPath();ctx.ellipse(0,-hR*op*0.85,1.8+hR*0.1,hR*op*0.55,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+    ctx.fillStyle='#6b3a1a';ctx.beginPath();ctx.arc(0,0,hR*0.52,0,Math.PI*2);ctx.fill();
+    if(lv>=21){const sc2=Math.min((lv-20)*4,20);ctx.fillStyle=lv>=28?'#3a2a1a':'#8a5a2a';
+      for(let i=0;i<sc2;i++){const a=i*2.4,d=(i/sc2)*hR*0.42;ctx.beginPath();ctx.arc(Math.cos(a)*d,Math.sin(a)*d,0.7,0,Math.PI*2);ctx.fill();}}
+    ctx.restore();}
+  // new sprout lv29+
+  if(lv>=29){ctx.save();ctx.translate(11,0);dStem(ctx,7,1,'#6db85a',1);dLeaf(ctx,3,-5,2.8,0.4,'#8ac870',false);ctx.restore();}
+  ctx.restore();
+  // bee lv22-27
+  if(lv>=22&&lv<=27)dBee(ctx,cx+12+Math.sin(t/500)*6,bY-sH*0.85+Math.cos(t/700)*4,t);
+  // bird lv30
+  if(lv>=30)dBird(ctx,cx-10,10,'#7a8a5a');
+}
+
+/* ═══ OAK TREE — 30 levels ═══ */
+function drawTree(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#6b4226');ctx.restore();return;}
+  const bY=by-16,tH=mp(lv,5,30,6,48),tW=mp(lv,5,30,2,7.5);
+  // falling leaves lv26+
+  if(lv>=26){const lcs=['#c8a030','#cc6644','#aa4030','#88aa40'];
+    for(let i=0;i<lv-25;i++){const lx=cx-15+((t/1500+i*0.4)%1)*30,ly=12+((t/2000+i*0.3)%1)*(H*0.4);
+      ctx.save();ctx.translate(lx,ly);ctx.rotate(t/400+i*2);ctx.fillStyle=lcs[i%4];
+      ctx.beginPath();ctx.ellipse(0,0,2.2,1,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
+  ctx.save();ctx.translate(cx,bY);
+  ctx.rotate(Math.sin(t/1200)*0.3*Math.PI/180);
+  // trunk
+  ctx.fillStyle='#6b4226';ctx.fillRect(-tW/2,-tH,tW,tH);
+  // bark lv11+
+  if(lv>=11){ctx.strokeStyle='#5a3216';ctx.lineWidth=0.5;const bl=Math.min(lv-10,6);
+    for(let i=0;i<bl;i++){const bx=-tW/2+1+(i/bl)*(tW-2);ctx.beginPath();ctx.moveTo(bx,-tH+5);ctx.lineTo(bx+0.5,-3);ctx.stroke();}}
+  // knot lv16+
+  if(lv>=16){ctx.fillStyle='#5a3216';ctx.beginPath();ctx.ellipse(tW*0.2,-tH*0.4,1.4,1,0.3,0,Math.PI*2);ctx.fill();}
+  // roots lv13+
+  if(lv>=13){ctx.strokeStyle='#6b4226';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(-tW/2,0);ctx.quadraticCurveTo(-tW-3,2,-tW-5,0);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tW/2,0);ctx.quadraticCurveTo(tW+3,2,tW+5,0);ctx.stroke();}
+  // branches
+  const bc=Math.min(Math.floor(mp(lv,6,20,1,6)),6);
+  for(let b=0;b<bc;b++){const bh=tH*(0.5+b*0.08),s=b%2===0?1:-1,bl=mp(lv,6,25,4,11+b*1.3);
+    ctx.strokeStyle='#6b4226';ctx.lineWidth=1+(6-b)*0.25;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,-bh);ctx.quadraticCurveTo(s*bl*0.7,-bh-bl*0.3,s*bl,-bh-bl*0.5);ctx.stroke();}
+  // canopy lv8+
+  if(lv>=8){const layers=Math.min(Math.floor(mp(lv,8,22,1,4)),4);
+    for(let i=layers-1;i>=0;i--){const cy=-tH-(i*(3.5+lv*0.28)),cr=mp(lv,8,28,6,17-i*2.5);
+      ctx.fillStyle=lv>=26?['#8aaa40','#c8a030','#cc6644','#aa3030'][i%4]:shade('#2d8a4e',-i*12);
+      ctx.beginPath();ctx.arc(0,cy,cr,0,Math.PI*2);ctx.fill();}}
+  // flowers on canopy lv20-24
+  if(lv>=20&&lv<=24){ctx.fillStyle='#f0e0a0';for(let i=0;i<lv-19;i++){
+    ctx.beginPath();ctx.arc(Math.cos(i*2.5)*9,-tH-5+Math.sin(i*3)*5,1.3,0,Math.PI*2);ctx.fill();}}
+  // vines lv22-28
+  if(lv>=22&&lv<=28){ctx.strokeStyle='#5aaa5a';ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(-tW/2,-5);
+    for(let i=0;i<4;i++)ctx.quadraticCurveTo((i%2?1:-1)*(tW/2+3),-5-(i+0.5)*tH/5,(i%2?-1:1)*tW/4,-5-(i+1)*tH/5);
+    ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle='#7aba6a';ctx.beginPath();ctx.ellipse((i%2?1:-1)*3,-tH*0.2-i*7,1.8,0.9,0,0,Math.PI*2);ctx.fill();}}
+  // nest lv19+
+  if(lv>=19){ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(7,-tH*0.68,4.5,2.5,0,0,Math.PI);ctx.fill();
+    ctx.strokeStyle='#6a5a3a';ctx.lineWidth=0.4;ctx.beginPath();
+    ctx.moveTo(3.5,-tH*0.68);ctx.lineTo(4.5,-tH*0.68+1);ctx.lineTo(6,-tH*0.68);ctx.lineTo(7,-tH*0.68+1);ctx.lineTo(9,-tH*0.68);ctx.stroke();}
+  // fruits lv25-29
+  if(lv>=25&&lv<=29){const fc=Math.min(lv-24,5);for(let i=0;i<fc;i++)dBerry(ctx,(i%2?1:-1)*(4+i*2.8),-tH-2.5+i*1.8,2.2,'#8a6a30');}
+  ctx.restore();
+  // birds lv24-29
+  if(lv>=24&&lv<30)dBird(ctx,cx+9,bY-tH*0.73,'#6a5a4a');
+  // owl lv30
+  if(lv>=30){ctx.save();ctx.translate(cx-9,bY-tH-4);
+    ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.arc(0,0,3.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f0e080';ctx.beginPath();ctx.arc(-1.3,-0.8,1.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(1.3,-0.8,1.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(-1.3,-0.8,0.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(1.3,-0.8,0.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c8a050';ctx.beginPath();ctx.moveTo(-0.8,0.5);ctx.lineTo(0,1.8);ctx.lineTo(0.8,0.5);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#7a6a4a';ctx.beginPath();ctx.moveTo(-2.5,-2.5);ctx.lineTo(-1.8,-5);ctx.lineTo(-0.8,-2.5);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(0.8,-2.5);ctx.lineTo(1.8,-5);ctx.lineTo(2.5,-2.5);ctx.closePath();ctx.fill();
+    ctx.restore();}
+}
+
+/* ═══ CHERRY BLOSSOM — 30 levels ═══ */
+function drawCherry(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#8a4020');ctx.restore();return;}
+  const bY=by-16,tH=mp(lv,5,30,5,45),tW=mp(lv,5,30,1.5,5);
+  // falling blossom petals lv21+
+  if(lv>=21)dPetals(ctx,W,H,t,Math.min(lv-20,6),'#f5b0c8');
+  ctx.save();ctx.translate(cx,bY);
+  ctx.rotate(Math.sin(t/1000)*0.4*Math.PI/180);
+  // trunk
+  ctx.fillStyle='#5a3020';ctx.fillRect(-tW/2,-tH,tW,tH);
+  // branches
+  const bc=Math.min(Math.floor(mp(lv,6,18,1,6)),6);
+  for(let b=0;b<bc;b++){const bh=tH*(0.4+b*0.09),s=b%2===0?1:-1,bl=mp(lv,6,22,5,14);
+    ctx.strokeStyle='#5a3020';ctx.lineWidth=1.2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,-bh);ctx.quadraticCurveTo(s*bl*0.8,-bh-bl*0.1,s*bl,-bh-bl*0.3);ctx.stroke();
+    if(lv>=9&&b<3){ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(s*bl*0.6,-bh-bl*0.15);ctx.lineTo(s*(bl*0.6+4),-bh-bl*0.4);ctx.stroke();}}
+  // green canopy (lv9-13 only)
+  if(lv>=9&&lv<14){const cR=mp(lv,9,13,7,14);
+    ctx.fillStyle='#3a9e5a';ctx.beginPath();ctx.arc(0,-tH-2,cR,0,Math.PI*2);ctx.fill();
+    if(cR>11){ctx.fillStyle=shade('#3a9e5a',-15);
+      ctx.beginPath();ctx.arc(-3.5,-tH-4.5,cR*0.65,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(4.5,-tH,cR*0.55,0,Math.PI*2);ctx.fill();}}
+  // pink canopy lv23+
+  if(lv>=23){const cR=mp(lv,23,30,14,21);
+    ctx.fillStyle='rgba(245,160,200,0.45)';ctx.beginPath();ctx.arc(0,-tH-2,cR,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,180,210,0.35)';ctx.beginPath();ctx.arc(-4,-tH-5,cR*0.6,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(5,-tH,cR*0.55,0,Math.PI*2);ctx.fill();}
+  // pink buds lv14-16
+  if(lv>=14&&lv<17){const bn=(lv-13)*4;ctx.fillStyle='#e8a0b0';
+    for(let i=0;i<bn;i++){ctx.beginPath();ctx.arc(Math.cos(i*2.3)*9,-tH-3+Math.sin(i*3)*5.5,1.3,0,Math.PI*2);ctx.fill();}}
+  // cherry blossoms lv17+
+  if(lv>=17){const bn2=Math.floor(mp(lv,17,22,4,18)),bR=mp(lv,17,22,7,17);
+    for(let i=0;i<bn2;i++){const bx=Math.cos(i*2.3+t/5000)*bR,bby=-tH-3+Math.sin(i*1.7+t/6000)*bR*0.7;
+      for(let p=0;p<5;p++){const pa=(p/5)*Math.PI*2+i*0.5;
+        ctx.fillStyle=(i+lv)%3===0?'#fff0f4':'#f5a0c0';
+        ctx.beginPath();ctx.ellipse(bx+Math.cos(pa)*2.2,bby+Math.sin(pa)*2.2,1.6,0.9,pa,0,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle='#e0c040';ctx.beginPath();ctx.arc(bx,bby,0.7,0,Math.PI*2);ctx.fill();}}
+  // peak bloom cloud lv20+
+  if(lv>=20){ctx.fillStyle='rgba(245,160,192,'+(lv<=22?'0.28':lv<=25?'0.22':'0.18')+')';ctx.beginPath();ctx.arc(0,-tH-4,mp(lv,20,30,14,22),0,Math.PI*2);ctx.fill();}
+  // cherries lv25+
+  if(lv>=25){const cn=Math.min(lv-24,8);for(let i=0;i<cn;i++){
+    const chx=Math.cos(i*2.1)*(7+i*1.3),chy=-tH*0.58+Math.sin(i*1.5)*7;
+    ctx.strokeStyle='#3a6a20';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(chx,chy-2.5);ctx.lineTo(chx,chy);ctx.stroke();
+    dBerry(ctx,chx,chy,lv>=28?2.2:1.6,lv>=27?'#cc2040':'#80aa40');}}
+  ctx.restore();
+  // bird lv29+
+  if(lv>=29)dBird(ctx,cx+11,bY-tH*0.5,'#e08040');
+}
+
+/* ═══ CACTUS — 30 levels ═══ */
+function drawCactus(ctx,lv,t){
+  const W=80,H=100,cx=W/2,by=H-4;
+  drawPot(ctx,cx,by);
+  if(lv<=4){ctx.save();ctx.translate(cx,by-16);drawSeedPhase(ctx,lv,'#2a5a30');ctx.restore();return;}
+  const bY=by-16,cH=mp(lv,5,30,8,48),cW=mp(lv,5,30,5,13);
+  ctx.save();ctx.translate(cx,bY);
+  // main body
+  ctx.fillStyle=lv>=24?'#1a5a2a':'#2d7a3a';rRect(ctx,-cW/2,-cH,cW,cH,Math.min(cW/2,6));
+  ctx.fillStyle='rgba(100,200,120,0.12)';ctx.fillRect(-cW/4,-cH+4,cW/2,cH-8);
+  // ribs lv7+
+  if(lv>=7){const rc=Math.min(Math.floor(mp(lv,7,15,2,5)),5);ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=0.7;
+    for(let i=0;i<rc;i++){const rx=-cW/2+(cW/(rc+1))*(i+1);ctx.beginPath();ctx.moveTo(rx,-cH+5);ctx.lineTo(rx,-3);ctx.stroke();}}
+  // spines lv9+
+  if(lv>=9){ctx.strokeStyle='#c8c8a0';ctx.lineWidth=0.3;const sr=Math.min(Math.floor(mp(lv,9,18,2,6)),6);
+    for(let r=0;r<sr;r++){const sy=-cH*(0.15+r*0.14);
+      ctx.beginPath();ctx.moveTo(-cW/2,sy);ctx.lineTo(-cW/2-3,sy-1);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-cW/2,sy);ctx.lineTo(-cW/2-2,sy+2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cW/2,sy);ctx.lineTo(cW/2+3,sy-1);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cW/2,sy);ctx.lineTo(cW/2+2,sy+2);ctx.stroke();}}
+  // arms lv12+
+  if(lv>=12){const aH=mp(lv,12,25,3,17),aW=mp(lv,12,25,3,6.5);
+    ctx.fillStyle='#2d7a3a';
+    ctx.save();ctx.translate(-cW/2,-cH*0.55);rRect(ctx,-aW,-aH/2,aW,aH,3);
+    if(lv>=16)rRect(ctx,-aW,-aH,aW*0.8,aH*0.6,3);ctx.restore();
+    if(lv>=14){const aH2=mp(lv,14,25,3,13);ctx.save();ctx.translate(cW/2,-cH*0.4);rRect(ctx,0,-aH2/2,aW,aH2,3);
+      if(lv>=18)rRect(ctx,0,-aH2,aW*0.8,aH2*0.5,3);ctx.restore();}
+    if(lv>=20){const aH3=mp(lv,20,28,3,10);ctx.save();ctx.translate(-cW/2,-cH*0.35);rRect(ctx,-aW*0.8,-aH3/2,aW*0.8,aH3,3);ctx.restore();}}
+  // bud lv17-19
+  if(lv>=17&&lv<20){const bs=mp(lv,17,19,2,4);ctx.fillStyle='#3d8a4a';ctx.beginPath();ctx.ellipse(0,-cH-bs*0.5,bs*0.55,bs,0,0,Math.PI*2);ctx.fill();
+    if(lv>=18){ctx.fillStyle='#f5c5d0';ctx.beginPath();ctx.ellipse(0,-cH-bs,bs*0.3,bs*0.3,0,0,Math.PI*2);ctx.fill();}}
+  // flowers lv20+
+  if(lv>=20){const fcs=['#f5c5d0','#ff6b9d','#f0e060','#ff8060','#e060e0'];
+    const fc=Math.min(Math.floor(mp(lv,20,28,1,4)),4);
+    const positions=[[0,-cH],[-cW/2-3,-cH*0.55-8],[cW/2+3,-cH*0.4-6],[0,-cH*0.8]];
+    for(let f=0;f<fc;f++){const[fx,fy]=positions[f];const c=lv>=24?fcs[f%5]:'#f5c5d0';
+      for(let p=0;p<6;p++){const pa=(p/6)*Math.PI*2+Math.sin(t/1000+f)*0.05;
+        ctx.save();ctx.translate(fx,fy);ctx.rotate(pa);ctx.fillStyle=c;
+        ctx.beginPath();ctx.ellipse(0,-3.2,1.4,3.2,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+      ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(fx,fy,1.8,0,Math.PI*2);ctx.fill();}}
+  // baby cacti lv26+
+  if(lv>=26){const bb=Math.min(lv-25,3);for(let b=0;b<bb;b++){
+    const bx=(b%2===0?1:-1)*(cW/2+4+b*4.5),bh=4.5+b*1.8,bw=2.8+b*0.5;
+    ctx.fillStyle='#3da84e';rRect(ctx,bx-bw/2,-bh,bw,bh,2);}}
+  // rocks lv29+
+  if(lv>=29){ctx.fillStyle='#a89880';ctx.beginPath();ctx.ellipse(-11,-1,2.8,1.8,0.2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#989080';ctx.beginPath();ctx.ellipse(13,-1,1.8,1.3,-0.1,0,Math.PI*2);ctx.fill();}
+  ctx.restore();
+  // bird on arm lv28+
+  if(lv>=28)dBird(ctx,cx-cW/2-5,bY-cH*0.55-11,'#c89060');
+}
+
+/* ═══ MAIN DRAW + ANIMATE ═══ */
+function drawPlant(ctx,type,lv,t){
+  switch(type){
+    case'seedling':drawSeedling(ctx,lv,t);break;
+    case'tulip':drawTulip(ctx,lv,t);break;
+    case'sunflower':drawSunflower(ctx,lv,t);break;
+    case'tree':drawTree(ctx,lv,t);break;
+    case'cherry':drawCherry(ctx,lv,t);break;
+    case'cactus':drawCactus(ctx,lv,t);break;
+  }
+}
+function animate(t){
+  allC.forEach(({canvas,type,level})=>{
+    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,80,100);
+    drawPlant(ctx,type,level,t);
+  });
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
 </body>
 </html>

@@ -60,36 +60,20 @@
 
     /* ── Main layout ── */
     .main-wrap {
-      display: flex; flex-direction: column;
-    }
-    @media (min-width: 768px) {
-      .main-wrap {
-        flex-direction: row; min-height: calc(100vh - 60px);
-      }
+      display: flex; flex-direction: row; min-height: calc(100vh - 60px);
+      position: relative;
     }
 
     /* ── Room canvas ── */
     .room-container {
-      padding: 10px 16px; flex-shrink: 0;
-    }
-    @media (min-width: 768px) {
-      .room-container {
-        flex: 1 1 60%; padding: 16px; display: flex;
-        align-items: center; justify-content: center;
-      }
+      flex: 1; padding: 0; display: flex;
+      min-width: 0; height: calc(100vh - 60px);
     }
     .room {
-      position: relative; width: 100%; aspect-ratio: 16/9;
-      border-radius: 20px; overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.1);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      max-height: 50vh;
-    }
-    @media (min-width: 768px) {
-      .room {
-        width: 100%; max-width: 900px; aspect-ratio: 16/9;
-        max-height: 80vh;
-      }
+      position: relative; width: 100%; height: 100%;
+      overflow: hidden;
+      border: none;
+      box-shadow: none;
     }
     #roomBgCanvas {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -105,11 +89,14 @@
 
     /* ── Plant ── */
     .plant-slot {
-      position: absolute; bottom: 18%; right: 20%; transform: translateX(50%);
-      text-align: center; cursor: default;
+      position: absolute;
+      text-align: center; cursor: grab;
+      user-select: none; -webkit-user-select: none;
     }
     .plant-canvas-wrap {
       position: relative;
+      transform: scale(1.8);
+      transform-origin: bottom center;
     }
     .plant-canvas-wrap canvas {
       display: block; margin: 0 auto;
@@ -129,34 +116,55 @@
 
     /* ── Right panel wrapper (tabs + content) ── */
     .panel-wrap {
-      display: flex; flex-direction: column; min-width: 0; flex: 1;
+      position: relative;
+      display: flex; flex-direction: column; min-width: 0;
+      width: 420px; max-height: calc(100vh - 60px);
+      border-left: 1px solid rgba(255,255,255,0.06);
+      transition: width 0.3s ease;
+      flex-shrink: 0;
+      overflow: visible;
     }
-    @media (min-width: 768px) {
-      .panel-wrap {
-        flex: 0 0 380px; max-height: 100%; overflow-y: auto;
-        border-left: 1px solid rgba(255,255,255,0.06);
-      }
+    .panel-wrap .panel-inner {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .panel-wrap.collapsed {
+      width: 0; border-left: none;
+    }
+    .panel-wrap.collapsed .panel-inner {
+      display: none;
+    }
+    .panel-toggle {
+      position: absolute; top: 50%; left: -28px; transform: translateY(-50%);
+      z-index: 100; width: 28px; height: 56px;
+      background: rgba(48, 43, 99, 0.92); border: 1px solid rgba(255,255,255,0.15);
+      border-right: none; border-radius: 8px 0 0 8px;
+      color: rgba(255,255,255,0.8); font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .panel-toggle:hover {
+      background: rgba(48, 43, 99, 1); color: #f7c97e;
     }
 
     /* ── Tabs ── */
     .tabs {
-      margin: 0; padding: 8px 16px 0; width: 100%;
-      display: flex; gap: 4px;
+      margin: 0; padding: 10px 16px 0; width: 100%;
+      display: flex; gap: 6px;
       position: sticky; top: 0; z-index: 30;
       background: linear-gradient(135deg, #0f0c29, #302b63);
     }
-    @media (min-width: 768px) {
-      .tabs { top: 0; }
-    }
     .tab-btn {
-      flex: 1; padding: 12px 0; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px 12px 0 0; background: rgba(255,255,255,0.04);
-      color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s; text-align: center;
+      flex: 1; padding: 14px 4px; border: none; border-bottom: 2px solid transparent;
+      background: transparent;
+      color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.25s; text-align: center;
+      white-space: nowrap;
     }
+    .tab-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.04); }
     .tab-btn.active {
-      background: rgba(255,255,255,0.08); color: #f7c97e;
-      border-bottom-color: transparent;
+      color: #f7c97e;
+      border-bottom: 2px solid #f7c97e;
     }
 
     /* ── Tab panels ── */
@@ -166,53 +174,121 @@
     }
     .tab-panel.active { display: block; }
 
+    /* ── Sub-tabs (Pet / Plant inside Shop) ── */
+    .sub-tabs {
+      display: flex; gap: 0; margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sub-tab {
+      flex: 1; padding: 10px 0; border: none;
+      background: transparent; color: rgba(255,255,255,0.4);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+      border-bottom: 2px solid transparent;
+    }
+    .sub-tab:hover { color: rgba(255,255,255,0.7); }
+    .sub-tab.active { color: #f7c97e; border-bottom: 2px solid #f7c97e; }
+    .sub-panel { display: none; }
+    .sub-panel.active { display: block; }
+
     /* ── Shop items ── */
     .shop-grid {
       display: grid; grid-template-columns: repeat(2, 1fr);
       gap: 10px;
     }
     .shop-card {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px; padding: 14px; text-align: center;
-      transition: all 0.2s; cursor: pointer;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 16px 12px; text-align: center;
+      transition: all 0.25s; cursor: pointer; position: relative;
     }
-    .shop-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-    .shop-card.owned { border-color: rgba(52,211,153,0.4); }
-    .shop-card.equipped { border-color: #f7c97e; box-shadow: 0 0 12px rgba(247,201,126,0.2); }
-    .shop-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
-    .shop-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .shop-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .shop-card.owned { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.04); }
+    .shop-card.equipped { border-color: #f7c97e; box-shadow: 0 0 16px rgba(247,201,126,0.15); background: rgba(247,201,126,0.06); }
+    .shop-emoji { font-size: 40px; display: block; margin-bottom: 10px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    .shop-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: rgba(255,255,255,0.9); }
     .shop-price {
       font-size: 12px; color: #f7c97e; display: flex;
-      align-items: center; justify-content: center; gap: 4px;
+      align-items: center; justify-content: center; gap: 4px; margin-bottom: 2px;
     }
     .shop-btn {
-      margin-top: 8px; padding: 6px 16px; border: none; border-radius: 10px;
+      margin-top: 8px; padding: 7px 18px; border: none; border-radius: 12px;
       font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+      width: 100%;
     }
     .shop-btn.buy { background: linear-gradient(135deg, #7b5ea7, #5b6abf); color: #fff; }
-    .shop-btn.buy:hover { opacity: 0.85; }
-    .shop-btn.equip { background: rgba(247,201,126,0.2); color: #f7c97e; border: 1px solid rgba(247,201,126,0.3); }
-    .shop-btn.equipped-btn { background: rgba(52,211,153,0.15); color: #34d399; }
+    .shop-btn.buy:hover { opacity: 0.85; transform: scale(1.02); }
+    .shop-btn.equip { background: rgba(247,201,126,0.15); color: #f7c97e; border: 1px solid rgba(247,201,126,0.25); }
+    .shop-btn.equip:hover { background: rgba(247,201,126,0.25); }
+    .shop-btn.equipped-btn { background: rgba(52,211,153,0.12); color: #34d399; }
     .shop-btn.upgrade { background: linear-gradient(135deg, #059669, #34d399); color: #fff; }
-    .shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .shop-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .shop-section-title {
-      font-size: 14px; font-weight: 700; margin-bottom: 10px;
-      color: rgba(255,255,255,0.7);
+      font-size: 15px; font-weight: 700; margin-bottom: 12px;
+      color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 8px;
     }
-    .shop-section { margin-bottom: 20px; }
+    .shop-section { margin-bottom: 24px; }
+    .slot-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+      margin-left: auto;
+    }
+    .slot-badge.full { color: #f87171; }
+
+    /* ── Feed section ── */
+    .feed-pet-header {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.05); border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 14px;
+    }
+    .feed-pet-emoji { font-size: 36px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+    .feed-pet-info { flex: 1; }
+    .feed-pet-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 6px; }
+    .feed-hunger-bar {
+      height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;
+      overflow: hidden; position: relative;
+    }
+    .feed-hunger-fill {
+      height: 100%; border-radius: 5px; transition: width 0.4s ease;
+    }
+    .feed-hunger-text {
+      font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px;
+    }
+    .food-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .food-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 10px 6px; text-align: center;
+      transition: all 0.2s; cursor: pointer;
+    }
+    .food-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+    .food-card.selected {
+      border-color: #f7c97e; background: rgba(247,201,126,0.15);
+      box-shadow: 0 0 12px rgba(247,201,126,0.3);
+    }
+    .food-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+    .food-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+    .food-restore { font-size: 10px; color: rgba(52,211,153,0.7); margin-bottom: 4px; }
+    .food-btn {
+      padding: 4px 10px; border: none; border-radius: 8px; font-size: 11px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf); color: #fff;
+    }
+    .food-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* ── Visit list ── */
-    .visit-list { display: flex; flex-direction: column; gap: 8px; }
+    .visit-list { display: flex; flex-direction: column; gap: 10px; }
     .visit-card {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.25s;
     }
-    .visit-card:hover { background: rgba(255,255,255,0.1); }
-    .visit-avatar { font-size: 28px; }
-    .visit-name { font-size: 14px; font-weight: 600; flex: 1; }
-    .visit-peek { font-size: 20px; display: flex; gap: 2px; }
-    .visit-arrow { color: rgba(255,255,255,0.3); font-size: 18px; }
+    .visit-card:hover { background: rgba(255,255,255,0.1); transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .visit-avatar { font-size: 32px; background: rgba(255,255,255,0.06); border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; }
+    .visit-info { flex: 1; }
+    .visit-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 4px; }
+    .visit-peek { font-size: 18px; display: flex; gap: 4px; }
+    .visit-arrow { color: rgba(255,255,255,0.25); font-size: 20px; font-weight: 300; }
     .visit-empty {
       text-align: center; color: rgba(255,255,255,0.3);
       font-size: 13px; padding: 40px 20px;
@@ -255,6 +331,96 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.success { border-color: rgba(52,211,153,0.4); color: #34d399; }
     .toast.error { border-color: rgba(248,113,113,0.4); color: #f87171; }
+
+    /* ── Mobile responsive ── */
+    @media (max-width: 768px) {
+      /* Stack layout vertically */
+      .main-wrap {
+        flex-direction: column; min-height: auto;
+      }
+      /* Room takes upper portion */
+      .room-container {
+        height: 55vh; min-height: 280px; flex: none;
+        transition: height 0.3s ease;
+      }
+      /* Panel becomes bottom sheet */
+      .panel-wrap {
+        width: 100% !important; flex: 1;
+        max-height: none; border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        overflow: visible;
+      }
+      .panel-inner {
+        overflow-y: auto; max-height: calc(45vh - 10px);
+      }
+      .panel-wrap.collapsed {
+        width: 100% !important; flex: none;
+      }
+      .panel-wrap.collapsed .panel-inner {
+        display: none;
+      }
+      /* Toggle becomes horizontal bar at top of panel */
+      .panel-toggle {
+        position: relative; left: auto; top: auto; transform: none;
+        width: 100%; height: 28px; border-radius: 0;
+        border: none; border-bottom: 1px solid rgba(255,255,255,0.08);
+        font-size: 12px;
+      }
+      .panel-toggle::after {
+        content: ' Toggle Panel';
+        font-size: 11px; opacity: 0.6;
+      }
+
+      /* Header adjustments */
+      .page-header { padding: 52px 16px 6px; }
+      .page-header h1 { font-size: 18px; }
+      .back-btn { top: 10px; left: 10px; padding: 10px 14px; font-size: 13px; }
+      .coin-display { top: 10px; right: 10px; padding: 8px 12px; font-size: 13px; }
+
+      /* Tab bar */
+      .tabs { padding: 6px 10px 0; }
+      .tab-btn { padding: 10px 4px; font-size: 12px; }
+
+      /* Sub-tabs */
+      .sub-tabs { padding: 6px 10px; gap: 4px; }
+      .sub-tab { padding: 6px 10px; font-size: 12px; }
+
+      /* Shop cards — 2 columns still works */
+      .shop-grid { gap: 8px; padding: 0 8px; }
+      .shop-card { padding: 12px 8px; border-radius: 12px; }
+      .shop-emoji { font-size: 30px; }
+      .shop-name { font-size: 12px; }
+      .shop-card .status { font-size: 10px; }
+      .shop-section { padding: 10px 4px; }
+      .shop-section-title { font-size: 14px; padding: 0 4px; }
+
+      /* Food grid — 2 columns on mobile */
+      .food-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 8px; }
+      .food-card { padding: 12px 8px; }
+      .food-emoji { font-size: 28px; }
+      .food-name { font-size: 12px; }
+      .food-restore { font-size: 11px; }
+
+      /* Visit cards */
+      .visit-card { padding: 12px 14px; }
+
+      /* Plant slot: smaller scale on mobile */
+      .plant-canvas-wrap { transform: scale(1.4); }
+
+      /* Toast */
+      .toast { font-size: 13px; padding: 10px 20px; }
+    }
+
+    /* Small phones */
+    @media (max-width: 400px) {
+      .room-container { height: 50vh; min-height: 240px; }
+      .panel-inner { max-height: calc(50vh - 10px); }
+      .page-header { padding: 48px 12px 4px; }
+      .page-header h1 { font-size: 16px; }
+      .shop-grid { grid-template-columns: repeat(2, 1fr); }
+      .food-grid { grid-template-columns: repeat(2, 1fr); }
+      .plant-canvas-wrap { transform: scale(1.2); }
+    }
   </style>
 </head>
 <body>
@@ -293,7 +459,9 @@
       </div>
     </div>
 
-    <div class="panel-wrap">
+    <div class="panel-wrap" id="panelWrap">
+    <button class="panel-toggle" id="panelToggle" title="Toggle panel">❮</button>
+    <div class="panel-inner">
     <!-- Tabs -->
     <div class="tabs" id="tabsBar">
       <button class="tab-btn active" data-tab="shop">🛒 Shop</button>
@@ -303,13 +471,29 @@
 
   <!-- Shop panel -->
   <div class="tab-panel active" id="panel-shop">
-    <div class="shop-section">
-      <div class="shop-section-title">🐾 Pets</div>
-      <div class="shop-grid" id="petShop"></div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-sub="petShopWrap">🐾 Pet</button>
+      <button class="sub-tab" data-sub="plantShopWrap">🌱 Plant</button>
+      <button class="sub-tab" data-sub="decorShopWrap">🪑 Decor</button>
     </div>
-    <div class="shop-section">
-      <div class="shop-section-title">🌱 Plants</div>
-      <div class="shop-grid" id="plantShop"></div>
+    <div class="sub-panel active" id="petShopWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">🐾 Pets</div>
+        <div class="shop-grid" id="petShop"></div>
+      </div>
+    </div>
+    <div class="sub-panel" id="plantShopWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">🌱 Plants</div>
+        <div class="shop-grid" id="plantShop"></div>
+      </div>
+    </div>
+    <div class="sub-panel" id="decorShopWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">🪑 Decorations</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">👆 Place decorations, then drag them around the room to reposition</div>
+        <div class="shop-grid" id="decorShop"></div>
+      </div>
     </div>
   </div>
 
@@ -324,6 +508,7 @@
       <div class="visit-empty">Loading rooms…</div>
     </div>
   </div>
+    </div><!-- /.panel-inner -->
     </div><!-- /.panel-wrap -->
   </div><!-- /.main-wrap -->
 
@@ -394,7 +579,7 @@
     ];
 
     const PET_SIZES = {
-      cat: 44, dog: 50, bunny: 40, hamster: 36, fox: 48, panda: 54
+      cat: 72, dog: 80, bunny: 64, hamster: 58, fox: 76, panda: 86
     };
 
     const FOODS = [
@@ -406,18 +591,63 @@
       { id: 'feast',    emoji: '🍱', name: 'Feast Box', cost: 300, restore: 100 },
     ];
 
+    const DECORATIONS = [
+      // Wall decorations  (defaultX/Y are normalized 0-1)
+      { id: 'clock',        emoji: '🕐', name: 'Wall Clock',     cost: 150,  category: 'wall',  dx: 0.09,  dy: 0.15 },
+      { id: 'shelf',        emoji: '📚', name: 'Book Shelf',     cost: 300,  category: 'wall',  dx: 0.82,  dy: 0.28 },
+      { id: 'hangplant',    emoji: '🌿', name: 'Hanging Plant',  cost: 200,  category: 'wall',  dx: 0.32,  dy: 0.05 },
+      { id: 'stringlights', emoji: '💡', name: 'String Lights',  cost: 400,  category: 'wall',  dx: 0.50,  dy: 0.02 },
+      { id: 'banner',       emoji: '🎏', name: 'Wall Banner',    cost: 250,  category: 'wall',  dx: 0.64,  dy: 0.06 },
+      // Floor decorations
+      { id: 'floorlamp',    emoji: '🪔', name: 'Floor Lamp',     cost: 350,  category: 'floor', dx: 0.78,  dy: 0.88 },
+      { id: 'sidetable',    emoji: '🪑', name: 'Side Table',     cost: 200,  category: 'floor', dx: 0.08,  dy: 0.80 },
+      { id: 'cushion',      emoji: '🛋️', name: 'Floor Cushion',  cost: 100,  category: 'floor', dx: 0.58,  dy: 0.86 },
+      { id: 'toybox',       emoji: '🧸', name: 'Toy Box',        cost: 250,  category: 'floor', dx: 0.22,  dy: 0.84 },
+      { id: 'bookcase',     emoji: '📖', name: 'Bookcase',       cost: 500,  category: 'floor', dx: 0.88,  dy: 0.88 },
+      // Rug styles (only one active at a time)
+      { id: 'rug_blue',     emoji: '🔵', name: 'Blue Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_green',    emoji: '🟢', name: 'Green Rug',      cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_pink',     emoji: '🩷', name: 'Pink Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_star',     emoji: '⭐', name: 'Star Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+    ];
+
     const PLANT_LEVELS = [
-      { level: 1, size: 44, label: 'Sprout' },
-      { level: 2, size: 52, label: 'Growing', cost: 200 },
-      { level: 3, size: 60, label: 'Mature',  cost: 400 },
-      { level: 4, size: 68, label: 'Full',    cost: 700 },
-      { level: 5, size: 76, label: 'Max ★',   cost: 1000 },
+      { level: 1,  label: 'Seed' },
+      { level: 2,  label: 'Cracking',    cost: 30 },
+      { level: 3,  label: 'Rooting',     cost: 50 },
+      { level: 4,  label: 'Sprouting',   cost: 80 },
+      { level: 5,  label: 'Cotyledon',   cost: 100 },
+      { level: 6,  label: 'First Leaf',  cost: 130 },
+      { level: 7,  label: 'Two Leaves',  cost: 160 },
+      { level: 8,  label: 'Growing',     cost: 200 },
+      { level: 9,  label: 'Leafy',       cost: 250 },
+      { level: 10, label: 'Strong',      cost: 300 },
+      { level: 11, label: 'Branching',   cost: 350 },
+      { level: 12, label: 'Spreading',   cost: 400 },
+      { level: 13, label: 'Veined',      cost: 460 },
+      { level: 14, label: 'Lush',        cost: 520 },
+      { level: 15, label: 'Budding',     cost: 580 },
+      { level: 16, label: 'Pre-bloom',   cost: 650 },
+      { level: 17, label: 'Bud Color',   cost: 720 },
+      { level: 18, label: 'Opening',     cost: 800 },
+      { level: 19, label: 'Flowering',   cost: 880 },
+      { level: 20, label: 'Full Bloom',  cost: 970 },
+      { level: 21, label: 'Multi-bloom', cost: 1060 },
+      { level: 22, label: 'Abundant',    cost: 1160 },
+      { level: 23, label: 'Radiant',     cost: 1260 },
+      { level: 24, label: 'Vivid',       cost: 1370 },
+      { level: 25, label: 'Flourishing', cost: 1500 },
+      { level: 26, label: 'Graceful',    cost: 1650 },
+      { level: 27, label: 'Fruitful',    cost: 1800 },
+      { level: 28, label: 'Golden',      cost: 2000 },
+      { level: 29, label: 'Majestic',    cost: 2200 },
+      { level: 30, label: 'Max ★',       cost: 2500 },
     ];
 
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, plant: null, petHunger: {}, plantLevels: {}, ownedPets: [], ownedPlants: [], displayName: '' };
+    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '' };
 
     /* ═══════════════════════════════
        Helpers
@@ -438,11 +668,15 @@
       const data = {
         coins: roomData.coins,
         pet: roomData.pet,
+        pet2: roomData.pet2,
         plant: roomData.plant,
         petHunger: roomData.petHunger,
         plantLevels: roomData.plantLevels,
         ownedPets: roomData.ownedPets,
         ownedPlants: roomData.ownedPlants,
+        ownedDecors: roomData.ownedDecors,
+        placedDecors: roomData.placedDecors,
+        plantPosition: roomData.plantPosition || null,
         displayName: currentUser.displayName || 'Anonymous',
         updatedAt: Date.now()
       };
@@ -453,17 +687,32 @@
        Init
        ═══════════════════════════════ */
     async function initRoom() {
+      initRoomDropZone();
+      initDecorDrag();
+      initMobileFoodTap();
       // Listen to own room data
       userDocRef().onSnapshot((snap) => {
         if (snap.exists) {
           const d = snap.data();
           roomData.coins = d.coins ?? 0;
           roomData.pet = d.pet ?? null;
+          roomData.pet2 = d.pet2 ?? null;
           roomData.plant = d.plant ?? null;
           roomData.petHunger = d.petHunger ?? {};
           roomData.plantLevels = d.plantLevels ?? {};
           roomData.ownedPets = d.ownedPets ?? [];
           roomData.ownedPlants = d.ownedPlants ?? [];
+          roomData.ownedDecors = d.ownedDecors ?? [];
+          roomData.plantPosition = d.plantPosition ?? null;
+          // Migrate old string[] placedDecors to {id,x,y}[] format
+          const rawPlaced = d.placedDecors ?? [];
+          roomData.placedDecors = rawPlaced.map(d => {
+            if (typeof d === 'string') {
+              const def = DECORATIONS.find(x => x.id === d);
+              return { id: d, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+            }
+            return d;
+          });
           roomData.displayName = d.displayName ?? '';
           // Decay hunger based on elapsed time (1% per 10 min)
           const lastUpdate = d.updatedAt ?? Date.now();
@@ -546,44 +795,70 @@
       startRoomBgAnimation();
 
       // Pet — canvas drawn, walks in 2D wander path
-      if (roomData.pet) {
-        const petDef = PETS.find(p => p.id === roomData.pet);
-        const hunger = roomData.petHunger[roomData.pet] ?? 100;
+      const activePets = [];
+      if (roomData.pet) activePets.push(roomData.pet);
+      if (roomData.pet2 && roomData.pet2 !== roomData.pet) activePets.push(roomData.pet2);
+      if (activePets.length) {
         petSlot.innerHTML = '<canvas id="petCanvas"></canvas>';
-        startPetAnimation(petDef?.id || 'cat', hunger);
+        const petInfos = activePets.map(id => ({
+          type: PETS.find(p => p.id === id)?.id || 'cat',
+          hunger: roomData.petHunger[id] ?? 100
+        }));
+        startPetAnimation(petInfos);
       } else {
-        petSlot.innerHTML = isOwner ? '<div style="position:absolute;bottom:22%;left:25%;transform:translateX(-50%)"><div class="empty-slot" onclick="switchTab(\'shop\')">+</div></div>' : '';
+        petSlot.innerHTML = isOwner ? '<div style="position:absolute;bottom:22%;left:25%;transform:translateX(-50%)"><div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'petShopWrap\')">+</div></div>' : '';
       }
 
       // Plant — canvas drawn, grows per level
       if (roomData.plant) {
         const plantDef = PLANTS.find(p => p.id === roomData.plant);
         const plantLvl = roomData.plantLevels[roomData.plant] || 1;
-        const clampedLvl = Math.min(plantLvl, 5);
+        const clampedLvl = Math.min(plantLvl, 30);
         const lvl = PLANT_LEVELS[clampedLvl - 1];
         plantSlot.innerHTML =
           '<div class="plant-canvas-wrap"><canvas id="plantCanvas" width="120" height="140"></canvas></div>' +
           '<div class="plant-level">Lv.' + plantLvl + ' ' + lvl.label + '</div>';
+        // Apply saved position or default
+        const pos = roomData.plantPosition || { left: 80, bottom: 18 };
+        plantSlot.style.left = pos.left + '%';
+        plantSlot.style.bottom = pos.bottom + '%';
+        plantSlot.style.right = '';
+        plantSlot.style.transform = 'translateX(-50%)';
         drawPlant(plantDef?.id || 'seedling', clampedLvl);
+        if (isOwner) initPlantDrag(plantSlot);
       } else {
-        plantSlot.innerHTML = isOwner ? '<div class="empty-slot" onclick="switchTab(\'shop\')">+</div>' : '';
+        plantSlot.innerHTML = isOwner ? '<div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'plantShopWrap\')">+</div>' : '';
+        plantSlot.style.left = '80%';
+        plantSlot.style.bottom = '18%';
+        plantSlot.style.right = '';
+        plantSlot.style.transform = 'translateX(-50%)';
       }
     }
 
     function renderShop() {
-      renderShopSection('petShop', PETS, roomData.ownedPets, roomData.pet, 'pet');
-      renderShopSection('plantShop', PLANTS, roomData.ownedPlants, roomData.plant, 'plant');
+      const petCount = [roomData.pet, roomData.pet2].filter(Boolean).length;
+      renderShopSection('petShop', PETS, roomData.ownedPets, [roomData.pet, roomData.pet2], 'pet',
+        '<span class="slot-badge' + (petCount >= 2 ? ' full' : '') + '">' + petCount + '/2 in room</span>');
+      renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant', '');
+      renderDecorShop();
     }
 
-    function renderShopSection(containerId, items, owned, equipped, type) {
+    function renderShopSection(containerId, items, owned, equippedArr, type, slotHtml) {
       const el = document.getElementById(containerId);
+      // Update section title with slot badge
+      const titleEl = el.previousElementSibling;
+      if (titleEl && slotHtml) {
+        const baseTitle = type === 'pet' ? '🐾 Pets' : '🌱 Plants';
+        titleEl.innerHTML = baseTitle + slotHtml;
+      }
       el.innerHTML = items.map(item => {
         const isOwned = owned.includes(item.id);
-        const isEquipped = equipped === item.id;
+        const isEquipped = equippedArr.includes(item.id);
         const canAfford = roomData.coins >= item.cost;
         let btnHtml = '';
         if (isEquipped) {
-          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>';
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
+            '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="unequipItem(\'' + type + '\',\'' + item.id + '\')">Remove</button>';
         } else if (isOwned) {
           btnHtml = '<button class="shop-btn equip" onclick="equipItem(\'' + type + '\',\'' + item.id + '\')">Place in Room</button>';
         } else {
@@ -599,27 +874,58 @@
       }).join('');
     }
 
+    function renderDecorShop() {
+      const el = document.getElementById('decorShop');
+      const placedCount = roomData.placedDecors.length;
+      // Update title
+      const titleEl = el.previousElementSibling;
+      if (titleEl) titleEl.innerHTML = '🪑 Decorations <span class="slot-badge">' + placedCount + ' placed</span>';
+
+      el.innerHTML = DECORATIONS.map(item => {
+        const isOwned = roomData.ownedDecors.includes(item.id);
+        const isPlaced = roomData.placedDecors.some(d => d.id === item.id);
+        const canAfford = roomData.coins >= item.cost;
+        let btnHtml = '';
+        if (isPlaced) {
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
+            '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="removeDecor(\'' + item.id + '\')">Remove</button>';
+        } else if (isOwned) {
+          btnHtml = '<button class="shop-btn equip" onclick="placeDecor(\'' + item.id + '\')">Place in Room</button>';
+        } else {
+          btnHtml = '<button class="shop-btn buy" onclick="buyDecor(\'' + item.id + '\')" ' +
+            (canAfford ? '' : 'disabled') + '>Buy</button>';
+        }
+        const catLabel = item.category === 'wall' ? 'Wall' : item.category === 'floor' ? 'Floor' : 'Rug';
+        return '<div class="shop-card' + (isPlaced ? ' equipped' : isOwned ? ' owned' : '') + '">' +
+          '<span class="shop-emoji">' + item.emoji + '</span>' +
+          '<div class="shop-name">' + item.name + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px">' + catLabel + '</div>' +
+          (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+            '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
+          btnHtml + '</div>';
+      }).join('');
+    }
+
     function renderUpgrade() {
       const el = document.getElementById('upgradeContent');
       let html = '';
 
-      // Pet feeding section
-      if (roomData.pet) {
-        const petDef = PETS.find(p => p.id === roomData.pet);
-        const hunger = roomData.petHunger[roomData.pet] ?? 100;
-        const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
-        html += '<div class="shop-section"><div class="shop-section-title">🍖 Feed ' + (petDef?.name || 'Pet') + ' — ' + hunger + '% full</div>';
-        html += '<div style="height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:12px;overflow:hidden"><div style="height:100%;width:' + hunger + '%;background:' + hColor + ';border-radius:4px;transition:width 0.3s"></div></div>';
-        html += '<div class="shop-grid">';
+      const activePetIds = [roomData.pet, roomData.pet2].filter(Boolean);
+
+      // Food grid (drag to pet)
+      if (activePetIds.length) {
+        html += '<div class="shop-section">';
+        html += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
+        html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Drag food to pet, or tap food then tap your pet</div>';
+        html += '<div class="food-grid">';
         html += FOODS.map(f => {
           const canAfford = roomData.coins >= f.cost;
-          return '<div class="shop-card">' +
-            '<span class="shop-emoji">' + f.emoji + '</span>' +
-            '<div class="shop-name">' + f.name + '</div>' +
-            '<div style="font-size:11px;color:rgba(255,255,255,0.4)">+' + f.restore + '% hunger</div>' +
-            '<div class="shop-price">' + coinSVG(14) + ' ' + f.cost + '</div>' +
-            '<button class="shop-btn buy" onclick="feedPet(\'' + f.id + '\')" ' +
-            (canAfford ? '' : 'disabled') + '>Feed</button></div>';
+          return '<div class="food-card' + (canAfford ? '' : ' disabled') + '" draggable="' + canAfford + '" ondragstart="onFoodDragStart(event,\'' + f.id + '\')" data-food="' + f.id + '">' +
+            '<span class="food-emoji">' + f.emoji + '</span>' +
+            '<div class="food-name">' + f.name + '</div>' +
+            '<div class="food-restore">+' + f.restore + '%</div>' +
+            '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + f.cost + '</div>' +
+            '</div>';
         }).join('');
         html += '</div></div>';
       }
@@ -643,7 +949,7 @@
         html += '</div>';
       }
 
-      if (!roomData.pet && !roomData.plant) {
+      if (!activePetIds.length && !roomData.plant) {
         html = '<div class="visit-empty">Buy a pet or plant first!</div>';
       }
       el.innerHTML = html;
@@ -665,11 +971,15 @@
         }
         el.innerHTML = rooms.map(r => {
           const petEmoji = r.pet ? (PETS.find(p => p.id === r.pet)?.emoji || '🐾') : '';
+          const pet2Emoji = r.pet2 ? (PETS.find(p => p.id === r.pet2)?.emoji || '') : '';
           const plantEmoji = r.plant ? (PLANTS.find(p => p.id === r.plant)?.emoji || '🌱') : '';
+          const peekItems = [petEmoji, pet2Emoji, plantEmoji].filter(Boolean);
           return '<div class="visit-card" onclick="visitRoom(\'' + r.uid + '\')">' +
             '<span class="visit-avatar">🏠</span>' +
-            '<span class="visit-name">' + escapeHtml(r.displayName || 'Anonymous') + '</span>' +
-            '<span class="visit-peek">' + petEmoji + plantEmoji + '</span>' +
+            '<div class="visit-info">' +
+            '<div class="visit-name">' + escapeHtml(r.displayName || 'Anonymous') + '</div>' +
+            '<span class="visit-peek">' + (peekItems.length ? peekItems.join(' ') : '<span style="font-size:12px;opacity:0.4">Empty room</span>') + '</span>' +
+            '</div>' +
             '<span class="visit-arrow">›</span></div>';
         }).join('');
       } catch {
@@ -697,20 +1007,85 @@
       // Set initial data for this item
       if (type === 'pet') roomData.petHunger[id] = 100;
       if (type === 'plant') roomData.plantLevels[id] = 1;
-      // Auto-equip if no current
-      if (!roomData[type]) roomData[type] = id;
+      // Auto-equip: pets fill 2 slots, plants 1 slot
+      if (type === 'pet') {
+        if (!roomData.pet) roomData.pet = id;
+        else if (!roomData.pet2) roomData.pet2 = id;
+      } else {
+        if (!roomData[type]) roomData[type] = id;
+      }
       await saveRoom();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
     }
 
     async function equipItem(type, id) {
-      roomData[type] = id;
+      if (type === 'pet') {
+        // Already equipped?
+        if (roomData.pet === id || roomData.pet2 === id) return;
+        // Fill empty slot or replace slot 1
+        if (!roomData.pet) roomData.pet = id;
+        else if (!roomData.pet2) roomData.pet2 = id;
+        else roomData.pet = id;
+      } else {
+        roomData[type] = id;
+      }
       await saveRoom();
       showToast('Placed in room!', 'success');
     }
 
-    async function feedPet(foodId) {
-      const petId = roomData.pet;
+    async function unequipItem(type, id) {
+      if (type === 'pet') {
+        if (roomData.pet === id) roomData.pet = null;
+        else if (roomData.pet2 === id) roomData.pet2 = null;
+      } else {
+        roomData[type] = null;
+      }
+      await saveRoom();
+      showToast('Removed from room!', 'success');
+    }
+
+    async function buyDecor(id) {
+      const item = DECORATIONS.find(d => d.id === id);
+      if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
+      if (roomData.ownedDecors.includes(id)) return;
+      roomData.coins -= item.cost;
+      roomData.ownedDecors.push(id);
+      // Auto-place; if rug, replace any existing rug
+      if (item.category === 'rug') {
+        roomData.placedDecors = roomData.placedDecors.filter(d => {
+          const def = DECORATIONS.find(x => x.id === d.id);
+          return !def || def.category !== 'rug';
+        });
+      }
+      roomData.placedDecors.push({ id: id, x: item.dx, y: item.dy });
+      await saveRoom();
+      showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
+    }
+
+    async function placeDecor(id) {
+      const item = DECORATIONS.find(d => d.id === id);
+      if (!item) return;
+      if (roomData.placedDecors.some(d => d.id === id)) return;
+      // If rug, remove other rugs first
+      if (item.category === 'rug') {
+        roomData.placedDecors = roomData.placedDecors.filter(d => {
+          const def = DECORATIONS.find(x => x.id === d.id);
+          return !def || def.category !== 'rug';
+        });
+      }
+      roomData.placedDecors.push({ id: id, x: item.dx, y: item.dy });
+      await saveRoom();
+      showToast('Placed ' + item.emoji + ' in room!', 'success');
+    }
+
+    async function removeDecor(id) {
+      roomData.placedDecors = roomData.placedDecors.filter(d => d.id !== id);
+      await saveRoom();
+      showToast('Removed from room!', 'success');
+    }
+
+    async function feedPet(foodId, petId) {
+      if (!petId) petId = roomData.pet;
       if (!petId) return;
       const food = FOODS.find(f => f.id === foodId);
       if (!food || roomData.coins < food.cost) return showToast('Not enough coins!', 'error');
@@ -718,7 +1093,330 @@
       const current = roomData.petHunger[petId] ?? 100;
       roomData.petHunger[petId] = Math.min(100, current + food.restore);
       await saveRoom();
-      showToast(food.emoji + ' Fed! +' + food.restore + '%', 'success');
+      showToast(food.emoji + ' Fed ' + (PETS.find(p => p.id === petId)?.name || 'Pet') + '! +' + food.restore + '%', 'success');
+    }
+
+    // Drag-and-drop food to pet
+    function onFoodDragStart(e, foodId) {
+      e.dataTransfer.setData('text/plain', foodId);
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    /* ── Mobile tap-to-feed system ── */
+    let selectedFood = null;
+
+    function initMobileFoodTap() {
+      // Tap a food card to select it
+      document.addEventListener('click', (e) => {
+        const foodCard = e.target.closest('.food-card[data-food]');
+        if (foodCard && !foodCard.classList.contains('disabled')) {
+          const foodId = foodCard.dataset.food;
+          // Deselect if already selected
+          if (selectedFood === foodId) {
+            selectedFood = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            showToast('Deselected food', '');
+            return;
+          }
+          selectedFood = foodId;
+          document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+          foodCard.classList.add('selected');
+          const food = FOODS.find(f => f.id === foodId);
+          showToast(food.emoji + ' Selected! Tap your pet to feed', 'success');
+          return;
+        }
+
+        // Tap on room to feed
+        if (!selectedFood) return;
+        const room = document.getElementById('roomView');
+        if (!room || !room.contains(e.target)) return;
+
+        const rect = room.getBoundingClientRect();
+        const tapX = (e.clientX - rect.left) / rect.width;
+        const tapY = (e.clientY - rect.top) / rect.height;
+
+        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        if (!activePets.length) return;
+
+        let closestPet = activePets[0];
+        let closestDist = Infinity;
+        for (const pid of activePets) {
+          const st = petStates[pid];
+          if (!st) continue;
+          const dx = st.x - tapX;
+          const dy = st.y - tapY;
+          const dist = dx * dx + dy * dy;
+          if (dist < closestDist) { closestDist = dist; closestPet = pid; }
+        }
+        feedPet(selectedFood, closestPet);
+        selectedFood = null;
+        document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+      });
+    }
+
+    function initRoomDropZone() {
+      const room = document.getElementById('roomView');
+      room.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        room.style.outline = '2px solid rgba(247,201,126,0.5)';
+      });
+      room.addEventListener('dragleave', () => {
+        room.style.outline = '';
+      });
+      room.addEventListener('drop', (e) => {
+        e.preventDefault();
+        room.style.outline = '';
+        const foodId = e.dataTransfer.getData('text/plain');
+        if (!foodId) return;
+
+        // Find closest pet to drop point
+        const rect = room.getBoundingClientRect();
+        const dropX = (e.clientX - rect.left) / rect.width;
+        const dropY = (e.clientY - rect.top) / rect.height;
+
+        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        if (!activePets.length) return;
+
+        let closestPet = activePets[0];
+        let closestDist = Infinity;
+        for (const pid of activePets) {
+          const st = petStates[pid];
+          if (!st) continue;
+          const dx = st.x - dropX;
+          const dy = st.y - dropY;
+          const dist = dx * dx + dy * dy;
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestPet = pid;
+          }
+        }
+        feedPet(foodId, closestPet);
+      });
+    }
+
+    /* ── Decoration drag-to-reposition ── */
+    // base: true = pos.y is the bottom of the item (hit area extends upward)
+    const DECOR_HIT_SIZES = {
+      clock: { w: 0.12, h: 0.12 },
+      shelf: { w: 0.20, h: 0.12 },
+      hangplant: { w: 0.12, h: 0.22 },
+      stringlights: { w: 1.0, h: 0.08 },
+      banner: { w: 0.10, h: 0.22 },
+      floorlamp: { w: 0.12, h: 0.30, base: true },
+      sidetable: { w: 0.14, h: 0.16 },
+      cushion: { w: 0.12, h: 0.10 },
+      toybox: { w: 0.12, h: 0.12 },
+      bookcase: { w: 0.16, h: 0.30, base: true },
+      rug_blue: { w: 0.30, h: 0.18 },
+      rug_green: { w: 0.30, h: 0.18 },
+      rug_pink: { w: 0.30, h: 0.18 },
+      rug_star: { w: 0.30, h: 0.18 },
+    };
+
+    function decorHitTest(mx, my, p) {
+      const hs = DECOR_HIT_SIZES[p.id];
+      if (!hs) return false;
+      const halfW = hs.w / 2;
+      if (mx < p.x - halfW || mx > p.x + halfW) return false;
+      if (hs.base) {
+        // pos.y is bottom — hit area extends upward
+        return my >= p.y - hs.h && my <= p.y;
+      }
+      return my >= p.y - hs.h / 2 && my <= p.y + hs.h / 2;
+    }
+
+    let decorDrag = null; // { id, offsetX, offsetY }
+    let decorSaveTimer = null;
+
+    function initDecorDrag() {
+      const cvs = document.getElementById('roomBgCanvas');
+      if (!cvs) return;
+      const isOwner = () => viewingUid === currentUid;
+
+      cvs.addEventListener('mousedown', (e) => {
+        if (!isOwner()) return;
+        const rect = cvs.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width;
+        const my = (e.clientY - rect.top) / rect.height;
+
+        // Hit-test placed decorations (reverse order for z-order priority)
+        const placed = [...(roomData.placedDecors || [])].reverse();
+        for (const p of placed) {
+          if (decorHitTest(mx, my, p)) {
+            decorDrag = { id: p.id, offsetX: mx - p.x, offsetY: my - p.y };
+            cvs.style.cursor = 'grabbing';
+            e.preventDefault();
+            return;
+          }
+        }
+      });
+
+      // Hover cursor on canvas only
+      cvs.addEventListener('mousemove', (e) => {
+        if (decorDrag) return;
+        if (!isOwner()) return;
+        const rect = cvs.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width;
+        const my = (e.clientY - rect.top) / rect.height;
+        const placed = roomData.placedDecors || [];
+        let over = false;
+        for (const p of placed) {
+          if (decorHitTest(mx, my, p)) {
+            over = true; break;
+          }
+        }
+        cvs.style.cursor = over ? 'grab' : '';
+      });
+
+      // Use document-level listeners so drag continues over overlapping elements
+      document.addEventListener('mousemove', (e) => {
+        if (!decorDrag) return;
+        e.preventDefault();
+        const rect = cvs.getBoundingClientRect();
+        let nx = (e.clientX - rect.left) / rect.width - decorDrag.offsetX;
+        let ny = (e.clientY - rect.top) / rect.height - decorDrag.offsetY;
+
+        const def = DECORATIONS.find(d => d.id === decorDrag.id);
+        if (def) {
+          if (def.category === 'wall') { ny = Math.max(0.01, Math.min(0.60, ny)); }
+          else if (def.category === 'floor' || def.category === 'rug') { ny = Math.max(0.66, Math.min(0.96, ny)); }
+        }
+        nx = Math.max(0.02, Math.min(0.98, nx));
+
+        const p = roomData.placedDecors.find(d => d.id === decorDrag.id);
+        if (p) { p.x = nx; p.y = ny; }
+      });
+
+      const endDrag = () => {
+        if (!decorDrag) return;
+        cvs.style.cursor = '';
+        decorDrag = null;
+        // Debounce save
+        clearTimeout(decorSaveTimer);
+        decorSaveTimer = setTimeout(() => saveRoom(), 300);
+      };
+      document.addEventListener('mouseup', endDrag);
+
+      // Touch support
+      cvs.addEventListener('touchstart', (e) => {
+        if (!isOwner() || e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const rect = cvs.getBoundingClientRect();
+        const mx = (touch.clientX - rect.left) / rect.width;
+        const my = (touch.clientY - rect.top) / rect.height;
+        const placed = [...(roomData.placedDecors || [])].reverse();
+        for (const p of placed) {
+          if (decorHitTest(mx, my, p)) {
+            decorDrag = { id: p.id, offsetX: mx - p.x, offsetY: my - p.y };
+            e.preventDefault();
+            return;
+          }
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!decorDrag || e.touches.length !== 1) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = cvs.getBoundingClientRect();
+        let nx = (touch.clientX - rect.left) / rect.width - decorDrag.offsetX;
+        let ny = (touch.clientY - rect.top) / rect.height - decorDrag.offsetY;
+        const def = DECORATIONS.find(d => d.id === decorDrag.id);
+        if (def) {
+          if (def.category === 'wall') { ny = Math.max(0.01, Math.min(0.60, ny)); }
+          else if (def.category === 'floor' || def.category === 'rug') { ny = Math.max(0.66, Math.min(0.96, ny)); }
+        }
+        nx = Math.max(0.02, Math.min(0.98, nx));
+        const p = roomData.placedDecors.find(d => d.id === decorDrag.id);
+        if (p) { p.x = nx; p.y = ny; }
+      }, { passive: false });
+
+      document.addEventListener('touchend', endDrag);
+      document.addEventListener('touchcancel', endDrag);
+    }
+
+    /* ── Plant drag-to-reposition ── */
+    let plantDragState = null; // { startX, startY, origLeft, origBottom }
+    let plantSaveTimer = null;
+
+    function initPlantDrag(el) {
+      // Remove old listeners by cloning
+      const room = el.parentElement;
+      if (!room) return;
+
+      el.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.empty-slot')) return;
+        e.preventDefault();
+        const roomRect = room.getBoundingClientRect();
+        plantDragState = {
+          startX: e.clientX,
+          startY: e.clientY,
+          origLeft: parseFloat(el.style.left) || 80,
+          origBottom: parseFloat(el.style.bottom) || 18,
+          roomW: roomRect.width,
+          roomH: roomRect.height
+        };
+        el.style.cursor = 'grabbing';
+      });
+
+      el.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.empty-slot')) return;
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const roomRect = room.getBoundingClientRect();
+        plantDragState = {
+          startX: touch.clientX,
+          startY: touch.clientY,
+          origLeft: parseFloat(el.style.left) || 80,
+          origBottom: parseFloat(el.style.bottom) || 18,
+          roomW: roomRect.width,
+          roomH: roomRect.height
+        };
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!plantDragState) return;
+        e.preventDefault();
+        const dx = e.clientX - plantDragState.startX;
+        const dy = e.clientY - plantDragState.startY;
+        let newLeft = plantDragState.origLeft + (dx / plantDragState.roomW) * 100;
+        let newBottom = plantDragState.origBottom - (dy / plantDragState.roomH) * 100;
+        newLeft = Math.max(5, Math.min(95, newLeft));
+        newBottom = Math.max(2, Math.min(30, newBottom));
+        el.style.left = newLeft + '%';
+        el.style.bottom = newBottom + '%';
+      });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!plantDragState || e.touches.length !== 1) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const dx = touch.clientX - plantDragState.startX;
+        const dy = touch.clientY - plantDragState.startY;
+        let newLeft = plantDragState.origLeft + (dx / plantDragState.roomW) * 100;
+        let newBottom = plantDragState.origBottom - (dy / plantDragState.roomH) * 100;
+        newLeft = Math.max(5, Math.min(95, newLeft));
+        newBottom = Math.max(2, Math.min(30, newBottom));
+        el.style.left = newLeft + '%';
+        el.style.bottom = newBottom + '%';
+      }, { passive: false });
+
+      const endPlantDrag = () => {
+        if (!plantDragState) return;
+        el.style.cursor = 'grab';
+        roomData.plantPosition = {
+          left: parseFloat(el.style.left) || 80,
+          bottom: parseFloat(el.style.bottom) || 18
+        };
+        plantDragState = null;
+        clearTimeout(plantSaveTimer);
+        plantSaveTimer = setTimeout(() => saveRoom(), 300);
+      };
+      document.addEventListener('mouseup', endPlantDrag);
+      document.addEventListener('touchend', endPlantDrag);
+      document.addEventListener('touchcancel', endPlantDrag);
     }
 
     async function upgradePlant() {
@@ -739,6 +1437,7 @@
       if (!snap.exists) return showToast('Room not found', 'error');
       const d = snap.data();
       roomData.pet = d.pet ?? null;
+      roomData.pet2 = d.pet2 ?? null;
       roomData.plant = d.plant ?? null;
       roomData.petHunger = d.petHunger ?? {};
       roomData.plantLevels = d.plantLevels ?? {};
@@ -755,17 +1454,8 @@
     }
 
     /* ═══════════════════════════════
-       Canvas plant drawing
+       Canvas plant drawing — 30 levels
        ═══════════════════════════════ */
-    const PLANT_COLORS = {
-      seedling:  { stem: '#4a7c3f', leaf: '#6db85a', flower: '#a8d97a', pot: '#8B6347' },
-      tulip:     { stem: '#3d7a3d', leaf: '#5daa5d', flower: '#e74c6f', pot: '#8B6347' },
-      sunflower: { stem: '#3d6b2b', leaf: '#5d9b3b', flower: '#f5c542', center: '#6b3a1a', pot: '#8B6347' },
-      tree:      { stem: '#6b4226', leaf: '#2d8a4e', flower: null, pot: '#8B6347' },
-      cherry:    { stem: '#6b4226', leaf: '#3a9e5a', flower: '#f5a0c0', pot: '#8B6347' },
-      cactus:    { stem: '#2d7a3a', leaf: '#3da84e', flower: '#f5c5d0', pot: '#8B6347' },
-    };
-
     let plantAnimFrame = null;
     function drawPlant(type, level) {
       cancelAnimationFrame(plantAnimFrame);
@@ -773,298 +1463,293 @@
       if (!cvs) return;
       const ctx = cvs.getContext('2d');
       const W = cvs.width, H = cvs.height;
-      const col = PLANT_COLORS[type] || PLANT_COLORS.seedling;
-
       function frame(t) {
         ctx.clearRect(0, 0, W, H);
-        const sway = Math.sin(t / 800) * 2 * (level >= 2 ? 1 : 0);
-
-        // Pot
-        drawPot(ctx, W / 2, H - 4, col.pot);
-
         ctx.save();
-        ctx.translate(W / 2, H - 28);
-        ctx.rotate(sway * Math.PI / 180);
-
-        if (type === 'cactus') drawCactus(ctx, col, level, t);
-        else if (type === 'tree' || type === 'cherry') drawTree(ctx, col, level, type, t);
-        else if (type === 'sunflower') drawSunflower(ctx, col, level, t);
-        else if (type === 'tulip') drawTulip(ctx, col, level, t);
-        else drawGenericPlant(ctx, col, level, t);
-
+        ctx.scale(W / 80, H / 100);
+        _renderPlantType(ctx, type, level, t);
         ctx.restore();
-
-        // Sparkles at high levels
-        if (level >= 4) drawSparkles(ctx, W, H, t, level);
-
         plantAnimFrame = requestAnimationFrame(frame);
       }
       plantAnimFrame = requestAnimationFrame(frame);
     }
-
-    function drawPot(ctx, cx, by, color) {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(cx - 20, by - 24);
-      ctx.lineTo(cx + 20, by - 24);
-      ctx.lineTo(cx + 16, by);
-      ctx.lineTo(cx - 16, by);
-      ctx.closePath();
-      ctx.fill();
-      // rim
-      ctx.fillStyle = '#a07050';
-      ctx.fillRect(cx - 22, by - 28, 44, 6);
-      // soil
-      ctx.fillStyle = '#5a3a20';
-      ctx.beginPath();
-      ctx.ellipse(cx, by - 24, 18, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
+    function _renderPlantType(ctx, type, lv, t) {
+      switch(type) {
+        case 'seedling': _drawSeedling(ctx, lv, t); break;
+        case 'tulip': _drawTulip(ctx, lv, t); break;
+        case 'sunflower': _drawSunflower(ctx, lv, t); break;
+        case 'tree': _drawTree(ctx, lv, t); break;
+        case 'cherry': _drawCherry(ctx, lv, t); break;
+        case 'cactus': _drawCactus(ctx, lv, t); break;
+      }
     }
 
-    function drawStem(ctx, h, thickness, color) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = thickness;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(2, -h / 2, 0, -h);
-      ctx.stroke();
+    /* ── Helpers ── */
+    function _mp(lv,a,b,c,d){return c+(d-c)*Math.max(0,Math.min(1,(lv-a)/(b-a)))}
+    function _drawPot(ctx,cx,by){
+      ctx.fillStyle='#8B6347';ctx.beginPath();
+      ctx.moveTo(cx-14,by-16);ctx.lineTo(cx+14,by-16);ctx.lineTo(cx+11,by);ctx.lineTo(cx-11,by);
+      ctx.closePath();ctx.fill();
+      ctx.fillStyle='#a07050';ctx.fillRect(cx-16,by-20,32,5);
+      ctx.fillStyle='#5a3a20';ctx.beginPath();ctx.ellipse(cx,by-16,12,3,0,0,Math.PI*2);ctx.fill();
     }
-
-    function drawLeaf(ctx, x, y, size, angle, color) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, size, size * 0.4, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // vein
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.8, 0);
-      ctx.lineTo(size * 0.8, 0);
-      ctx.stroke();
+    function _drawSeedPhase(ctx,lv,seedCol){
+      if(lv>=2){ctx.fillStyle=seedCol||'#7a5a3a';ctx.beginPath();ctx.ellipse(0,-2,3,2,0.3,0,Math.PI*2);ctx.fill();
+        if(lv>=3){ctx.strokeStyle='#9a8a6a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(-1,-3);ctx.lineTo(0,-1);ctx.lineTo(1,-3);ctx.stroke();
+          ctx.strokeStyle='#c8b89a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(1,3);ctx.stroke();}
+        if(lv>=4){ctx.strokeStyle='#6db85a';ctx.lineWidth=1;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(0,-7);ctx.stroke();
+          ctx.fillStyle='#7ac868';ctx.beginPath();ctx.ellipse(0,-7,1.5,1,0,0,Math.PI*2);ctx.fill();}}
+    }
+    function _dStem(ctx,h,w,col,cv){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(cv||2,-h/2,0,-h);ctx.stroke();}
+    function _dLeaf(ctx,x,y,sz,ang,col,vein){
+      ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,0,sz,sz*0.38,0,0,Math.PI*2);ctx.fill();
+      if(vein){ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(-sz*0.7,0);ctx.lineTo(sz*0.7,0);ctx.stroke();
+        for(let i=-2;i<=2;i++){if(!i)continue;ctx.beginPath();ctx.moveTo(i*sz*0.18,0);ctx.lineTo(i*sz*0.3,i>0?-sz*0.18:sz*0.18);ctx.stroke();}}
       ctx.restore();
     }
+    function _dFlower(ctx,x,y,pc,ps,pcol,ccol,op){
+      if(op<=0)return;
+      for(let i=0;i<pc;i++){const a=(i/pc)*Math.PI*2;ctx.save();ctx.translate(x,y);ctx.rotate(a);
+        ctx.fillStyle=pcol;ctx.beginPath();ctx.ellipse(0,-ps*op*0.7,ps*0.38,ps*op,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+      ctx.fillStyle=ccol||'#f5e060';ctx.beginPath();ctx.arc(x,y,ps*0.32,0,Math.PI*2);ctx.fill();
+    }
+    function _dBud(ctx,x,y,sz,col){ctx.fillStyle='#4a7a3f';ctx.beginPath();ctx.ellipse(x,y,sz*0.55,sz,0,0,Math.PI*2);ctx.fill();
+      if(col){ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(x,y-sz*0.3,sz*0.25,sz*0.35,0,0,Math.PI*2);ctx.fill();}}
+    function _dDew(ctx,x,y){ctx.fillStyle='rgba(180,220,255,0.55)';ctx.beginPath();ctx.arc(x,y,1.4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.65)';ctx.beginPath();ctx.arc(x-0.4,y-0.4,0.45,0,Math.PI*2);ctx.fill();}
+    function _dButterfly(ctx,x,y,t,col){
+      const wa=Math.sin(t/200)*0.4;ctx.save();ctx.translate(x,y);ctx.fillStyle=col||'#e8a0c0';
+      ctx.save();ctx.rotate(-0.3-wa);ctx.beginPath();ctx.ellipse(-3,0,3.5,2.2,-0.3,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.rotate(0.3+wa);ctx.beginPath();ctx.ellipse(3,0,3.5,2.2,0.3,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle='#3a2a1a';ctx.fillRect(-0.3,-2.5,0.6,5);
+      ctx.strokeStyle='#3a2a1a';ctx.lineWidth=0.3;ctx.beginPath();ctx.moveTo(0,-2.5);ctx.lineTo(-1.5,-4.5);ctx.moveTo(0,-2.5);ctx.lineTo(1.5,-4.5);ctx.stroke();ctx.restore();
+    }
+    function _dBird(ctx,x,y,col){
+      ctx.save();ctx.translate(x,y);ctx.fillStyle=col||'#8a5a3a';
+      ctx.beginPath();ctx.ellipse(0,0,4.5,2.8,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(3.5,-1.8,2.2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(4.3,-2.2,0.7,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#000';ctx.beginPath();ctx.arc(4.6,-2.2,0.35,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#e8a040';ctx.beginPath();ctx.moveTo(5.7,-1.8);ctx.lineTo(7.2,-1.3);ctx.lineTo(5.7,-0.8);ctx.closePath();ctx.fill();
+      ctx.fillStyle=col||'#8a5a3a';ctx.beginPath();ctx.moveTo(-3.5,-0.8);ctx.lineTo(-7,-3.5);ctx.lineTo(-6,0.3);ctx.closePath();ctx.fill();ctx.restore();
+    }
+    function _dBee(ctx,x,y,t){
+      ctx.save();ctx.translate(x,y);const wa=Math.sin(t/100)*0.3;ctx.fillStyle='rgba(200,220,255,0.45)';
+      ctx.save();ctx.rotate(-0.3-wa);ctx.beginPath();ctx.ellipse(-1.5,0,2.5,1.3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.rotate(0.3+wa);ctx.beginPath();ctx.ellipse(1.5,0,2.5,1.3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle='#e8c020';ctx.beginPath();ctx.ellipse(0,0,2.5,1.8,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#2a1a00';ctx.fillRect(-0.3,-1.8,0.6,3.6);ctx.fillRect(-1.8,-1,0.6,2);ctx.restore();
+    }
+    function _dPetals(ctx,W,H,t,n,col){
+      for(let i=0;i<n;i++){const px=W*0.1+W*0.8*((Math.sin(t/1200+i*2.7)+1)/2);const py=H*0.08+H*0.5*((t/2000+i*0.3)%1);
+        ctx.save();ctx.translate(px,py);ctx.rotate(t/500+i*1.5);ctx.fillStyle=col||'#f5a0b0';ctx.globalAlpha=0.55;
+        ctx.beginPath();ctx.ellipse(0,0,2.2,1,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.restore();}
+    }
+    function _dBerry(ctx,x,y,sz,col){ctx.fillStyle=col||'#cc3344';ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.28)';ctx.beginPath();ctx.arc(x-sz*0.3,y-sz*0.3,sz*0.28,0,Math.PI*2);ctx.fill();}
+    function _rRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+      ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+      ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();}
+    function _shade(hex,p){let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+      r=Math.max(0,Math.min(255,r+Math.round(r*p/100)));g=Math.max(0,Math.min(255,g+Math.round(g*p/100)));
+      b=Math.max(0,Math.min(255,b+Math.round(b*p/100)));return'#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');}
 
-    /* ── Plant type renderers ── */
-    function drawGenericPlant(ctx, col, level, t) {
-      const heights = [20, 35, 50, 65, 80];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 2 + level * 0.3, col.stem);
-      // leaves
-      const leafCount = level;
-      for (let i = 0; i < leafCount; i++) {
-        const ly = -(h * (0.3 + i * 0.15));
-        const side = i % 2 === 0 ? 1 : -1;
-        const leafSway = Math.sin(t / 600 + i) * 0.1;
-        drawLeaf(ctx, side * (4 + level), ly, 6 + level * 1.5, side * (0.5 + leafSway), col.leaf);
-      }
-      // tip bud at lv3+
-      if (level >= 3) {
-        ctx.fillStyle = col.flower || '#a8d97a';
-        ctx.beginPath();
-        ctx.arc(0, -h, 3 + level, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    /* ── Seedling 30 levels ── */
+    function _drawSeedling(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#7a5a3a');ctx.restore();return;}
+      const bY=by-16,sH=_mp(lv,5,30,8,55),sW=_mp(lv,5,30,1.5,4.5);
+      const lSz=_mp(lv,5,30,4,13),lCol=lv>=28?'#a8aa40':lv>=26?'#88a850':'#6db85a';
+      if(lv>=26)_dPetals(ctx,W,H,t,Math.min(lv-25,4),'#f0a0b0');
+      ctx.save();ctx.translate(cx,bY);ctx.rotate(Math.sin(t/900+lv*0.5)*(0.5+lv*0.06)*Math.PI/180);
+      _dStem(ctx,sH,sW,'#4a7c3f',1+lv*0.08);
+      if(lv>=5&&lv<=12){const cs=lv<=8?4:3;_dLeaf(ctx,-5,-3,cs,-0.8,'#8ac870',false);_dLeaf(ctx,5,-3,cs,0.8,'#8ac870',false);}
+      const lC=Math.min(Math.floor(_mp(lv,6,25,0,10)),10);
+      for(let i=0;i<lC;i++){const ly=-(sH*(0.15+i*0.075));if(ly<-sH)break;const s=i%2===0?1:-1;
+        _dLeaf(ctx,s*(3+sW+lSz*0.3),ly,lSz*(0.6+0.4*(1-i/10)),s*(0.4+i*0.05),lCol,lv>=13);}
+      if(lv>=12){const bc=Math.min(Math.floor(_mp(lv,12,25,1,4)),4);
+        for(let b=0;b<bc;b++){const bh=sH*(0.35+b*0.15),bl=_mp(lv,12,30,6,16),s=b%2===0?1:-1;
+          ctx.save();ctx.translate(0,-bh);ctx.rotate(s*0.6);_dStem(ctx,bl,sW*0.45,'#5a8a4f',s*2);
+          if(lv>=14)_dLeaf(ctx,s*2,-bl+2,lSz*0.55,s*0.3,lCol,false);ctx.restore();}}
+      if(lv>=15&&lv<18){const bs=_mp(lv,15,17,2,4);_dBud(ctx,0,-sH,bs,lv>=16?'#e8a0c0':null);}
+      if(lv>=18)_dFlower(ctx,0,-sH,lv>=22?6:5,4+lv*0.18,'#e87090','#f5e060',_mp(lv,18,20,0.3,1));
+      if(lv>=21){const ef=Math.min(Math.floor(_mp(lv,21,28,1,5)),5);const cs2=['#e87090','#d060a0','#f090a0','#e0a070','#c070c0'];
+        for(let f=0;f<ef;f++){const fy=-(sH*(0.45+f*0.09)),fx=(f%2===0?1:-1)*(7+f*2);
+          _dFlower(ctx,fx,fy,5,2.8,lv>=24?cs2[f%5]:'#e87090','#f5e060',1);}}
+      if(lv>=27){const bn=Math.min(lv-26,6);for(let i=0;i<bn;i++){_dBerry(ctx,(i%2?1:-1)*(5+i*2.5),-(sH*(0.28+i*0.07)),1.8,lv>=29?'#cc2244':'#cc6644');}}
+      ctx.restore();
+      if(lv>=20&&lv<=25){_dDew(ctx,cx-8,bY-sH*0.38);if(lv>=22)_dDew(ctx,cx+10,bY-sH*0.28);}
+      if(lv>=23&&lv<=28)_dButterfly(ctx,cx+16+Math.sin(t/600)*5,bY-sH*0.55+Math.cos(t/800)*3,t,'#d8a0d0');
+      if(lv>=30)_dBird(ctx,cx+8,bY-sH-8,'#8a6a4a');
     }
 
-    function drawTulip(ctx, col, level, t) {
-      const heights = [18, 32, 48, 60, 75];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 2 + level * 0.3, col.stem);
-      // leaves
-      for (let i = 0; i < Math.min(level, 3); i++) {
-        const ly = -(h * (0.25 + i * 0.2));
-        const side = i % 2 === 0 ? 1 : -1;
-        drawLeaf(ctx, side * (5 + level), ly, 7 + level, side * 0.6, col.leaf);
-      }
-      // tulip flower at lv2+
-      if (level >= 2) {
-        const petalCount = Math.min(level + 1, 6);
-        for (let i = 0; i < petalCount; i++) {
-          const angle = (i / petalCount) * Math.PI * 2 + Math.sin(t / 1000) * 0.05;
-          ctx.save();
-          ctx.translate(0, -h);
-          ctx.rotate(angle);
-          ctx.fillStyle = col.flower;
-          ctx.beginPath();
-          ctx.ellipse(0, -(4 + level), 3 + level * 0.5, 6 + level, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-        // center
-        ctx.fillStyle = '#f5e060';
-        ctx.beginPath();
-        ctx.arc(0, -h, 2 + level * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    /* ── Tulip 30 levels ── */
+    function _drawTulip(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#8a6a40');ctx.restore();return;}
+      const bY=by-16,sH=_mp(lv,5,30,6,55),sW=_mp(lv,5,30,1.2,3);
+      if(lv>=26)_dPetals(ctx,W,H,t,lv-25,'#f0a0c0');
+      ctx.save();ctx.translate(cx,bY);ctx.rotate(Math.sin(t/1000+lv*0.3)*(0.3+lv*0.04)*Math.PI/180);
+      const blC=Math.min(Math.floor(_mp(lv,5,15,1,5)),5);
+      for(let i=0;i<blC;i++){const s=i%2===0?1:-1,bH=_mp(lv,5,20,8,28-i*3);
+        ctx.fillStyle='#5daa5d';ctx.beginPath();ctx.moveTo(s*2,0);ctx.quadraticCurveTo(s*(8+i*2),-bH*0.6,s*(3+i),-bH);
+        ctx.quadraticCurveTo(s*(6+i),-bH*0.4,s*2,0);ctx.fill();}
+      _dStem(ctx,sH,sW,'#3d7a3d',1);
+      if(lv>=13&&lv<18){const bs=_mp(lv,13,17,3,7);ctx.fillStyle='#3d7a3d';ctx.beginPath();ctx.ellipse(0,-sH,bs*0.5,bs,0,0,Math.PI*2);ctx.fill();
+        if(lv>=16){ctx.fillStyle='#e74c6f';ctx.beginPath();ctx.ellipse(0,-sH-bs*0.3,bs*0.3,bs*0.3,0,0,Math.PI*2);ctx.fill();}}
+      if(lv>=18){const op=_mp(lv,18,22,0.3,1);const cols=['#e74c6f','#d43a6f','#ff6090','#e050a0','#f0a040','#c040c0'];
+        const fc=lv>=24?cols[(lv-24)%6]:'#e74c6f';
+        for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.save();ctx.translate(0,-sH);ctx.rotate(a);
+          ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(0,-(5+lv*0.18)*op*0.7,2.8+lv*0.12,(5+lv*0.18)*op,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+        ctx.fillStyle='#f5e060';ctx.beginPath();ctx.arc(0,-sH,2+op,0,Math.PI*2);ctx.fill();}
+      if(lv>=22){const es=Math.min(Math.floor(_mp(lv,22,30,1,5)),5);const sc=['#e74c6f','#f5a040','#d060d0','#e04060','#f07060'];
+        for(let s=0;s<es;s++){const sx=(s%2===0?1:-1)*(5+s*3),sh=sH*(0.45+s*0.06);
+          ctx.save();ctx.translate(sx,0);_dStem(ctx,sh,1.3,'#3d7a3d',sx>0?2:-2);
+          const c=sc[s%5];for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2;ctx.save();ctx.translate(0,-sh);ctx.rotate(a);
+            ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(0,-3.5,1.8,3.5,0,0,Math.PI*2);ctx.fill();ctx.restore();}ctx.restore();}}
+      ctx.restore();
+      if(lv>=19&&lv<=24)_dDew(ctx,cx-10,bY-8);
+      if(lv>=25&&lv<=29)_dButterfly(ctx,cx+17+Math.sin(t/700)*4,bY-sH*0.45+Math.cos(t/900)*3,t,'#f0c080');
+      if(lv>=30)_dBird(ctx,cx-12,12,'#c08040');
     }
 
-    function drawSunflower(ctx, col, level, t) {
-      const heights = [20, 36, 52, 66, 82];
-      const h = heights[level - 1];
-      drawStem(ctx, h, 3 + level * 0.5, col.stem);
-      // big leaves
-      for (let i = 0; i < Math.min(level, 4); i++) {
-        const ly = -(h * (0.2 + i * 0.18));
-        const side = i % 2 === 0 ? 1 : -1;
-        drawLeaf(ctx, side * (6 + level * 1.5), ly, 8 + level * 2, side * 0.5, col.leaf);
-      }
-      // sunflower head at lv2+
-      if (level >= 2) {
-        const r = 6 + level * 3;
-        const petals = 8 + level * 2;
-        for (let i = 0; i < petals; i++) {
-          const angle = (i / petals) * Math.PI * 2 + Math.sin(t / 2000) * 0.03;
-          ctx.save();
-          ctx.translate(0, -h);
-          ctx.rotate(angle);
-          ctx.fillStyle = col.flower;
-          ctx.beginPath();
-          ctx.ellipse(0, -r, 3 + level * 0.5, r * 0.7, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-        // center disk
-        ctx.fillStyle = col.center;
-        ctx.beginPath();
-        ctx.arc(0, -h, r * 0.55, 0, Math.PI * 2);
-        ctx.fill();
-        // seed dots
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        for (let i = 0; i < level * 2; i++) {
-          const a = Math.random() * Math.PI * 2;
-          const d = Math.random() * r * 0.4;
-          ctx.beginPath();
-          ctx.arc(Math.cos(a) * d, -h + Math.sin(a) * d, 1, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
+    /* ── Sunflower 30 levels ── */
+    function _drawSunflower(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#4a4a4a');ctx.restore();return;}
+      const bY=by-16,sH=_mp(lv,5,30,8,55),sW=_mp(lv,5,30,2,5.5);
+      ctx.save();ctx.translate(cx,bY);ctx.rotate(Math.sin(t/1100+lv*0.2)*(0.3+lv*0.04)*Math.PI/180);
+      _dStem(ctx,sH,sW,'#3d6b2b',lv>=25?4:2);
+      if(lv>=8){ctx.strokeStyle='#5a8a3b';ctx.lineWidth=0.3;const hc=Math.min(lv-7,8);
+        for(let i=0;i<hc;i++){const hy=-(sH*(0.1+i*0.1)),s=i%2===0?1:-1;ctx.beginPath();ctx.moveTo(sW/2*s,hy);ctx.lineTo((sW/2+2)*s,hy-1);ctx.stroke();}}
+      const lC=Math.min(Math.floor(_mp(lv,5,20,1,6)),6);
+      for(let i=0;i<lC;i++){const ly=-(sH*(0.1+i*0.11));if(ly<-sH+5)break;const s=i%2===0?1:-1;const ls=_mp(lv,5,25,6,15)*(1-i*0.07);
+        ctx.save();ctx.translate(s*(sW/2+1),ly);ctx.rotate(s*0.45);ctx.fillStyle='#5d9b3b';ctx.beginPath();ctx.ellipse(s*ls*0.5,0,ls,ls*0.42,0,0,Math.PI*2);ctx.fill();
+        if(lv>=11){ctx.strokeStyle='#4d8b2b';ctx.lineWidth=0.4;for(let j=0;j<4;j++){ctx.beginPath();ctx.moveTo(s*(ls*0.15+j*ls*0.15),-ls*0.25);ctx.lineTo(s*(ls*0.15+j*ls*0.15+1.2),-ls*0.4);ctx.stroke();}}ctx.restore();}
+      if(lv>=12&&lv<17){const hs=_mp(lv,12,16,4,10);ctx.fillStyle='#5d8b3b';ctx.beginPath();ctx.arc(0,-sH,hs,0,Math.PI*2);ctx.fill();
+        if(lv>=15){ctx.fillStyle='#e8c040';for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;ctx.beginPath();ctx.arc(Math.cos(a)*hs*0.8,-sH+Math.sin(a)*hs*0.8,1.3,0,Math.PI*2);ctx.fill();}}}
+      if(lv>=17){const hR=_mp(lv,17,28,6,14),op=_mp(lv,17,20,0.3,1),droop=lv>=25?_mp(lv,25,30,0,0.3):0;
+        ctx.save();ctx.translate(0,-sH);ctx.rotate(droop);
+        const pc=10+lv;for(let i=0;i<pc;i++){const a=(i/pc)*Math.PI*2;ctx.save();ctx.rotate(a);
+          ctx.fillStyle=lv>=29?'#c8a030':'#f5c542';ctx.beginPath();ctx.ellipse(0,-hR*op*0.85,1.8+hR*0.1,hR*op*0.55,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+        ctx.fillStyle='#6b3a1a';ctx.beginPath();ctx.arc(0,0,hR*0.52,0,Math.PI*2);ctx.fill();
+        if(lv>=21){const sc2=Math.min((lv-20)*4,20);ctx.fillStyle=lv>=28?'#3a2a1a':'#8a5a2a';
+          for(let i=0;i<sc2;i++){const a=i*2.4,d=(i/sc2)*hR*0.42;ctx.beginPath();ctx.arc(Math.cos(a)*d,Math.sin(a)*d,0.7,0,Math.PI*2);ctx.fill();}}
+        ctx.restore();}
+      if(lv>=29){ctx.save();ctx.translate(11,0);_dStem(ctx,7,1,'#6db85a',1);_dLeaf(ctx,3,-5,2.8,0.4,'#8ac870',false);ctx.restore();}
+      ctx.restore();
+      if(lv>=22&&lv<=27)_dBee(ctx,cx+12+Math.sin(t/500)*6,bY-sH*0.85+Math.cos(t/700)*4,t);
+      if(lv>=30)_dBird(ctx,cx-10,10,'#7a8a5a');
     }
 
-    function drawTree(ctx, col, level, type, t) {
-      const heights = [16, 30, 48, 64, 80];
-      const h = heights[level - 1];
-      // trunk
-      ctx.fillStyle = col.stem;
-      const tw = 3 + level * 1.2;
-      ctx.fillRect(-tw / 2, -h, tw, h);
-      // canopy layers
-      const layers = Math.min(level, 4);
-      for (let i = 0; i < layers; i++) {
-        const cy = -h + 2 - i * (6 + level * 2);
-        const cr = 10 + level * 4 - i * 4;
-        ctx.fillStyle = i === 0 ? col.leaf : shadeColor(col.leaf, -i * 10);
-        ctx.beginPath();
-        ctx.arc(0, cy, cr, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // cherry blossoms
-      if (type === 'cherry' && level >= 3) {
-        ctx.fillStyle = col.flower;
-        for (let i = 0; i < level * 4; i++) {
-          const bx = (Math.sin(i * 7 + t / 3000) * (8 + level * 3));
-          const by = -h - (Math.cos(i * 5) * (6 + level * 3));
-          const br = 2 + Math.sin(t / 500 + i) * 0.5;
-          ctx.beginPath();
-          ctx.arc(bx, by, br, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
+    /* ── Oak Tree 30 levels ── */
+    function _drawTree(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#6b4226');ctx.restore();return;}
+      const bY=by-16,tH=_mp(lv,5,30,6,48),tW=_mp(lv,5,30,2,7.5);
+      if(lv>=26){const lcs=['#c8a030','#cc6644','#aa4030','#88aa40'];
+        for(let i=0;i<lv-25;i++){const lx=cx-15+((t/1500+i*0.4)%1)*30,ly=12+((t/2000+i*0.3)%1)*(H*0.4);
+          ctx.save();ctx.translate(lx,ly);ctx.rotate(t/400+i*2);ctx.fillStyle=lcs[i%4];ctx.beginPath();ctx.ellipse(0,0,2.2,1,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
+      ctx.save();ctx.translate(cx,bY);ctx.rotate(Math.sin(t/1200)*0.3*Math.PI/180);
+      ctx.fillStyle='#6b4226';ctx.fillRect(-tW/2,-tH,tW,tH);
+      if(lv>=11){ctx.strokeStyle='#5a3216';ctx.lineWidth=0.5;const bl=Math.min(lv-10,6);
+        for(let i=0;i<bl;i++){const bx=-tW/2+1+(i/bl)*(tW-2);ctx.beginPath();ctx.moveTo(bx,-tH+5);ctx.lineTo(bx+0.5,-3);ctx.stroke();}}
+      if(lv>=16){ctx.fillStyle='#5a3216';ctx.beginPath();ctx.ellipse(tW*0.2,-tH*0.4,1.4,1,0.3,0,Math.PI*2);ctx.fill();}
+      if(lv>=13){ctx.strokeStyle='#6b4226';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(-tW/2,0);ctx.quadraticCurveTo(-tW-3,2,-tW-5,0);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(tW/2,0);ctx.quadraticCurveTo(tW+3,2,tW+5,0);ctx.stroke();}
+      const bc=Math.min(Math.floor(_mp(lv,6,20,1,6)),6);
+      for(let b=0;b<bc;b++){const bh=tH*(0.5+b*0.08),s=b%2===0?1:-1,bl=_mp(lv,6,25,4,11+b*1.3);
+        ctx.strokeStyle='#6b4226';ctx.lineWidth=1+(6-b)*0.25;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(0,-bh);ctx.quadraticCurveTo(s*bl*0.7,-bh-bl*0.3,s*bl,-bh-bl*0.5);ctx.stroke();}
+      if(lv>=8){const layers=Math.min(Math.floor(_mp(lv,8,22,1,4)),4);
+        for(let i=layers-1;i>=0;i--){const cy=-tH-(i*(3.5+lv*0.28)),cr=_mp(lv,8,28,6,17-i*2.5);
+          ctx.fillStyle=lv>=26?['#8aaa40','#c8a030','#cc6644','#aa3030'][i%4]:_shade('#2d8a4e',-i*12);
+          ctx.beginPath();ctx.arc(0,cy,cr,0,Math.PI*2);ctx.fill();}}
+      if(lv>=20&&lv<=24){ctx.fillStyle='#f0e0a0';for(let i=0;i<lv-19;i++){ctx.beginPath();ctx.arc(Math.cos(i*2.5)*9,-tH-5+Math.sin(i*3)*5,1.3,0,Math.PI*2);ctx.fill();}}
+      if(lv>=22&&lv<=28){ctx.strokeStyle='#5aaa5a';ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(-tW/2,-5);
+        for(let i=0;i<4;i++)ctx.quadraticCurveTo((i%2?1:-1)*(tW/2+3),-5-(i+0.5)*tH/5,(i%2?-1:1)*tW/4,-5-(i+1)*tH/5);
+        ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle='#7aba6a';ctx.beginPath();ctx.ellipse((i%2?1:-1)*3,-tH*0.2-i*7,1.8,0.9,0,0,Math.PI*2);ctx.fill();}}
+      if(lv>=19){ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(7,-tH*0.68,4.5,2.5,0,0,Math.PI);ctx.fill();
+        ctx.strokeStyle='#6a5a3a';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(3.5,-tH*0.68);ctx.lineTo(4.5,-tH*0.68+1);ctx.lineTo(6,-tH*0.68);ctx.lineTo(7,-tH*0.68+1);ctx.lineTo(9,-tH*0.68);ctx.stroke();}
+      if(lv>=25&&lv<=29){const fc=Math.min(lv-24,5);for(let i=0;i<fc;i++)_dBerry(ctx,(i%2?1:-1)*(4+i*2.8),-tH-2.5+i*1.8,2.2,'#8a6a30');}
+      ctx.restore();
+      if(lv>=24&&lv<30)_dBird(ctx,cx+9,bY-tH*0.73,'#6a5a4a');
+      if(lv>=30){ctx.save();ctx.translate(cx-9,bY-tH-4);
+        ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.arc(0,0,3.8,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#f0e080';ctx.beginPath();ctx.arc(-1.3,-0.8,1.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(1.3,-0.8,1.3,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#000';ctx.beginPath();ctx.arc(-1.3,-0.8,0.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(1.3,-0.8,0.5,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#c8a050';ctx.beginPath();ctx.moveTo(-0.8,0.5);ctx.lineTo(0,1.8);ctx.lineTo(0.8,0.5);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#7a6a4a';ctx.beginPath();ctx.moveTo(-2.5,-2.5);ctx.lineTo(-1.8,-5);ctx.lineTo(-0.8,-2.5);ctx.closePath();ctx.fill();
+        ctx.beginPath();ctx.moveTo(0.8,-2.5);ctx.lineTo(1.8,-5);ctx.lineTo(2.5,-2.5);ctx.closePath();ctx.fill();ctx.restore();}
     }
 
-    function drawCactus(ctx, col, level, t) {
-      const heights = [20, 32, 45, 58, 70];
-      const h = heights[level - 1];
-      const w = 8 + level * 2;
-      // main body
-      ctx.fillStyle = col.stem;
-      roundRect(ctx, -w / 2, -h, w, h, 6);
-      // ribs
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.lineWidth = 0.8;
-      for (let i = 1; i < 4; i++) {
-        const x = -w / 2 + (w / 4) * i;
-        ctx.beginPath();
-        ctx.moveTo(x, -h + 6);
-        ctx.lineTo(x, -2);
-        ctx.stroke();
-      }
-      // arms at lv3+
-      if (level >= 3) {
-        const armH = 10 + (level - 3) * 8;
-        ctx.fillStyle = col.stem;
-        // left arm
-        roundRect(ctx, -w / 2 - 8, -h * 0.6 - armH, 7, armH, 4);
-        // right arm at lv4+
-        if (level >= 4) {
-          roundRect(ctx, w / 2 + 1, -h * 0.45 - armH * 0.7, 7, armH * 0.7, 4);
-        }
-      }
-      // flower on top at lv4+
-      if (level >= 4) {
-        const fc = level === 5 ? '#ff6b9d' : col.flower;
-        ctx.fillStyle = fc;
-        for (let i = 0; i < 5; i++) {
-          const a = (i / 5) * Math.PI * 2 + Math.sin(t / 1000) * 0.1;
-          ctx.beginPath();
-          ctx.ellipse(Math.cos(a) * 4, -h - 3 + Math.sin(a) * 4, 3, 5, a, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.fillStyle = '#ffe066';
-        ctx.beginPath();
-        ctx.arc(0, -h - 3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    /* ── Cherry Blossom 30 levels ── */
+    function _drawCherry(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#8a4020');ctx.restore();return;}
+      const bY=by-16,tH=_mp(lv,5,30,5,45),tW=_mp(lv,5,30,1.5,5);
+      if(lv>=21)_dPetals(ctx,W,H,t,Math.min(lv-20,6),'#f5b0c8');
+      ctx.save();ctx.translate(cx,bY);ctx.rotate(Math.sin(t/1000)*0.4*Math.PI/180);
+      ctx.fillStyle='#5a3020';ctx.fillRect(-tW/2,-tH,tW,tH);
+      const bc=Math.min(Math.floor(_mp(lv,6,18,1,6)),6);
+      for(let b=0;b<bc;b++){const bh=tH*(0.4+b*0.09),s=b%2===0?1:-1,bl=_mp(lv,6,22,5,14);
+        ctx.strokeStyle='#5a3020';ctx.lineWidth=1.2;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(0,-bh);ctx.quadraticCurveTo(s*bl*0.8,-bh-bl*0.1,s*bl,-bh-bl*0.3);ctx.stroke();
+        if(lv>=9&&b<3){ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(s*bl*0.6,-bh-bl*0.15);ctx.lineTo(s*(bl*0.6+4),-bh-bl*0.4);ctx.stroke();}}
+      if(lv>=9&&lv<14){const cR=_mp(lv,9,13,7,14);ctx.fillStyle='#3a9e5a';ctx.beginPath();ctx.arc(0,-tH-2,cR,0,Math.PI*2);ctx.fill();
+        if(cR>11){ctx.fillStyle=_shade('#3a9e5a',-15);ctx.beginPath();ctx.arc(-3.5,-tH-4.5,cR*0.65,0,Math.PI*2);ctx.fill();
+          ctx.beginPath();ctx.arc(4.5,-tH,cR*0.55,0,Math.PI*2);ctx.fill();}}
+      if(lv>=23){const cR=_mp(lv,23,30,14,21);ctx.fillStyle='rgba(245,160,200,0.45)';ctx.beginPath();ctx.arc(0,-tH-2,cR,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(255,180,210,0.35)';ctx.beginPath();ctx.arc(-4,-tH-5,cR*0.6,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(5,-tH,cR*0.55,0,Math.PI*2);ctx.fill();}
+      if(lv>=14&&lv<17){const bn=(lv-13)*4;ctx.fillStyle='#e8a0b0';for(let i=0;i<bn;i++){ctx.beginPath();ctx.arc(Math.cos(i*2.3)*9,-tH-3+Math.sin(i*3)*5.5,1.3,0,Math.PI*2);ctx.fill();}}
+      if(lv>=17){const bn2=Math.floor(_mp(lv,17,22,4,18)),bR=_mp(lv,17,22,7,17);
+        for(let i=0;i<bn2;i++){const bx=Math.cos(i*2.3+t/5000)*bR,bby=-tH-3+Math.sin(i*1.7+t/6000)*bR*0.7;
+          for(let p=0;p<5;p++){const pa=(p/5)*Math.PI*2+i*0.5;ctx.fillStyle=(i+lv)%3===0?'#fff0f4':'#f5a0c0';
+            ctx.beginPath();ctx.ellipse(bx+Math.cos(pa)*2.2,bby+Math.sin(pa)*2.2,1.6,0.9,pa,0,0,Math.PI*2);ctx.fill();}
+          ctx.fillStyle='#e0c040';ctx.beginPath();ctx.arc(bx,bby,0.7,0,Math.PI*2);ctx.fill();}}
+      if(lv>=20){ctx.fillStyle='rgba(245,160,192,'+(lv<=22?'0.28':lv<=25?'0.22':'0.18')+')';ctx.beginPath();ctx.arc(0,-tH-4,_mp(lv,20,30,14,22),0,Math.PI*2);ctx.fill();}
+      if(lv>=25){const cn=Math.min(lv-24,8);for(let i=0;i<cn;i++){
+        const chx=Math.cos(i*2.1)*(7+i*1.3),chy=-tH*0.58+Math.sin(i*1.5)*7;
+        ctx.strokeStyle='#3a6a20';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(chx,chy-2.5);ctx.lineTo(chx,chy);ctx.stroke();
+        _dBerry(ctx,chx,chy,lv>=28?2.2:1.6,lv>=27?'#cc2040':'#80aa40');}}
+      ctx.restore();
+      if(lv>=29)_dBird(ctx,cx+11,bY-tH*0.5,'#e08040');
     }
 
-    function drawSparkles(ctx, W, H, t, level) {
-      const count = level === 5 ? 6 : 3;
-      for (let i = 0; i < count; i++) {
-        const x = W * 0.2 + (W * 0.6) * ((Math.sin(t / 1200 + i * 2.3) + 1) / 2);
-        const y = H * 0.1 + (H * 0.5) * ((Math.cos(t / 900 + i * 1.7) + 1) / 2);
-        const alpha = (Math.sin(t / 400 + i * 1.1) + 1) / 2;
-        const r = 1.5 + alpha;
-        ctx.fillStyle = 'rgba(255,255,200,' + (alpha * 0.7) + ')';
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        // cross sparkle
-        ctx.strokeStyle = 'rgba(255,255,200,' + (alpha * 0.4) + ')';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y);
-        ctx.moveTo(x, y - 4); ctx.lineTo(x, y + 4);
-        ctx.stroke();
-      }
-    }
-
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.arcTo(x + w, y, x + w, y + r, r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-      ctx.lineTo(x + r, y + h);
-      ctx.arcTo(x, y + h, x, y + h - r, r);
-      ctx.lineTo(x, y + r);
-      ctx.arcTo(x, y, x + r, y, r);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function shadeColor(hex, percent) {
-      let r = parseInt(hex.slice(1, 3), 16);
-      let g = parseInt(hex.slice(3, 5), 16);
-      let b = parseInt(hex.slice(5, 7), 16);
-      r = Math.max(0, Math.min(255, r + Math.round(r * percent / 100)));
-      g = Math.max(0, Math.min(255, g + Math.round(g * percent / 100)));
-      b = Math.max(0, Math.min(255, b + Math.round(b * percent / 100)));
-      return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+    /* ── Cactus 30 levels ── */
+    function _drawCactus(ctx,lv,t){
+      const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
+      if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#2a5a30');ctx.restore();return;}
+      const bY=by-16,cH=_mp(lv,5,30,8,48),cW=_mp(lv,5,30,5,13);
+      ctx.save();ctx.translate(cx,bY);
+      ctx.fillStyle=lv>=24?'#1a5a2a':'#2d7a3a';_rRect(ctx,-cW/2,-cH,cW,cH,Math.min(cW/2,6));
+      ctx.fillStyle='rgba(100,200,120,0.12)';ctx.fillRect(-cW/4,-cH+4,cW/2,cH-8);
+      if(lv>=7){const rc=Math.min(Math.floor(_mp(lv,7,15,2,5)),5);ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=0.7;
+        for(let i=0;i<rc;i++){const rx=-cW/2+(cW/(rc+1))*(i+1);ctx.beginPath();ctx.moveTo(rx,-cH+5);ctx.lineTo(rx,-3);ctx.stroke();}}
+      if(lv>=9){ctx.strokeStyle='#c8c8a0';ctx.lineWidth=0.3;const sr=Math.min(Math.floor(_mp(lv,9,18,2,6)),6);
+        for(let r=0;r<sr;r++){const sy=-cH*(0.15+r*0.14);
+          ctx.beginPath();ctx.moveTo(-cW/2,sy);ctx.lineTo(-cW/2-3,sy-1);ctx.stroke();ctx.beginPath();ctx.moveTo(-cW/2,sy);ctx.lineTo(-cW/2-2,sy+2);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(cW/2,sy);ctx.lineTo(cW/2+3,sy-1);ctx.stroke();ctx.beginPath();ctx.moveTo(cW/2,sy);ctx.lineTo(cW/2+2,sy+2);ctx.stroke();}}
+      if(lv>=12){const aH=_mp(lv,12,25,3,17),aW=_mp(lv,12,25,3,6.5);ctx.fillStyle='#2d7a3a';
+        ctx.save();ctx.translate(-cW/2,-cH*0.55);_rRect(ctx,-aW,-aH/2,aW,aH,3);if(lv>=16)_rRect(ctx,-aW,-aH,aW*0.8,aH*0.6,3);ctx.restore();
+        if(lv>=14){const aH2=_mp(lv,14,25,3,13);ctx.save();ctx.translate(cW/2,-cH*0.4);_rRect(ctx,0,-aH2/2,aW,aH2,3);
+          if(lv>=18)_rRect(ctx,0,-aH2,aW*0.8,aH2*0.5,3);ctx.restore();}
+        if(lv>=20){const aH3=_mp(lv,20,28,3,10);ctx.save();ctx.translate(-cW/2,-cH*0.35);_rRect(ctx,-aW*0.8,-aH3/2,aW*0.8,aH3,3);ctx.restore();}}
+      if(lv>=17&&lv<20){const bs=_mp(lv,17,19,2,4);ctx.fillStyle='#3d8a4a';ctx.beginPath();ctx.ellipse(0,-cH-bs*0.5,bs*0.55,bs,0,0,Math.PI*2);ctx.fill();
+        if(lv>=18){ctx.fillStyle='#f5c5d0';ctx.beginPath();ctx.ellipse(0,-cH-bs,bs*0.3,bs*0.3,0,0,Math.PI*2);ctx.fill();}}
+      if(lv>=20){const fcs=['#f5c5d0','#ff6b9d','#f0e060','#ff8060','#e060e0'];const fc=Math.min(Math.floor(_mp(lv,20,28,1,4)),4);
+        const positions=[[0,-cH],[-cW/2-3,-cH*0.55-8],[cW/2+3,-cH*0.4-6],[0,-cH*0.8]];
+        for(let f=0;f<fc;f++){const[fx,fy]=positions[f];const c=lv>=24?fcs[f%5]:'#f5c5d0';
+          for(let p=0;p<6;p++){const pa=(p/6)*Math.PI*2+Math.sin(t/1000+f)*0.05;ctx.save();ctx.translate(fx,fy);ctx.rotate(pa);ctx.fillStyle=c;
+            ctx.beginPath();ctx.ellipse(0,-3.2,1.4,3.2,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+          ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(fx,fy,1.8,0,Math.PI*2);ctx.fill();}}
+      if(lv>=26){const bb=Math.min(lv-25,3);for(let b=0;b<bb;b++){
+        const bx=(b%2===0?1:-1)*(cW/2+4+b*4.5),bh=4.5+b*1.8,bw=2.8+b*0.5;ctx.fillStyle='#3da84e';_rRect(ctx,bx-bw/2,-bh,bw,bh,2);}}
+      if(lv>=29){ctx.fillStyle='#a89880';ctx.beginPath();ctx.ellipse(-11,-1,2.8,1.8,0.2,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#989080';ctx.beginPath();ctx.ellipse(13,-1,1.8,1.3,-0.1,0,Math.PI*2);ctx.fill();}
+      ctx.restore();
+      if(lv>=28)_dBird(ctx,cx-cW/2-5,bY-cH*0.55-11,'#c89060');
     }
 
     /* ═══════════════════════════════
@@ -1095,6 +1780,367 @@
       ctx.fill();
     }
 
+    /* ═══════════════════════════════
+       Decoration Drawing
+       ═══════════════════════════════ */
+    function hasDecor(id) {
+      return roomData.placedDecors && roomData.placedDecors.some(d => d.id === id);
+    }
+
+    function getDecorPos(id) {
+      const p = roomData.placedDecors && roomData.placedDecors.find(d => d.id === id);
+      const def = DECORATIONS.find(d => d.id === id);
+      return p || (def ? { id, x: def.dx, y: def.dy } : { id, x: 0.5, y: 0.5 });
+    }
+
+    function drawRug(ctx, rw, rh, floorY) {
+      // Find placed rug
+      const rugIds = ['rug_blue','rug_green','rug_pink','rug_star'];
+      const placedRug = (roomData.placedDecors || []).find(d => rugIds.includes(d.id));
+
+      ctx.save();
+      const pos = placedRug ? placedRug : null;
+      const rugCX = pos ? pos.x * rw : rw * 0.38;
+      const rugCY = pos ? pos.y * rh : floorY + (rh - floorY) * 0.5;
+      const rugRX = rw * 0.13, rugRY = (rh - floorY) * 0.2;
+
+      let fillColor = 'rgba(156,60,60,0.2)';
+      let borderColor = 'rgba(140,50,50,0.18)';
+      let centerColor = 'rgba(180,80,60,0.12)';
+      let isStar = false;
+
+      if (placedRug) {
+        if (placedRug.id === 'rug_blue')  { fillColor = 'rgba(60,100,180,0.22)'; borderColor = 'rgba(50,80,160,0.2)'; centerColor = 'rgba(80,120,200,0.14)'; }
+        else if (placedRug.id === 'rug_green') { fillColor = 'rgba(60,156,80,0.22)'; borderColor = 'rgba(50,130,60,0.2)'; centerColor = 'rgba(80,170,90,0.14)'; }
+        else if (placedRug.id === 'rug_pink')  { fillColor = 'rgba(200,80,140,0.22)'; borderColor = 'rgba(180,60,120,0.2)'; centerColor = 'rgba(220,100,160,0.14)'; }
+        else if (placedRug.id === 'rug_star')  { fillColor = 'rgba(180,150,60,0.22)'; borderColor = 'rgba(160,130,40,0.2)'; centerColor = 'rgba(200,170,80,0.14)'; isStar = true; }
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx.beginPath(); ctx.ellipse(rugCX, rugCY + 3, rugRX + 2, rugRY + 2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = fillColor;
+      ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX, rugRY, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = borderColor; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.78, rugRY * 0.78, 0, 0, Math.PI * 2); ctx.stroke();
+      if (isStar) {
+        ctx.fillStyle = centerColor;
+        const sr = rugRX * 0.25;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+          const method = i === 0 ? 'moveTo' : 'lineTo';
+          ctx[method](rugCX + Math.cos(a) * sr, rugCY + Math.sin(a) * sr * (rugRY / rugRX));
+        }
+        ctx.closePath(); ctx.fill();
+      } else {
+        ctx.fillStyle = centerColor;
+        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.35, rugRY * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawWallDecorations(ctx, rw, rh, floorY, t) {
+      // String lights — spans full width, y-position from stored pos
+      if (hasDecor('stringlights')) {
+        ctx.save();
+        const pos = getDecorPos('stringlights');
+        const lY = pos.y * rh;
+        ctx.strokeStyle = 'rgba(120,100,80,0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, lY + 6);
+        for (let x = 0; x <= rw; x += 20) {
+          ctx.lineTo(x, lY + 6 + Math.sin(x * 0.03) * 5);
+        }
+        ctx.stroke();
+        const colors = ['#ffdd57','#ff6b6b','#48dbfb','#ff9ff3','#55efc4','#fd79a8'];
+        for (let i = 0; i < Math.floor(rw / 28); i++) {
+          const bx = 14 + i * 28;
+          const by = lY + 8 + Math.sin(bx * 0.03) * 5;
+          const glow = 0.3 + Math.sin(t / 600 + i * 0.8) * 0.15;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.globalAlpha = glow + 0.4;
+          ctx.beginPath(); ctx.arc(bx, by, 3.5, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = glow * 0.3;
+          ctx.beginPath(); ctx.arc(bx, by, 7, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      // Wall clock
+      if (hasDecor('clock')) {
+        ctx.save();
+        const pos = getDecorPos('clock');
+        const cx = pos.x * rw, cy = pos.y * rh, cr = rw * 0.035;
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.beginPath(); ctx.arc(cx + 1, cy + 2, cr + 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f5efe6';
+        ctx.strokeStyle = '#8B7355'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(139,115,85,0.3)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx, cy, cr * 0.85, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#6d5a42';
+        for (let i = 0; i < 12; i++) {
+          const a = (i * Math.PI * 2 / 12) - Math.PI / 2;
+          ctx.beginPath(); ctx.arc(cx + Math.cos(a) * cr * 0.72, cy + Math.sin(a) * cr * 0.72, 1.2, 0, Math.PI * 2); ctx.fill();
+        }
+        const now = new Date();
+        const sec = now.getSeconds() + now.getMilliseconds() / 1000;
+        const min = now.getMinutes() + sec / 60;
+        const hr = (now.getHours() % 12) + min / 60;
+        ctx.strokeStyle = '#4a3a2a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        const ha = (hr / 12) * Math.PI * 2 - Math.PI / 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(ha) * cr * 0.45, cy + Math.sin(ha) * cr * 0.45); ctx.stroke();
+        ctx.lineWidth = 1.5;
+        const ma = (min / 60) * Math.PI * 2 - Math.PI / 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(ma) * cr * 0.65, cy + Math.sin(ma) * cr * 0.65); ctx.stroke();
+        ctx.strokeStyle = '#c44'; ctx.lineWidth = 0.7;
+        const sa = (sec / 60) * Math.PI * 2 - Math.PI / 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(sa) * cr * 0.7, cy + Math.sin(sa) * cr * 0.7); ctx.stroke();
+        ctx.fillStyle = '#4a3a2a';
+        ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Book shelf
+      if (hasDecor('shelf')) {
+        ctx.save();
+        const pos = getDecorPos('shelf');
+        const sx = pos.x * rw, sy = pos.y * rh, sw = rw * 0.12, sh = 6;
+        ctx.fillStyle = '#7a6550';
+        ctx.fillRect(sx + sw * 0.15, sy + sh, 3, 10);
+        ctx.fillRect(sx + sw * 0.75, sy + sh, 3, 10);
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(sx + 1, sy + 2, sw, sh + 2);
+        ctx.fillStyle = '#a08868';
+        roundRectPath(ctx, sx, sy, sw, sh, 1);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(sx, sy, sw, 2);
+        const bookColors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'];
+        let bx = sx + 3;
+        for (let i = 0; i < 5; i++) {
+          const bw = sw * 0.12 + (i % 3) * 2;
+          const bh = 14 + (i % 2) * 4;
+          ctx.fillStyle = bookColors[i];
+          roundRectPath(ctx, bx, sy - bh, bw, bh, 1);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(bx + bw * 0.5, sy - bh + 3); ctx.lineTo(bx + bw * 0.5, sy - 2); ctx.stroke();
+          bx += bw + 1.5;
+        }
+        ctx.restore();
+      }
+
+      // Hanging plant
+      if (hasDecor('hangplant')) {
+        ctx.save();
+        const pos = getDecorPos('hangplant');
+        const hx = pos.x * rw, hy = pos.y * rh;
+        ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#c8b898'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        const potY = hy + rh * 0.12;
+        ctx.beginPath(); ctx.moveTo(hx - 8, potY - 4); ctx.quadraticCurveTo(hx - 4, hy + 4, hx, hy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hx + 8, potY - 4); ctx.quadraticCurveTo(hx + 4, hy + 4, hx, hy); ctx.stroke();
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(hx - 6, potY - 15); ctx.lineTo(hx + 6, potY - 8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hx + 6, potY - 15); ctx.lineTo(hx - 6, potY - 8); ctx.stroke();
+        ctx.fillStyle = '#c97b4b';
+        ctx.beginPath();
+        ctx.moveTo(hx - 9, potY - 4); ctx.lineTo(hx - 7, potY + 8); ctx.lineTo(hx + 7, potY + 8); ctx.lineTo(hx + 9, potY - 4); ctx.fill();
+        ctx.fillStyle = '#b56a3a';
+        ctx.fillRect(hx - 10, potY - 6, 20, 3);
+        ctx.strokeStyle = '#5a9a4a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        const sway = Math.sin(t / 2000) * 2;
+        ctx.beginPath(); ctx.moveTo(hx - 3, potY - 2); ctx.quadraticCurveTo(hx - 18 + sway, potY + 10, hx - 14 + sway, potY + 22); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hx + 3, potY - 2); ctx.quadraticCurveTo(hx + 16 + sway, potY + 8, hx + 18 + sway, potY + 20); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hx, potY - 3); ctx.quadraticCurveTo(hx - 10 + sway, potY + 14, hx - 6 + sway, potY + 26); ctx.stroke();
+        ctx.fillStyle = '#6aaa4c';
+        [-14, 6, 18].forEach((ox, i) => {
+          const lx = hx + ox + sway * (i % 2 ? 1 : -1);
+          const ly = potY + 16 + i * 3;
+          ctx.beginPath(); ctx.ellipse(lx, ly, 5, 3, (i - 1) * 0.4, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      // Wall banner
+      if (hasDecor('banner')) {
+        ctx.save();
+        const pos = getDecorPos('banner');
+        const bx = pos.x * rw, by = pos.y * rh;
+        const bw = rw * 0.05, bh = rh * 0.16;
+        ctx.fillStyle = '#8B7355';
+        ctx.fillRect(bx - 2, by, bw + 4, 3);
+        const banGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+        banGrad.addColorStop(0, '#e85d75');
+        banGrad.addColorStop(1, '#c44060');
+        ctx.fillStyle = banGrad;
+        ctx.beginPath();
+        ctx.moveTo(bx, by + 3); ctx.lineTo(bx, by + bh);
+        ctx.lineTo(bx + bw / 2, by + bh - 10);
+        ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + 3);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1;
+        const dcx = bx + bw / 2, dcy = by + bh * 0.4;
+        ctx.beginPath();
+        ctx.moveTo(dcx, dcy - 8); ctx.lineTo(dcx + 6, dcy);
+        ctx.lineTo(dcx, dcy + 8); ctx.lineTo(dcx - 6, dcy);
+        ctx.closePath(); ctx.stroke();
+        ctx.strokeStyle = '#d4a040'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(bx + bw / 2, by + bh - 10); ctx.lineTo(bx + bw / 2, by + bh - 2); ctx.stroke();
+        ctx.fillStyle = '#d4a040';
+        ctx.beginPath(); ctx.arc(bx + bw / 2, by + bh - 1, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawFloorDecorations(ctx, rw, rh, floorY, t) {
+      // Floor lamp — pos.y is base (feet), draws upward
+      if (hasDecor('floorlamp')) {
+        ctx.save();
+        const pos = getDecorPos('floorlamp');
+        const lx = pos.x * rw;
+        const baseY = pos.y * rh;
+        const lampH = (rh - floorY) * 0.65;
+        // Base ellipse (feet)
+        ctx.fillStyle = '#555';
+        ctx.beginPath(); ctx.ellipse(lx, baseY, 10, 4, 0, 0, Math.PI * 2); ctx.fill();
+        // Pole from base upward
+        ctx.strokeStyle = '#777'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(lx, baseY); ctx.lineTo(lx, baseY - lampH + 8); ctx.stroke();
+        // Shade at top
+        const shadeY = baseY - lampH;
+        ctx.fillStyle = '#f5e6c8';
+        ctx.beginPath();
+        ctx.moveTo(lx - 14, shadeY + 8); ctx.lineTo(lx - 10, shadeY - 6);
+        ctx.lineTo(lx + 10, shadeY - 6); ctx.lineTo(lx + 14, shadeY + 8);
+        ctx.fill();
+        ctx.strokeStyle = '#c8a876'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(lx - 14, shadeY + 8); ctx.lineTo(lx - 10, shadeY - 6);
+        ctx.lineTo(lx + 10, shadeY - 6); ctx.lineTo(lx + 14, shadeY + 8);
+        ctx.closePath(); ctx.stroke();
+        // Glow
+        ctx.fillStyle = 'rgba(255,240,200,0.08)';
+        ctx.beginPath(); ctx.ellipse(lx, baseY - lampH * 0.5, 30, lampH * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Side table
+      if (hasDecor('sidetable')) {
+        ctx.save();
+        const pos = getDecorPos('sidetable');
+        const tx = pos.x * rw, ty = pos.y * rh;
+        const tw = rw * 0.08, th = (rh - floorY) * 0.28;
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.beginPath(); ctx.ellipse(tx + tw / 2, ty + th + 2, tw * 0.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#8B7355';
+        ctx.fillRect(tx + 2, ty + 4, 3, th - 2);
+        ctx.fillRect(tx + tw - 5, ty + 4, 3, th - 2);
+        const topGrad = ctx.createLinearGradient(tx, ty, tx, ty + 5);
+        topGrad.addColorStop(0, '#b89a6e');
+        topGrad.addColorStop(1, '#a08868');
+        ctx.fillStyle = topGrad;
+        roundRectPath(ctx, tx - 1, ty, tw + 2, 5, 1.5);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(tx, ty, tw, 2);
+        ctx.fillStyle = '#7faac8';
+        ctx.beginPath();
+        ctx.moveTo(tx + tw * 0.35, ty); ctx.lineTo(tx + tw * 0.3, ty - 12);
+        ctx.quadraticCurveTo(tx + tw * 0.5, ty - 16, tx + tw * 0.7, ty - 12);
+        ctx.lineTo(tx + tw * 0.65, ty); ctx.fill();
+        ctx.fillStyle = '#ff8a8a';
+        ctx.beginPath(); ctx.arc(tx + tw * 0.5, ty - 17, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#5a9a4a'; ctx.strokeStyle = '#5a9a4a'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tx + tw * 0.5, ty - 14); ctx.lineTo(tx + tw * 0.5, ty - 5); ctx.stroke();
+        ctx.restore();
+      }
+
+      // Floor cushion
+      if (hasDecor('cushion')) {
+        ctx.save();
+        const pos = getDecorPos('cushion');
+        const cx = pos.x * rw, cy = pos.y * rh;
+        const cw = 22, ch = 10;
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.beginPath(); ctx.ellipse(cx, cy + 3, cw + 1, ch + 1, 0, 0, Math.PI * 2); ctx.fill();
+        const cushGrad = ctx.createRadialGradient(cx, cy - 2, 0, cx, cy, cw);
+        cushGrad.addColorStop(0, '#e8a0c0');
+        cushGrad.addColorStop(1, '#d080a0');
+        ctx.fillStyle = cushGrad;
+        ctx.beginPath(); ctx.ellipse(cx, cy, cw, ch, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath(); ctx.ellipse(cx - 4, cy - 3, cw * 0.5, ch * 0.4, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(180,80,120,0.3)';
+        ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Toy box
+      if (hasDecor('toybox')) {
+        ctx.save();
+        const pos = getDecorPos('toybox');
+        const bx = pos.x * rw, by = pos.y * rh;
+        const bw = 30, bh = 22;
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.fillRect(bx + 2, by + bh - 1, bw, 3);
+        ctx.fillStyle = '#d4a06a';
+        roundRectPath(ctx, bx, by, bw, bh, 3);
+        ctx.fill();
+        ctx.fillStyle = '#c49058';
+        ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
+        ctx.fillStyle = '#f7c97e';
+        ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('★', bx + bw / 2, by + bh / 2 + 3);
+        ctx.fillStyle = '#ff6b6b';
+        ctx.beginPath(); ctx.arc(bx + 8, by - 2, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#5b9bd5';
+        ctx.fillRect(bx + bw - 10, by - 6, 4, 8);
+        ctx.fillStyle = '#55efc4';
+        ctx.fillRect(bx + bw - 8, by - 8, 4, 6);
+        ctx.restore();
+      }
+
+      // Bookcase — pos.y is base (bottom), draws upward
+      if (hasDecor('bookcase')) {
+        ctx.save();
+        const pos = getDecorPos('bookcase');
+        const bx = pos.x * rw;
+        const baseY = pos.y * rh;
+        const bw = rw * 0.1, bh = (rh - floorY) * 0.7;
+        const by = baseY - bh; // top of bookcase
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(bx + 2, by + 2, bw + 1, bh + 1);
+        ctx.fillStyle = '#7a6550';
+        roundRectPath(ctx, bx, by, bw, bh, 2);
+        ctx.fill();
+        ctx.fillStyle = '#a08868';
+        ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
+        const shelfH = (bh - 8) / 3;
+        for (let i = 0; i < 3; i++) {
+          const sy = by + 4 + i * shelfH;
+          ctx.fillStyle = '#8a7355';
+          ctx.fillRect(bx + 2, sy + shelfH - 3, bw - 4, 3);
+          const bkColors = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#e67e22','#1abc9c'];
+          let bkx = bx + 4;
+          for (let j = 0; j < 3 + (i % 2); j++) {
+            const bkw = bw * 0.15 + (j % 3) * 1.5;
+            const bkh = shelfH * 0.65 + (j % 2) * shelfH * 0.12;
+            ctx.fillStyle = bkColors[(i * 3 + j) % bkColors.length];
+            ctx.fillRect(bkx, sy + shelfH - 3 - bkh, bkw, bkh);
+            bkx += bkw + 1;
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    /* ═══════════════════════════════
+       Canvas Room Background
+       ═══════════════════════════════ */
     function startRoomBgAnimation() {
       cancelAnimationFrame(bgAnimFrame);
       const cvs = document.getElementById('roomBgCanvas');
@@ -1188,51 +2234,8 @@
         ctx.fill();
         ctx.restore();
 
-        /* ── Small picture frame on wall ── */
-        const pfW = rw * 0.07, pfH = rh * 0.1;
-        const pfX = rw * 0.18, pfY = rh * 0.12;
-        // Frame shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.06)';
-        ctx.fillRect(pfX + 1, pfY + 2, pfW + 2, pfH + 2);
-        // Frame
-        ctx.fillStyle = '#a08060';
-        ctx.fillRect(pfX - 3, pfY - 3, pfW + 6, pfH + 6);
-        ctx.fillStyle = '#c8a876';
-        ctx.fillRect(pfX - 1, pfY - 1, pfW + 2, pfH + 2);
-        // Painting inside — tiny sunset
-        const paintGrad = ctx.createLinearGradient(pfX, pfY, pfX, pfY + pfH);
-        paintGrad.addColorStop(0, '#f7a072');
-        paintGrad.addColorStop(0.5, '#fcd29f');
-        paintGrad.addColorStop(1, '#7eb89a');
-        ctx.fillStyle = paintGrad;
-        ctx.fillRect(pfX, pfY, pfW, pfH);
-        // Tiny sun
-        ctx.fillStyle = '#ffe066';
-        ctx.beginPath(); ctx.arc(pfX + pfW * 0.6, pfY + pfH * 0.35, pfW * 0.1, 0, Math.PI * 2); ctx.fill();
-
-        /* ── Another small frame on right side ── */
-        const pf2X = rw * 0.76, pf2Y = rh * 0.08;
-        ctx.fillStyle = 'rgba(0,0,0,0.06)';
-        ctx.fillRect(pf2X + 1, pf2Y + 2, pfW + 2, pfH + 2);
-        ctx.fillStyle = '#7a6550';
-        ctx.fillRect(pf2X - 3, pf2Y - 3, pfW + 6, pfH + 6);
-        ctx.fillStyle = '#b89a6e';
-        ctx.fillRect(pf2X - 1, pf2Y - 1, pfW + 2, pfH + 2);
-        // Mountain scene
-        const mGrad = ctx.createLinearGradient(pf2X, pf2Y, pf2X, pf2Y + pfH);
-        mGrad.addColorStop(0, '#8ec5e8');
-        mGrad.addColorStop(0.5, '#a0d0b0');
-        mGrad.addColorStop(1, '#6aaa6a');
-        ctx.fillStyle = mGrad;
-        ctx.fillRect(pf2X, pf2Y, pfW, pfH);
-        // Mountain
-        ctx.fillStyle = 'rgba(80,100,80,0.5)';
-        ctx.beginPath();
-        ctx.moveTo(pf2X, pf2Y + pfH);
-        ctx.lineTo(pf2X + pfW * 0.35, pf2Y + pfH * 0.3);
-        ctx.lineTo(pf2X + pfW * 0.65, pf2Y + pfH * 0.45);
-        ctx.lineTo(pf2X + pfW, pf2Y + pfH);
-        ctx.fill();
+        /* ── Wall Decorations (drawn over wall, before baseboard) ── */
+        drawWallDecorations(ctx, rw, rh, floorY, t);
 
         /* ── Baseboard ── */
         ctx.fillStyle = '#6d5a42';
@@ -1277,23 +2280,11 @@
           ctx.stroke();
         }
 
-        /* ── Oval rug ── */
-        ctx.save();
-        const rugCX = rw * 0.38, rugCY = floorY + (rh - floorY) * 0.5;
-        const rugRX = rw * 0.13, rugRY = (rh - floorY) * 0.2;
-        // Rug shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.06)';
-        ctx.beginPath(); ctx.ellipse(rugCX, rugCY + 3, rugRX + 2, rugRY + 2, 0, 0, Math.PI * 2); ctx.fill();
-        // Rug fill
-        ctx.fillStyle = 'rgba(156,60,60,0.2)';
-        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX, rugRY, 0, 0, Math.PI * 2); ctx.fill();
-        // Rug border
-        ctx.strokeStyle = 'rgba(140,50,50,0.18)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.78, rugRY * 0.78, 0, 0, Math.PI * 2); ctx.stroke();
-        // Rug center design
-        ctx.fillStyle = 'rgba(180,80,60,0.12)';
-        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.35, rugRY * 0.35, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
+        /* ── Oval rug (dynamic based on placed rug decor) ── */
+        drawRug(ctx, rw, rh, floorY);
+
+        /* ── Floor Decorations ── */
+        drawFloorDecorations(ctx, rw, rh, floorY, t);
 
         /* ── Floating dust motes in sunlight ── */
         bgDust.forEach(p => {
@@ -1313,16 +2304,30 @@
        Canvas Pet — 2D wander + drawing
        ═══════════════════════════════ */
     let petAnimFrame = null;
-    let petState = { x: 0.3, y: 0.7, tx: 0.6, ty: 0.75, speed: 0.0004, nextWander: 0, facingRight: true,
-      action: null, actionEnd: 0, actionCooldown: 0 };
+    let petStates = {};
+    function getPetState(id, idx) {
+      if (!petStates[id]) {
+        petStates[id] = {
+          x: 0.15 + idx * 0.25, y: 0.75 + Math.random() * 0.08,
+          tx: 0.5, ty: 0.78,
+          speed: 0.0004, nextWander: 0, facingRight: true,
+          action: null, actionEnd: 0, actionCooldown: 0,
+          // Natural movement additions
+          vx: 0, vy: 0,              // velocity for smooth accel/decel
+          pauseUntil: 0,             // occasional pause timestamp
+          idlePhase: Math.random() * Math.PI * 2  // breathing offset
+        };
+      }
+      return petStates[id];
+    }
 
     const PET_ACTIONS = {
-      cat:     ['groom', 'stretch', 'nap', 'yawn'],
-      dog:     ['sit', 'pant', 'scratch', 'playbow'],
-      bunny:   ['sniff', 'hop', 'standup', 'eartwitch'],
+      cat:     ['groom', 'stretch', 'nap', 'yawn', 'sleep'],
+      dog:     ['sit', 'pant', 'scratch', 'playbow', 'sleep'],
+      bunny:   ['sniff', 'hop', 'standup', 'eartwitch', 'sleep'],
       hamster: ['stuff', 'groom', 'spin', 'sleep'],
-      fox:     ['pounce', 'yawn', 'crouch', 'sneak'],
-      panda:   ['eat', 'roll', 'wave', 'sit']
+      fox:     ['pounce', 'yawn', 'crouch', 'sneak', 'sleep'],
+      panda:   ['eat', 'roll', 'wave', 'sit', 'sleep']
     };
 
     function pickAction(type) {
@@ -1330,7 +2335,7 @@
       return acts[Math.floor(Math.random() * acts.length)];
     }
 
-    function startPetAnimation(type, hunger) {
+    function startPetAnimation(pets) {
       cancelAnimationFrame(petAnimFrame);
       const cvs = document.getElementById('petCanvas');
       if (!cvs) return;
@@ -1339,102 +2344,154 @@
       cvs.width = rw; cvs.height = rh;
       const ctx = cvs.getContext('2d');
 
-      function pickTarget() {
-        petState.tx = 0.1 + Math.random() * 0.55;
-        petState.ty = 0.62 + Math.random() * 0.18;
-        petState.nextWander = Date.now() + 3000 + Math.random() * 4000;
-      }
-      if (!petState.nextWander) pickTarget();
+      // Ensure each pet has a state
+      pets.forEach((p, i) => getPetState(p.type, i));
 
       function frame(t) {
         ctx.clearRect(0, 0, rw, rh);
-
         const now = Date.now();
-        let moving = false;
-        let actionProgress = -1; // -1 = no action
-        let currentAction = null;
 
-        // Action system
-        if (petState.action && now < petState.actionEnd) {
-          // In action — don't move
-          currentAction = petState.action;
-          actionProgress = (now - (petState.actionEnd - 2500)) / 2500; // 0→1
-          actionProgress = Math.max(0, Math.min(1, actionProgress));
-        } else {
-          if (petState.action) {
-            // Action just ended
-            petState.action = null;
-            petState.actionCooldown = now + 4000 + Math.random() * 5000;
-          }
-          // Maybe start a new action
-          if (!petState.action && now > petState.actionCooldown && Math.random() < 0.008) {
-            petState.action = pickAction(type);
-            petState.actionEnd = now + 2500;
+        for (const p of pets) {
+          const st = petStates[p.type];
+          // Live hunger read
+          const hunger = roomData.petHunger[p.type] ?? p.hunger;
+          let moving = false;
+          let actionProgress = -1;
+          let currentAction = null;
+
+          // Action system
+          if (st.action && now < st.actionEnd) {
+            currentAction = st.action;
+            const dur = st.actionDur || 2500;
+            actionProgress = (now - (st.actionEnd - dur)) / dur;
+            actionProgress = Math.max(0, Math.min(1, actionProgress));
+          } else {
+            if (st.action) {
+              st.action = null;
+              st.actionCooldown = now + 4000 + Math.random() * 5000;
+            }
+            if (!st.action && now > st.actionCooldown && Math.random() < 0.008) {
+              st.action = pickAction(p.type);
+              // Sleep/nap lasts longer
+              st.actionDur = (st.action === 'sleep' || st.action === 'nap') ? 5000 + Math.random() * 3000 : 2500;
+              st.actionEnd = now + st.actionDur;
+            }
+
+            // Wander
+            if (now > st.nextWander) {
+              st.tx = 0.06 + Math.random() * 0.60;
+              st.ty = 0.72 + Math.random() * 0.18;
+              st.nextWander = now + 4000 + Math.random() * 6000;
+              // Occasionally pause before moving
+              if (Math.random() < 0.35) {
+                st.pauseUntil = now + 800 + Math.random() * 1500;
+              }
+            }
+
+            // Pausing?
+            if (now < st.pauseUntil) {
+              moving = false;
+              st.vx *= 0.9; st.vy *= 0.9;
+            } else {
+              const dx = st.tx - st.x;
+              const dy = st.ty - st.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const wantMove = dist > 0.005;
+
+              if (wantMove) {
+                const maxSpeed = st.speed * (hunger > 30 ? 1 : 0.5);
+                // Ease in/out: accelerate smoothly, decelerate near target
+                const easeIn = 0.08;
+                const decelDist = 0.08;
+                const speedMult = dist < decelDist ? (dist / decelDist) * 0.6 + 0.4 : 1;
+                const targetVx = (dx / dist) * maxSpeed * speedMult * 16;
+                const targetVy = (dy / dist) * maxSpeed * speedMult * 16;
+                st.vx += (targetVx - st.vx) * easeIn;
+                st.vy += (targetVy - st.vy) * easeIn;
+                st.x += st.vx;
+                st.y += st.vy;
+                moving = true;
+                if (Math.abs(dx) > 0.01) st.facingRight = dx > 0;
+              } else {
+                // Decelerate to stop
+                st.vx *= 0.85;
+                st.vy *= 0.85;
+                st.x += st.vx;
+                st.y += st.vy;
+                moving = Math.abs(st.vx) > 0.00005 || Math.abs(st.vy) > 0.00005;
+              }
+            }
           }
 
-          // Wander
-          if (now > petState.nextWander) pickTarget();
-          const dx = petState.tx - petState.x;
-          const dy = petState.ty - petState.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          moving = dist > 0.005;
+          // Clamp pet to floor area (floor starts at 0.65 normalized)
+          st.x = Math.max(0.04, Math.min(0.70, st.x));
+          st.y = Math.max(0.70, Math.min(0.92, st.y));
+
+          const px = st.x * rw;
+          const py = st.y * rh;
+          const depthScale = 0.6 + (st.y - 0.6) * 2.0;
+          const baseSize = PET_SIZES[p.type] || 44;
+          const size = baseSize * depthScale;
+
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.scale(st.facingRight ? depthScale : -depthScale, depthScale);
+
+          // Natural bob: walking has bounce, idle has gentle breathing
+          let bob = 0;
+          let legPhase = 0;
           if (moving) {
-            const step = petState.speed * (hunger > 30 ? 1 : 0.5);
-            petState.x += (dx / dist) * step * 16;
-            petState.y += (dy / dist) * step * 16;
-            petState.facingRight = dx > 0;
+            const walkSpeed = Math.sqrt(st.vx * st.vx + st.vy * st.vy) * 800;
+            bob = Math.sin(t / 100) * (1.5 + walkSpeed * 0.5);
+            legPhase = t / 100;
+          } else {
+            // Idle breathing sway
+            bob = Math.sin(t / 800 + st.idlePhase) * 0.8;
+            // Tiny body sway
+            ctx.rotate(Math.sin(t / 1200 + st.idlePhase) * 0.015);
           }
+          ctx.translate(0, bob);
+
+          if (currentAction && actionProgress >= 0) {
+            applyActionTransform(ctx, p.type, currentAction, actionProgress, size, t);
+          }
+
+          drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress);
+          ctx.restore();
+
+          // Action floating effects
+          if (currentAction && actionProgress >= 0) {
+            ctx.save();
+            drawActionEffect(ctx, px, py, size, depthScale, p.type, currentAction, actionProgress, t);
+            ctx.restore();
+          }
+
+          // Hunger bar above pet
+          const barW = 52 * depthScale;
+          const barH = 6 * depthScale;
+          const barX = px - barW / 2;
+          const barY = py - size * 1.5;
+          ctx.fillStyle = 'rgba(0,0,0,0.45)';
+          roundRectPath(ctx, barX, barY, barW, barH, 3);
+          ctx.fill();
+          const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
+          ctx.fillStyle = hColor;
+          roundRectPath(ctx, barX, barY, barW * (hunger / 100), barH, 3);
+          ctx.fill();
+
+          // Hunger percentage
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.font = 'bold ' + Math.round(8 * depthScale) + 'px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(Math.round(hunger) + '%', px, barY + barH + 10 * depthScale);
+
+          // Pet name
+          const petDef = PETS.find(x => x.id === p.type);
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = 'bold ' + Math.round(10 * depthScale) + 'px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(petDef?.name || 'Pet', px, barY - 4 * depthScale);
         }
-
-        const px = petState.x * rw;
-        const py = petState.y * rh;
-        // Depth scale: further back (smaller y) = smaller
-        const depthScale = 0.6 + (petState.y - 0.6) * 2.0;
-        const baseSize = PET_SIZES[type] || 44;
-        const size = baseSize * depthScale;
-
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.scale(petState.facingRight ? depthScale : -depthScale, depthScale);
-
-        // Walking bob
-        const bob = moving ? Math.sin(t / 120) * 2 : 0;
-        const legPhase = moving ? t / 120 : 0;
-        ctx.translate(0, bob);
-
-        // Action body transforms
-        if (currentAction && actionProgress >= 0) {
-          applyActionTransform(ctx, type, currentAction, actionProgress, size, t);
-        }
-
-        drawPetCanvas(ctx, type, size, legPhase, moving, hunger, t, currentAction, actionProgress);
-        ctx.restore();
-
-        // Action floating effects (outside pet transform)
-        if (currentAction && actionProgress >= 0) {
-          drawActionEffect(ctx, px, py, size, depthScale, type, currentAction, actionProgress, t);
-        }
-        ctx.restore();
-
-        // Hunger bar above pet
-        const barW = 48 * depthScale;
-        const barH = 5 * depthScale;
-        const barX = px - barW / 2;
-        const barY = py - size * 1.5;
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        roundRectPath(ctx, barX, barY, barW, barH, 2);
-        ctx.fill();
-        const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
-        ctx.fillStyle = hColor;
-        roundRectPath(ctx, barX, barY, barW * (hunger / 100), barH, 2);
-        ctx.fill();
-
-        // Pet name
-        const petDef = PETS.find(p => p.id === type);
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.font = Math.round(10 * depthScale) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(petDef?.name || 'Pet', px, barY - 4 * depthScale);
 
         petAnimFrame = requestAnimationFrame(frame);
       }
@@ -2120,8 +3177,25 @@
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
     }
 
+    function switchSubTab(subId) {
+      const panel = document.getElementById(subId);
+      if (!panel) return;
+      const parent = panel.parentElement;
+      parent.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('active', p.id === subId));
+      parent.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b.dataset.sub === subId));
+    }
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // Sub-tabs (Pet/Plant inside Shop)
+    document.querySelectorAll('.sub-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.sub;
+        btn.parentElement.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b === btn));
+        btn.parentElement.parentElement.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('active', p.id === target));
+      });
     });
 
     // Back button: if visiting, go home; else go to index
@@ -2131,6 +3205,34 @@
         goHome();
       }
     });
+
+    // Panel collapse toggle
+    const panelToggle = document.getElementById('panelToggle');
+    const panelWrap = document.getElementById('panelWrap');
+    const isMobile = () => window.innerWidth <= 768;
+    panelToggle.addEventListener('click', () => {
+      const collapsed = panelWrap.classList.toggle('collapsed');
+      if (isMobile()) {
+        panelToggle.textContent = collapsed ? '▲' : '▼';
+      } else {
+        panelToggle.textContent = collapsed ? '❯' : '❮';
+      }
+      // Re-render room canvas after transition completes
+      setTimeout(() => {
+        startRoomBgAnimation();
+        // Also restart pet animation if active
+        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        if (activePets.length) {
+          const petInfos = activePets.map(id => ({
+            type: PETS.find(p => p.id === id)?.id || 'cat',
+            hunger: roomData.petHunger[id] ?? 100
+          }));
+          startPetAnimation(petInfos);
+        }
+      }, 320);
+    });
+    // Set initial toggle icon based on viewport
+    if (isMobile()) panelToggle.textContent = '▼';
   </script>
 </body>
 </html>
