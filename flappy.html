@@ -232,9 +232,100 @@
       .score-display { font-size: 40px; top: 46px; }
       canvas { max-width: 100%; }
     }
+
+    /* ── Login gate overlay ── */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    }
+    .login-overlay.hidden { display: none; }
+    .login-overlay.loading .login-box { display: none; }
+    .login-overlay.loading::after {
+      content: '';
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: #f7c97e;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .login-box {
+      text-align: center;
+      padding: 48px 40px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      max-width: 380px;
+      width: 90%;
+    }
+    .login-box .login-icon { font-size: 56px; margin-bottom: 16px; }
+    .login-box h2 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #f7c97e, #f2a154);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .login-box p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .google-login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 14px;
+      background: #fff;
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .google-login-btn:hover { transform: scale(1.03); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+    .google-login-btn:active { transform: scale(0.97); }
+    .google-login-btn svg { width: 22px; height: 22px; }
+    .login-error {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #e06377;
+      min-height: 20px;
+    }
+    .app-content { display: none; }
+    .app-content.visible { display: contents; }
   </style>
 </head>
 <body>
+
+  <!-- Login gate -->
+  <div class="login-overlay loading" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-icon">🐦</div>
+      <h2>Flappy Bird</h2>
+      <p>Sign in with Google to play.<br>Your name will appear on the leaderboard.</p>
+      <button class="google-login-btn" id="googleLoginBtn">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+      </button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <div class="app-content" id="appContent">
 
   <a href="index.html" class="back-btn">← Back</a>
 
@@ -249,8 +340,8 @@
   <!-- Start screen -->
   <div class="overlay" id="startScreen">
     <h2>🐦 Flappy Bird</h2>
-    <div class="name-input">
-      <input type="text" id="playerName" placeholder="Your name" maxlength="20">
+    <div class="name-input" id="nameDisplay" style="justify-content:center">
+      <span style="font-size:14px;color:rgba(255,255,255,0.6)">Playing as: <strong id="playerDisplayName" style="color:#f7c97e">...</strong></span>
     </div>
     <button class="play-btn" id="startBtn">Play!</button>
     <div class="tap-hint">Tap / Space / Click to flap</div>
@@ -274,15 +365,54 @@
     </div>
   </div>
 
+  </div> <!-- /app-content -->
+
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
 
   <script>
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
     const lbRef = db.collection('leaderboard_flappy');
+
+    /* ── Google Auth Gate ── */
+    const loginOverlay = document.getElementById('loginOverlay');
+    const appContent = document.getElementById('appContent');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError = document.getElementById('loginError');
+
+    googleLoginBtn.addEventListener('click', async () => {
+      googleLoginBtn.disabled = true;
+      loginError.textContent = '';
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+        }
+      } finally {
+        googleLoginBtn.disabled = false;
+      }
+    });
+
+    auth.onAuthStateChanged((user) => {
+      loginOverlay.classList.remove('loading');
+      if (user) {
+        loginOverlay.classList.add('hidden');
+        appContent.classList.add('visible');
+        const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
+        localStorage.setItem('flappy_name', displayName);
+        document.getElementById('playerDisplayName').textContent = displayName;
+      } else {
+        loginOverlay.classList.remove('hidden');
+        appContent.classList.remove('visible');
+      }
+    });
 
     /* ═══════════════════════════════
        Canvas setup
@@ -305,7 +435,7 @@
     const GRAVITY = 0.45;
     const FLAP_STRENGTH = -7;
     const PIPE_WIDTH = 52;
-    const PIPE_GAP = 140;
+    const PIPE_GAP = 160;
     const PIPE_SPEED = 2.5;
     const BIRD_SIZE = 24;
 
@@ -565,8 +695,6 @@
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); flap(); }, { passive: false });
 
     document.getElementById('startBtn').addEventListener('click', () => {
-      const name = document.getElementById('playerName').value.trim();
-      if (name) localStorage.setItem('flappy_name', name);
       startGame();
     });
     document.getElementById('retryBtn').addEventListener('click', startGame);
@@ -646,11 +774,9 @@
     localStorage.removeItem('flappy_best');
     localStorage.removeItem('flappy_player_id');
 
-    const savedName = localStorage.getItem('flappy_name');
-    if (savedName) document.getElementById('playerName').value = savedName;
     bestLocalScore = parseInt(localStorage.getItem(getBestKey()) || '0', 10);
     initGame();
-    draw(); // draw initial frame
+    draw();
   </script>
 </body>
 </html>

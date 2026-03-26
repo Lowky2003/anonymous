@@ -158,7 +158,46 @@
       max-height: 90vh;
       border-radius: 12px;
       object-fit: contain;
+      transition: transform 0.25s ease;
+      cursor: zoom-in;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
+    .lightbox img.zoomed {
+      cursor: grab;
+      transition: none;
+    }
+    .lightbox img.dragging {
+      cursor: grabbing;
+    }
+    .lightbox .lightbox-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      pointer-events: none;
+    }
+    .lightbox .lightbox-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox .lightbox-close:hover { background: rgba(255,255,255,0.15); }
 
     /* ── Bubble reply section ── */
     .bubble-reactions {
@@ -382,12 +421,42 @@
     }
     .bubble:hover { transform: scale(1.06); }
 
-    .bubble .timer {
+    /* ── Bubble HP bar (game-style) ── */
+    .bubble-hp-wrapper {
+      margin-bottom: 8px;
+    }
+    .bubble-hp-label {
       display: block;
-      margin-top: 10px;
-      font-size: 11px;
-      opacity: 0.5;
-      text-align: right;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 3px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    .bubble-hp {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.15);
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .bubble-hp-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s linear, background 0.5s;
+      box-shadow: 0 0 6px rgba(255,255,255,0.15);
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 8px,
+        rgba(0,0,0,0.12) 8px,
+        rgba(0,0,0,0.12) 9px
+      );
     }
 
     /* 8 colour variants */
@@ -969,9 +1038,109 @@
       .reply-item { font-size: 13px; }
       .attach-btn { width: 42px; min-width: 42px; height: 42px; font-size: 18px; }
     }
+
+    /* ── Login gate overlay ── */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    }
+    .login-overlay.hidden { display: none; }
+    .login-box {
+      text-align: center;
+      padding: 48px 40px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      max-width: 380px;
+      width: 90%;
+    }
+    .login-box .login-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+    }
+    .login-box h2 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .login-box p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .google-login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 14px;
+      background: #fff;
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .google-login-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+    .google-login-btn:active { transform: scale(0.97); }
+    .google-login-btn svg { width: 22px; height: 22px; }
+    .login-error {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #e06377;
+      min-height: 20px;
+    }
+    .app-content { display: none; }
+    .app-content.visible { display: block; }
+
+    /* Auth loading state */
+    .login-overlay.loading .login-box { display: none; }
+    .login-overlay.loading::after {
+      content: '';
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: #c8b6ff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+
+  <!-- Login gate -->
+  <div class="login-overlay loading" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-icon">🔒</div>
+      <h2>Welcome</h2>
+      <p>Sign in with Google to continue.<br>Everything stays anonymous — your identity is never shown.</p>
+      <button class="google-login-btn" id="googleLoginBtn">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+      </button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- App content (hidden until auth) -->
+  <div class="app-content" id="appContent">
 
   <!-- Sidebar toggle -->
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">&#9776;</button>
@@ -1003,7 +1172,7 @@
         <div class="countdown-label" id="countdownLabel">Loading…</div>
       </div>
       <button class="countdown-clear" id="countdownClear">&#128260; Clear countdown</button>
-      <div class="countdown-schedule">Default: Mon–Fri, 9:00 AM → 6:00 PM</div>
+      <div class="countdown-schedule">Default: Mon–Fri, 9 AM → 12:30 PM | 2 PM → 6 PM</div>
     </div>
 
     <!-- Food & Vote section (combined, collapsible) -->
@@ -1074,21 +1243,28 @@
     <button id="sendBtn">Send</button>
   </div>
 
-  <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="full"></div>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&#10005;</button>
+    <img id="lightboxImg" src="" alt="full">
+    <div class="lightbox-hint">Scroll to zoom &middot; Drag to pan &middot; Tap outside to close</div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
   <!-- Celebration overlay -->
   <div class="celebration-overlay" id="celebrationOverlay">
-    <div class="celebration-emojis">🎉🥳🎊</div>
-    <div class="celebration-text">OFF WORK!</div>
-    <div class="celebration-sub">Time to go home! You did great today 💪</div>
+    <div class="celebration-emojis" id="celebrationEmojis">🎉🥳🎊</div>
+    <div class="celebration-text" id="celebrationText">OFF WORK!</div>
+    <div class="celebration-sub" id="celebrationSub">Time to go home! You did great today 💪</div>
     <button class="celebration-close" id="celebrationClose">Dismiss</button>
   </div>
+
+  </div> <!-- /app-content -->
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
 
   <script>
@@ -1097,7 +1273,42 @@
        ═══════════════════════════════════════════ */
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
+
+    /* ═══════════════════════════════════════════
+       Google Auth Gate
+       ═══════════════════════════════════════════ */
+    const loginOverlay = document.getElementById('loginOverlay');
+    const appContent   = document.getElementById('appContent');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError   = document.getElementById('loginError');
+
+    googleLoginBtn.addEventListener('click', async () => {
+      googleLoginBtn.disabled = true;
+      loginError.textContent = '';
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+        }
+      } finally {
+        googleLoginBtn.disabled = false;
+      }
+    });
+
+    auth.onAuthStateChanged((user) => {
+      loginOverlay.classList.remove('loading');
+      if (user) {
+        loginOverlay.classList.add('hidden');
+        appContent.classList.add('visible');
+      } else {
+        loginOverlay.classList.remove('hidden');
+        appContent.classList.remove('visible');
+      }
+    });
     // Enable Firestore offline persistence (IndexedDB cache)
     db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
       if (err.code === 'failed-precondition') {
@@ -1321,8 +1532,122 @@
       }
     });
 
-    /* ── Lightbox ── */
-    lightbox.addEventListener('click', () => lightbox.classList.remove('show'));
+    /* ── Lightbox with pan & zoom ── */
+    let lbZoomed = false, lbScale = 1, lbX = 0, lbY = 0;
+    let lbDragging = false, lbStartX = 0, lbStartY = 0, lbStartTX = 0, lbStartTY = 0;
+
+    function lbUpdateTransform(animate) {
+      lightboxImg.style.transition = animate ? 'transform 0.25s ease' : 'none';
+      lightboxImg.style.transform = 'scale(' + lbScale + ') translate(' + lbX + 'px, ' + lbY + 'px)';
+    }
+
+    function lbClampPan() {
+      if (lbScale <= 1) { lbX = 0; lbY = 0; return; }
+      const rect = lightboxImg.getBoundingClientRect();
+      const imgW = lightboxImg.naturalWidth ? Math.min(lightboxImg.clientWidth * lbScale, rect.width) : rect.width;
+      const imgH = lightboxImg.naturalHeight ? Math.min(lightboxImg.clientHeight * lbScale, rect.height) : rect.height;
+      const maxX = Math.max(0, (imgW - window.innerWidth) / (2 * lbScale));
+      const maxY = Math.max(0, (imgH - window.innerHeight) / (2 * lbScale));
+      lbX = Math.max(-maxX, Math.min(maxX, lbX));
+      lbY = Math.max(-maxY, Math.min(maxY, lbY));
+    }
+
+    function lbReset() {
+      lbZoomed = false; lbScale = 1; lbX = 0; lbY = 0;
+      lightboxImg.classList.remove('zoomed', 'dragging');
+      lbUpdateTransform(true);
+    }
+
+    function lbClose() {
+      lbReset();
+      lightbox.classList.remove('show');
+    }
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightboxImg) return;
+      lbClose();
+    });
+    document.getElementById('lightboxClose').addEventListener('click', (e) => {
+      e.stopPropagation();
+      lbClose();
+    });
+
+    lightboxImg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (lbDragging) return;
+      if (lbZoomed) {
+        lbReset();
+      } else {
+        lbZoomed = true; lbScale = 2; lbX = 0; lbY = 0;
+        lightboxImg.classList.add('zoomed');
+        lbUpdateTransform(true);
+      }
+    });
+
+    // Drag (mouse)
+    lightboxImg.addEventListener('mousedown', (e) => {
+      if (!lbZoomed) return;
+      e.preventDefault();
+      lbDragging = true;
+      lbStartX = e.clientX; lbStartY = e.clientY;
+      lbStartTX = lbX; lbStartTY = lbY;
+      lightboxImg.classList.add('dragging');
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!lbDragging) return;
+      lbX = lbStartTX + (e.clientX - lbStartX) / lbScale;
+      lbY = lbStartTY + (e.clientY - lbStartY) / lbScale;
+      lbClampPan();
+      lbUpdateTransform(false);
+    });
+    window.addEventListener('mouseup', () => {
+      if (!lbDragging) return;
+      lightboxImg.classList.remove('dragging');
+      setTimeout(() => { lbDragging = false; }, 10);
+    });
+
+    // Drag (touch)
+    lightboxImg.addEventListener('touchstart', (e) => {
+      if (!lbZoomed || e.touches.length !== 1) return;
+      lbDragging = true;
+      lbStartX = e.touches[0].clientX; lbStartY = e.touches[0].clientY;
+      lbStartTX = lbX; lbStartTY = lbY;
+      lightboxImg.classList.add('dragging');
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (!lbDragging || e.touches.length !== 1) return;
+      lbX = lbStartTX + (e.touches[0].clientX - lbStartX) / lbScale;
+      lbY = lbStartTY + (e.touches[0].clientY - lbStartY) / lbScale;
+      lbClampPan();
+      lbUpdateTransform(false);
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+      if (!lbDragging) return;
+      lightboxImg.classList.remove('dragging');
+      setTimeout(() => { lbDragging = false; }, 10);
+    });
+
+    // Scroll wheel zoom
+    lightbox.addEventListener('wheel', (e) => {
+      if (!lightbox.classList.contains('show')) return;
+      e.preventDefault();
+      const zoomStep = 0.25;
+      const prev = lbScale;
+      lbScale += e.deltaY < 0 ? zoomStep : -zoomStep;
+      lbScale = Math.max(1, Math.min(5, lbScale));
+      if (lbScale <= 1) {
+        lbZoomed = false; lbX = 0; lbY = 0;
+        lightboxImg.classList.remove('zoomed');
+      } else {
+        lbZoomed = true;
+        lightboxImg.classList.add('zoomed');
+        // Adjust pan to keep zoom centered
+        lbX = lbX * (lbScale / prev);
+        lbY = lbY * (lbScale / prev);
+      }
+      lbClampPan();
+      lbUpdateTransform(false);
+    }, { passive: false });
 
     /* ── Render bubbles ── */
     let knownIds = new Set();
@@ -1345,9 +1670,15 @@
       items.forEach((a, i) => {
         const existing = wrap.querySelector('[data-id="' + a.id + '"]');
         if (existing) {
-          // Update timer, replies, and reactions
-          const timer = existing.querySelector('.bubble-footer .timer');
-          if (timer) timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
+          // Update HP bar, replies, and reactions
+          const hpFill = existing.querySelector('.bubble-hp-fill');
+          if (hpFill) {
+            const pct = Math.max(0, Math.min(100, ((SIX_HOURS - (now - a.ts)) / SIX_HOURS) * 100));
+            hpFill.style.width = pct + '%';
+            hpFill.style.background = pct > 50 ? '#58c5b5' : pct > 20 ? '#f2a154' : '#e06377';
+            const hpLabel = existing.querySelector('.bubble-hp-label');
+            if (hpLabel) hpLabel.textContent = 'HP ' + Math.round(pct) + '%';
+          }
           updateReplies(existing, a);
           updateReactions(existing, a);
           return;
@@ -1357,6 +1688,24 @@
         bubble.className = 'bubble c' + (i % COLORS);
         bubble.dataset.id = a.id;
         bubble.style.animationDelay = '0s, 0s';
+
+        // HP bar (game-style)
+        const hpWrapper = document.createElement('div');
+        hpWrapper.className = 'bubble-hp-wrapper';
+        const hpLabel = document.createElement('span');
+        hpLabel.className = 'bubble-hp-label';
+        const pct = Math.max(0, Math.min(100, ((SIX_HOURS - (now - a.ts)) / SIX_HOURS) * 100));
+        hpLabel.textContent = 'HP ' + Math.round(pct) + '%';
+        const hpBar = document.createElement('div');
+        hpBar.className = 'bubble-hp';
+        const hpFill = document.createElement('div');
+        hpFill.className = 'bubble-hp-fill';
+        hpFill.style.width = pct + '%';
+        hpFill.style.background = pct > 50 ? '#58c5b5' : pct > 20 ? '#f2a154' : '#e06377';
+        hpBar.appendChild(hpFill);
+        hpWrapper.appendChild(hpLabel);
+        hpWrapper.appendChild(hpBar);
+        bubble.appendChild(hpWrapper);
 
         if (a.image) {
           const img = document.createElement('img');
@@ -1399,11 +1748,6 @@
           }
         });
         footer.appendChild(replyBtn);
-
-        const timer = document.createElement('span');
-        timer.className = 'timer';
-        timer.textContent = fmtRemaining(SIX_HOURS - (now - a.ts));
-        footer.appendChild(timer);
 
         bubble.appendChild(footer);
 
@@ -2310,16 +2654,16 @@
     const celebrationClose   = document.getElementById('celebrationClose');
     let countdownInterval    = null;
 
-    // Only show celebration once per day — persist across refresh
-    function getCelebrationKey() {
+    // Only show celebration once per period per day — persist across refresh
+    function getCelebrationKey(type) {
       const d = new Date();
-      return 'celebration_' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return 'celebration_' + type + '_' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     }
-    function wasCelebrationShown() {
-      return localStorage.getItem(getCelebrationKey()) === '1';
+    function wasCelebrationShown(type) {
+      return localStorage.getItem(getCelebrationKey(type)) === '1';
     }
-    function markCelebrationShown() {
-      localStorage.setItem(getCelebrationKey(), '1');
+    function markCelebrationShown(type) {
+      localStorage.setItem(getCelebrationKey(type), '1');
     }
 
     function padZ(n) { return String(n).padStart(2, '0'); }
@@ -2341,9 +2685,22 @@
       }
     }
 
-    function showCelebration() {
-      if (wasCelebrationShown()) return;
-      markCelebrationShown();
+    function showCelebration(type) {
+      type = type || 'offwork';
+      if (wasCelebrationShown(type)) return;
+      markCelebrationShown(type);
+      const celebrationText = document.getElementById('celebrationText');
+      const celebrationSub = document.getElementById('celebrationSub');
+      const celebrationEmojis = document.getElementById('celebrationEmojis');
+      if (type === 'lunch') {
+        celebrationEmojis.textContent = '🍽️😋🎉';
+        celebrationText.textContent = 'LUNCH TIME!';
+        celebrationSub.textContent = 'Go eat & recharge! Enjoy your break 🍜';
+      } else {
+        celebrationEmojis.textContent = '🎉🥳🎊';
+        celebrationText.textContent = 'OFF WORK!';
+        celebrationSub.textContent = 'Time to go home! You did great today 💪';
+      }
       celebrationOverlay.classList.add('show');
       spawnConfetti();
       setTimeout(spawnConfetti, 1200);
@@ -2353,38 +2710,53 @@
       celebrationOverlay.classList.remove('show');
     });
 
-    // Default target: today at 6 PM (only active Mon-Fri, 9 AM - 6 PM)
+    // Default targets: Mon-Fri, 9AM→12:30PM (lunch) | 2PM→6PM (off work)
     function getDefaultTarget() {
       const now = new Date();
       const day = now.getDay(); // 0=Sun, 6=Sat
-      const h = now.getHours();
+      const hm = now.getHours() * 60 + now.getMinutes();
       // Only weekdays (Mon=1 to Fri=5)
       if (day === 0 || day === 6) return null;
-      // Between 9 AM and 6 PM: count down to 6 PM
-      if (h >= 9 && h < 18) {
+      // Morning period: 9:00 AM (540) to 12:30 PM (750)
+      if (hm >= 540 && hm < 750) {
+        const target = new Date(now);
+        target.setHours(12, 30, 0, 0);
+        return { ts: target.getTime(), type: 'lunch' };
+      }
+      // Afternoon period: 2:00 PM (840) to 6:00 PM (1080)
+      if (hm >= 840 && hm < 1080) {
         const target = new Date(now);
         target.setHours(18, 0, 0, 0);
-        return target.getTime();
+        return { ts: target.getTime(), type: 'offwork' };
       }
-      return null; // outside work hours
+      // Lunch break: 12:30 PM to 2:00 PM
+      if (hm >= 750 && hm < 840) return { ts: null, type: 'lunchbreak' };
+      return null;
     }
 
-    function tickCountdown(targetTs) {
+    function tickCountdown(targetTs, type) {
       clearInterval(countdownInterval);
+      type = type || 'offwork';
       function update() {
         const diff = targetTs - Date.now();
         if (diff <= 0) {
           clearInterval(countdownInterval);
-          countdownDigits.innerHTML = '<span class="countdown-done">🎉 Off work! 🎉</span>';
-          countdownLabel.textContent = 'Time to go home!';
-          showCelebration();
+          if (type === 'lunch') {
+            countdownDigits.innerHTML = '<span class="countdown-done">🍽️ Lunch time! 🍽️</span>';
+            countdownLabel.textContent = 'Go eat & recharge!';
+            showCelebration('lunch');
+          } else {
+            countdownDigits.innerHTML = '<span class="countdown-done">🎉 Off work! 🎉</span>';
+            countdownLabel.textContent = 'Time to go home!';
+            showCelebration('offwork');
+          }
           return;
         }
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
         countdownDigits.textContent = padZ(h) + ':' + padZ(m) + ':' + padZ(s);
-        countdownLabel.textContent = 'until freedom 🏃';
+        countdownLabel.textContent = type === 'lunch' ? 'until lunch 🍜' : 'until freedom 🏃';
       }
       update();
       countdownInterval = setInterval(update, 1000);
@@ -2421,19 +2793,22 @@
     });
 
     function applyDefaultCountdown() {
-      const target = getDefaultTarget();
-      if (target) {
-        tickCountdown(target);
+      const result = getDefaultTarget();
+      if (result && result.ts) {
+        tickCountdown(result.ts, result.type);
       } else {
         const now = new Date();
         const day = now.getDay();
-        const h = now.getHours();
+        const hm = now.getHours() * 60 + now.getMinutes();
         if (day === 0 || day === 6) {
           countdownDigits.textContent = '--:--:--';
           countdownLabel.textContent = 'It\u2019s the weekend! Enjoy \ud83c\udf1f';
-        } else if (h < 9) {
+        } else if (hm < 540) {
           countdownDigits.textContent = '--:--:--';
           countdownLabel.textContent = 'Work starts at 9:00 AM \u2615';
+        } else if (result && result.type === 'lunchbreak') {
+          countdownDigits.textContent = '--:--:--';
+          countdownLabel.textContent = 'Lunch break! Back at 2:00 PM \ud83c\udf5c';
         } else {
           countdownDigits.innerHTML = '<span class="countdown-done">\ud83c\udf89 Off work! \ud83c\udf89</span>';
           countdownLabel.textContent = 'Enjoy your evening!';
