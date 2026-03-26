@@ -1196,26 +1196,27 @@
       display: flex;
       align-items: flex-end;
       justify-content: space-around;
-      height: 80px;
-      padding-top: 8px;
+      height: 70px;
+      padding: 8px 4px 0;
       border-top: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
     }
     .mood-chart-bar {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      flex: 1;
+      gap: 3px;
+      width: 36px;
     }
     .mood-chart-bar .bar {
-      width: 24px;
-      border-radius: 6px 6px 2px 2px;
+      width: 12px;
+      border-radius: 4px 4px 1px 1px;
       background: linear-gradient(180deg, #c8b6ff, #7c3aed);
       min-height: 2px;
       transition: height 0.5s ease;
     }
-    .mood-chart-bar .emoji { font-size: 16px; }
-    .mood-chart-bar .count { font-size: 10px; color: rgba(255,255,255,0.5); }
+    .mood-chart-bar .emoji { font-size: 14px; line-height: 1; }
+    .mood-chart-bar .count { font-size: 9px; color: rgba(255,255,255,0.45); line-height: 1; }
 
     .mood-checked-msg {
       text-align: center;
@@ -3028,7 +3029,7 @@
         MOODS.forEach(m => {
           const bar = document.getElementById('moodBar_' + m);
           const cnt = document.getElementById('moodCount_' + m);
-          if (bar) bar.style.height = Math.max(2, (counts[m] / max) * 60) + 'px';
+          if (bar) bar.style.height = Math.max(2, (counts[m] / max) * 30) + 'px';
           if (cnt) cnt.textContent = counts[m];
         });
       }
