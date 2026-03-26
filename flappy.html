@@ -676,8 +676,9 @@
       }
       document.getElementById('gameOverScreen').classList.remove('hidden');
 
-      // Submit score
+      // Submit score & award coins
       submitScore(score);
+      awardCoins(score);
     }
 
     /* ═══════════════════════════════
@@ -737,6 +738,37 @@
       } catch (e) {
         console.error('Leaderboard submit error:', e);
       }
+    }
+
+    async function awardCoins(s) {
+      if (s <= 0) return;
+      const user = auth.currentUser;
+      if (!user) return;
+      const coins = Math.max(1, Math.floor(s));
+      try {
+        const roomRef = db.collection('rooms').doc(user.uid);
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(roomRef);
+          const current = snap.exists ? (snap.data().coins || 0) : 0;
+          const update = { coins: current + coins, displayName: user.displayName || 'Anonymous', updatedAt: Date.now() };
+          if (snap.exists) { tx.update(roomRef, update); }
+          else { tx.set(roomRef, { ...update, pet: null, plant: null, petHunger: {}, plantLevels: {}, ownedPets: [], ownedPlants: [] }); }
+        });
+        showCoinReward(coins);
+      } catch (e) { console.error('Coin award error:', e); }
+    }
+
+    function showCoinReward(n) {
+      let el = document.getElementById('coinReward');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'coinReward';
+        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;font-size:28px;font-weight:800;color:#f7c97e;text-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;opacity:0;transition:all 0.6s;';
+        document.body.appendChild(el);
+      }
+      el.textContent = '\u{1FA99} +' + n + ' coins!';
+      el.style.opacity = '1'; el.style.transform = 'translate(-50%,-80%)';
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translate(-50%,-50%)'; }, 2000);
     }
 
     function renderLeaderboard(containerId, entries) {

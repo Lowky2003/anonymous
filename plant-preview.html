@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plant Preview — All Types × All Levels</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff; padding: 20px;
+    }
+    h1 { text-align: center; margin-bottom: 8px; font-size: 20px; color: #f7c97e; }
+    .subtitle { text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 720px;
+      margin: 0 auto 32px;
+    }
+    .cell {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      text-align: center;
+      padding: 8px 4px;
+    }
+    .cell canvas { display: block; margin: 0 auto; }
+    .cell-label { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+    .type-header {
+      grid-column: 1 / -1;
+      font-size: 15px; font-weight: 700;
+      padding: 8px 0 2px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 4px;
+    }
+    .level-headers {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 720px;
+      margin: 0 auto 8px;
+      text-align: center;
+      font-size: 11px;
+      color: #f7c97e;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌱 Plant Canvas Preview</h1>
+  <div class="subtitle">All 6 plant types × 5 levels</div>
+  <div class="level-headers">
+    <div>Lv.1 Sprout</div>
+    <div>Lv.2 Growing</div>
+    <div>Lv.3 Mature</div>
+    <div>Lv.4 Full</div>
+    <div>Lv.5 Max ★</div>
+  </div>
+  <div id="container"></div>
+
+  <script>
+    /* ── Copy of plant drawing code from room.html ── */
+    const PLANT_COLORS = {
+      seedling:  { stem: '#4a7c3f', leaf: '#6db85a', flower: '#a8d97a', pot: '#8B6347' },
+      tulip:     { stem: '#3d7a3d', leaf: '#5daa5d', flower: '#e74c6f', pot: '#8B6347' },
+      sunflower: { stem: '#3d6b2b', leaf: '#5d9b3b', flower: '#f5c542', center: '#6b3a1a', pot: '#8B6347' },
+      tree:      { stem: '#6b4226', leaf: '#2d8a4e', flower: null, pot: '#8B6347' },
+      cherry:    { stem: '#6b4226', leaf: '#3a9e5a', flower: '#f5a0c0', pot: '#8B6347' },
+      cactus:    { stem: '#2d7a3a', leaf: '#3da84e', flower: '#f5c5d0', pot: '#8B6347' },
+    };
+
+    const TYPES = [
+      { id: 'seedling', name: '🌱 Seedling' },
+      { id: 'tulip',    name: '🌷 Tulip' },
+      { id: 'sunflower',name: '🌻 Sunflower' },
+      { id: 'tree',     name: '🌳 Tree' },
+      { id: 'cherry',   name: '🌸 Cherry Tree' },
+      { id: 'cactus',   name: '🌵 Cactus' },
+    ];
+
+    const container = document.getElementById('container');
+    const allCanvases = []; // {canvas, type, level}
+
+    TYPES.forEach(t => {
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      const header = document.createElement('div');
+      header.className = 'type-header';
+      header.textContent = t.name;
+      grid.appendChild(header);
+
+      for (let lv = 1; lv <= 5; lv++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const cvs = document.createElement('canvas');
+        cvs.width = 120; cvs.height = 140;
+        cell.appendChild(cvs);
+        const label = document.createElement('div');
+        label.className = 'cell-label';
+        label.textContent = 'Lv.' + lv;
+        cell.appendChild(label);
+        grid.appendChild(cell);
+        allCanvases.push({ canvas: cvs, type: t.id, level: lv });
+      }
+      container.appendChild(grid);
+    });
+
+    /* ── Drawing functions (same as room.html) ── */
+    function drawPot(ctx, cx, by, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(cx - 20, by - 24);
+      ctx.lineTo(cx + 20, by - 24);
+      ctx.lineTo(cx + 16, by);
+      ctx.lineTo(cx - 16, by);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#a07050';
+      ctx.fillRect(cx - 22, by - 28, 44, 6);
+      ctx.fillStyle = '#5a3a20';
+      ctx.beginPath();
+      ctx.ellipse(cx, by - 24, 18, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawStem(ctx, h, thickness, color) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(2, -h / 2, 0, -h);
+      ctx.stroke();
+    }
+
+    function drawLeaf(ctx, x, y, size, angle, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, size, size * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.8, 0);
+      ctx.lineTo(size * 0.8, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawGenericPlant(ctx, col, level, t) {
+      const heights = [20, 35, 50, 65, 80];
+      const h = heights[level - 1];
+      drawStem(ctx, h, 2 + level * 0.3, col.stem);
+      const leafCount = level;
+      for (let i = 0; i < leafCount; i++) {
+        const ly = -(h * (0.3 + i * 0.15));
+        const side = i % 2 === 0 ? 1 : -1;
+        const leafSway = Math.sin(t / 600 + i) * 0.1;
+        drawLeaf(ctx, side * (4 + level), ly, 6 + level * 1.5, side * (0.5 + leafSway), col.leaf);
+      }
+      if (level >= 3) {
+        ctx.fillStyle = col.flower || '#a8d97a';
+        ctx.beginPath();
+        ctx.arc(0, -h, 3 + level, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawTulip(ctx, col, level, t) {
+      const heights = [18, 32, 48, 60, 75];
+      const h = heights[level - 1];
+      drawStem(ctx, h, 2 + level * 0.3, col.stem);
+      for (let i = 0; i < Math.min(level, 3); i++) {
+        const ly = -(h * (0.25 + i * 0.2));
+        const side = i % 2 === 0 ? 1 : -1;
+        drawLeaf(ctx, side * (5 + level), ly, 7 + level, side * 0.6, col.leaf);
+      }
+      if (level >= 2) {
+        const petalCount = Math.min(level + 1, 6);
+        for (let i = 0; i < petalCount; i++) {
+          const angle = (i / petalCount) * Math.PI * 2 + Math.sin(t / 1000) * 0.05;
+          ctx.save();
+          ctx.translate(0, -h);
+          ctx.rotate(angle);
+          ctx.fillStyle = col.flower;
+          ctx.beginPath();
+          ctx.ellipse(0, -(4 + level), 3 + level * 0.5, 6 + level, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.fillStyle = '#f5e060';
+        ctx.beginPath();
+        ctx.arc(0, -h, 2 + level * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawSunflower(ctx, col, level, t) {
+      const heights = [20, 36, 52, 66, 82];
+      const h = heights[level - 1];
+      drawStem(ctx, h, 3 + level * 0.5, col.stem);
+      for (let i = 0; i < Math.min(level, 4); i++) {
+        const ly = -(h * (0.2 + i * 0.18));
+        const side = i % 2 === 0 ? 1 : -1;
+        drawLeaf(ctx, side * (6 + level * 1.5), ly, 8 + level * 2, side * 0.5, col.leaf);
+      }
+      if (level >= 2) {
+        const r = 6 + level * 3;
+        const petals = 8 + level * 2;
+        for (let i = 0; i < petals; i++) {
+          const angle = (i / petals) * Math.PI * 2 + Math.sin(t / 2000) * 0.03;
+          ctx.save();
+          ctx.translate(0, -h);
+          ctx.rotate(angle);
+          ctx.fillStyle = col.flower;
+          ctx.beginPath();
+          ctx.ellipse(0, -r, 3 + level * 0.5, r * 0.7, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.fillStyle = col.center;
+        ctx.beginPath();
+        ctx.arc(0, -h, r * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        for (let i = 0; i < level * 2; i++) {
+          const a = i * 2.4;
+          const d = (i / (level * 2)) * r * 0.4;
+          ctx.beginPath();
+          ctx.arc(Math.cos(a) * d, -h + Math.sin(a) * d, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawTree(ctx, col, level, type, t) {
+      const heights = [16, 30, 48, 64, 80];
+      const h = heights[level - 1];
+      ctx.fillStyle = col.stem;
+      const tw = 3 + level * 1.2;
+      ctx.fillRect(-tw / 2, -h, tw, h);
+      const layers = Math.min(level, 4);
+      for (let i = 0; i < layers; i++) {
+        const cy = -h + 2 - i * (6 + level * 2);
+        const cr = 10 + level * 4 - i * 4;
+        ctx.fillStyle = i === 0 ? col.leaf : shadeColor(col.leaf, -i * 10);
+        ctx.beginPath();
+        ctx.arc(0, cy, cr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (type === 'cherry' && level >= 3) {
+        ctx.fillStyle = col.flower;
+        for (let i = 0; i < level * 4; i++) {
+          const bx = (Math.sin(i * 7 + t / 3000) * (8 + level * 3));
+          const by = -h - (Math.cos(i * 5) * (6 + level * 3));
+          const br = 2 + Math.sin(t / 500 + i) * 0.5;
+          ctx.beginPath();
+          ctx.arc(bx, by, br, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawCactus(ctx, col, level, t) {
+      const heights = [20, 32, 45, 58, 70];
+      const h = heights[level - 1];
+      const w = 8 + level * 2;
+      ctx.fillStyle = col.stem;
+      roundRect(ctx, -w / 2, -h, w, h, 6);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 0.8;
+      for (let i = 1; i < 4; i++) {
+        const x = -w / 2 + (w / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, -h + 6);
+        ctx.lineTo(x, -2);
+        ctx.stroke();
+      }
+      if (level >= 3) {
+        const armH = 10 + (level - 3) * 8;
+        ctx.fillStyle = col.stem;
+        roundRect(ctx, -w / 2 - 8, -h * 0.6 - armH, 7, armH, 4);
+        if (level >= 4) {
+          roundRect(ctx, w / 2 + 1, -h * 0.45 - armH * 0.7, 7, armH * 0.7, 4);
+        }
+      }
+      if (level >= 4) {
+        const fc = level === 5 ? '#ff6b9d' : col.flower;
+        ctx.fillStyle = fc;
+        for (let i = 0; i < 5; i++) {
+          const a = (i / 5) * Math.PI * 2 + Math.sin(t / 1000) * 0.1;
+          ctx.beginPath();
+          ctx.ellipse(Math.cos(a) * 4, -h - 3 + Math.sin(a) * 4, 3, 5, a, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#ffe066';
+        ctx.beginPath();
+        ctx.arc(0, -h - 3, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawSparkles(ctx, W, H, t, level) {
+      const count = level === 5 ? 6 : 3;
+      for (let i = 0; i < count; i++) {
+        const x = W * 0.2 + (W * 0.6) * ((Math.sin(t / 1200 + i * 2.3) + 1) / 2);
+        const y = H * 0.1 + (H * 0.5) * ((Math.cos(t / 900 + i * 1.7) + 1) / 2);
+        const alpha = (Math.sin(t / 400 + i * 1.1) + 1) / 2;
+        const r = 1.5 + alpha;
+        ctx.fillStyle = 'rgba(255,255,200,' + (alpha * 0.7) + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,200,' + (alpha * 0.4) + ')';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y);
+        ctx.moveTo(x, y - 4); ctx.lineTo(x, y + 4);
+        ctx.stroke();
+      }
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.arcTo(x + w, y, x + w, y + r, r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+      ctx.lineTo(x + r, y + h);
+      ctx.arcTo(x, y + h, x, y + h - r, r);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function shadeColor(hex, percent) {
+      let r = parseInt(hex.slice(1, 3), 16);
+      let g = parseInt(hex.slice(3, 5), 16);
+      let b = parseInt(hex.slice(5, 7), 16);
+      r = Math.max(0, Math.min(255, r + Math.round(r * percent / 100)));
+      g = Math.max(0, Math.min(255, g + Math.round(g * percent / 100)));
+      b = Math.max(0, Math.min(255, b + Math.round(b * percent / 100)));
+      return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+    }
+
+    /* ── Animate all canvases ── */
+    function animateAll(t) {
+      allCanvases.forEach(({ canvas, type, level }) => {
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        const col = PLANT_COLORS[type];
+
+        ctx.clearRect(0, 0, W, H);
+        const sway = Math.sin(t / 800) * 2 * (level >= 2 ? 1 : 0);
+
+        drawPot(ctx, W / 2, H - 4, col.pot);
+        ctx.save();
+        ctx.translate(W / 2, H - 28);
+        ctx.rotate(sway * Math.PI / 180);
+
+        if (type === 'cactus') drawCactus(ctx, col, level, t);
+        else if (type === 'tree' || type === 'cherry') drawTree(ctx, col, level, type, t);
+        else if (type === 'sunflower') drawSunflower(ctx, col, level, t);
+        else if (type === 'tulip') drawTulip(ctx, col, level, t);
+        else drawGenericPlant(ctx, col, level, t);
+
+        ctx.restore();
+        if (level >= 4) drawSparkles(ctx, W, H, t, level);
+      });
+      requestAnimationFrame(animateAll);
+    }
+    requestAnimationFrame(animateAll);
+  </script>
+</body>
+</html>
