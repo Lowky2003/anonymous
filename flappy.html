@@ -306,7 +306,7 @@
       min-height: 20px;
     }
     .app-content { display: none; }
-    .app-content.visible { display: contents; }
+    .app-content.visible { display: block; }
   </style>
 </head>
 <body>
@@ -414,6 +414,8 @@
       }
     });
 
+    let lbUnsubscribe = null;
+
     auth.onAuthStateChanged((user) => {
       loginOverlay.classList.remove('loading');
       if (user) {
@@ -422,9 +424,12 @@
         const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
         localStorage.setItem('flappy_name', displayName);
         document.getElementById('playerDisplayName').textContent = displayName;
+        // Start leaderboard listener AFTER auth succeeds
+        if (!lbUnsubscribe) startLeaderboardListener();
       } else {
         loginOverlay.classList.remove('hidden');
         appContent.classList.remove('visible');
+        if (lbUnsubscribe) { lbUnsubscribe(); lbUnsubscribe = null; }
       }
     });
 
@@ -810,16 +815,25 @@
       return div.innerHTML;
     }
 
-    // Real-time leaderboard
-    lbRef.orderBy('score', 'desc').limit(20).onSnapshot((snap) => {
-      const entries = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        entries.push({ name: d.name || 'Anonymous', score: d.score });
-      });
-      renderLeaderboard('startLbBody', entries);
-      renderLeaderboard('overLbBody', entries);
-    });
+    // Real-time leaderboard — called after auth succeeds
+    function startLeaderboardListener() {
+      lbUnsubscribe = lbRef.orderBy('score', 'desc').limit(20).onSnapshot(
+        (snap) => {
+          const entries = [];
+          snap.forEach(doc => {
+            const d = doc.data();
+            entries.push({ name: d.name || 'Anonymous', score: d.score });
+          });
+          renderLeaderboard('startLbBody', entries);
+          renderLeaderboard('overLbBody', entries);
+        },
+        (err) => {
+          console.error('Leaderboard listen error:', err);
+          renderLeaderboard('startLbBody', []);
+          renderLeaderboard('overLbBody', []);
+        }
+      );
+    }
 
     /* ═══════════════════════════════
        Init
