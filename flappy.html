@@ -427,6 +427,27 @@
     });
 
     /* ═══════════════════════════════
+       Game constants & state
+       ═══════════════════════════════ */
+    const GRAVITY = 0.35;
+    const FLAP_STRENGTH = -6.5;
+    const PIPE_WIDTH = 52;
+    const PIPE_GAP = 190;
+    const PIPE_SPEED = 2;
+    const BIRD_SIZE = 24;
+
+    let bird, pipes, score, bestLocalScore, gameRunning, gameWaiting, frameId, startBlockFlap;
+
+    // Colors
+    const SKY_TOP = '#1a1a3e';
+    const SKY_BOT = '#302b63';
+    const PIPE_COLOR = '#3ab0a2';
+    const PIPE_EDGE = '#58c5b5';
+    const BIRD_BODY = '#f7c97e';
+    const BIRD_WING = '#f2a154';
+    const GROUND_COLOR = '#1e1645';
+
+    /* ═══════════════════════════════
        Canvas setup
        ═══════════════════════════════ */
     const canvas = document.getElementById('gameCanvas');
@@ -449,31 +470,11 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    /* ═══════════════════════════════
-       Game constants & state
-       ═══════════════════════════════ */
-    const GRAVITY = 0.45;
-    const FLAP_STRENGTH = -7;
-    const PIPE_WIDTH = 52;
-    const PIPE_GAP = 160;
-    const PIPE_SPEED = 2.5;
-    const BIRD_SIZE = 24;
-
-    let bird, pipes, score, bestLocalScore, gameRunning, gameWaiting, frameId;
-
-    // Colors
-    const SKY_TOP = '#1a1a3e';
-    const SKY_BOT = '#302b63';
-    const PIPE_COLOR = '#3ab0a2';
-    const PIPE_EDGE = '#58c5b5';
-    const BIRD_BODY = '#f7c97e';
-    const BIRD_WING = '#f2a154';
-    const GROUND_COLOR = '#1e1645';
-
     function initGame() {
       bird = { x: canvas.width * 0.28, y: canvas.height / 2, vy: 0, rotation: 0 };
       pipes = [];
       score = 0;
+      lastPipeTopH = 0;
       gameRunning = false;
       document.getElementById('scoreDisplay').textContent = '0';
     }
@@ -567,6 +568,7 @@
        Game loop
        ═══════════════════════════════ */
     function flap() {
+      if (startBlockFlap) return;
       if (gameWaiting) {
         gameWaiting = false;
         gameRunning = true;
@@ -578,10 +580,24 @@
       bird.vy = FLAP_STRENGTH;
     }
 
+    let lastPipeTopH = 0;
+
     function spawnPipe() {
       const minTop = 60;
       const maxTop = canvas.height - PIPE_GAP - 80;
-      const topH = minTop + Math.random() * (maxTop - minTop);
+      const maxShift = 150; // max vertical change between consecutive pipes
+
+      let topH;
+      if (lastPipeTopH === 0) {
+        // First pipe: center-ish
+        topH = (minTop + maxTop) / 2 + (Math.random() - 0.5) * 60;
+      } else {
+        // Clamp change from previous pipe
+        const lo = Math.max(minTop, lastPipeTopH - maxShift);
+        const hi = Math.min(maxTop, lastPipeTopH + maxShift);
+        topH = lo + Math.random() * (hi - lo);
+      }
+      lastPipeTopH = topH;
       pipes.push({ x: canvas.width + 10, topH, scored: false });
     }
 
@@ -641,6 +657,8 @@
       initGame();
       gameWaiting = true;
       gameRunning = false;
+      startBlockFlap = true;
+      setTimeout(() => { startBlockFlap = false; }, 300);
       document.getElementById('startScreen').classList.add('hidden');
       document.getElementById('gameOverScreen').classList.add('hidden');
       waitLoop();
@@ -714,6 +732,17 @@
 
     canvas.addEventListener('click', () => { flap(); });
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); flap(); }, { passive: false });
+
+    // Full-page tap for waiting/playing state (catches taps outside canvas too)
+    document.addEventListener('click', (e) => {
+      // Don't intercept clicks on overlays or buttons
+      if (e.target.closest('.overlay') || e.target.closest('.login-overlay') || e.target.closest('.back-btn')) return;
+      flap();
+    });
+    document.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.overlay') || e.target.closest('.login-overlay') || e.target.closest('.back-btn')) return;
+      flap();
+    }, { passive: true });
 
     document.getElementById('startBtn').addEventListener('click', () => {
       startGame();

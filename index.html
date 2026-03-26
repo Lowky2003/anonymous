@@ -3257,7 +3257,12 @@
 
       function todayDocRef() { return moodRef.doc(todayKey()); }
 
-      // Check if user already voted today
+      function getUid() {
+        const u = auth.currentUser;
+        return u ? u.uid : null;
+      }
+
+      // Check if THIS user already voted today (stored in sub-collection)
       function getLocalMood() { return localStorage.getItem('mood_' + todayKey()); }
       function setLocalMood(mood) { localStorage.setItem('mood_' + todayKey(), mood); }
 
@@ -3295,21 +3300,60 @@
         });
       }
 
-      // Submit mood
+      // Submit mood — 1 vote per Google account per day
       async function submitMood(mood) {
+        const uid = getUid();
+        if (!uid) { showToast('Please sign in first', 'error'); return; }
+
         setLocalMood(mood);
         renderChecked(mood);
+
+        const votersRef = todayDocRef().collection('voters').doc(uid);
         try {
+          const voterSnap = await votersRef.get();
+          const previousMood = voterSnap.exists ? voterSnap.data().mood : null;
+
           await db.runTransaction(async (tx) => {
             const ref = todayDocRef();
             const snap = await tx.get(ref);
             const d = snap.exists ? snap.data() : {};
-            d[mood] = (d[mood] || 0) + 1;
+
+            // If already voted, undo previous mood count
+            if (previousMood && previousMood !== mood) {
+              d[previousMood] = Math.max(0, (d[previousMood] || 0) - 1);
+            }
+
+            // Only increment if new vote or changed mood
+            if (!previousMood || previousMood !== mood) {
+              d[mood] = (d[mood] || 0) + 1;
+            }
+
             d.date = todayKey();
             tx.set(ref, d, { merge: true });
           });
+
+          // Record this user's vote
+          await votersRef.set({ mood, ts: Date.now() });
         } catch {
           showToast('Mood submit failed', 'error');
+        }
+      }
+
+      // Check if user already voted today (from Firestore)
+      async function checkExistingVote() {
+        const uid = getUid();
+        if (!uid) return;
+        try {
+          const voterSnap = await todayDocRef().collection('voters').doc(uid).get();
+          if (voterSnap.exists) {
+            const mood = voterSnap.data().mood;
+            renderChecked(mood);
+            setLocalMood(mood);
+          }
+        } catch (e) {
+          // Fall back to localStorage
+          const existing = getLocalMood();
+          if (existing) renderChecked(existing);
         }
       }
 
@@ -3323,9 +3367,15 @@
         });
       });
 
-      // Init: check existing vote & listen for real-time updates
+      // Init: check existing vote from localStorage first (fast), then verify from Firestore
       const existing = getLocalMood();
       if (existing) renderChecked(existing);
+
+      // After auth ready, check Firestore for actual vote
+      const unsubAuth = auth.onAuthStateChanged(() => {
+        checkExistingVote();
+        unsubAuth();
+      });
 
       todayDocRef().onSnapshot((snap) => {
         updateChart(snap.exists ? snap.data() : {});
