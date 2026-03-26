@@ -1121,6 +1121,108 @@
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mood Check-in Widget ── */
+    .mood-fab {
+      position: fixed;
+      bottom: 90px;
+      right: 18px;
+      z-index: 310;
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c8b6ff 0%, #7c3aed 100%);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mood-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(124,58,237,0.5); }
+    .mood-fab.has-checked { background: linear-gradient(135deg, #34d399 0%, #059669 100%); box-shadow: 0 4px 16px rgba(5,150,105,0.4); }
+    .mood-fab.has-checked:hover { box-shadow: 0 6px 24px rgba(5,150,105,0.5); }
+
+    .mood-panel {
+      position: fixed;
+      bottom: 150px;
+      right: 18px;
+      z-index: 320;
+      width: 280px;
+      background: rgba(30,22,69,0.97);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      padding: 20px;
+      display: none;
+      animation: moodSlideIn 0.25s ease;
+    }
+    .mood-panel.show { display: block; }
+    @keyframes moodSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    .mood-panel h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+    }
+    .mood-emoji-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 16px;
+    }
+    .mood-emoji-btn {
+      width: 44px;
+      height: 44px;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mood-emoji-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.15); }
+    .mood-emoji-btn.selected { border-color: #c8b6ff; background: rgba(200,182,255,0.15); transform: scale(1.15); }
+
+    .mood-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 80px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .mood-chart-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .mood-chart-bar .bar {
+      width: 24px;
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, #c8b6ff, #7c3aed);
+      min-height: 2px;
+      transition: height 0.5s ease;
+    }
+    .mood-chart-bar .emoji { font-size: 16px; }
+    .mood-chart-bar .count { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+    .mood-checked-msg {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
@@ -1251,6 +1353,28 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Mood Check-in Widget -->
+  <button class="mood-fab" id="moodFab" title="How are you feeling today?">😊</button>
+  <div class="mood-panel" id="moodPanel">
+    <h4>How are you feeling today?</h4>
+    <div id="moodCheckinArea">
+      <div class="mood-emoji-row" id="moodEmojiRow">
+        <button class="mood-emoji-btn" data-mood="great">😄</button>
+        <button class="mood-emoji-btn" data-mood="good">🙂</button>
+        <button class="mood-emoji-btn" data-mood="meh">😐</button>
+        <button class="mood-emoji-btn" data-mood="bad">😢</button>
+        <button class="mood-emoji-btn" data-mood="fire">🔥</button>
+      </div>
+    </div>
+    <div class="mood-chart" id="moodChart">
+      <div class="mood-chart-bar"><div class="bar" id="moodBar_great" style="height:2px"></div><span class="emoji">😄</span><span class="count" id="moodCount_great">0</span></div>
+      <div class="mood-chart-bar"><div class="bar" id="moodBar_good" style="height:2px"></div><span class="emoji">🙂</span><span class="count" id="moodCount_good">0</span></div>
+      <div class="mood-chart-bar"><div class="bar" id="moodBar_meh" style="height:2px"></div><span class="emoji">😐</span><span class="count" id="moodCount_meh">0</span></div>
+      <div class="mood-chart-bar"><div class="bar" id="moodBar_bad" style="height:2px"></div><span class="emoji">😢</span><span class="count" id="moodCount_bad">0</span></div>
+      <div class="mood-chart-bar"><div class="bar" id="moodBar_fire" style="height:2px"></div><span class="emoji">🔥</span><span class="count" id="moodCount_fire">0</span></div>
+    </div>
+  </div>
+
   <!-- Celebration overlay -->
   <div class="celebration-overlay" id="celebrationOverlay">
     <div class="celebration-emojis" id="celebrationEmojis">🎉🥳🎊</div>
@@ -1339,6 +1463,8 @@
     let pendingImage = null;  // base64 string of compressed image
     let suppressNextNotif = false; // suppress notification for self-sent messages
     let suppressNextReplyNotif = false; // suppress notification for self-sent replies
+    let shouldScrollToBottom = true; // scroll to bottom on first load
+    let firstSnapshotFired = false; // track if real Firestore data arrived
     let knownReplyCounts = {}; // track reply counts per bubble ID
 
     /* ── Local cache helpers ── */
@@ -1754,6 +1880,14 @@
         wrap.appendChild(bubble);
       });
       knownIds = newIds;
+
+      // Auto-scroll to bottom on first load or after user sends a message
+      if (shouldScrollToBottom && firstSnapshotFired) {
+        shouldScrollToBottom = false;
+        setTimeout(() => {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 300);
+      }
     }
 
     /* ── Safe text with line-break rendering ── */
@@ -1959,6 +2093,7 @@
         if (text) doc.text = text;
         if (pendingImage) doc.image = pendingImage;
         suppressNextNotif = true;
+        shouldScrollToBottom = true;
         const docRef = await answersRef.add(doc);
         input.value = '';
         pendingImage = null;
@@ -2562,6 +2697,7 @@
       } catch {}
       // Detect new messages for notifications
       notifyNewMessages(items);
+      firstSnapshotFired = true;
       render(items);
     }, (err) => {
       console.error('Firestore error:', err);
@@ -2840,6 +2976,98 @@
       const batch = db.batch();
       expired.forEach((doc) => batch.delete(doc.ref));
       if (!expired.empty) batch.commit();
+    })();
+
+    /* ═══════════════════════════════════════════
+       Mood Check-in Widget
+       ═══════════════════════════════════════════ */
+    (() => {
+      const MOODS = ['great', 'good', 'meh', 'bad', 'fire'];
+      const moodFab = document.getElementById('moodFab');
+      const moodPanel = document.getElementById('moodPanel');
+      const checkinArea = document.getElementById('moodCheckinArea');
+      const moodRef = db.collection('mood_checkins');
+
+      function todayKey() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function todayDocRef() { return moodRef.doc(todayKey()); }
+
+      // Check if user already voted today
+      function getLocalMood() { return localStorage.getItem('mood_' + todayKey()); }
+      function setLocalMood(mood) { localStorage.setItem('mood_' + todayKey(), mood); }
+
+      // Toggle panel
+      moodFab.addEventListener('click', () => {
+        moodPanel.classList.toggle('show');
+      });
+
+      // Close panel on outside click
+      document.addEventListener('click', (e) => {
+        if (!moodPanel.contains(e.target) && e.target !== moodFab) {
+          moodPanel.classList.remove('show');
+        }
+      });
+
+      // Render checked state
+      function renderChecked(mood) {
+        moodFab.classList.add('has-checked');
+        moodFab.textContent = { great: '😄', good: '🙂', meh: '😐', bad: '😢', fire: '🔥' }[mood] || '✅';
+        checkinArea.innerHTML = '<div class="mood-checked-msg">You picked ' +
+          { great: '😄', good: '🙂', meh: '😐', bad: '😢', fire: '🔥' }[mood] +
+          ' today!</div>';
+      }
+
+      // Update chart bars
+      function updateChart(data) {
+        const counts = {};
+        MOODS.forEach(m => { counts[m] = (data && data[m]) || 0; });
+        const max = Math.max(1, ...Object.values(counts));
+        MOODS.forEach(m => {
+          const bar = document.getElementById('moodBar_' + m);
+          const cnt = document.getElementById('moodCount_' + m);
+          if (bar) bar.style.height = Math.max(2, (counts[m] / max) * 60) + 'px';
+          if (cnt) cnt.textContent = counts[m];
+        });
+      }
+
+      // Submit mood
+      async function submitMood(mood) {
+        setLocalMood(mood);
+        renderChecked(mood);
+        try {
+          await db.runTransaction(async (tx) => {
+            const ref = todayDocRef();
+            const snap = await tx.get(ref);
+            const d = snap.exists ? snap.data() : {};
+            d[mood] = (d[mood] || 0) + 1;
+            d.date = todayKey();
+            tx.set(ref, d, { merge: true });
+          });
+        } catch {
+          showToast('Mood submit failed', 'error');
+        }
+      }
+
+      // Bind emoji buttons
+      document.querySelectorAll('.mood-emoji-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mood = btn.dataset.mood;
+          document.querySelectorAll('.mood-emoji-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          submitMood(mood);
+        });
+      });
+
+      // Init: check existing vote & listen for real-time updates
+      const existing = getLocalMood();
+      if (existing) renderChecked(existing);
+
+      todayDocRef().onSnapshot((snap) => {
+        updateChart(snap.exists ? snap.data() : {});
+      });
     })();
   </script>
 </body>
