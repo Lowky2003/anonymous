@@ -406,20 +406,48 @@
       position: relative;
       max-width: 280px;
       min-width: 110px;
-      padding: 20px 24px 14px;
-      border-radius: 30px;
+      padding: 22px 24px 14px;
+      border-radius: 28px 28px 28px 8px;
       color: #fff;
       font-size: 14.5px;
       line-height: 1.6;
       word-break: break-word;
-      box-shadow: 0 6px 28px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
       opacity: 0;
       animation: floatIn 0.5s ease-out forwards,
                  bobbing 5s ease-in-out infinite;
       cursor: default;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(6px);
     }
-    .bubble:hover { transform: scale(1.06); }
+    .bubble::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: inherit;
+      background: radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.18) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .bubble:hover { transform: scale(1.06); box-shadow: 0 10px 36px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2); }
+    .bubble:nth-child(even) { border-radius: 28px 28px 8px 28px; }
+
+    /* Bubble decorative emojis */
+    .bubble-deco {
+      position: absolute;
+      font-size: 14px;
+      pointer-events: none;
+      animation: decoFloat 4s ease-in-out infinite;
+      z-index: 1;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    }
+    @keyframes decoFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-4px) scale(1.15); }
+    }
 
     /* ── Bubble HP bar (game-style) ── */
     .bubble-hp-wrapper {
@@ -459,23 +487,25 @@
       );
     }
 
-    /* 8 colour variants */
-    .bubble.c0 { background: linear-gradient(135deg, #7b5ea7cc, #5b6abfcc); }
-    .bubble.c1 { background: linear-gradient(135deg, #e06377cc, #f0939bcc); }
-    .bubble.c2 { background: linear-gradient(135deg, #3ab0a2cc, #58c5b5cc); }
-    .bubble.c3 { background: linear-gradient(135deg, #f2a154cc, #f7c97ecc); }
-    .bubble.c4 { background: linear-gradient(135deg, #6886c5cc, #8ea8dbcc); }
-    .bubble.c5 { background: linear-gradient(135deg, #c06c84cc, #f67280cc); }
-    .bubble.c6 { background: linear-gradient(135deg, #45b7a0cc, #61d4b3cc); }
-    .bubble.c7 { background: linear-gradient(135deg, #9b72cfcc, #c49bdbcc); }
+    /* 8 colour variants — soft muted pastels */
+    .bubble.c0 { background: linear-gradient(135deg, #6d4ba0cc, #8b6fc0cc); }
+    .bubble.c1 { background: linear-gradient(135deg, #c4506acc, #e08090cc); }
+    .bubble.c2 { background: linear-gradient(135deg, #2a8a7fcc, #4db8a8cc); }
+    .bubble.c3 { background: linear-gradient(135deg, #c07030cc, #dba060cc); }
+    .bubble.c4 { background: linear-gradient(135deg, #3a6db5cc, #6a9ad0cc); }
+    .bubble.c5 { background: linear-gradient(135deg, #a84868cc, #d07090cc); }
+    .bubble.c6 { background: linear-gradient(135deg, #2e8060cc, #58b890cc); }
+    .bubble.c7 { background: linear-gradient(135deg, #6848a0cc, #9878c8cc); }
 
     @keyframes floatIn {
-      from { opacity: 0; transform: translateY(30px) scale(0.8); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      0%   { opacity: 0; transform: translateY(40px) scale(0.6) rotate(-5deg); }
+      60%  { opacity: 1; transform: translateY(-6px) scale(1.04) rotate(1deg); }
+      100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
     }
     @keyframes bobbing {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-10px); }
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25%      { transform: translateY(-6px) rotate(0.5deg); }
+      75%      { transform: translateY(4px) rotate(-0.5deg); }
     }
 
     /* ── Empty state ── */
@@ -1815,6 +1845,25 @@
         bubble.className = 'bubble c' + (i % COLORS);
         bubble.dataset.id = a.id;
         bubble.style.animationDelay = '0s, 0s';
+
+        // Decorative emojis
+        const DECO_SETS = [['✨','💫'],['🌸','💗'],['⭐','🌟'],['💜','🔮'],['💎','🎀'],['🌈','☁️'],['🍬','🧁'],['🦋','🌺']];
+        const decos = DECO_SETS[i % DECO_SETS.length];
+        const positions = [
+          { side: Math.random() < 0.5 ? 'left' : 'right', vert: Math.random() < 0.5 ? 'top' : 'bottom' },
+          { side: Math.random() < 0.5 ? 'left' : 'right', vert: Math.random() < 0.5 ? 'top' : 'bottom' }
+        ];
+        decos.forEach((emoji, di) => {
+          const d = document.createElement('span');
+          d.className = 'bubble-deco';
+          d.textContent = emoji;
+          const p = positions[di];
+          d.style[p.vert] = (-6 + Math.random() * -6) + 'px';
+          d.style[p.side] = (Math.random() * 60 + 5) + '%';
+          d.style.animationDelay = (Math.random() * 3).toFixed(1) + 's';
+          d.style.fontSize = (12 + Math.random() * 6) + 'px';
+          bubble.appendChild(d);
+        });
 
         // HP bar (game-style)
         const hpWrapper = document.createElement('div');
