@@ -421,10 +421,18 @@
     const ctx = canvas.getContext('2d');
 
     function resizeCanvas() {
+      if (gameRunning) return;          // never resize mid-game
       const maxW = Math.min(480, window.innerWidth);
       const maxH = window.innerHeight - 60;
       canvas.width = maxW;
       canvas.height = maxH;
+      if (bird) {                       // reposition bird for new size
+        bird.x = canvas.width * 0.28;
+        bird.y = canvas.height / 2;
+        bird.vy = 0;
+      }
+      pipes = pipes || [];
+      pipes.length = 0;                 // clear stale pipes
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
