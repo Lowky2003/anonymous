@@ -385,12 +385,26 @@
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const loginError = document.getElementById('loginError');
 
+    // Handle redirect result (fires on page load after redirect sign-in)
+    auth.getRedirectResult().catch((err) => {
+      if (err.code && err.code !== 'auth/popup-closed-by-user') {
+        loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+      }
+    });
+
+    // Detect mobile: use redirect (popups are blocked on mobile browsers)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     googleLoginBtn.addEventListener('click', async () => {
       googleLoginBtn.disabled = true;
       loginError.textContent = '';
+      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
+        if (isMobile) {
+          await auth.signInWithRedirect(provider);
+        } else {
+          await auth.signInWithPopup(provider);
+        }
       } catch (err) {
         if (err.code !== 'auth/popup-closed-by-user') {
           loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
