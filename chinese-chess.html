@@ -309,6 +309,18 @@ let presenceDocRef  = null;
 
 // ── Helpers ──
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+// Firestore doesn't support nested arrays, so convert 2D board to/from a map
+function boardToFirestore(board) {
+  const m = {};
+  for (let i = 0; i < board.length; i++) m[String(i)] = board[i];
+  return m;
+}
+function boardFromFirestore(m) {
+  if (Array.isArray(m)) return m; // fallback if already array
+  const board = [];
+  for (let i = 0; i < 10; i++) board.push(m[String(i)] || Array(9).fill(null));
+  return board;
+}
 function showToast(msg, type) {
   const c = document.getElementById('toastContainer');
   const t = document.createElement('div');
@@ -656,6 +668,7 @@ function enterWaitingRoom(gameId) {
     if (!snap.exists) { showToast('Game was deleted', 'error'); enterLobby(); return; }
     const data = snap.data();
     currentGameData = data;
+    if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
     waitBet.textContent = '🪙 ' + data.bet + ' coins';
 
     // Show players
@@ -699,6 +712,7 @@ async function joinGame(gameId) {
       currentGameId = gameId;
       if (data.status === 'playing') {
         currentGameData = data;
+        if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
         myColor = data.redUid === currentUid ? 'red' : 'black';
         enterGame();
       } else {
@@ -712,7 +726,10 @@ async function joinGame(gameId) {
       return;
     }
     if (data.guestUid) { showToast('Room is full', 'error'); return; }
-    if (data.bet > myCoins) { showToast('Not enough coins (need ' + data.bet + ')', 'error'); return; }
+    // Fetch fresh coins from Firestore to avoid stale myCoins
+    const coinSnap = await roomsRef.doc(currentUid).get();
+    const freshCoins = coinSnap.exists ? (coinSnap.data().coins || 0) : 0;
+    if (data.bet > freshCoins) { showToast('Not enough coins (need ' + data.bet + ')', 'error'); return; }
 
     await gamesRef.doc(gameId).update({
       guestUid: currentUid,
@@ -734,7 +751,7 @@ waitStartBtn.addEventListener('click', async () => {
   try {
     await gamesRef.doc(currentGameId).update({
       status: 'playing',
-      board: initialBoard(),
+      board: boardToFirestore(initialBoard()),
       turn: 'red',
       startedAt: Date.now()
     });
@@ -776,6 +793,7 @@ function spectateGame(gameId) {
   unsubGame = gamesRef.doc(gameId).onSnapshot((snap) => {
     if (!snap.exists) { showToast('Game ended', 'info'); enterLobby(); return; }
     currentGameData = snap.data();
+    if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
     if (currentGameData.status === 'finished' || currentGameData.status === 'waiting') {
       // Go back to lobby after game ends
     }
@@ -850,6 +868,7 @@ function enterGame() {
   unsubGame = gamesRef.doc(currentGameId).onSnapshot((snap) => {
     if (!snap.exists) { showToast('Game was deleted', 'error'); enterLobby(); return; }
     currentGameData = snap.data();
+    if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
     renderGameUI();
     drawBoard();
     // Check if game ended
@@ -1109,7 +1128,7 @@ async function makeMove(fromRow, fromCol, toRow, toCol) {
   }
 
   const update = {
-    board: board,
+    board: boardToFirestore(board),
     turn: nextTurn,
     lastMove: { fromRow, fromCol, toRow, toCol }
   };
