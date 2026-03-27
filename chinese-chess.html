@@ -127,7 +127,7 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
 .spectator-bar{display:none;text-align:center;padding:6px 16px;font-size:12px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.04);border-radius:8px;margin-top:8px}
 
 /* ── Invite popup (shown on all pages via listener) ── */
-.invite-popup-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.invite-popup-overlay{position:fixed;inset:0;z-index:9900;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
 .invite-popup{background:rgba(30,25,60,.97);backdrop-filter:blur(16px);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
 .invite-popup h3{font-size:18px;margin-bottom:8px}
 .invite-popup .inv-from{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px}
@@ -914,6 +914,7 @@ function enterGame() {
   resignBtn.style.display = '';
   backLobbyBtn.style.display = 'none';
   resetWinAnim();
+  oppLeftShown = false;
   initCanvas();
   if (unsubGame) unsubGame();
   unsubGame = gamesRef.doc(currentGameId).onSnapshot((snap) => {
@@ -928,6 +929,13 @@ function enterGame() {
       if (currentGameData.winner) {
         const wName = currentGameData.winner === 'red' ? currentGameData.redName : currentGameData.blackName;
         showWinAnimation(currentGameData.winner, wName, currentGameData.bet);
+      }
+      // Check if opponent left to lobby
+      const oppLeftField = currentUid === currentGameData.redUid ? 'blackLeft' : 'redLeft';
+      if (currentGameData[oppLeftField] && !oppLeftShown) {
+        oppLeftShown = true;
+        const oppName = currentUid === currentGameData.redUid ? currentGameData.blackName : currentGameData.redName;
+        showToast(escapeHtml(oppName) + ' left to lobby', 'info');
       }
     }
   });
@@ -965,6 +973,7 @@ function renderGameUI() {
 let winAnimShown = false;
 let rematchInviteId = null;
 let unsubRematch = null;
+let oppLeftShown = false;
 
 function showWinAnimation(winner, winnerName, bet) {
   if (winAnimShown) return;
@@ -1132,9 +1141,16 @@ function showWinAnimation(winner, winnerName, bet) {
     });
 
     // Lobby button
-    ov.querySelector('.win-btn-lobby').addEventListener('click', (e) => {
+    ov.querySelector('.win-btn-lobby').addEventListener('click', async (e) => {
       e.stopPropagation();
       if (unsubRematch) { unsubRematch(); unsubRematch = null; }
+      // Notify opponent that we left
+      if (currentGameId) {
+        try {
+          const leftField = currentUid === (currentGameData && currentGameData.redUid) ? 'redLeft' : 'blackLeft';
+          await gamesRef.doc(currentGameId).update({ [leftField]: true });
+        } catch {}
+      }
       resetWinAnim();
       if (unsubGame) { unsubGame(); unsubGame = null; }
       enterLobby();
