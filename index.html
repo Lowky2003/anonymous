@@ -1590,7 +1590,7 @@
       margin-bottom: 12px;
     }
     /* Chess invite popup */
-    .chess-invite-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
+    .chess-invite-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
     .chess-invite-box{background:rgba(30,25,60,.97);backdrop-filter:blur(16px);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
     .chess-invite-box h3{font-size:18px;margin-bottom:8px}
     .chess-invite-box .ci-from{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px}
@@ -3965,10 +3965,13 @@
     // ═══ Chinese Chess invite listener ═══
     (function() {
       let chessInvUnsub = null;
-      auth.onAuthStateChanged((u) => {
+      const _auth = firebase.auth();
+      const _db = firebase.firestore();
+      _auth.onAuthStateChanged((u) => {
         if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
         if (!u) return;
-        chessInvUnsub = db.collection('chess_invites')
+        console.log('[ChessInvite] Listening for invites on index, uid:', u.uid);
+        chessInvUnsub = _db.collection('chess_invites')
           .where('toUid', '==', u.uid)
           .where('status', '==', 'pending')
           .onSnapshot((snap) => {
@@ -3976,6 +3979,7 @@
               if (ch.type !== 'added') return;
               const inv = ch.doc.data();
               const id = ch.doc.id;
+              console.log('[ChessInvite] Invite received on index:', id, inv);
               if (document.querySelector('.chess-invite-overlay')) return;
               const ov = document.createElement('div');
               ov.className = 'chess-invite-overlay';
@@ -3990,15 +3994,15 @@
               document.body.appendChild(ov);
               ov.querySelector('.ci-accept').addEventListener('click', () => {
                 ov.remove();
-                db.collection('chess_invites').doc(id).update({status:'accepted'});
+                _db.collection('chess_invites').doc(id).update({status:'accepted'});
                 window.location.href = 'chinese-chess.html?join=' + inv.gameId;
               });
               ov.querySelector('.ci-reject').addEventListener('click', () => {
                 ov.remove();
-                db.collection('chess_invites').doc(id).update({status:'rejected'});
+                _db.collection('chess_invites').doc(id).update({status:'rejected'});
               });
             });
-          });
+          }, (err) => { console.error('[ChessInvite] onSnapshot error on index:', err); });
       });
     })();
   </script>
