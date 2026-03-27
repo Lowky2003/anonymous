@@ -591,6 +591,24 @@
       { id: 'feast',    emoji: '🍱', name: 'Feast Box', cost: 300, restore: 100 },
     ];
 
+    const AFFECTION_MILESTONES = [
+      { min: 0,    title: 'Stranger',      reward: 0 },
+      { min: 50,   title: 'Acquaintance',  reward: 20 },
+      { min: 150,  title: 'Friend',        reward: 50 },
+      { min: 300,  title: 'Good Friend',   reward: 100 },
+      { min: 500,  title: 'Best Friend',   reward: 200 },
+      { min: 800,  title: 'Soul Mate',     reward: 350 },
+      { min: 1200, title: 'Inseparable',   reward: 500 },
+      { min: 2000, title: 'Legendary Bond', reward: 800 },
+    ];
+
+    function getAffectionTitle(aff) {
+      for (let i = AFFECTION_MILESTONES.length - 1; i >= 0; i--) {
+        if (aff >= AFFECTION_MILESTONES[i].min) return AFFECTION_MILESTONES[i];
+      }
+      return AFFECTION_MILESTONES[0];
+    }
+
     const DECORATIONS = [
       // Wall decorations  (defaultX/Y are normalized 0-1)
       { id: 'clock',        emoji: '🕐', name: 'Wall Clock',     cost: 150,  category: 'wall',  dx: 0.09,  dy: 0.15 },
@@ -647,7 +665,7 @@
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '', lastCoinCollect: 0 };
+    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '', lastCoinCollect: 0 };
 
     /* ═══════════════════════════════
        Helpers
@@ -671,6 +689,7 @@
         pet2: roomData.pet2,
         plant: roomData.plant,
         petHunger: roomData.petHunger,
+        petAffection: roomData.petAffection,
         plantLevels: roomData.plantLevels,
         ownedPets: roomData.ownedPets,
         ownedPlants: roomData.ownedPlants,
@@ -703,6 +722,7 @@
           roomData.pet2 = d.pet2 ?? null;
           roomData.plant = d.plant ?? null;
           roomData.petHunger = d.petHunger ?? {};
+          roomData.petAffection = d.petAffection ?? {};
           roomData.plantLevels = d.plantLevels ?? {};
           roomData.ownedPets = d.ownedPets ?? [];
           roomData.ownedPlants = d.ownedPlants ?? [];
@@ -974,6 +994,20 @@
       // Food grid (drag to pet)
       if (activePetIds.length) {
         html += '<div class="shop-section">';
+        // Show pet affection stats
+        html += '<div style="display:flex;justify-content:center;gap:16px;padding:6px 0 10px;flex-wrap:wrap">';
+        activePetIds.forEach(pid => {
+          const petDef = PETS.find(p => p.id === pid);
+          const aff = roomData.petAffection[pid] ?? 0;
+          const ms = getAffectionTitle(aff);
+          const nextMs = AFFECTION_MILESTONES.find(m => m.min > aff);
+          const nextText = nextMs ? ' (next: ' + nextMs.min + ')' : ' ★ MAX';
+          html += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
+            (petDef?.emoji || '🐾') + ' <span style="color:#ff8aab">♥ ' + aff + '</span> ' +
+            '<span style="color:#fbbf24;font-size:10px">' + ms.title + '</span>' +
+            '<span style="color:rgba(255,255,255,0.35);font-size:9px">' + nextText + '</span></div>';
+        });
+        html += '</div>';
         html += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
         html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Drag food to pet, or tap food then tap your pet</div>';
         html += '<div class="food-grid">';
@@ -994,11 +1028,16 @@
         const plantDef = PLANTS.find(p => p.id === roomData.plant);
         const lvl = roomData.plantLevels[roomData.plant] || 1;
         const next = PLANT_LEVELS[lvl];
+        const coinsPerCycle = lvl * 2;
         html += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
+        html += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
+          '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
         if (next) {
+          const nextCoins = next.level * 2;
           html += '<div class="shop-card" style="text-align:center">' +
             '<span class="shop-emoji">' + (plantDef?.emoji || '🌱') + '</span>' +
             '<div class="shop-name">Upgrade to Lv.' + next.level + ' (' + next.label + ')</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px">Earns ' + nextCoins + ' coins / 5 min</div>' +
             '<div class="shop-price">' + coinSVG(14) + ' ' + next.cost + '</div>' +
             '<button class="shop-btn upgrade" onclick="upgradePlant()" ' +
             (roomData.coins >= next.cost ? '' : 'disabled') + '>Upgrade</button></div>';
@@ -1151,8 +1190,19 @@
       roomData.coins -= food.cost;
       const current = roomData.petHunger[petId] ?? 100;
       roomData.petHunger[petId] = Math.min(100, current + food.restore);
+      const curAff = roomData.petAffection[petId] ?? 0;
+      const oldMilestone = getAffectionTitle(curAff);
+      roomData.petAffection[petId] = curAff + food.restore;
+      const newMilestone = getAffectionTitle(curAff + food.restore);
       await saveRoom();
-      showToast(food.emoji + ' Fed ' + (PETS.find(p => p.id === petId)?.name || 'Pet') + '! +' + food.restore + '%', 'success');
+      const petName = PETS.find(p => p.id === petId)?.name || 'Pet';
+      if (newMilestone.min > oldMilestone.min && newMilestone.reward > 0) {
+        roomData.coins += newMilestone.reward;
+        await saveRoom();
+        showToast('🎉 ' + petName + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
+      } else {
+        showToast(food.emoji + ' Fed ' + petName + '! +' + food.restore + '% ♥+' + food.restore, 'success');
+      }
     }
 
     // Drag-and-drop food to pet
@@ -1502,6 +1552,7 @@
       roomData.pet2 = d.pet2 ?? null;
       roomData.plant = d.plant ?? null;
       roomData.petHunger = d.petHunger ?? {};
+      roomData.petAffection = d.petAffection ?? {};
       roomData.plantLevels = d.plantLevels ?? {};
       roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
@@ -2577,7 +2628,14 @@
           ctx.fillStyle = 'rgba(255,255,255,0.85)';
           ctx.font = 'bold ' + Math.round(10 * depthScale) + 'px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(petDef?.name || 'Pet', px, barY - 4 * depthScale);
+          ctx.fillText(petDef?.name || 'Pet', px, barY - 12 * depthScale);
+
+          // Affection (好感度) + title
+          const aff = roomData.petAffection[p.type] ?? 0;
+          const affTitle = getAffectionTitle(aff);
+          ctx.fillStyle = 'rgba(255,150,180,0.9)';
+          ctx.font = Math.round(7 * depthScale) + 'px sans-serif';
+          ctx.fillText('♥ ' + aff + '  ' + affTitle.title, px, barY - 2 * depthScale);
         } catch(e) { ctx.restore(); } }
 
         petAnimFrame = requestAnimationFrame(frame);
