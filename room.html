@@ -806,6 +806,12 @@
 
     function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
 
+    function getPlayerName() {
+      const custom = localStorage.getItem('flappy_custom_name');
+      if (custom) return custom;
+      return localStorage.getItem('flappy_name') || (currentUser && currentUser.displayName) || 'Anonymous';
+    }
+
     async function saveRoom() {
       if (viewingUid !== currentUid) return;
       const data = {
@@ -821,7 +827,7 @@
         ownedDecors: roomData.ownedDecors,
         placedDecors: roomData.placedDecors,
         plantPosition: roomData.plantPosition || null,
-        displayName: currentUser.displayName || 'Anonymous',
+        displayName: getPlayerName(),
         lastCoinCollect: roomData.lastCoinCollect || Date.now(),
         updatedAt: Date.now()
       };
@@ -904,7 +910,7 @@
       // Ensure room doc exists
       const snap = await userDocRef().get();
       if (!snap.exists) {
-        roomData.displayName = currentUser.displayName || 'Anonymous';
+        roomData.displayName = getPlayerName();
         await saveRoom();
       }
 
