@@ -1926,6 +1926,7 @@
       }
     });
 
+    let _lastSeenInterval = null;
     auth.onAuthStateChanged((user) => {
       loginOverlay.classList.remove('loading');
       if (user) {
@@ -1934,11 +1935,20 @@
         // Sync displayName to rooms collection so chess invite list shows correct name
         const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
         const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
-        db.collection('rooms').doc(user.uid).set({ displayName: displayName }, { merge: true }).catch(() => {});
+        db.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
+        // Heartbeat: update lastSeen every 2 min so others see you online
+        if (_lastSeenInterval) clearInterval(_lastSeenInterval);
+        _lastSeenInterval = setInterval(() => {
+          if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
+        }, 120000);
       } else {
         loginOverlay.classList.remove('hidden');
         appContent.classList.remove('visible');
+        if (_lastSeenInterval) { clearInterval(_lastSeenInterval); _lastSeenInterval = null; }
       }
+    });
+    window.addEventListener('beforeunload', () => {
+      if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
     });
     // Enable Firestore offline persistence (IndexedDB cache)
     db.enablePersistence({ synchronizeTabs: true }).catch((err) => {

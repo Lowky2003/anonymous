@@ -982,6 +982,11 @@
         userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
       }, 2 * 60 * 1000);
 
+      // Mark offline on page close
+      window.addEventListener('beforeunload', () => {
+        if (currentUid) userDocRef().update({ lastSeen: 0 }).catch(() => {});
+      });
+
       // Plant passive coin generation: every 5 min while online
       if (_plantCoinInterval) clearInterval(_plantCoinInterval);
       _plantCoinInterval = setInterval(async () => {

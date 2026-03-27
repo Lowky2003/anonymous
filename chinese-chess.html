@@ -553,6 +553,8 @@ function setPresence() {
 function cleanupPresence() {
   if (presenceDocRef) presenceDocRef.delete().catch(() => {});
   if (window._chessHeartbeat) clearInterval(window._chessHeartbeat);
+  // Mark offline immediately so others see status change
+  if (currentUid) roomsRef.doc(currentUid).update({ lastSeen: 0 }).catch(() => {});
 }
 
 function listenPresence() {
