@@ -2366,7 +2366,7 @@
       const cvs = document.getElementById('petCanvas');
       if (!cvs) return;
       const room = cvs.parentElement.parentElement;
-      const rw = room.clientWidth, rh = room.clientHeight;
+      let rw = room.clientWidth, rh = room.clientHeight;
       cvs.width = rw; cvs.height = rh;
       const ctx = cvs.getContext('2d');
 
@@ -2374,10 +2374,15 @@
       pets.forEach((p, i) => getPetState(p.type, i));
 
       function frame(t) {
+        // Update canvas size if room resized
+        const nw = room.clientWidth, nh = room.clientHeight;
+        if (nw && nh && (nw !== rw || nh !== rh)) {
+          rw = nw; rh = nh; cvs.width = rw; cvs.height = rh;
+        }
         ctx.clearRect(0, 0, rw, rh);
         const now = Date.now();
 
-        for (const p of pets) {
+        for (const p of pets) { try {
           const st = petStates[p.type];
           // Live hunger read
           const hunger = roomData.petHunger[p.type] ?? p.hunger;
@@ -2517,7 +2522,7 @@
           ctx.font = 'bold ' + Math.round(10 * depthScale) + 'px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(petDef?.name || 'Pet', px, barY - 4 * depthScale);
-        }
+        } catch(e) { ctx.restore(); } }
 
         petAnimFrame = requestAnimationFrame(frame);
       }
@@ -2633,7 +2638,7 @@
           // Sparkle/tear near mouth
           ctx.globalAlpha = ease * 0.5;
           ctx.fillStyle = '#88ccff';
-          const tx = px + size * 0.5 * (petState.facingRight ? 1 : -1);
+          const tx = px + size * 0.5 * ((petStates[type]?.facingRight) ? 1 : -1);
           const ty = py - size * 0.1;
           ctx.beginPath(); ctx.arc(tx, ty, 2 * ds, 0, Math.PI * 2); ctx.fill();
           break;
@@ -2712,7 +2717,7 @@
           ctx.strokeStyle = 'rgba(200,180,150,0.35)';
           ctx.lineWidth = 1;
           ctx.globalAlpha = ease * 0.5;
-          const earX = px + size * 0.3 * (petState.facingRight ? -1 : 1);
+          const earX = px + size * 0.3 * ((petStates[type]?.facingRight) ? -1 : 1);
           const earY = py - size * 0.8;
           for (let i = 0; i < 3; i++) {
             ctx.beginPath();
@@ -2729,7 +2734,7 @@
             ctx.globalAlpha = Math.min(1, (ap - 0.3) * 2) * 0.4;
             ctx.fillStyle = '#88ccff';
             ctx.beginPath();
-            const dripX = px + size * 0.35 * (petState.facingRight ? 1 : -1);
+            const dripX = px + size * 0.35 * ((petStates[type]?.facingRight) ? 1 : -1);
             ctx.arc(dripX, dripY, 1.5 * ds, 0, Math.PI * 2);
             ctx.fill();
           }
