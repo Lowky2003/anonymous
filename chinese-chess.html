@@ -75,6 +75,11 @@ body{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;font-
 .invite-btn{padding:6px 14px;border-radius:8px;border:none;background:rgba(58,176,162,.25);color:#3ab0a2;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s}
 .invite-btn:hover{background:rgba(58,176,162,.4)}
 .invite-btn:disabled{opacity:.4;cursor:not-allowed}
+.online-count{font-size:12px;color:#3ab0a2;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-left:8px}
+.online-count .pulse{width:6px;height:6px;border-radius:50%;background:#3ab0a2;animation:onlinePulse 1.5s ease-in-out infinite}
+@keyframes onlinePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.lobby-online-section{background:rgba(255,255,255,.06);border-radius:16px;padding:20px;margin-bottom:20px}
+.lobby-online-section h3{font-size:15px;margin-bottom:12px}
 
 /* Room list */
 .room-list{margin-bottom:20px}
@@ -230,6 +235,12 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
       <button class="create-go" id="createGameBtn" disabled>Select a bet to create game</button>
     </div>
 
+    <!-- Online players -->
+    <div class="lobby-online-section">
+      <h3>🟢 Online Players <span class="online-count" id="lobbyOnlineCount"><span class="pulse"></span> <span id="lobbyOnlineNum">0</span></span></h3>
+      <div class="online-users" id="lobbyOnlineUsers"><div class="no-rooms">Looking for players…</div></div>
+    </div>
+
     <!-- Active rooms -->
     <div class="room-list">
       <h3>🏟️ Active Games</h3>
@@ -246,7 +257,7 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
     <div class="waiting-players" id="waitPlayers"></div>
     <!-- Invite players from waiting room -->
     <div class="invite-section" id="waitInviteSection" style="display:none;text-align:left;margin-bottom:20px">
-      <h3>📨 Invite a Player</h3>
+      <h3>📨 Invite a Player <span class="online-count" id="waitOnlineCount"><span class="pulse"></span> <span id="waitOnlineNum">0</span></span></h3>
       <div class="online-users" id="waitOnlineUsersList">
         <div class="no-rooms">Looking for online players…</div>
       </div>
@@ -552,16 +563,27 @@ function listenPresence() {
 }
 
 function renderOnlineUsers(users) {
-  const html = users.length ? users.map(u =>
+  const count = users.length;
+  const html = count ? users.map(u =>
     '<div class="online-user-row">' +
       '<span class="online-user-name">' + escapeHtml(u.name) + '</span>' +
       '<button class="invite-btn" data-uid="' + escapeHtml(u.uid) + '">Invite</button>' +
     '</div>'
-  ).join('') : '';
+  ).join('') : '<div class="no-rooms">No other players online</div>';
+
+  // Update lobby online section
+  const lobbyList = document.getElementById('lobbyOnlineUsers');
+  if (lobbyList) lobbyList.innerHTML = html;
+  const lobbyNum = document.getElementById('lobbyOnlineNum');
+  if (lobbyNum) lobbyNum.textContent = count;
+
+  // Update waiting room invite count
+  const waitNum = document.getElementById('waitOnlineNum');
+  if (waitNum) waitNum.textContent = count;
 
   // Waiting room invite list (show when in waiting view and guest hasn't joined)
   const inWaiting = waitingView.style.display !== 'none';
-  if (!users.length || !inWaiting || (currentGameData && currentGameData.guestUid)) {
+  if (!count || !inWaiting || (currentGameData && currentGameData.guestUid)) {
     waitInviteSection.style.display = 'none';
   } else {
     waitInviteSection.style.display = '';
@@ -572,10 +594,38 @@ function renderOnlineUsers(users) {
 // Send invite (shared handler for both lobby and waiting room lists)
 async function handleInviteClick(e) {
   const btn = e.target.closest('.invite-btn');
-  if (!btn || !currentGameId) return;
+  if (!btn) return;
+  const targetUid = btn.dataset.uid;
+
+  // If no game exists yet (lobby), auto-create one with selected bet
+  if (!currentGameId) {
+    if (!selectedBet || selectedBet > myCoins) {
+      showToast('Select a bet first', 'error');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    try {
+      const docRef = await gamesRef.add({
+        hostUid: currentUid, hostName: myName,
+        guestUid: null, guestName: null,
+        bet: selectedBet, status: 'waiting', board: null, turn: 'red',
+        redUid: currentUid, redName: myName,
+        blackUid: null, blackName: null,
+        winner: null, winnerUid: null, lastMove: null,
+        createdAt: Date.now()
+      });
+      currentGameId = docRef.id;
+    } catch {
+      showToast('Failed to create game', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Invite';
+      return;
+    }
+  }
+
   btn.disabled = true;
   btn.textContent = 'Sent';
-  const targetUid = btn.dataset.uid;
   const bet = currentGameData ? currentGameData.bet : selectedBet;
   try {
     await invitesRef.add({
@@ -588,6 +638,10 @@ async function handleInviteClick(e) {
       ts: Date.now()
     });
     showToast('Invite sent!', 'success');
+    // If we just created a game from lobby, enter waiting room
+    if (!currentGameData || currentGameData.status !== 'playing') {
+      enterWaitingRoom(currentGameId);
+    }
   } catch {
     showToast('Failed to send invite', 'error');
     btn.disabled = false;
@@ -595,6 +649,7 @@ async function handleInviteClick(e) {
   }
 }
 waitOnlineUsersList.addEventListener('click', handleInviteClick);
+document.getElementById('lobbyOnlineUsers').addEventListener('click', handleInviteClick);
 
 // ── Listen invites for me ──
 function listenInvites() {

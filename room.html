@@ -293,6 +293,13 @@
       text-align: center; color: rgba(255,255,255,0.3);
       font-size: 13px; padding: 40px 20px;
     }
+    .visit-online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.6); margin-right: 6px; vertical-align: middle; }
+    .visit-offline-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); margin-right: 6px; vertical-align: middle; }
+    .visit-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .visit-header h4 { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8); }
+    .online-count-badge { font-size: 12px; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .online-count-badge .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; animation: pulseDot 1.5s ease-in-out infinite; }
+    @keyframes pulseDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
 
     /* ── Login gate ── */
     .login-overlay {
@@ -592,6 +599,10 @@
 
   <!-- Visit panel -->
   <div class="tab-panel" id="panel-visit">
+    <div class="visit-header">
+      <h4>👀 Visit Rooms</h4>
+      <div class="online-count-badge" id="onlineCountBadge"><div class="pulse-dot"></div> <span id="onlineCountNum">0</span> online</div>
+    </div>
     <div class="visit-list" id="visitList">
       <div class="visit-empty">Loading rooms…</div>
     </div>
@@ -861,6 +872,7 @@
         plantPosition: roomData.plantPosition || null,
         displayName: getPlayerName(),
         lastCoinCollect: roomData.lastCoinCollect || Date.now(),
+        lastSeen: Date.now(),
         updatedAt: Date.now()
       };
       await userDocRef().set(data, { merge: true });
@@ -962,6 +974,13 @@
         }
         if (changed) { await saveRoom(); renderAll(); }
       }, 10 * 60 * 1000);
+
+      // Heartbeat: update lastSeen every 2 min so others see you online
+      userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
+      setInterval(() => {
+        if (viewingUid !== currentUid) return;
+        userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
+      }, 2 * 60 * 1000);
 
       // Plant passive coin generation: every 5 min while online
       if (_plantCoinInterval) clearInterval(_plantCoinInterval);
@@ -1239,11 +1258,18 @@
       try {
         const snap = await db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).get();
         const rooms = [];
+        const now = Date.now();
+        const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
         snap.forEach(doc => {
           if (doc.id === currentUid) return; // skip self
           const d = doc.data();
-          rooms.push({ uid: doc.id, ...d });
+          const isOnline = d.lastSeen && (now - d.lastSeen) < ONLINE_THRESHOLD;
+          rooms.push({ uid: doc.id, isOnline, ...d });
         });
+        // Sort: online users first
+        rooms.sort((a, b) => (b.isOnline ? 1 : 0) - (a.isOnline ? 1 : 0));
+        const onlineCount = rooms.filter(r => r.isOnline).length;
+        document.getElementById('onlineCountNum').textContent = onlineCount;
         if (!rooms.length) {
           el.innerHTML = '<div class="visit-empty">No other rooms yet. Invite friends!</div>';
           return;
@@ -1253,10 +1279,11 @@
           const pet2Emoji = r.pet2 ? (PETS.find(p => p.id === r.pet2)?.emoji || '') : '';
           const plantEmoji = r.plant ? (PLANTS.find(p => p.id === r.plant)?.emoji || '🌱') : '';
           const peekItems = [petEmoji, pet2Emoji, plantEmoji].filter(Boolean);
+          const dot = r.isOnline ? '<span class="visit-online-dot"></span>' : '<span class="visit-offline-dot"></span>';
           return '<div class="visit-card" onclick="visitRoom(\'' + r.uid + '\')">' +
             '<span class="visit-avatar">🏠</span>' +
             '<div class="visit-info">' +
-            '<div class="visit-name">' + escapeHtml(r.displayName || 'Anonymous') + '</div>' +
+            '<div class="visit-name">' + dot + escapeHtml(r.displayName || 'Anonymous') + '</div>' +
             '<span class="visit-peek">' + (peekItems.length ? peekItems.join(' ') : '<span style="font-size:12px;opacity:0.4">Empty room</span>') + '</span>' +
             '</div>' +
             '<span class="visit-arrow">›</span></div>';
