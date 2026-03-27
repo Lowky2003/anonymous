@@ -499,7 +499,16 @@
 
   <!-- Upgrade panel -->
   <div class="tab-panel" id="panel-upgrade">
-    <div id="upgradeContent"></div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-sub="feedPetWrap">🍖 Pet Food</button>
+      <button class="sub-tab" data-sub="feedPlantWrap">🌱 Plant</button>
+    </div>
+    <div class="sub-panel active" id="feedPetWrap">
+      <div id="feedPetContent"></div>
+    </div>
+    <div class="sub-panel" id="feedPlantWrap">
+      <div id="feedPlantContent"></div>
+    </div>
   </div>
 
   <!-- Visit panel -->
@@ -986,32 +995,33 @@
     }
 
     function renderUpgrade() {
-      const el = document.getElementById('upgradeContent');
-      let html = '';
-
+      // Pet Food sub-tab
+      const petEl = document.getElementById('feedPetContent');
+      let petHtml = '';
       const activePetIds = [roomData.pet, roomData.pet2].filter(Boolean);
 
-      // Food grid (drag to pet)
       if (activePetIds.length) {
-        html += '<div class="shop-section">';
-        // Show pet affection stats
-        html += '<div style="display:flex;justify-content:center;gap:16px;padding:6px 0 10px;flex-wrap:wrap">';
+        petHtml += '<div class="shop-section">';
+        petHtml += '<div style="display:flex;justify-content:center;gap:16px;padding:6px 0 10px;flex-wrap:wrap">';
         activePetIds.forEach(pid => {
           const petDef = PETS.find(p => p.id === pid);
           const aff = roomData.petAffection[pid] ?? 0;
           const ms = getAffectionTitle(aff);
           const nextMs = AFFECTION_MILESTONES.find(m => m.min > aff);
           const nextText = nextMs ? ' (next: ' + nextMs.min + ')' : ' ★ MAX';
-          html += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
-            (petDef?.emoji || '🐾') + ' <span style="color:#ff8aab">♥ ' + aff + '</span> ' +
+          const hunger = roomData.petHunger[pid] ?? 100;
+          const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
+          petHtml += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
+            (petDef?.emoji || '🐾') + ' <span style="color:' + hColor + '">' + Math.round(hunger) + '%</span> · ' +
+            '<span style="color:#ff8aab">♥ ' + aff + '</span> ' +
             '<span style="color:#fbbf24;font-size:10px">' + ms.title + '</span>' +
             '<span style="color:rgba(255,255,255,0.35);font-size:9px">' + nextText + '</span></div>';
         });
-        html += '</div>';
-        html += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
-        html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Drag food to pet, or tap food then tap your pet</div>';
-        html += '<div class="food-grid">';
-        html += FOODS.map(f => {
+        petHtml += '</div>';
+        petHtml += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
+        petHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Drag food to pet, or tap food then tap your pet</div>';
+        petHtml += '<div class="food-grid">';
+        petHtml += FOODS.map(f => {
           const canAfford = roomData.coins >= f.cost;
           return '<div class="food-card' + (canAfford ? '' : ' disabled') + '" draggable="' + canAfford + '" ondragstart="onFoodDragStart(event,\'' + f.id + '\')" data-food="' + f.id + '">' +
             '<span class="food-emoji">' + f.emoji + '</span>' +
@@ -1020,21 +1030,27 @@
             '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + f.cost + '</div>' +
             '</div>';
         }).join('');
-        html += '</div></div>';
+        petHtml += '</div></div>';
+      } else {
+        petHtml = '<div class="visit-empty">Buy a pet first to feed it!</div>';
       }
+      petEl.innerHTML = petHtml;
 
-      // Plant upgrade section
+      // Plant Upgrade sub-tab
+      const plantEl = document.getElementById('feedPlantContent');
+      let plantHtml = '';
+
       if (roomData.plant) {
         const plantDef = PLANTS.find(p => p.id === roomData.plant);
         const lvl = roomData.plantLevels[roomData.plant] || 1;
         const next = PLANT_LEVELS[lvl];
         const coinsPerCycle = lvl * 2;
-        html += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
-        html += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
+        plantHtml += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
+        plantHtml += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
           '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
         if (next) {
           const nextCoins = next.level * 2;
-          html += '<div class="shop-card" style="text-align:center">' +
+          plantHtml += '<div class="shop-card" style="text-align:center">' +
             '<span class="shop-emoji">' + (plantDef?.emoji || '🌱') + '</span>' +
             '<div class="shop-name">Upgrade to Lv.' + next.level + ' (' + next.label + ')</div>' +
             '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px">Earns ' + nextCoins + ' coins / 5 min</div>' +
@@ -1042,15 +1058,13 @@
             '<button class="shop-btn upgrade" onclick="upgradePlant()" ' +
             (roomData.coins >= next.cost ? '' : 'disabled') + '>Upgrade</button></div>';
         } else {
-          html += '<div style="text-align:center;color:#98e4b0;padding:20px">★ Max Level! ★</div>';
+          plantHtml += '<div style="text-align:center;color:#98e4b0;padding:20px">★ Max Level! ★</div>';
         }
-        html += '</div>';
+        plantHtml += '</div>';
+      } else {
+        plantHtml = '<div class="visit-empty">Buy a plant first to upgrade it!</div>';
       }
-
-      if (!activePetIds.length && !roomData.plant) {
-        html = '<div class="visit-empty">Buy a pet or plant first!</div>';
-      }
-      el.innerHTML = html;
+      plantEl.innerHTML = plantHtml;
     }
 
     async function renderVisitList() {
