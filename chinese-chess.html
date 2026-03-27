@@ -318,7 +318,7 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 function getPlayerName() {
-  return localStorage.getItem('flappy_custom_name') || localStorage.getItem('flappy_name') || 'Anonymous';
+  return (currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null) || localStorage.getItem('flappy_name') || 'Anonymous';
 }
 
 // ═══════════════════════════
@@ -347,9 +347,11 @@ auth.onAuthStateChanged((user) => {
     currentUser = user;
     currentUid  = user.uid;
     const defaultName = user.displayName || user.email?.split('@')[0] || 'Player';
-    const customName  = localStorage.getItem('flappy_custom_name');
+    const customName  = localStorage.getItem('flappy_custom_name_' + user.uid);
     myName = customName || defaultName;
     localStorage.setItem('flappy_name', myName);
+    // Sync displayName in rooms collection so invite list shows correct name
+    roomsRef.doc(currentUid).set({ displayName: myName }, { merge: true }).catch(() => {});
     // Check for ?join= param (from invite acceptance on other pages)
     const joinParam = new URLSearchParams(window.location.search).get('join');
     if (joinParam) {

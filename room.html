@@ -807,7 +807,7 @@
     function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
 
     function getPlayerName() {
-      const custom = localStorage.getItem('flappy_custom_name');
+      const custom = currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null;
       if (custom) return custom;
       return localStorage.getItem('flappy_name') || (currentUser && currentUser.displayName) || 'Anonymous';
     }
@@ -907,11 +907,17 @@
         renderAll();
       });
 
-      // Ensure room doc exists
+      // Ensure room doc exists and displayName is current
       const snap = await userDocRef().get();
       if (!snap.exists) {
         roomData.displayName = getPlayerName();
         await saveRoom();
+      } else {
+        // Always sync displayName in case user changed their name on another page
+        const currentName = getPlayerName();
+        if (snap.data().displayName !== currentName) {
+          await userDocRef().update({ displayName: currentName });
+        }
       }
 
       // Periodic hunger decay: -1% every 10 min while page is open

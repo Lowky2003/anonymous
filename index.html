@@ -1930,6 +1930,10 @@
       if (user) {
         loginOverlay.classList.add('hidden');
         appContent.classList.add('visible');
+        // Sync displayName to rooms collection so chess invite list shows correct name
+        const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
+        const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
+        db.collection('rooms').doc(user.uid).set({ displayName: displayName }, { merge: true }).catch(() => {});
       } else {
         loginOverlay.classList.remove('hidden');
         appContent.classList.remove('visible');
@@ -3165,7 +3169,7 @@
       soundToggle.checked = soundEnabled;
       themeToggle.checked = document.body.classList.contains('light-theme');
       animToggle.checked = !document.body.classList.contains('no-animations');
-      settingsNameInput.value = localStorage.getItem('flappy_custom_name') || auth.currentUser?.displayName || '';
+      settingsNameInput.value = (auth.currentUser ? localStorage.getItem('flappy_custom_name_' + auth.currentUser.uid) : null) || auth.currentUser?.displayName || '';
       settingsNameStatus.textContent = '';
       updateFontSizeBtns();
       settingsOverlay.classList.remove('hidden');
@@ -3196,7 +3200,8 @@
         settingsNameStatus.textContent = 'Name must be 1-20 characters';
         return;
       }
-      const oldName = localStorage.getItem('flappy_custom_name') || localStorage.getItem('flappy_name') || '';
+      const uid = auth.currentUser?.uid;
+      const oldName = (uid ? localStorage.getItem('flappy_custom_name_' + uid) : null) || localStorage.getItem('flappy_name') || '';
       if (newName === oldName) {
         settingsOverlay.classList.add('hidden');
         return;
@@ -3230,17 +3235,14 @@
             await tetrisLbRef.doc(oldName).delete();
           }
         }
-        // Update room displayName
+        // Update room displayName (merge: true creates doc if it doesn't exist)
         const uid = auth.currentUser?.uid;
         if (uid) {
-          const roomSnap = await roomsRef.doc(uid).get();
-          if (roomSnap.exists) {
-            await roomsRef.doc(uid).update({ displayName: newName });
-          }
+          await roomsRef.doc(uid).set({ displayName: newName }, { merge: true });
         }
-        // Save to localStorage
+        // Save to localStorage (keyed by uid to prevent cross-account mix on same device)
         localStorage.setItem('flappy_name', newName);
-        localStorage.setItem('flappy_custom_name', newName);
+        if (uid) localStorage.setItem('flappy_custom_name_' + uid, newName);
         // Migrate local best score
         if (oldName) {
           const oldBestKey = 'flappy_best_' + oldName;

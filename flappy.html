@@ -558,11 +558,13 @@
       if (user) {
         loginOverlay.classList.add('hidden');
         const defaultName = user.displayName || user.email?.split('@')[0] || 'Player';
-        // Use custom name if set, otherwise use Google display name
-        const customName = localStorage.getItem('flappy_custom_name');
+        // Use custom name if set (keyed by uid to prevent cross-account mix)
+        const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
         const displayName = customName || defaultName;
         localStorage.setItem('flappy_name', displayName);
         document.getElementById('playerDisplayName').textContent = displayName;
+        // Sync displayName to rooms collection so chess invite list shows correct name
+        db.collection('rooms').doc(user.uid).set({ displayName: displayName }, { merge: true }).catch(() => {});
         // Start leaderboard listener AFTER auth succeeds
         if (!lbUnsubscribe) startLeaderboardListener();
       } else {
