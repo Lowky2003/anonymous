@@ -93,6 +93,7 @@
       backdrop-filter: blur(8px);
     }
     .overlay.hidden { display: none; }
+    .hidden { display: none !important; }
     .overlay h2 {
       font-size: 36px;
       font-weight: 900;
@@ -221,6 +222,69 @@
       cursor: pointer;
     }
 
+    /* ── Logout button ── */
+    .logout-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 50;
+      padding: 8px 16px;
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 12px;
+      background: rgba(248,113,113,0.12);
+      backdrop-filter: blur(10px);
+      color: #f87171;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(248,113,113,0.25); }
+
+    /* ── Name change ── */
+    .name-change-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .name-change-row input {
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      width: 140px;
+      text-align: center;
+    }
+    .name-change-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .name-change-row button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .name-change-row button:hover { opacity: 0.85; }
+    .name-change-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .edit-name-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 6px;
+      transition: color 0.2s;
+    }
+    .edit-name-btn:hover { color: #f7c97e; }
+
     /* scrollbar hide for leaderboard */
     .leaderboard::-webkit-scrollbar { width: 0; }
     .leaderboard { scrollbar-width: none; }
@@ -324,6 +388,7 @@
   </div>
 
   <a href="index.html" class="back-btn">← Back</a>
+  <button class="logout-btn" id="logoutBtn">Logout</button>
 
   <div class="game-header">
     <h1>🐦 Flappy Bird</h1>
@@ -337,7 +402,12 @@
   <div class="overlay" id="startScreen">
     <h2>🐦 Flappy Bird</h2>
     <div class="name-input" id="nameDisplay" style="justify-content:center">
-      <span style="font-size:14px;color:rgba(255,255,255,0.6)">Playing as: <strong id="playerDisplayName" style="color:#f7c97e">...</strong></span>
+      <span style="font-size:14px;color:rgba(255,255,255,0.6)">Playing as: <strong id="playerDisplayName" style="color:#f7c97e">...</strong><button class="edit-name-btn" id="editNameBtn" title="Change name">✏️</button></span>
+    </div>
+    <div class="name-change-row hidden" id="nameChangeRow">
+      <input type="text" id="nameInput" placeholder="New name" maxlength="20">
+      <button id="nameConfirmBtn">Save</button>
+      <button id="nameCancelBtn" style="background:rgba(255,255,255,0.1)">Cancel</button>
     </div>
     <button class="play-btn" id="startBtn">Play!</button>
     <div class="tap-hint">Tap / Space / Click to flap</div>
@@ -411,11 +481,19 @@
 
     let lbUnsubscribe = null;
 
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
+    });
+
     auth.onAuthStateChanged((user) => {
       loginOverlay.classList.remove('loading');
       if (user) {
         loginOverlay.classList.add('hidden');
-        const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
+        const defaultName = user.displayName || user.email?.split('@')[0] || 'Player';
+        // Use custom name if set, otherwise use Google display name
+        const customName = localStorage.getItem('flappy_custom_name');
+        const displayName = customName || defaultName;
         localStorage.setItem('flappy_name', displayName);
         document.getElementById('playerDisplayName').textContent = displayName;
         // Start leaderboard listener AFTER auth succeeds
@@ -423,6 +501,71 @@
       } else {
         loginOverlay.classList.remove('hidden');
         if (lbUnsubscribe) { lbUnsubscribe(); lbUnsubscribe = null; }
+      }
+    });
+
+    /* ── Name Change ── */
+    const editNameBtn = document.getElementById('editNameBtn');
+    const nameChangeRow = document.getElementById('nameChangeRow');
+    const nameInput = document.getElementById('nameInput');
+    const nameConfirmBtn = document.getElementById('nameConfirmBtn');
+    const nameCancelBtn = document.getElementById('nameCancelBtn');
+
+    editNameBtn.addEventListener('click', () => {
+      nameInput.value = getPlayerName();
+      nameChangeRow.classList.remove('hidden');
+      nameInput.focus();
+    });
+
+    nameCancelBtn.addEventListener('click', () => {
+      nameChangeRow.classList.add('hidden');
+    });
+
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') nameConfirmBtn.click();
+      if (e.key === 'Escape') nameCancelBtn.click();
+    });
+
+    nameConfirmBtn.addEventListener('click', async () => {
+      const newName = nameInput.value.trim();
+      if (!newName || newName.length > 20) return;
+      const oldName = getPlayerName();
+      if (newName === oldName) {
+        nameChangeRow.classList.add('hidden');
+        return;
+      }
+      nameConfirmBtn.disabled = true;
+      try {
+        // Migrate leaderboard entry: copy old score to new name, delete old doc
+        const oldDoc = await lbRef.doc(oldName).get();
+        if (oldDoc.exists) {
+          const oldData = oldDoc.data();
+          // Check if new name doc already exists
+          const newDoc = await lbRef.doc(newName).get();
+          const newScore = newDoc.exists ? (newDoc.data().score || 0) : 0;
+          const bestScore = Math.max(oldData.score || 0, newScore);
+          await lbRef.doc(newName).set({ name: newName, score: bestScore, ts: Date.now() });
+          await lbRef.doc(oldName).delete();
+        }
+        // Save new name
+        localStorage.setItem('flappy_name', newName);
+        localStorage.setItem('flappy_custom_name', newName);
+        document.getElementById('playerDisplayName').textContent = newName;
+        nameChangeRow.classList.add('hidden');
+        // Migrate local best score
+        const oldBestKey = 'flappy_best_' + oldName;
+        const oldBest = localStorage.getItem(oldBestKey);
+        if (oldBest) {
+          const newBestKey = 'flappy_best_' + newName;
+          const existingBest = parseInt(localStorage.getItem(newBestKey) || '0', 10);
+          localStorage.setItem(newBestKey, Math.max(parseInt(oldBest, 10), existingBest));
+          localStorage.removeItem(oldBestKey);
+        }
+        bestLocalScore = parseInt(localStorage.getItem(getBestKey()) || '0', 10);
+      } catch (e) {
+        console.error('Name change error:', e);
+      } finally {
+        nameConfirmBtn.disabled = false;
       }
     });
 

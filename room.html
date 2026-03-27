@@ -319,6 +319,19 @@
     .google-login-btn:hover { transform: scale(1.03); }
     .login-error { color: #f87171; font-size: 13px; margin-top: 12px; }
 
+    /* ── Logout button ── */
+    .logout-btn {
+      position: fixed; top: 14px; right: 140px; z-index: 50;
+      padding: 8px 16px; border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 12px; background: rgba(248,113,113,0.12);
+      backdrop-filter: blur(10px); color: #f87171; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(248,113,113,0.25); }
+    @media (max-width: 768px) {
+      .logout-btn { top: 10px; right: 110px; padding: 8px 12px; font-size: 12px; }
+    }
+
     /* ── Toast ── */
     .toast {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -439,6 +452,7 @@
   </div>
 
   <a class="back-btn" href="index.html">← Back</a>
+  <button class="logout-btn" id="logoutBtn">Logout</button>
   <div class="coin-display">
     <span class="coin-icon"><svg class="coin-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#f7c97e" stroke="#c9952a" stroke-width="6"/><circle cx="50" cy="50" r="34" fill="none" stroke="#c9952a" stroke-width="3" opacity=".4"/><text x="50" y="58" text-anchor="middle" font-size="40" font-weight="bold" fill="#8a5e1f" font-family="sans-serif">$</text></svg></span>
     <span class="coin-amount" id="coinAmount">0</span>
@@ -536,12 +550,28 @@
 
     /* ── Auth gate ── */
     const loginOverlay = document.getElementById('loginOverlay');
+
+    // Handle redirect result (fires on page load after redirect sign-in)
+    auth.getRedirectResult().catch((err) => {
+      if (err.code && err.code !== 'auth/popup-closed-by-user') {
+        document.getElementById('loginError').textContent = 'Login failed: ' + (err.message || 'Unknown');
+      }
+    });
+
+    // Detect mobile: use redirect (popups are blocked on mobile browsers)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     document.getElementById('googleLoginBtn').addEventListener('click', async () => {
       const btn = document.getElementById('googleLoginBtn');
       btn.disabled = true;
       document.getElementById('loginError').textContent = '';
+      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        if (isMobile) {
+          await auth.signInWithRedirect(provider);
+        } else {
+          await auth.signInWithPopup(provider);
+        }
       } catch (err) {
         if (err.code !== 'auth/popup-closed-by-user') {
           document.getElementById('loginError').textContent = 'Login failed: ' + (err.message || 'Unknown');
@@ -552,6 +582,10 @@
     let currentUid = null;
     let currentUser = null;
     let viewingUid = null; // for visit mode
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
+    });
 
     auth.onAuthStateChanged((user) => {
       loginOverlay.classList.remove('loading');
