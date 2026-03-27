@@ -2568,10 +2568,15 @@
       const ease = Math.sin(ap * Math.PI); // 0→1→0 bell curve
       switch (action) {
         // ── Shared-ish poses ──
-        case 'nap': case 'sleep':
-          ctx.translate(0, s * 0.08 * ease);
-          ctx.scale(1, 1 - 0.12 * ease); // squish down
+        case 'nap': case 'sleep': {
+          // Lie down: tilt sideways, squish flat, gentle breathing
+          const settle = Math.min(1, ap * 5); // quick settle into pose (first 20%)
+          const breath = Math.sin(t / 600) * 0.02 * settle; // gentle breathing
+          ctx.translate(0, s * 0.15 * settle); // sink lower
+          ctx.rotate(0.25 * settle);           // tilt to lie on side
+          ctx.scale(1.12 + breath, 0.75 - breath * 0.5); // flatten wide + breathe
           break;
+        }
         case 'stretch':
           ctx.scale(1 + 0.18 * ease, 1 - 0.06 * ease);
           break;
