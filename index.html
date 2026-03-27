@@ -699,15 +699,39 @@
       position: fixed; inset: 0; z-index: 9000;
       display: flex; align-items: center; justify-content: center;
       background: rgba(15, 12, 41, 0.85); backdrop-filter: blur(8px);
+      padding: 16px;
     }
     .settings-overlay.hidden { display: none; }
     .settings-box {
-      width: 90%; max-width: 360px;
+      width: 100%; max-width: 400px;
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       background: rgba(30, 25, 65, 0.97);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 24px; padding: 32px 28px 24px;
       backdrop-filter: blur(16px);
       box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .settings-box::-webkit-scrollbar { width: 4px; }
+    .settings-box::-webkit-scrollbar-track { background: transparent; }
+    .settings-box::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15); border-radius: 4px;
+    }
+    @media (max-width: 480px) {
+      .settings-overlay { padding: 8px; }
+      .settings-box {
+        max-width: 100%;
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
+        border-radius: 18px;
+        padding: 24px 20px 20px;
+      }
+      .settings-box h3 { font-size: 18px; margin-bottom: 18px; }
+      .settings-section { margin-bottom: 14px; }
+      .settings-row { padding: 10px 12px; }
+      .settings-divider { margin: 12px 0; }
     }
     .settings-box h3 {
       font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 24px;
@@ -730,9 +754,13 @@
       display: flex; align-items: center; gap: 8px;
     }
     .settings-toggle {
-      position: relative; width: 48px; height: 26px; cursor: pointer;
+      position: relative; display: inline-block; width: 48px; height: 26px;
+      cursor: pointer; flex-shrink: 0;
     }
-    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-toggle input {
+      position: absolute; width: 100%; height: 100%;
+      opacity: 0; margin: 0; cursor: pointer; z-index: 2;
+    }
     .settings-toggle .slider {
       position: absolute; inset: 0;
       background: rgba(255,255,255,0.15); border-radius: 13px;
@@ -787,6 +815,134 @@
       font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
     .settings-close-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* Font size selector */
+    .settings-select {
+      display: flex; gap: 6px;
+    }
+    .settings-select button {
+      flex: 1; padding: 8px 0; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .settings-select button.active {
+      border-color: rgba(138,120,255,0.5); background: rgba(138,120,255,0.15);
+      color: #c8b6ff;
+    }
+    .settings-select button:hover:not(.active) { background: rgba(255,255,255,0.08); }
+
+    /* Clear cache button */
+    .settings-cache-btn {
+      width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .settings-cache-btn:hover { background: rgba(255,255,255,0.1); }
+
+    /* About section */
+    .settings-about {
+      text-align: center; font-size: 12px;
+      color: rgba(255,255,255,0.3); line-height: 1.6;
+    }
+
+    /* Theme overrides — light mode */
+    body.light-theme {
+      background: linear-gradient(135deg, #e8e4f0, #f0eef5, #dde4f0);
+      color: #333;
+    }
+    body.light-theme .page-title {
+      background: linear-gradient(90deg, #6b5ce7, #3a8fd4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    body.light-theme .page-subtitle { color: rgba(0,0,0,0.45); }
+    body.light-theme .input-area {
+      background: rgba(240,238,245,0.96);
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    body.light-theme .input-area textarea {
+      background: rgba(0,0,0,0.04); color: #333;
+      border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .input-area textarea::placeholder { color: rgba(0,0,0,0.35); }
+    body.light-theme .bubble {
+      background: rgba(255,255,255,0.85);
+      border-color: rgba(0,0,0,0.08);
+      color: #333;
+    }
+    body.light-theme .bubble-hp-fill { opacity: 0.8; }
+    body.light-theme .reply-item {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.06);
+      color: #444;
+    }
+    body.light-theme .reply-input-row input {
+      background: rgba(0,0,0,0.04); color: #333;
+      border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .sidebar {
+      background: rgba(245,243,250,0.97);
+      border-right-color: rgba(0,0,0,0.08);
+    }
+    body.light-theme .sidebar-header { color: #333; }
+    body.light-theme .vote-item {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.06);
+      color: #333;
+    }
+    body.light-theme .login-overlay {
+      background: linear-gradient(135deg, #e8e4f0, #d8d4e8, #dde4f0);
+    }
+    body.light-theme .login-box { background: rgba(255,255,255,0.6); }
+    body.light-theme .settings-overlay { background: rgba(0,0,0,0.4); }
+    body.light-theme .settings-box {
+      background: rgba(245,243,250,0.97);
+      border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .settings-box h3 {
+      background: linear-gradient(90deg, #6b5ce7, #3a8fd4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    body.light-theme .settings-label { color: rgba(0,0,0,0.45); }
+    body.light-theme .settings-row {
+      background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.06);
+    }
+    body.light-theme .settings-row-label { color: rgba(0,0,0,0.75); }
+    body.light-theme .settings-divider { border-top-color: rgba(0,0,0,0.08); }
+    body.light-theme .settings-close-btn {
+      background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.6);
+      border-color: rgba(0,0,0,0.08);
+    }
+    body.light-theme .settings-name-row input {
+      background: rgba(0,0,0,0.04); color: #333;
+      border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .settings-select button {
+      background: rgba(0,0,0,0.03); color: rgba(0,0,0,0.55);
+      border-color: rgba(0,0,0,0.08);
+    }
+    body.light-theme .settings-select button.active {
+      background: rgba(107,92,231,0.1); color: #6b5ce7;
+      border-color: rgba(107,92,231,0.4);
+    }
+    body.light-theme .settings-cache-btn {
+      background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.6);
+      border-color: rgba(0,0,0,0.08);
+    }
+    body.light-theme .settings-about { color: rgba(0,0,0,0.35); }
+
+    /* Font size classes */
+    body.font-small .bubble { font-size: 13px; }
+    body.font-small .bubble .reply-item { font-size: 12px; }
+    body.font-medium .bubble { font-size: 15px; }
+    body.font-medium .bubble .reply-item { font-size: 13px; }
+    body.font-large .bubble { font-size: 18px; }
+    body.font-large .bubble .reply-item { font-size: 15px; }
+
+    /* No-animation mode */
+    body.no-animations .bubble-deco { display: none !important; }
+    body.no-animations .bubble { animation: none !important; opacity: 1 !important; }
 
     /* ── Left sidebar ── */
     .sidebar {
@@ -1485,10 +1641,55 @@
             <span class="slider"></span>
           </label>
         </div>
+        <div class="settings-row" style="margin-top:8px">
+          <span class="settings-row-label">🔊 Notification Sound</span>
+          <label class="settings-toggle">
+            <input type="checkbox" id="soundToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <hr class="settings-divider">
+      <div class="settings-section">
+        <div class="settings-label">Appearance</div>
+        <div class="settings-row">
+          <span class="settings-row-label">🌙 Dark / Light Mode</span>
+          <label class="settings-toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <hr class="settings-divider">
+      <div class="settings-section">
+        <div class="settings-label">Font Size</div>
+        <div class="settings-select" id="fontSizeSelect">
+          <button data-size="small">Small</button>
+          <button data-size="medium">Medium</button>
+          <button data-size="large">Large</button>
+        </div>
+      </div>
+      <hr class="settings-divider">
+      <div class="settings-section">
+        <div class="settings-row">
+          <span class="settings-row-label">🫧 Bubble Animations</span>
+          <label class="settings-toggle">
+            <input type="checkbox" id="animToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <hr class="settings-divider">
+      <div class="settings-section">
+        <div class="settings-label">Data</div>
+        <button class="settings-cache-btn" id="clearCacheBtn">🗑️ Clear Local Cache</button>
       </div>
       <hr class="settings-divider">
       <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
       <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
+      <div class="settings-about">
+        Anonymous Bubble Answers v1.0<br>Made with 💜
+      </div>
     </div>
   </div>
 
@@ -2876,12 +3077,22 @@
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsOverlay = document.getElementById('settingsOverlay');
     const notifToggle = document.getElementById('notifToggle');
+    const soundToggle = document.getElementById('soundToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const animToggle = document.getElementById('animToggle');
     const notifBadge = document.getElementById('notifBadge');
     const originalTitle = document.title;
     let notifEnabled = localStorage.getItem('notif_enabled') === '1';
+    let soundEnabled = localStorage.getItem('sound_enabled') !== '0'; // on by default
     let isFirstSnapshot = true;
     let unseenCount = 0;
     let titleFlashInterval = null;
+
+    // Restore saved preferences on load
+    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-theme');
+    const savedFont = localStorage.getItem('font_size') || 'medium';
+    document.body.classList.add('font-' + savedFont);
+    if (localStorage.getItem('animations') === '0') document.body.classList.add('no-animations');
 
     // Notification sound using Web Audio API (no external file needed)
     let audioCtx = null;
@@ -2923,8 +3134,12 @@
 
     settingsBtn.addEventListener('click', () => {
       notifToggle.checked = notifEnabled;
+      soundToggle.checked = soundEnabled;
+      themeToggle.checked = document.body.classList.contains('light-theme');
+      animToggle.checked = !document.body.classList.contains('no-animations');
       settingsNameInput.value = localStorage.getItem('flappy_custom_name') || auth.currentUser?.displayName || '';
       settingsNameStatus.textContent = '';
+      updateFontSizeBtns();
       settingsOverlay.classList.remove('hidden');
     });
     document.getElementById('settingsCloseBtn').addEventListener('click', () => {
@@ -3009,21 +3224,55 @@
     });
 
     // Notification toggle inside settings
-    notifToggle.addEventListener('change', async () => {
+    notifToggle.addEventListener('change', () => {
       if (notifToggle.checked) {
-        if ('Notification' in window && Notification.permission === 'default') {
-          const perm = await Notification.requestPermission();
-          if (perm !== 'granted') {
-            notifToggle.checked = false;
-            showToast('Notifications blocked by browser', 'error');
-            return;
-          }
+        // Check if browser supports Notification API
+        if (!('Notification' in window)) {
+          // No native push support (e.g. iOS Safari) — still enable in-app alerts
+          notifEnabled = true;
+          localStorage.setItem('notif_enabled', '1');
+          showToast('In-app notifications enabled! 🔔', 'success');
+          return;
         }
-        if ('Notification' in window && Notification.permission === 'denied') {
+        if (Notification.permission === 'denied') {
           notifToggle.checked = false;
           showToast('Notifications blocked — enable in browser settings', 'error');
           return;
         }
+        if (Notification.permission === 'default') {
+          // Request permission — handle both promise and callback styles
+          try {
+            const result = Notification.requestPermission((perm) => {
+              if (perm !== 'granted') {
+                notifToggle.checked = false;
+                showToast('Notifications blocked by browser', 'error');
+                return;
+              }
+              notifEnabled = true;
+              localStorage.setItem('notif_enabled', '1');
+              showToast('Notifications enabled! 🔔', 'success');
+            });
+            // Modern browsers return a promise
+            if (result && result.then) {
+              result.then((perm) => {
+                if (perm !== 'granted') {
+                  notifToggle.checked = false;
+                  showToast('Notifications blocked by browser', 'error');
+                } else {
+                  notifEnabled = true;
+                  localStorage.setItem('notif_enabled', '1');
+                  showToast('Notifications enabled! 🔔', 'success');
+                }
+              });
+            }
+          } catch {
+            notifEnabled = true;
+            localStorage.setItem('notif_enabled', '1');
+            showToast('Notifications enabled! 🔔', 'success');
+          }
+          return;
+        }
+        // permission === 'granted'
         notifEnabled = true;
         localStorage.setItem('notif_enabled', '1');
         showToast('Notifications enabled! 🔔', 'success');
@@ -3032,6 +3281,48 @@
         localStorage.setItem('notif_enabled', '0');
         showToast('Notifications disabled', 'success');
       }
+    });
+
+    // Sound toggle
+    soundToggle.addEventListener('change', () => {
+      soundEnabled = soundToggle.checked;
+      localStorage.setItem('sound_enabled', soundEnabled ? '1' : '0');
+      showToast(soundEnabled ? 'Sound on 🔊' : 'Sound muted 🔇', 'success');
+    });
+
+    // Theme toggle (light / dark)
+    themeToggle.addEventListener('change', () => {
+      document.body.classList.toggle('light-theme', themeToggle.checked);
+      localStorage.setItem('theme', themeToggle.checked ? 'light' : 'dark');
+    });
+
+    // Font size selector
+    function updateFontSizeBtns() {
+      const cur = localStorage.getItem('font_size') || 'medium';
+      document.querySelectorAll('#fontSizeSelect button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.size === cur);
+      });
+    }
+    document.getElementById('fontSizeSelect').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const size = btn.dataset.size;
+      document.body.classList.remove('font-small', 'font-medium', 'font-large');
+      document.body.classList.add('font-' + size);
+      localStorage.setItem('font_size', size);
+      updateFontSizeBtns();
+    });
+
+    // Bubble animation toggle
+    animToggle.addEventListener('change', () => {
+      document.body.classList.toggle('no-animations', !animToggle.checked);
+      localStorage.setItem('animations', animToggle.checked ? '1' : '0');
+    });
+
+    // Clear cache button
+    document.getElementById('clearCacheBtn').addEventListener('click', () => {
+      ['cache_answers', 'cache_food'].forEach(k => localStorage.removeItem(k));
+      showToast('Cache cleared!', 'success');
     });
 
     // Clear badge when user focuses the tab
@@ -3126,7 +3417,7 @@
     function fireNotification(count, bodyText, title, tag) {
       // Ring the bell animation + play sound
       ringBell();
-      if (notifEnabled) playNotifSound();
+      if (notifEnabled && soundEnabled) playNotifSound();
 
       // If tab not focused → badge + title flash
       if (document.hidden) {
