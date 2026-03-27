@@ -2232,11 +2232,23 @@
       knownIds = newIds;
 
       // Auto-scroll to bottom on first load or after user sends a message
-      if (shouldScrollToBottom && firstSnapshotFired) {
-        shouldScrollToBottom = false;
-        setTimeout(() => {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 300);
+      if (shouldScrollToBottom) {
+        // On cache render, scroll instantly but keep the flag for the Firestore render
+        if (!firstSnapshotFired) {
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+          });
+        } else {
+          // Firestore data arrived — final scroll, then clear flag
+          shouldScrollToBottom = false;
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          });
+          // Safety: re-scroll after layout settles (images, etc.)
+          setTimeout(() => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+          }, 600);
+        }
       }
     }
 
