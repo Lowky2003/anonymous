@@ -1772,6 +1772,13 @@
               <div style="font-size:11px;color:rgba(255,255,255,0.45)">Tap to fly — beat the high score!</div>
             </div>
           </a>
+          <a href="tetris.html" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.06);text-decoration:none;color:#fff;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+            <span style="font-size:28px">🧱</span>
+            <div>
+              <div style="font-size:14px;font-weight:600">Tetris</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.45)">Clear lines, earn coins, chain combos!</div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
@@ -3193,6 +3200,19 @@
             await lbRef.doc(oldName).delete();
           }
         }
+        // Migrate tetris leaderboard entry
+        if (oldName) {
+          const tetrisLbRef = db.collection('leaderboard_tetris');
+          const oldTDoc = await tetrisLbRef.doc(oldName).get();
+          if (oldTDoc.exists) {
+            const oldTData = oldTDoc.data();
+            const newTDoc = await tetrisLbRef.doc(newName).get();
+            const newTScore = newTDoc.exists ? (newTDoc.data().score || 0) : 0;
+            const bestT = Math.max(oldTData.score || 0, newTScore);
+            await tetrisLbRef.doc(newName).set({ name: newName, score: bestT, ts: Date.now() });
+            await tetrisLbRef.doc(oldName).delete();
+          }
+        }
         // Update room displayName
         const uid = auth.currentUser?.uid;
         if (uid) {
@@ -3213,6 +3233,15 @@
             const existingBest = parseInt(localStorage.getItem(newBestKey) || '0', 10);
             localStorage.setItem(newBestKey, Math.max(parseInt(oldBest, 10), existingBest));
             localStorage.removeItem(oldBestKey);
+          }
+          // Migrate tetris local best score
+          const oldTetrisKey = 'tetris_best_' + oldName;
+          const oldTetrisBest = localStorage.getItem(oldTetrisKey);
+          if (oldTetrisBest) {
+            const newTetrisKey = 'tetris_best_' + newName;
+            const existingTBest = parseInt(localStorage.getItem(newTetrisKey) || '0', 10);
+            localStorage.setItem(newTetrisKey, Math.max(parseInt(oldTetrisBest, 10), existingTBest));
+            localStorage.removeItem(oldTetrisKey);
           }
         }
         settingsNameStatus.style.color = '#34d399';
