@@ -542,24 +542,34 @@ function setPresence() {
   presenceDocRef.set({ uid: currentUid, name: myName, ts: Date.now() });
   // Update lastSeen on rooms doc for cross-page online detection
   roomsRef.doc(currentUid).set({ lastSeen: Date.now() }, { merge: true }).catch(() => {});
-  // Heartbeat: update lastSeen every 2 min
+  // Heartbeat: update lastSeen every 30s
   if (window._chessHeartbeat) clearInterval(window._chessHeartbeat);
   window._chessHeartbeat = setInterval(() => {
     roomsRef.doc(currentUid).set({ lastSeen: Date.now() }, { merge: true }).catch(() => {});
-  }, 2 * 60 * 1000);
-  // Remove on unload
+  }, 30 * 1000);
+  // Mark offline on page close / tab switch
+  window.removeEventListener('beforeunload', cleanupPresence);
   window.addEventListener('beforeunload', cleanupPresence);
+  document.removeEventListener('visibilitychange', handleVisibility);
+  document.addEventListener('visibilitychange', handleVisibility);
+}
+function handleVisibility() {
+  if (!currentUid) return;
+  if (document.visibilityState === 'hidden') {
+    roomsRef.doc(currentUid).update({ lastSeen: 0 }).catch(() => {});
+  } else {
+    roomsRef.doc(currentUid).update({ lastSeen: Date.now() }).catch(() => {});
+  }
 }
 function cleanupPresence() {
   if (presenceDocRef) presenceDocRef.delete().catch(() => {});
   if (window._chessHeartbeat) clearInterval(window._chessHeartbeat);
-  // Mark offline immediately so others see status change
   if (currentUid) roomsRef.doc(currentUid).update({ lastSeen: 0 }).catch(() => {});
 }
 
 function listenPresence() {
   if (unsubPresence) unsubPresence();
-  const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+  const ONLINE_THRESHOLD = 60 * 1000; // 60 seconds
   unsubPresence = roomsRef.onSnapshot((snap) => {
     const now = Date.now();
     const users = [];

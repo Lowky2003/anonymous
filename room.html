@@ -975,14 +975,21 @@
         if (changed) { await saveRoom(); renderAll(); }
       }, 10 * 60 * 1000);
 
-      // Heartbeat: update lastSeen every 2 min so others see you online
+      // Heartbeat: update lastSeen every 30s so others see you online
       userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
       setInterval(() => {
         if (viewingUid !== currentUid) return;
         userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
-      }, 2 * 60 * 1000);
+      }, 30 * 1000);
 
-      // Mark offline on page close
+      // Mark offline on page close / tab switch
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && currentUid) {
+          userDocRef().update({ lastSeen: 0 }).catch(() => {});
+        } else if (document.visibilityState === 'visible' && currentUid) {
+          userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
+        }
+      });
       window.addEventListener('beforeunload', () => {
         if (currentUid) userDocRef().update({ lastSeen: 0 }).catch(() => {});
       });
@@ -1265,7 +1272,7 @@
       unsubVisitList = db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).onSnapshot((snap) => {
         const rooms = [];
         const now = Date.now();
-        const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+        const ONLINE_THRESHOLD = 60 * 1000; // 60 seconds
         snap.forEach(doc => {
           if (doc.id === currentUid) return; // skip self
           const d = doc.data();
