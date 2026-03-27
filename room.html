@@ -319,18 +319,81 @@
     .google-login-btn:hover { transform: scale(1.03); }
     .login-error { color: #f87171; font-size: 13px; margin-top: 12px; }
 
-    /* ── Logout button ── */
-    .logout-btn {
+    /* ── Settings gear button ── */
+    .settings-btn {
       position: fixed; top: 14px; right: 140px; z-index: 50;
-      padding: 8px 16px; border: 1px solid rgba(248,113,113,0.3);
-      border-radius: 12px; background: rgba(248,113,113,0.12);
-      backdrop-filter: blur(10px); color: #f87171; font-size: 13px;
-      font-weight: 600; cursor: pointer; transition: background 0.2s;
+      width: 40px; height: 40px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      background: rgba(15, 12, 41, 0.9);
+      backdrop-filter: blur(10px);
+      color: rgba(255,255,255,0.7); font-size: 20px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, color 0.2s, transform 0.3s;
     }
-    .logout-btn:hover { background: rgba(248,113,113,0.25); }
+    .settings-btn:hover { background: rgba(255,255,255,0.1); color: #f7c97e; transform: rotate(45deg); }
     @media (max-width: 768px) {
-      .logout-btn { top: 10px; right: 110px; padding: 8px 12px; font-size: 12px; }
+      .settings-btn { top: 10px; right: 110px; width: 36px; height: 36px; font-size: 17px; }
     }
+
+    /* ── Settings modal ── */
+    .settings-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15, 12, 41, 0.85); backdrop-filter: blur(8px);
+    }
+    .settings-overlay.hidden { display: none; }
+    .settings-box {
+      width: 90%; max-width: 360px;
+      background: rgba(30, 25, 65, 0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 32px 28px 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .settings-box h3 {
+      font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 24px;
+      background: linear-gradient(90deg, #f7c97e, #f2a154);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .settings-section { margin-bottom: 20px; }
+    .settings-label {
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .settings-name-row { display: flex; gap: 8px; align-items: center; }
+    .settings-name-row input {
+      flex: 1; padding: 10px 16px;
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+      background: rgba(255,255,255,0.07); color: #fff; font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .settings-name-row input:focus { border-color: rgba(138, 120, 255, 0.5); }
+    .settings-name-row input::placeholder { color: rgba(255,255,255,0.3); }
+    .settings-name-row button {
+      padding: 10px 20px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: opacity 0.2s; white-space: nowrap;
+    }
+    .settings-name-row button:hover { opacity: 0.85; }
+    .settings-name-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .settings-status { font-size: 12px; color: #34d399; margin-top: 6px; min-height: 18px; }
+    .settings-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0; }
+    .settings-logout-btn {
+      width: 100%; padding: 12px;
+      border: 1px solid rgba(248,113,113,0.3); border-radius: 14px;
+      background: rgba(248,113,113,0.08); color: #f87171;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .settings-logout-btn:hover { background: rgba(248,113,113,0.2); }
+    .settings-close-btn {
+      width: 100%; padding: 12px; margin-top: 8px;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .settings-close-btn:hover { background: rgba(255,255,255,0.12); }
 
     /* ── Toast ── */
     .toast {
@@ -452,7 +515,26 @@
   </div>
 
   <a class="back-btn" href="index.html">← Back</a>
-  <button class="logout-btn" id="logoutBtn">Logout</button>
+  <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+
+  <!-- Settings modal -->
+  <div class="settings-overlay hidden" id="settingsOverlay">
+    <div class="settings-box">
+      <h3>⚙️ Settings</h3>
+      <div class="settings-section">
+        <div class="settings-label">Display Name</div>
+        <div class="settings-name-row">
+          <input type="text" id="settingsNameInput" placeholder="Your name" maxlength="20">
+          <button id="settingsNameSaveBtn">Save</button>
+        </div>
+        <div class="settings-status" id="settingsNameStatus"></div>
+      </div>
+      <hr class="settings-divider">
+      <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
+      <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
+    </div>
+  </div>
+
   <div class="coin-display">
     <span class="coin-icon"><svg class="coin-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#f7c97e" stroke="#c9952a" stroke-width="6"/><circle cx="50" cy="50" r="34" fill="none" stroke="#c9952a" stroke-width="3" opacity=".4"/><text x="50" y="58" text-anchor="middle" font-size="40" font-weight="bold" fill="#8a5e1f" font-family="sans-serif">$</text></svg></span>
     <span class="coin-amount" id="coinAmount">0</span>
@@ -583,8 +665,68 @@
     let currentUser = null;
     let viewingUid = null; // for visit mode
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+    /* ── Settings modal ── */
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const settingsNameInput = document.getElementById('settingsNameInput');
+    const settingsNameSaveBtn = document.getElementById('settingsNameSaveBtn');
+    const settingsNameStatus = document.getElementById('settingsNameStatus');
+
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+      settingsNameInput.value = roomData.displayName || currentUser?.displayName || '';
+      settingsNameStatus.textContent = '';
+      settingsOverlay.classList.remove('hidden');
+      settingsNameInput.focus();
+    });
+
+    document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+      settingsOverlay.classList.add('hidden');
+    });
+
+    settingsOverlay.addEventListener('click', (e) => {
+      if (e.target === settingsOverlay) settingsOverlay.classList.add('hidden');
+    });
+
+    document.getElementById('settingsLogoutBtn').addEventListener('click', async () => {
+      settingsOverlay.classList.add('hidden');
       try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
+    });
+
+    settingsNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') settingsNameSaveBtn.click();
+      if (e.key === 'Escape') settingsOverlay.classList.add('hidden');
+    });
+
+    settingsNameSaveBtn.addEventListener('click', async () => {
+      const newName = settingsNameInput.value.trim();
+      if (!newName || newName.length > 20) {
+        settingsNameStatus.style.color = '#f87171';
+        settingsNameStatus.textContent = 'Name must be 1-20 characters';
+        return;
+      }
+      if (newName === roomData.displayName) {
+        settingsOverlay.classList.add('hidden');
+        return;
+      }
+      settingsNameSaveBtn.disabled = true;
+      settingsNameStatus.style.color = 'rgba(255,255,255,0.4)';
+      settingsNameStatus.textContent = 'Saving…';
+      try {
+        roomData.displayName = newName;
+        await saveRoom();
+        // Also update flappy name so minigame leaderboard stays in sync
+        localStorage.setItem('flappy_name', newName);
+        localStorage.setItem('flappy_custom_name', newName);
+        settingsNameStatus.style.color = '#34d399';
+        settingsNameStatus.textContent = '✓ Name updated!';
+        renderAll();
+        setTimeout(() => settingsOverlay.classList.add('hidden'), 800);
+      } catch (e) {
+        console.error('Name change error:', e);
+        settingsNameStatus.style.color = '#f87171';
+        settingsNameStatus.textContent = 'Failed to save — try again';
+      } finally {
+        settingsNameSaveBtn.disabled = false;
+      }
     });
 
     auth.onAuthStateChanged((user) => {

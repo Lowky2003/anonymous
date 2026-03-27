@@ -649,8 +649,8 @@
     .sidebar-toggle:hover { background: rgba(123, 94, 167, 1); }
     .sidebar-toggle:active { transform: scale(0.92); }
 
-    /* ── Notification bell ── */
-    .notif-bell {
+    /* ── Settings gear button (top-right) ── */
+    .settings-btn {
       position: fixed;
       top: 14px;
       right: 14px;
@@ -661,18 +661,16 @@
       border-radius: 12px;
       background: rgba(123, 94, 167, 0.85);
       color: #fff;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s, transform 0.15s;
+      transition: background 0.2s, transform 0.3s;
       backdrop-filter: blur(8px);
     }
-    .notif-bell:hover { background: rgba(123, 94, 167, 1); }
-    .notif-bell:active { transform: scale(0.92); }
-    .notif-bell.enabled { background: rgba(58, 176, 162, 0.85); }
-    .notif-bell.enabled:hover { background: rgba(58, 176, 162, 1); }
+    .settings-btn:hover { background: rgba(123, 94, 167, 1); transform: rotate(45deg); }
+    .settings-btn:active { transform: scale(0.92); }
     .notif-badge {
       position: absolute;
       top: -4px;
@@ -690,14 +688,83 @@
       display: none;
     }
     .notif-badge.show { display: block; }
-    @keyframes bellShake {
-      0%, 100% { transform: rotate(0); }
-      20% { transform: rotate(14deg); }
-      40% { transform: rotate(-14deg); }
-      60% { transform: rotate(8deg); }
-      80% { transform: rotate(-8deg); }
+    @keyframes gearPulse {
+      0%, 100% { transform: scale(1); }
+      30% { transform: scale(1.18) rotate(15deg); }
+      60% { transform: scale(1.05) rotate(-8deg); }
     }
-    .notif-bell.ring .bell-icon { animation: bellShake 0.5s ease; }
+
+    /* ── Settings modal ── */
+    .settings-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15, 12, 41, 0.85); backdrop-filter: blur(8px);
+    }
+    .settings-overlay.hidden { display: none; }
+    .settings-box {
+      width: 90%; max-width: 360px;
+      background: rgba(30, 25, 65, 0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 32px 28px 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .settings-box h3 {
+      font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 24px;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .settings-section { margin-bottom: 20px; }
+    .settings-label {
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .settings-row-label {
+      font-size: 14px; color: rgba(255,255,255,0.85);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .settings-toggle {
+      position: relative; width: 48px; height: 26px; cursor: pointer;
+    }
+    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-toggle .slider {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.15); border-radius: 13px;
+      transition: background 0.3s;
+    }
+    .settings-toggle .slider::before {
+      content: ''; position: absolute;
+      width: 20px; height: 20px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .settings-toggle input:checked + .slider {
+      background: rgba(58, 176, 162, 0.85);
+    }
+    .settings-toggle input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+    .settings-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0; }
+    .settings-logout-btn {
+      width: 100%; padding: 12px;
+      border: 1px solid rgba(248,113,113,0.3); border-radius: 14px;
+      background: rgba(248,113,113,0.08); color: #f87171;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .settings-logout-btn:hover { background: rgba(248,113,113,0.2); }
+    .settings-close-btn {
+      width: 100%; padding: 12px; margin-top: 8px;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .settings-close-btn:hover { background: rgba(255,255,255,0.12); }
 
     /* ── Left sidebar ── */
     .sidebar {
@@ -1368,11 +1435,31 @@
   <!-- Sidebar toggle -->
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">&#9776;</button>
 
-  <!-- Notification bell -->
-  <button class="notif-bell" id="notifBell" title="Toggle notifications">
-    <span class="bell-icon">🔔</span>
+  <!-- Settings gear -->
+  <button class="settings-btn" id="settingsBtn" title="Settings">
+    ⚙️
     <span class="notif-badge" id="notifBadge">0</span>
   </button>
+
+  <!-- Settings modal -->
+  <div class="settings-overlay hidden" id="settingsOverlay">
+    <div class="settings-box">
+      <h3>⚙️ Settings</h3>
+      <div class="settings-section">
+        <div class="settings-label">Notifications</div>
+        <div class="settings-row">
+          <span class="settings-row-label">🔔 Push Notifications</span>
+          <label class="settings-toggle">
+            <input type="checkbox" id="notifToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <hr class="settings-divider">
+      <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
+      <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
+    </div>
+  </div>
 
   <!-- Overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -2721,7 +2808,9 @@
     /* ═══════════════════════════════════════════
        Notifications — browser push + tab badge
        ═══════════════════════════════════════════ */
-    const notifBell  = document.getElementById('notifBell');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const notifToggle = document.getElementById('notifToggle');
     const notifBadge = document.getElementById('notifBadge');
     const originalTitle = document.title;
     let notifEnabled = localStorage.getItem('notif_enabled') === '1';
@@ -2733,21 +2822,19 @@
     let audioCtx = null;
     function ensureAudioCtx() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      // Resume if suspended (mobile browsers suspend until user gesture)
       if (audioCtx.state === 'suspended') audioCtx.resume();
       return audioCtx;
     }
     function playNotifSound() {
       try {
         const ctx = ensureAudioCtx();
-        // Two-tone chime: boop-boop
         [0, 0.15].forEach((delay, i) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.type = 'sine';
-          osc.frequency.value = i === 0 ? 660 : 880; // two rising notes
+          osc.frequency.value = i === 0 ? 660 : 880;
           gain.gain.setValueAtTime(0.18, ctx.currentTime + delay);
           gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.25);
           osc.start(ctx.currentTime + delay);
@@ -2756,7 +2843,6 @@
       } catch {}
     }
 
-    // Unlock audio context on first user interaction (required on mobile)
     function unlockAudio() {
       ensureAudioCtx();
       document.removeEventListener('touchstart', unlockAudio);
@@ -2765,23 +2851,37 @@
     document.addEventListener('touchstart', unlockAudio, { once: true });
     document.addEventListener('click', unlockAudio, { once: true });
 
-    function updateBellUI() {
-      notifBell.classList.toggle('enabled', notifEnabled);
-      notifBell.title = notifEnabled ? 'Notifications ON — click to turn off' : 'Notifications OFF — click to turn on';
-    }
-    updateBellUI();
+    // Settings modal open/close
+    settingsBtn.addEventListener('click', () => {
+      notifToggle.checked = notifEnabled;
+      settingsOverlay.classList.remove('hidden');
+    });
+    document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+      settingsOverlay.classList.add('hidden');
+    });
+    settingsOverlay.addEventListener('click', (e) => {
+      if (e.target === settingsOverlay) settingsOverlay.classList.add('hidden');
+    });
 
-    notifBell.addEventListener('click', async () => {
-      if (!notifEnabled) {
-        // Request permission
+    // Logout
+    document.getElementById('settingsLogoutBtn').addEventListener('click', async () => {
+      settingsOverlay.classList.add('hidden');
+      try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
+    });
+
+    // Notification toggle inside settings
+    notifToggle.addEventListener('change', async () => {
+      if (notifToggle.checked) {
         if ('Notification' in window && Notification.permission === 'default') {
           const perm = await Notification.requestPermission();
           if (perm !== 'granted') {
+            notifToggle.checked = false;
             showToast('Notifications blocked by browser', 'error');
             return;
           }
         }
         if ('Notification' in window && Notification.permission === 'denied') {
+          notifToggle.checked = false;
           showToast('Notifications blocked — enable in browser settings', 'error');
           return;
         }
@@ -2793,7 +2893,6 @@
         localStorage.setItem('notif_enabled', '0');
         showToast('Notifications disabled', 'success');
       }
-      updateBellUI();
     });
 
     // Clear badge when user focuses the tab
@@ -2806,9 +2905,10 @@
     });
 
     function ringBell() {
-      notifBell.classList.remove('ring');
-      void notifBell.offsetWidth; // force reflow
-      notifBell.classList.add('ring');
+      // Subtle shake on the settings gear when new messages arrive
+      settingsBtn.style.animation = 'none';
+      void settingsBtn.offsetWidth;
+      settingsBtn.style.animation = 'gearPulse 0.4s ease';
     }
 
     function flashTitle() {
