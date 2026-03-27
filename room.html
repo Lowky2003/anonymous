@@ -1126,14 +1126,17 @@
           return;
         }
 
-        // Tap on room to feed
+        // Tap anywhere on room to feed (covers plant-slot, decor, bg canvas, pet canvas, etc.)
         if (!selectedFood) return;
         const room = document.getElementById('roomView');
-        if (!room || !room.contains(e.target)) return;
+        if (!room) return;
+        const roomRect = room.getBoundingClientRect();
+        // Check if tap is within room bounds
+        const cx = e.clientX, cy = e.clientY;
+        if (cx < roomRect.left || cx > roomRect.right || cy < roomRect.top || cy > roomRect.bottom) return;
 
-        const rect = room.getBoundingClientRect();
-        const tapX = (e.clientX - rect.left) / rect.width;
-        const tapY = (e.clientY - rect.top) / rect.height;
+        const tapX = (cx - roomRect.left) / roomRect.width;
+        const tapY = (cy - roomRect.top) / roomRect.height;
 
         const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
         if (!activePets.length) return;
