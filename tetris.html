@@ -367,6 +367,7 @@
     <button class="touch-btn" id="btnDown">▼</button>
     <button class="touch-btn wide" id="btnDrop">DROP</button>
     <button class="touch-btn wide" id="btnHold" style="background:rgba(167,139,250,0.15);color:#a78bfa">HOLD</button>
+    <button class="touch-btn wide" id="btnPause" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7)">PAUSE</button>
   </div>
 
   <!-- Combo popup -->
@@ -379,7 +380,7 @@
       Playing as: <strong id="playerDisplayName" style="color:#a78bfa">...</strong>
     </div>
     <button class="play-btn" id="startBtn">Play!</button>
-    <div class="tap-hint">← → Move &nbsp; ↑ Rotate &nbsp; ↓ Soft Drop &nbsp; Space Hard Drop &nbsp; C Hold</div>
+    <div class="tap-hint">← → Move &nbsp; ↑ Rotate &nbsp; ↓ Soft Drop &nbsp; Space Hard Drop &nbsp; C Hold &nbsp; P Pause</div>
     <div class="leaderboard" id="startLeaderboard">
       <div class="lb-title">🏆 Leaderboard</div>
       <div id="startLbBody"><div class="lb-empty">Loading…</div></div>
@@ -597,7 +598,7 @@
     });
 
     let board, currentPiece, nextPiece, holdPiece, holdUsed, score, lines, combo, coinsEarned;
-    let gameRunning, dropTimer, dropInterval, lockTimer, animatingLines;
+    let gameRunning, gamePaused, dropTimer, dropInterval, lockTimer, animatingLines;
     let bestLocalScore;
 
     function getPlayerName() {
@@ -849,19 +850,19 @@
        Game Actions
        ═══════════════════════════════ */
     function moveLeft() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       const test = { ...currentPiece, col: currentPiece.col - 1 };
       if (valid(test, board)) { currentPiece.col--; drawBoard(); }
     }
 
     function moveRight() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       const test = { ...currentPiece, col: currentPiece.col + 1 };
       if (valid(test, board)) { currentPiece.col++; drawBoard(); }
     }
 
     function softDrop() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       const test = { ...currentPiece, row: currentPiece.row + 1 };
       if (valid(test, board)) {
         currentPiece.row++;
@@ -870,7 +871,7 @@
     }
 
     function hardDrop() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       while (valid({ ...currentPiece, row: currentPiece.row + 1 }, board)) {
         currentPiece.row++;
       }
@@ -879,7 +880,7 @@
     }
 
     function holdSwap() {
-      if (!gameRunning || animatingLines || holdUsed) return;
+      if (!gameRunning || animatingLines || holdUsed || gamePaused) return;
       holdUsed = true;
       if (holdPiece) {
         // Swap current with held
@@ -908,7 +909,7 @@
     }
 
     function rotate() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       const rotated = rotateCW(currentPiece.shape);
       let test = { ...currentPiece, shape: rotated };
       // Wall kicks: try offsets 0, -1, +1, -2, +2
@@ -961,7 +962,7 @@
     }
 
     function tick() {
-      if (!gameRunning || animatingLines) return;
+      if (!gameRunning || animatingLines || gamePaused) return;
       const test = { ...currentPiece, row: currentPiece.row + 1 };
       if (valid(test, board)) {
         currentPiece.row++;
@@ -969,6 +970,28 @@
       } else {
         clearInterval(dropTimer);
         lockPiece();
+      }
+    }
+
+    function togglePause() {
+      if (!gameRunning || animatingLines) return;
+      gamePaused = !gamePaused;
+      if (gamePaused) {
+        clearInterval(dropTimer);
+        // Draw pause overlay
+        ctx2d.fillStyle = 'rgba(15,12,41,0.85)';
+        ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+        ctx2d.fillStyle = '#fff';
+        ctx2d.font = 'bold ' + Math.floor(BLOCK * 1.2) + 'px sans-serif';
+        ctx2d.textAlign = 'center';
+        ctx2d.textBaseline = 'middle';
+        ctx2d.fillText('PAUSED', canvas.width / 2, canvas.height / 2 - 10);
+        ctx2d.font = Math.floor(BLOCK * 0.55) + 'px sans-serif';
+        ctx2d.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx2d.fillText('Press P or tap to resume', canvas.width / 2, canvas.height / 2 + 20);
+      } else {
+        dropTimer = setInterval(tick, dropInterval);
+        drawBoard();
       }
     }
 
@@ -980,6 +1003,7 @@
       board = createBoard();
       score = 0; lines = 0; combo = 0; coinsEarned = 0;
       holdPiece = null; holdUsed = false;
+      gamePaused = false;
       dropInterval = 800; animatingLines = false;
       flashRows = []; flashFrame = 0;
       drawHold();
@@ -1032,6 +1056,8 @@
         }
         return;
       }
+      if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); togglePause(); return; }
+      if (gamePaused) return;
       switch (e.code) {
         case 'ArrowLeft': case 'KeyA':  e.preventDefault(); moveLeft(); break;
         case 'ArrowRight': case 'KeyD': e.preventDefault(); moveRight(); break;
@@ -1071,6 +1097,8 @@
     document.getElementById('btnDrop').addEventListener('touchstart', e => { e.preventDefault(); hardDrop(); }, { passive: false });
     document.getElementById('btnHold').addEventListener('click', holdSwap);
     document.getElementById('btnHold').addEventListener('touchstart', e => { e.preventDefault(); holdSwap(); }, { passive: false });
+    document.getElementById('btnPause').addEventListener('click', togglePause);
+    document.getElementById('btnPause').addEventListener('touchstart', e => { e.preventDefault(); togglePause(); }, { passive: false });
 
     /* ═══════════════════════════════
        Buttons
@@ -1209,6 +1237,7 @@
     holdPiece = null;
     holdUsed = false;
     gameRunning = false;
+    gamePaused = false;
     animatingLines = false;
     drawBoard();
 
