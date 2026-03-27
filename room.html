@@ -647,7 +647,7 @@
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '' };
+    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '', lastCoinCollect: 0 };
 
     /* ═══════════════════════════════
        Helpers
@@ -678,6 +678,7 @@
         placedDecors: roomData.placedDecors,
         plantPosition: roomData.plantPosition || null,
         displayName: currentUser.displayName || 'Anonymous',
+        lastCoinCollect: roomData.lastCoinCollect || Date.now(),
         updatedAt: Date.now()
       };
       await userDocRef().set(data, { merge: true });
@@ -686,7 +687,10 @@
     /* ═══════════════════════════════
        Init
        ═══════════════════════════════ */
+    let _offlineCoinsCollected = false;
+    let _plantCoinInterval = null;
     async function initRoom() {
+      _offlineCoinsCollected = false;
       initRoomDropZone();
       initDecorDrag();
       initMobileFoodTap();
@@ -714,6 +718,7 @@
             return d;
           });
           roomData.displayName = d.displayName ?? '';
+          roomData.lastCoinCollect = d.lastCoinCollect ?? d.updatedAt ?? Date.now();
           // Decay hunger based on elapsed time (1% per 10 min)
           const lastUpdate = d.updatedAt ?? Date.now();
           const elapsed = Date.now() - lastUpdate;
@@ -726,6 +731,24 @@
               if (newVal !== cur) { roomData.petHunger[pid] = newVal; changed = true; }
             }
             if (changed) saveRoom();
+          }
+          // Plant passive coin generation (offline earnings)
+          if (!_offlineCoinsCollected && roomData.plant) {
+            _offlineCoinsCollected = true;
+            const plantLvl = roomData.plantLevels[roomData.plant] || 1;
+            const coinsPerCycle = plantLvl * 2; // 2 coins per level per 5 min
+            const lastCollect = roomData.lastCoinCollect || Date.now();
+            const elapsed = Date.now() - lastCollect;
+            const cycles = Math.floor(elapsed / (5 * 60 * 1000));
+            if (cycles > 0) {
+              const earned = cycles * coinsPerCycle;
+              roomData.coins += earned;
+              roomData.lastCoinCollect = Date.now();
+              saveRoom();
+              setTimeout(() => {
+                showToast('🌱 Your Lv.' + plantLvl + ' plant earned ' + earned + ' coins while you were away!', 'success');
+              }, 800);
+            }
           }
         }
         renderAll();
@@ -748,6 +771,19 @@
         }
         if (changed) { await saveRoom(); renderAll(); }
       }, 10 * 60 * 1000);
+
+      // Plant passive coin generation: every 5 min while online
+      if (_plantCoinInterval) clearInterval(_plantCoinInterval);
+      _plantCoinInterval = setInterval(async () => {
+        if (viewingUid !== currentUid || !roomData.plant) return;
+        const plantLvl = roomData.plantLevels[roomData.plant] || 1;
+        const earned = plantLvl * 2;
+        roomData.coins += earned;
+        roomData.lastCoinCollect = Date.now();
+        await saveRoom();
+        renderAll();
+        showToast('🌱 Plant earned ' + earned + ' coins!', 'success');
+      }, 5 * 60 * 1000);
     }
 
     /* ═══════════════════════════════
@@ -2645,15 +2681,15 @@
 
       switch (action) {
         case 'nap': case 'sleep': {
-          // Floating Z's — continuously visible throughout sleep
+          // Floating Z's — continuously visible, close to pet head
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           const zCount = 3;
           const cycle = (t % 3000) / 3000; // 0→1 loop every 3s
           for (let i = 0; i < zCount; i++) {
             const phase = (cycle + i / zCount) % 1; // staggered
-            const zy = py - size * 1.1 - phase * 50 * ds;
-            const zx = px + (8 + i * 8) * ds + Math.sin(t / 500 + i * 2) * 5 * ds;
+            const zy = py - size * 0.4 - phase * 30 * ds;
+            const zx = px + (5 + i * 5) * ds + Math.sin(t / 500 + i * 2) * 3 * ds;
             const fadeIn = Math.min(1, phase * 4);
             const fadeOut = Math.max(0, 1 - (phase - 0.6) / 0.4);
             const alpha = fadeIn * fadeOut * 0.75 * ease;
