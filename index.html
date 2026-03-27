@@ -2308,14 +2308,32 @@
         if (btn) btn.textContent = '💬 Reply' + (a.replies.length ? ' (' + a.replies.length + ')' : '');
         return;
       }
-      // Re-render replies inside open container
-      const inputRow = container.querySelector('.reply-input-row');
-      container.innerHTML = '';
+      // Preserve user's in-progress text and pending image before re-rendering
+      const oldInput = container.querySelector('.reply-input-row input[type="text"]');
+      const savedText = oldInput ? oldInput.value : '';
+      const oldPreview = container.querySelector('.reply-preview');
+      const savedImage = oldPreview && oldPreview.style.display !== 'none'
+        ? oldPreview.querySelector('img')?.src : null;
+
+      // Re-render reply items only, keep input row
+      const replyItems = container.querySelectorAll('.reply-item');
+      replyItems.forEach(el => el.remove());
+      const inputWrapper = container.querySelector('.reply-input-row')?.parentElement;
       a.replies.forEach(r => {
-        container.appendChild(buildReplyItem(r));
+        container.insertBefore(buildReplyItem(r), inputWrapper);
       });
-      // Re-add input row
-      container.appendChild(buildReplyInput(a.id));
+
+      // Restore user's in-progress text and pending image
+      const newInput = container.querySelector('.reply-input-row input[type="text"]');
+      if (newInput && savedText) newInput.value = savedText;
+      if (savedImage) {
+        const newPreview = container.querySelector('.reply-preview');
+        const newPreviewImg = newPreview?.querySelector('img');
+        if (newPreview && newPreviewImg) {
+          newPreviewImg.src = savedImage;
+          newPreview.style.display = 'flex';
+        }
+      }
       // Update button count
       const btn = bubble.querySelector('.reply-toggle');
       if (btn) btn.textContent = '💬 Reply (' + a.replies.length + ')';
