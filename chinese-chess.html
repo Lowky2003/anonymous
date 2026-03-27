@@ -195,14 +195,6 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
       <button class="create-go" id="createGameBtn" disabled>Select a bet to create game</button>
     </div>
 
-    <!-- Invite player -->
-    <div class="invite-section" id="inviteSection" style="display:none">
-      <h3>📨 Invite a Player</h3>
-      <div class="online-users" id="onlineUsersList">
-        <div class="no-rooms">Looking for online players…</div>
-      </div>
-    </div>
-
     <!-- Active rooms -->
     <div class="room-list">
       <h3>🏟️ Active Games</h3>
@@ -217,6 +209,13 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
     <h2>⏳ Waiting Room</h2>
     <div class="waiting-bet" id="waitBet">🪙 0 coins</div>
     <div class="waiting-players" id="waitPlayers"></div>
+    <!-- Invite players from waiting room -->
+    <div class="invite-section" id="waitInviteSection" style="display:none;text-align:left;margin-bottom:20px">
+      <h3>📨 Invite a Player</h3>
+      <div class="online-users" id="waitOnlineUsersList">
+        <div class="no-rooms">Looking for online players…</div>
+      </div>
+    </div>
     <button class="waiting-start" id="waitStartBtn" disabled>Start Game</button>
     <br>
     <button class="waiting-leave" id="waitLeaveBtn">Leave Room</button>
@@ -274,8 +273,6 @@ const gameView       = document.getElementById('gameView');
 const lobbyCoins     = document.getElementById('lobbyCoins');
 const betOptions     = document.getElementById('betOptions');
 const createGameBtn  = document.getElementById('createGameBtn');
-const inviteSection  = document.getElementById('inviteSection');
-const onlineUsersList= document.getElementById('onlineUsersList');
 const roomListBody   = document.getElementById('roomListBody');
 const waitBet        = document.getElementById('waitBet');
 const waitPlayers    = document.getElementById('waitPlayers');
@@ -292,8 +289,8 @@ const spectatorBar   = document.getElementById('spectatorBar');
 const resignBtn      = document.getElementById('resignBtn');
 const backLobbyBtn   = document.getElementById('backLobbyBtn');
 const backBtn        = document.getElementById('backBtn');
-
-let currentUser = null;
+const waitInviteSection  = document.getElementById('waitInviteSection');
+const waitOnlineUsersList= document.getElementById('waitOnlineUsersList');
 let currentUid  = null;
 let myName      = 'Anonymous';
 let myCoins     = 0;
@@ -491,50 +488,52 @@ function cleanupPresence() {
 
 function listenPresence() {
   if (unsubPresence) unsubPresence();
-  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-  unsubPresence = presenceRef.where('ts', '>', fiveMinAgo).onSnapshot((snap) => {
+  // Show ALL registered users (from rooms collection) — they'll see the invite popup on any page
+  unsubPresence = roomsRef.onSnapshot((snap) => {
     const users = [];
     snap.forEach(doc => {
       const d = doc.data();
-      if (d.uid !== currentUid) users.push(d);
+      if (doc.id !== currentUid && d.displayName) {
+        users.push({ uid: doc.id, name: d.displayName });
+      }
     });
     renderOnlineUsers(users);
   });
-  // Update presence timestamp every 2 min
-  if (window._presenceInterval) clearInterval(window._presenceInterval);
-  window._presenceInterval = setInterval(() => {
-    if (presenceDocRef) presenceDocRef.update({ ts: Date.now() }).catch(() => {});
-  }, 120000);
 }
 
 function renderOnlineUsers(users) {
-  if (!users.length) {
-    inviteSection.style.display = 'none';
-    return;
-  }
-  inviteSection.style.display = '';
-  onlineUsersList.innerHTML = users.map(u =>
+  const html = users.length ? users.map(u =>
     '<div class="online-user-row">' +
       '<span class="online-user-name">' + escapeHtml(u.name) + '</span>' +
       '<button class="invite-btn" data-uid="' + escapeHtml(u.uid) + '">Invite</button>' +
     '</div>'
-  ).join('');
+  ).join('') : '';
+
+  // Waiting room invite list (show when in waiting view and guest hasn't joined)
+  const inWaiting = waitingView.style.display !== 'none';
+  if (!users.length || !inWaiting || (currentGameData && currentGameData.guestUid)) {
+    waitInviteSection.style.display = 'none';
+  } else {
+    waitInviteSection.style.display = '';
+    waitOnlineUsersList.innerHTML = html;
+  }
 }
 
-// Send invite
-onlineUsersList.addEventListener('click', async (e) => {
+// Send invite (shared handler for both lobby and waiting room lists)
+async function handleInviteClick(e) {
   const btn = e.target.closest('.invite-btn');
   if (!btn || !currentGameId) return;
   btn.disabled = true;
   btn.textContent = 'Sent';
   const targetUid = btn.dataset.uid;
+  const bet = currentGameData ? currentGameData.bet : selectedBet;
   try {
     await invitesRef.add({
       fromUid: currentUid,
       fromName: myName,
       toUid: targetUid,
       gameId: currentGameId,
-      bet: selectedBet,
+      bet: bet,
       status: 'pending',
       ts: Date.now()
     });
@@ -544,7 +543,8 @@ onlineUsersList.addEventListener('click', async (e) => {
     btn.disabled = false;
     btn.textContent = 'Invite';
   }
-});
+}
+waitOnlineUsersList.addEventListener('click', handleInviteClick);
 
 // ── Listen invites for me ──
 function listenInvites() {
@@ -646,6 +646,8 @@ roomListBody.addEventListener('click', (e) => {
 function enterWaitingRoom(gameId) {
   currentGameId = gameId;
   showView('waiting');
+  // Re-trigger presence so invite list renders while waiting view is visible
+  listenPresence();
   // Listen to this game doc
   if (unsubGame) unsubGame();
   unsubGame = gamesRef.doc(gameId).onSnapshot((snap) => {
@@ -665,6 +667,11 @@ function enterWaitingRoom(gameId) {
     const isHost = data.hostUid === currentUid;
     waitStartBtn.disabled = !isHost || !data.guestUid;
     waitStartBtn.style.display = isHost ? '' : 'none';
+
+    // Hide invite section once guest has joined
+    if (data.guestUid) {
+      waitInviteSection.style.display = 'none';
+    }
 
     // If game started, go to game
     if (data.status === 'playing') {
