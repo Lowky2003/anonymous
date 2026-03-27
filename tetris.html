@@ -284,6 +284,16 @@
       .touch-btn { height: 48px; width: 56px; font-size: 20px; }
       .touch-btn.wide { width: 120px; }
     }
+    /* Chess invite popup */
+    .chess-invite-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
+    .chess-invite-box{background:rgba(30,25,60,.97);backdrop-filter:blur(16px);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
+    .chess-invite-box h3{font-size:18px;margin-bottom:8px}
+    .chess-invite-box .ci-from{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px}
+    .chess-invite-box .ci-bet{font-size:22px;font-weight:700;color:#f7c97e;margin-bottom:20px}
+    .chess-invite-box .ci-buttons{display:flex;gap:10px}
+    .chess-invite-box .ci-accept{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#3ab0a2,#2d8f83);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+    .chess-invite-box .ci-reject{flex:1;padding:12px;border:1px solid rgba(255,80,80,.3);border-radius:12px;background:transparent;color:#ff6b6b;font-size:15px;font-weight:600;cursor:pointer}
+    @keyframes chessInvFade{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
@@ -1134,6 +1144,46 @@
     gameRunning = false;
     animatingLines = false;
     drawBoard();
+
+    // ═══ Chinese Chess invite listener ═══
+    (function() {
+      let chessInvUnsub = null;
+      auth.onAuthStateChanged((u) => {
+        if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
+        if (!u) return;
+        chessInvUnsub = db.collection('chess_invites')
+          .where('toUid', '==', u.uid)
+          .where('status', '==', 'pending')
+          .onSnapshot((snap) => {
+            snap.docChanges().forEach(ch => {
+              if (ch.type !== 'added') return;
+              const inv = ch.doc.data();
+              const id = ch.doc.id;
+              if (document.querySelector('.chess-invite-overlay')) return;
+              const ov = document.createElement('div');
+              ov.className = 'chess-invite-overlay';
+              ov.innerHTML = '<div class="chess-invite-box">' +
+                '<h3>♟️ Chess Challenge!</h3>' +
+                '<div class="ci-from">' + (inv.fromName||'Someone') + ' invites you</div>' +
+                '<div class="ci-bet">🪙 ' + inv.bet + ' coins</div>' +
+                '<div class="ci-buttons">' +
+                  '<button class="ci-reject">Reject</button>' +
+                  '<button class="ci-accept">Accept</button>' +
+                '</div></div>';
+              document.body.appendChild(ov);
+              ov.querySelector('.ci-accept').addEventListener('click', () => {
+                ov.remove();
+                db.collection('chess_invites').doc(id).update({status:'accepted'});
+                window.location.href = 'chinese-chess.html?join=' + inv.gameId;
+              });
+              ov.querySelector('.ci-reject').addEventListener('click', () => {
+                ov.remove();
+                db.collection('chess_invites').doc(id).update({status:'rejected'});
+              });
+            });
+          });
+      });
+    })();
   </script>
 </body>
 </html>
