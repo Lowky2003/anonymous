@@ -726,10 +726,6 @@ async function joinGame(gameId) {
       return;
     }
     if (data.guestUid) { showToast('Room is full', 'error'); return; }
-    // Fetch fresh coins from Firestore to avoid stale myCoins
-    const coinSnap = await roomsRef.doc(currentUid).get();
-    const freshCoins = coinSnap.exists ? (coinSnap.data().coins || 0) : 0;
-    if (data.bet > freshCoins) { showToast('Not enough coins (need ' + data.bet + ')', 'error'); return; }
 
     await gamesRef.doc(gameId).update({
       guestUid: currentUid,
@@ -749,6 +745,21 @@ waitStartBtn.addEventListener('click', async () => {
   if (!currentGameId) return;
   waitStartBtn.disabled = true;
   try {
+    // Verify both players have enough coins before starting
+    const gameSnap = await gamesRef.doc(currentGameId).get();
+    if (!gameSnap.exists) { showToast('Game not found', 'error'); waitStartBtn.disabled = false; return; }
+    const gData = gameSnap.data();
+    const bet = gData.bet || 0;
+    if (bet > 0) {
+      const [hostCoinSnap, guestCoinSnap] = await Promise.all([
+        roomsRef.doc(gData.redUid).get(),
+        roomsRef.doc(gData.blackUid).get()
+      ]);
+      const hostCoins = hostCoinSnap.exists ? (hostCoinSnap.data().coins || 0) : 0;
+      const guestCoins = guestCoinSnap.exists ? (guestCoinSnap.data().coins || 0) : 0;
+      if (hostCoins < bet) { showToast('You don\'t have enough coins (need ' + bet + ')', 'error'); waitStartBtn.disabled = false; return; }
+      if (guestCoins < bet) { showToast('Opponent doesn\'t have enough coins (need ' + bet + ')', 'error'); waitStartBtn.disabled = false; return; }
+    }
     await gamesRef.doc(currentGameId).update({
       status: 'playing',
       board: boardToFirestore(initialBoard()),
