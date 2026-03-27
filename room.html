@@ -2640,17 +2640,23 @@
 
       switch (action) {
         case 'nap': case 'sleep': {
-          // Floating Z's
-          ctx.fillStyle = 'rgba(150,180,255,0.6)';
-          ctx.font = Math.round(12 * ds) + 'px sans-serif';
+          // Floating Z's — continuously visible throughout sleep
           ctx.textAlign = 'center';
-          for (let i = 0; i < 3; i++) {
-            const zy = py - size * 1.2 - (ap * 40 + i * 14) * ds;
-            const zx = px + (10 + i * 6) * ds + Math.sin(t / 400 + i) * 4;
-            const za = Math.max(0, 1 - (ap + i * 0.15));
-            ctx.globalAlpha = za * 0.6;
-            ctx.font = Math.round((10 + i * 3) * ds) + 'px sans-serif';
-            ctx.fillText('Z', zx, zy);
+          ctx.textBaseline = 'middle';
+          const zCount = 3;
+          const cycle = (t % 3000) / 3000; // 0→1 loop every 3s
+          for (let i = 0; i < zCount; i++) {
+            const phase = (cycle + i / zCount) % 1; // staggered
+            const zy = py - size * 1.1 - phase * 50 * ds;
+            const zx = px + (8 + i * 8) * ds + Math.sin(t / 500 + i * 2) * 5 * ds;
+            const fadeIn = Math.min(1, phase * 4);
+            const fadeOut = Math.max(0, 1 - (phase - 0.6) / 0.4);
+            const alpha = fadeIn * fadeOut * 0.75 * ease;
+            if (alpha <= 0) continue;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = 'rgba(150,180,255,0.85)';
+            ctx.font = 'bold ' + Math.round((11 + i * 4) * ds) + 'px sans-serif';
+            ctx.fillText('z', zx, zy);
           }
           break;
         }
