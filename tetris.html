@@ -691,10 +691,14 @@
         if (combo > 1) showCombo(combo, fullRows.length);
         else if (fullRows.length >= 2) showCombo(0, fullRows.length);
 
-        // Save row data for flash animation, then IMMEDIATELY remove from board
+        // Save row data for flash animation, then remove from board
         const savedRows = fullRows.map(r => ({ index: r, cells: [...board[r]] }));
+        // Remove all full rows first (descending to keep indices valid)
         for (const r of fullRows.sort((a, b) => b - a)) {
           board.splice(r, 1);
+        }
+        // Then add empty rows at top
+        for (let i = 0; i < fullRows.length; i++) {
           board.unshift(Array(COLS).fill(0));
         }
 
