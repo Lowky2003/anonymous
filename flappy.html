@@ -535,30 +535,26 @@
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const loginError = document.getElementById('loginError');
 
-    // Handle redirect result (fires on page load after redirect sign-in)
+    // Handle redirect result (fallback — fires on page load after redirect sign-in)
     auth.getRedirectResult().catch((err) => {
       if (err.code) {
         loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
       }
     });
 
-    // Detect mobile (includes iPadOS 13+ which reports as Macintosh with touch)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+    const provider = new firebase.auth.GoogleAuthProvider();
 
     googleLoginBtn.addEventListener('click', async () => {
       googleLoginBtn.disabled = true;
       loginError.textContent = '';
-      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        if (isMobile && location.protocol !== 'file:') {
-          await auth.signInWithRedirect(provider);
-        } else {
-          await auth.signInWithPopup(provider);
-        }
+        // Always try popup first — works on both desktop and mobile (opens new tab).
+        // signInWithRedirect is broken on most mobile browsers due to
+        // third-party cookie blocking in Safari/Chrome.
+        await auth.signInWithPopup(provider);
       } catch (err) {
-        if (err.code === 'auth/popup-blocked') {
-          // Popup blocked — fall back to redirect
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+          // Popup blocked or unsupported — fall back to redirect
           try { await auth.signInWithRedirect(provider); } catch (e) {
             loginError.textContent = 'Login failed: ' + (e.message || 'Unknown error');
           }
