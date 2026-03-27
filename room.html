@@ -1253,10 +1253,11 @@
       plantEl.innerHTML = plantHtml;
     }
 
-    async function renderVisitList() {
+    let unsubVisitList = null;
+    function renderVisitList() {
       const el = document.getElementById('visitList');
-      try {
-        const snap = await db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).get();
+      if (unsubVisitList) unsubVisitList();
+      unsubVisitList = db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).onSnapshot((snap) => {
         const rooms = [];
         const now = Date.now();
         const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
@@ -1288,9 +1289,9 @@
             '</div>' +
             '<span class="visit-arrow">›</span></div>';
         }).join('');
-      } catch {
+      }, () => {
         el.innerHTML = '<div class="visit-empty">Failed to load rooms</div>';
-      }
+      });
     }
 
     function escapeHtml(s) {

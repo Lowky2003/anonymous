@@ -540,22 +540,32 @@ function setPresence() {
   if (presenceDocRef) presenceDocRef.delete().catch(() => {});
   presenceDocRef = presenceRef.doc(currentUid);
   presenceDocRef.set({ uid: currentUid, name: myName, ts: Date.now() });
+  // Update lastSeen on rooms doc for cross-page online detection
+  roomsRef.doc(currentUid).set({ lastSeen: Date.now() }, { merge: true }).catch(() => {});
+  // Heartbeat: update lastSeen every 2 min
+  if (window._chessHeartbeat) clearInterval(window._chessHeartbeat);
+  window._chessHeartbeat = setInterval(() => {
+    roomsRef.doc(currentUid).set({ lastSeen: Date.now() }, { merge: true }).catch(() => {});
+  }, 2 * 60 * 1000);
   // Remove on unload
   window.addEventListener('beforeunload', cleanupPresence);
 }
 function cleanupPresence() {
   if (presenceDocRef) presenceDocRef.delete().catch(() => {});
+  if (window._chessHeartbeat) clearInterval(window._chessHeartbeat);
 }
 
 function listenPresence() {
   if (unsubPresence) unsubPresence();
-  // Show ALL registered users (from rooms collection) — they'll see the invite popup on any page
+  const ONLINE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
   unsubPresence = roomsRef.onSnapshot((snap) => {
+    const now = Date.now();
     const users = [];
     snap.forEach(doc => {
       const d = doc.data();
       if (doc.id !== currentUid && d.displayName) {
-        users.push({ uid: doc.id, name: d.displayName });
+        const isOnline = d.lastSeen && (now - d.lastSeen) < ONLINE_THRESHOLD;
+        if (isOnline) users.push({ uid: doc.id, name: d.displayName });
       }
     });
     renderOnlineUsers(users);
