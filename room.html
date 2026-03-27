@@ -695,12 +695,12 @@
     ];
 
     const PLANTS = [
-      { id: 'seedling', emoji: '🌱', name: 'Seedling',    cost: 200 },
-      { id: 'tulip',    emoji: '🌷', name: 'Tulip',       cost: 400 },
-      { id: 'sunflower',emoji: '🌻', name: 'Sunflower',   cost: 600 },
-      { id: 'tree',     emoji: '🌳', name: 'Tree',        cost: 1000 },
-      { id: 'cherry',   emoji: '🌸', name: 'Cherry Tree', cost: 1500 },
-      { id: 'cactus',   emoji: '🌵', name: 'Cactus',      cost: 300 },
+      { id: 'seedling', emoji: '🌱', name: 'Seedling',    cost: 200,  coinRate: 1 },
+      { id: 'cactus',   emoji: '🌵', name: 'Cactus',      cost: 300,  coinRate: 2 },
+      { id: 'tulip',    emoji: '🌷', name: 'Tulip',       cost: 400,  coinRate: 3 },
+      { id: 'sunflower',emoji: '🌻', name: 'Sunflower',   cost: 600,  coinRate: 4 },
+      { id: 'tree',     emoji: '🌳', name: 'Tree',        cost: 1000, coinRate: 6 },
+      { id: 'cherry',   emoji: '🌸', name: 'Cherry Tree', cost: 1500, coinRate: 10 },
     ];
 
     const PET_SIZES = {
@@ -881,7 +881,9 @@
           if (!_offlineCoinsCollected && roomData.plant) {
             _offlineCoinsCollected = true;
             const plantLvl = roomData.plantLevels[roomData.plant] || 1;
-            const coinsPerCycle = plantLvl * 2; // 2 coins per level per 5 min
+            const plantDef = PLANTS.find(p => p.id === roomData.plant);
+            const baseRate = plantDef ? plantDef.coinRate : 1;
+            const coinsPerCycle = plantLvl * baseRate;
             const lastCollect = roomData.lastCoinCollect || Date.now();
             const elapsed = Date.now() - lastCollect;
             const cycles = Math.floor(elapsed / (5 * 60 * 1000));
@@ -891,7 +893,7 @@
               roomData.lastCoinCollect = Date.now();
               saveRoom();
               setTimeout(() => {
-                showToast('🌱 Your Lv.' + plantLvl + ' plant earned ' + earned + ' coins while you were away!', 'success');
+                showToast('🌱 Your Lv.' + plantLvl + ' ' + (plantDef ? plantDef.name : 'plant') + ' earned ' + earned + ' coins while you were away!', 'success');
               }, 800);
             }
           }
@@ -922,12 +924,14 @@
       _plantCoinInterval = setInterval(async () => {
         if (viewingUid !== currentUid || !roomData.plant) return;
         const plantLvl = roomData.plantLevels[roomData.plant] || 1;
-        const earned = plantLvl * 2;
+        const plantDef = PLANTS.find(p => p.id === roomData.plant);
+        const baseRate = plantDef ? plantDef.coinRate : 1;
+        const earned = plantLvl * baseRate;
         roomData.coins += earned;
         roomData.lastCoinCollect = Date.now();
         await saveRoom();
         renderAll();
-        showToast('🌱 Plant earned ' + earned + ' coins!', 'success');
+        showToast('🌱 ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins!', 'success');
       }, 5 * 60 * 1000);
     }
 
@@ -1072,6 +1076,7 @@
         return '<div class="shop-card' + (isEquipped ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
+          (type === 'plant' && item.coinRate ? '<div style="font-size:10px;color:#f7c97e;margin:2px 0">' + coinSVG(10) + ' ' + item.coinRate + '/5min × Lv</div>' : '') +
           (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
