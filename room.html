@@ -635,13 +635,14 @@
 
     // Handle redirect result (fires on page load after redirect sign-in)
     auth.getRedirectResult().catch((err) => {
-      if (err.code && err.code !== 'auth/popup-closed-by-user') {
+      if (err.code) {
         document.getElementById('loginError').textContent = 'Login failed: ' + (err.message || 'Unknown');
       }
     });
 
-    // Detect mobile: use redirect (popups are blocked on mobile browsers)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // Detect mobile (includes iPadOS 13+ which reports as Macintosh with touch)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 
     document.getElementById('googleLoginBtn').addEventListener('click', async () => {
       const btn = document.getElementById('googleLoginBtn');
@@ -649,13 +650,17 @@
       document.getElementById('loginError').textContent = '';
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        if (isMobile) {
+        if (isMobile && location.protocol !== 'file:') {
           await auth.signInWithRedirect(provider);
         } else {
           await auth.signInWithPopup(provider);
         }
       } catch (err) {
-        if (err.code !== 'auth/popup-closed-by-user') {
+        if (err.code === 'auth/popup-blocked') {
+          try { await auth.signInWithRedirect(provider); } catch (e) {
+            document.getElementById('loginError').textContent = 'Login failed: ' + (e.message || 'Unknown');
+          }
+        } else if (err.code !== 'auth/popup-closed-by-user') {
           document.getElementById('loginError').textContent = 'Login failed: ' + (err.message || 'Unknown');
         }
       } finally { btn.disabled = false; }
