@@ -333,6 +333,10 @@
     <canvas id="gameCanvas"></canvas>
     <div class="side-panel">
       <div class="panel-box">
+        <div class="panel-label">Hold <kbd style="font-size:8px;opacity:.4;margin-left:2px">C</kbd></div>
+        <canvas id="holdCanvas" width="80" height="80"></canvas>
+      </div>
+      <div class="panel-box">
         <div class="panel-label">Next</div>
         <canvas id="nextCanvas" width="80" height="80"></canvas>
       </div>
@@ -362,6 +366,7 @@
     <button class="touch-btn" id="btnRight">▶</button>
     <button class="touch-btn" id="btnDown">▼</button>
     <button class="touch-btn wide" id="btnDrop">DROP</button>
+    <button class="touch-btn wide" id="btnHold" style="background:rgba(167,139,250,0.15);color:#a78bfa">HOLD</button>
   </div>
 
   <!-- Combo popup -->
@@ -374,7 +379,7 @@
       Playing as: <strong id="playerDisplayName" style="color:#a78bfa">...</strong>
     </div>
     <button class="play-btn" id="startBtn">Play!</button>
-    <div class="tap-hint">← → Move &nbsp; ↑ Rotate &nbsp; ↓ Soft Drop &nbsp; Space Hard Drop</div>
+    <div class="tap-hint">← → Move &nbsp; ↑ Rotate &nbsp; ↓ Soft Drop &nbsp; Space Hard Drop &nbsp; C Hold</div>
     <div class="leaderboard" id="startLeaderboard">
       <div class="lb-title">🏆 Leaderboard</div>
       <div id="startLbBody"><div class="lb-empty">Loading…</div></div>
@@ -578,6 +583,8 @@
     const ctx2d  = canvas.getContext('2d');
     const nextCanvas = document.getElementById('nextCanvas');
     const nextCtx    = nextCanvas.getContext('2d');
+    const holdCanvas = document.getElementById('holdCanvas');
+    const holdCtx    = holdCanvas.getContext('2d');
 
     function resizeBoard() {
       BLOCK = calcBlockSize();
@@ -589,7 +596,7 @@
       if (!gameRunning) resizeBoard();
     });
 
-    let board, currentPiece, nextPiece, score, lines, combo, coinsEarned;
+    let board, currentPiece, nextPiece, holdPiece, holdUsed, score, lines, combo, coinsEarned;
     let gameRunning, dropTimer, dropInterval, lockTimer, animatingLines;
     let bestLocalScore;
 
@@ -681,22 +688,25 @@
         if (combo > 1) showCombo(combo, fullRows.length);
         else if (fullRows.length >= 2) showCombo(0, fullRows.length);
 
-        // Animate flash then remove
-        animatingLines = true;
-        flashRows = fullRows;
-        flashFrame = 0;
-        animateFlash(() => {
-          // Remove rows
-          for (const r of fullRows.sort((a, b) => b - a)) {
-            board.splice(r, 1);
-            board.unshift(Array(COLS).fill(0));
-          }
-          animatingLines = false;
-          spawnNext();
-        });
+        // Save row data for flash animation, then IMMEDIATELY remove from board
+        const savedRows = fullRows.map(r => ({ index: r, cells: [...board[r]] }));
+        for (const r of fullRows.sort((a, b) => b - a)) {
+          board.splice(r, 1);
+          board.unshift(Array(COLS).fill(0));
+        }
 
         // Speed up every 10 lines
         dropInterval = Math.max(100, 800 - Math.floor(lines / 10) * 60);
+
+        // Animate flash visually, then spawn next
+        animatingLines = true;
+        flashRows = savedRows;
+        flashFrame = 0;
+        animateFlash(() => {
+          flashRows = [];
+          animatingLines = false;
+          spawnNext();
+        });
       } else {
         combo = 0;
         document.getElementById('comboDisplay').textContent = '0';
@@ -756,17 +766,20 @@
       for (let r = 0; r < ROWS; r++)
         for (let c = 0; c < COLS; c++) {
           if (!board[r][c]) continue;
-          // Flash animation for clearing rows
-          if (flashRows.includes(r)) {
-            ctx2d.fillStyle = flashFrame % 2 === 0 ? '#fff' : board[r][c];
-            ctx2d.globalAlpha = flashFrame % 2 === 0 ? 0.8 : 0.4;
-          } else {
-            ctx2d.fillStyle = board[r][c];
-            ctx2d.globalAlpha = 1;
-          }
-          drawCell(ctx2d, c, r);
+          ctx2d.fillStyle = board[r][c];
           ctx2d.globalAlpha = 1;
+          drawCell(ctx2d, c, r);
         }
+      ctx2d.globalAlpha = 1;
+
+      // Flash animation overlay for cleared rows (rows already removed from board)
+      if (flashRows.length && flashFrame > 0) {
+        for (const saved of flashRows) {
+          const flashY = saved.index * BLOCK;
+          ctx2d.fillStyle = flashFrame % 2 === 0 ? 'rgba(255,255,255,0.7)' : 'rgba(167,139,250,0.4)';
+          ctx2d.fillRect(0, flashY, COLS * BLOCK, BLOCK);
+        }
+      }
 
       // Ghost piece
       if (currentPiece && !animatingLines) {
@@ -852,23 +865,46 @@
       const test = { ...currentPiece, row: currentPiece.row + 1 };
       if (valid(test, board)) {
         currentPiece.row++;
-        score += 1;
-        document.getElementById('scoreDisplay').textContent = score;
         drawBoard();
       }
     }
 
     function hardDrop() {
       if (!gameRunning || animatingLines) return;
-      let dropped = 0;
       while (valid({ ...currentPiece, row: currentPiece.row + 1 }, board)) {
         currentPiece.row++;
-        dropped++;
       }
-      score += dropped * 2;
-      document.getElementById('scoreDisplay').textContent = score;
       clearInterval(dropTimer);
       lockPiece();
+    }
+
+    function holdSwap() {
+      if (!gameRunning || animatingLines || holdUsed) return;
+      holdUsed = true;
+      if (holdPiece) {
+        // Swap current with held
+        const held = holdPiece;
+        holdPiece = { shape: SHAPES[COLORS.indexOf(currentPiece.color)].map(r => [...r]), color: currentPiece.color };
+        currentPiece = {
+          shape: held.shape.map(r => [...r]),
+          color: held.color,
+          row: 0,
+          col: Math.floor((COLS - held.shape[0].length) / 2)
+        };
+      } else {
+        // Store current, spawn next
+        holdPiece = { shape: SHAPES[COLORS.indexOf(currentPiece.color)].map(r => [...r]), color: currentPiece.color };
+        currentPiece = nextPiece || randomPiece();
+        currentPiece.row = 0;
+        currentPiece.col = Math.floor((COLS - currentPiece.shape[0].length) / 2);
+        nextPiece = randomPiece();
+        drawNext();
+      }
+      drawHold();
+      if (!valid(currentPiece, board)) { gameOver(); return; }
+      clearInterval(dropTimer);
+      dropTimer = setInterval(tick, dropInterval);
+      drawBoard();
     }
 
     function rotate() {
@@ -887,10 +923,34 @@
       }
     }
 
+    function drawHold() {
+      const hw = holdCanvas.width;
+      const hh = holdCanvas.height;
+      holdCtx.clearRect(0, 0, hw, hh);
+      if (!holdPiece) return;
+      const shape = holdPiece.shape;
+      const cellSize = 18;
+      const ox = (hw - shape[0].length * cellSize) / 2;
+      const oy = (hh - shape.length * cellSize) / 2;
+      holdCtx.globalAlpha = holdUsed ? 0.35 : 1;
+      holdCtx.fillStyle = holdPiece.color;
+      for (let r = 0; r < shape.length; r++)
+        for (let c = 0; c < shape[r].length; c++) {
+          if (!shape[r][c]) continue;
+          holdCtx.fillRect(ox + c * cellSize + 1, oy + r * cellSize + 1, cellSize - 2, cellSize - 2);
+          holdCtx.fillStyle = 'rgba(255,255,255,0.15)';
+          holdCtx.fillRect(ox + c * cellSize + 1, oy + r * cellSize + 1, cellSize - 2, 2);
+          holdCtx.fillStyle = holdPiece.color;
+        }
+      holdCtx.globalAlpha = 1;
+    }
+
     function spawnNext() {
       currentPiece = nextPiece || randomPiece();
       nextPiece = randomPiece();
+      holdUsed = false;
       drawNext();
+      drawHold();
       if (!valid(currentPiece, board)) {
         gameOver();
         return;
@@ -919,8 +979,10 @@
       resizeBoard();
       board = createBoard();
       score = 0; lines = 0; combo = 0; coinsEarned = 0;
+      holdPiece = null; holdUsed = false;
       dropInterval = 800; animatingLines = false;
       flashRows = []; flashFrame = 0;
+      drawHold();
       document.getElementById('scoreDisplay').textContent = '0';
       document.getElementById('linesDisplay').textContent = '0';
       document.getElementById('comboDisplay').textContent = '0';
@@ -976,6 +1038,7 @@
         case 'ArrowDown': case 'KeyS':  e.preventDefault(); softDrop(); break;
         case 'ArrowUp': case 'KeyW':    e.preventDefault(); rotate(); break;
         case 'Space':                    e.preventDefault(); hardDrop(); break;
+        case 'KeyC': case 'ShiftLeft': case 'ShiftRight': e.preventDefault(); holdSwap(); break;
       }
     });
 
@@ -1006,6 +1069,8 @@
     document.getElementById('btnRotate').addEventListener('touchstart', e => { e.preventDefault(); rotate(); }, { passive: false });
     document.getElementById('btnDrop').addEventListener('click', hardDrop);
     document.getElementById('btnDrop').addEventListener('touchstart', e => { e.preventDefault(); hardDrop(); }, { passive: false });
+    document.getElementById('btnHold').addEventListener('click', holdSwap);
+    document.getElementById('btnHold').addEventListener('touchstart', e => { e.preventDefault(); holdSwap(); }, { passive: false });
 
     /* ═══════════════════════════════
        Buttons
@@ -1141,6 +1206,8 @@
     board = createBoard();
     currentPiece = null;
     nextPiece = null;
+    holdPiece = null;
+    holdUsed = false;
     gameRunning = false;
     animatingLines = false;
     drawBoard();
