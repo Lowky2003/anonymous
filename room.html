@@ -1467,7 +1467,22 @@
       roomData.plant = d.plant ?? null;
       roomData.petHunger = d.petHunger ?? {};
       roomData.plantLevels = d.plantLevels ?? {};
+      roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
+      roomData.ownedDecors = d.ownedDecors ?? [];
+      const rawPlaced = d.placedDecors ?? [];
+      roomData.placedDecors = rawPlaced.map(pd => {
+        if (typeof pd === 'string') {
+          const def = DECORATIONS.find(x => x.id === pd);
+          return { id: pd, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+        }
+        return pd;
+      });
+      // Reset render keys so room fully redraws for visited user
+      _lastPetKey = '';
+      _lastPlantKey = '';
+      const bgc = document.getElementById('roomBgCanvas');
+      if (bgc) delete bgc.dataset.init;
       // Keep own coins visible
       renderAll();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1475,6 +1490,11 @@
 
     function goHome() {
       viewingUid = currentUid;
+      // Reset render keys so room fully redraws for own data
+      _lastPetKey = '';
+      _lastPlantKey = '';
+      const bgc = document.getElementById('roomBgCanvas');
+      if (bgc) delete bgc.dataset.init;
       // Re-init to get own data
       initRoom();
     }
@@ -2825,7 +2845,8 @@
     }
 
     /* ── Cat ── */
-    function drawCatPet(ctx, s, lp, moving, hunger) {
+    function drawCatPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       const bodyColor = '#f5a623';
       const darkColor = '#d4871a';
       const stripe = '#c97a15';
@@ -2866,19 +2887,21 @@
       // Muzzle
       ctx.fillStyle = '#ffe0b2';
       ctx.beginPath(); ctx.ellipse(s*0.38, -s*0.08, s*0.1, s*0.06, 0, 0, Math.PI*2); ctx.fill();
-      // Eyes (cat slit pupils)
+      // Eyes
       const eyeY = -s * 0.22;
-      ctx.fillStyle = hunger > 20 ? '#5a5' : '#c44';
-      ctx.beginPath(); ctx.ellipse(s*0.26, eyeY, s*0.035, s*0.045, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(s*0.44, eyeY, s*0.035, s*0.045, 0, 0, Math.PI*2); ctx.fill();
-      // Slit pupils
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.ellipse(s*0.26, eyeY, s*0.011, s*0.035, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(s*0.44, eyeY, s*0.011, s*0.035, 0, 0, Math.PI*2); ctx.fill();
-      // Eye shine
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(s*0.27, eyeY - s*0.015, s*0.012, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.45, eyeY - s*0.015, s*0.012, 0, Math.PI*2); ctx.fill();
+      if (sleeping) {
+        drawSleepEyes(ctx, s, s*0.26, eyeY, s*0.44, eyeY, s*0.035);
+      } else {
+        ctx.fillStyle = hunger > 20 ? '#5a5' : '#c44';
+        ctx.beginPath(); ctx.ellipse(s*0.26, eyeY, s*0.035, s*0.045, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s*0.44, eyeY, s*0.035, s*0.045, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.ellipse(s*0.26, eyeY, s*0.011, s*0.035, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s*0.44, eyeY, s*0.011, s*0.035, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.27, eyeY - s*0.015, s*0.012, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.45, eyeY - s*0.015, s*0.012, 0, Math.PI*2); ctx.fill();
+      }
       // Triangle nose
       ctx.fillStyle = '#e88';
       ctx.beginPath(); ctx.moveTo(s*0.35,-s*0.1); ctx.lineTo(s*0.38,-s*0.06); ctx.lineTo(s*0.41,-s*0.1); ctx.fill();
@@ -2895,11 +2918,12 @@
       ctx.beginPath(); ctx.moveTo(s*0.56,-s*0.1); ctx.lineTo(s*0.72,-s*0.14); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s*0.56,-s*0.07); ctx.lineTo(s*0.74,-s*0.07); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s*0.56,-s*0.04); ctx.lineTo(s*0.72, 0); ctx.stroke();
-      drawPetLegs(ctx, s, lp, moving, bodyColor);
+      if (!sleeping) drawPetLegs(ctx, s, lp, moving, bodyColor);
     }
 
     /* ── Dog ── */
-    function drawDogPet(ctx, s, lp, moving, hunger) {
+    function drawDogPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       const bodyColor = '#b87333';
       const lightColor = '#d4a574';
       // Tail (wagging, behind body)
@@ -2928,12 +2952,16 @@
       ctx.beginPath(); ctx.moveTo(s*0.22,-s*0.26); ctx.lineTo(s*0.32,-s*0.28); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s*0.38,-s*0.28); ctx.lineTo(s*0.48,-s*0.26); ctx.stroke();
       // Eyes
-      ctx.fillStyle = hunger > 20 ? '#442' : '#c44';
-      ctx.beginPath(); ctx.arc(s*0.28, -s*0.18, s*0.038, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.42, -s*0.18, s*0.038, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(s*0.29, -s*0.19, s*0.014, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.43, -s*0.19, s*0.014, 0, Math.PI*2); ctx.fill();
+      if (sleeping) {
+        drawSleepEyes(ctx, s, s*0.28, -s*0.18, s*0.42, -s*0.18, s*0.038);
+      } else {
+        ctx.fillStyle = hunger > 20 ? '#442' : '#c44';
+        ctx.beginPath(); ctx.arc(s*0.28, -s*0.18, s*0.038, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.42, -s*0.18, s*0.038, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.29, -s*0.19, s*0.014, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.43, -s*0.19, s*0.014, 0, Math.PI*2); ctx.fill();
+      }
       // Big black nose
       ctx.fillStyle = '#222';
       ctx.beginPath(); ctx.ellipse(s*0.58, -s*0.06, s*0.035, s*0.028, 0, 0, Math.PI*2); ctx.fill();
@@ -2944,7 +2972,7 @@
       ctx.strokeStyle = '#6b4226'; ctx.lineWidth = s * 0.01;
       ctx.beginPath(); ctx.moveTo(s*0.58,-s*0.035); ctx.lineTo(s*0.58, s*0.0); ctx.stroke();
       // Tongue if happy
-      if (hunger > 50) {
+      if (hunger > 50 && !sleeping) {
         ctx.fillStyle = '#ff7b9c';
         ctx.beginPath(); ctx.ellipse(s*0.58, s*0.04, s*0.03, s*0.055, 0, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = '#e06080'; ctx.lineWidth = s*0.006;
@@ -2956,11 +2984,12 @@
       // Collar tag
       ctx.fillStyle = '#ffd700';
       ctx.beginPath(); ctx.arc(s*0.35, s*0.16, s*0.025, 0, Math.PI*2); ctx.fill();
-      drawPetLegs(ctx, s, lp, moving, bodyColor);
+      if (!sleeping) drawPetLegs(ctx, s, lp, moving, bodyColor);
     }
 
     /* ── Bunny ── */
-    function drawBunnyPet(ctx, s, lp, moving, hunger) {
+    function drawBunnyPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       const bodyColor = '#f0f0f0';
       const pinkColor = '#ffb6c1';
       // Cotton-ball tail
@@ -2981,13 +3010,17 @@
       ctx.fillStyle = pinkColor;
       ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.58, s*0.035, s*0.2, -0.15, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(s*0.4, -s*0.55, s*0.035, s*0.18,  0.15, 0, Math.PI*2); ctx.fill();
-      // Big round eyes
-      ctx.fillStyle = hunger > 20 ? '#c44' : '#833';
-      ctx.beginPath(); ctx.arc(s*0.22, -s*0.2, s*0.04, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.38, -s*0.2, s*0.04, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(s*0.23, -s*0.21, s*0.015, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.39, -s*0.21, s*0.015, 0, Math.PI*2); ctx.fill();
+      // Eyes
+      if (sleeping) {
+        drawSleepEyes(ctx, s, s*0.22, -s*0.2, s*0.38, -s*0.2, s*0.04);
+      } else {
+        ctx.fillStyle = hunger > 20 ? '#c44' : '#833';
+        ctx.beginPath(); ctx.arc(s*0.22, -s*0.2, s*0.04, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.38, -s*0.2, s*0.04, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.23, -s*0.21, s*0.015, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.39, -s*0.21, s*0.015, 0, Math.PI*2); ctx.fill();
+      }
       // Y-shaped nose
       ctx.fillStyle = pinkColor;
       ctx.beginPath(); ctx.moveTo(s*0.28,-s*0.11); ctx.lineTo(s*0.3,-s*0.08); ctx.lineTo(s*0.32,-s*0.11); ctx.fill();
@@ -3011,11 +3044,12 @@
       ctx.beginPath(); ctx.moveTo(s*0.17,-s*0.07); ctx.lineTo(s*0.02,-s*0.05); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s*0.43,-s*0.1); ctx.lineTo(s*0.58,-s*0.13); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(s*0.43,-s*0.07); ctx.lineTo(s*0.58,-s*0.05); ctx.stroke();
-      drawPetLegs(ctx, s * 0.9, lp, moving, bodyColor);
+      if (!sleeping) drawPetLegs(ctx, s * 0.9, lp, moving, bodyColor);
     }
 
     /* ── Hamster ── */
-    function drawHamsterPet(ctx, s, lp, moving, hunger) {
+    function drawHamsterPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       const bodyColor = '#f5c38a';
       const cheekColor = '#ffe0b2';
       // Super round body
@@ -3042,13 +3076,17 @@
       ctx.fillStyle = '#ffb6c1';
       ctx.beginPath(); ctx.arc(s*0.1, -s*0.36, s*0.045, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(s*0.4, -s*0.36, s*0.045, 0, Math.PI*2); ctx.fill();
-      // Beady eyes
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(s*0.18, -s*0.16, s*0.032, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.32, -s*0.16, s*0.032, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(s*0.185, -s*0.17, s*0.012, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.325, -s*0.17, s*0.012, 0, Math.PI*2); ctx.fill();
+      // Eyes
+      if (sleeping) {
+        drawSleepEyes(ctx, s, s*0.18, -s*0.16, s*0.32, -s*0.16, s*0.032);
+      } else {
+        ctx.fillStyle = '#222';
+        ctx.beginPath(); ctx.arc(s*0.18, -s*0.16, s*0.032, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.32, -s*0.16, s*0.032, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.185, -s*0.17, s*0.012, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.325, -s*0.17, s*0.012, 0, Math.PI*2); ctx.fill();
+      }
       // Tiny pink nose
       ctx.fillStyle = '#e88';
       ctx.beginPath(); ctx.arc(s*0.25, -s*0.08, s*0.02, 0, Math.PI*2); ctx.fill();
@@ -3068,11 +3106,12 @@
       ctx.fillStyle = '#f0b67a';
       ctx.beginPath(); ctx.arc(s*0.08, s*0.12, s*0.04, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(s*0.42, s*0.12, s*0.04, 0, Math.PI*2); ctx.fill();
-      drawPetLegs(ctx, s * 0.75, lp, moving, bodyColor);
+      if (!sleeping) drawPetLegs(ctx, s * 0.75, lp, moving, bodyColor);
     }
 
     /* ── Fox ── */
-    function drawFoxPet(ctx, s, lp, moving, hunger) {
+    function drawFoxPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       const bodyColor = '#e86f2c';
       const whiteColor = '#fff3e0';
       // BIG bushy tail behind body
@@ -3104,18 +3143,22 @@
       ctx.fillStyle = '#444';
       ctx.beginPath(); ctx.moveTo(s*0.24,-s*0.34); ctx.lineTo(s*0.28,-s*0.54); ctx.lineTo(s*0.34,-s*0.34); ctx.fill();
       ctx.beginPath(); ctx.moveTo(s*0.42,-s*0.34); ctx.lineTo(s*0.48,-s*0.52); ctx.lineTo(s*0.52,-s*0.31); ctx.fill();
-      // Almond amber eyes
-      ctx.fillStyle = '#c90';
-      ctx.save();
-      ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.18, s*0.035, s*0.025, -0.15, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(s*0.46, -s*0.18, s*0.035, s*0.025,  0.15, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(s*0.3, -s*0.18, s*0.015, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.46, -s*0.18, s*0.015, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(s*0.305, -s*0.19, s*0.006, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(s*0.465, -s*0.19, s*0.006, 0, Math.PI*2); ctx.fill();
+      // Eyes
+      if (sleeping) {
+        drawSleepEyes(ctx, s, s*0.3, -s*0.18, s*0.46, -s*0.18, s*0.035);
+      } else {
+        ctx.fillStyle = '#c90';
+        ctx.save();
+        ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.18, s*0.035, s*0.025, -0.15, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s*0.46, -s*0.18, s*0.035, s*0.025,  0.15, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = '#222';
+        ctx.beginPath(); ctx.arc(s*0.3, -s*0.18, s*0.015, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.46, -s*0.18, s*0.015, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.305, -s*0.19, s*0.006, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s*0.465, -s*0.19, s*0.006, 0, Math.PI*2); ctx.fill();
+      }
       // Black nose
       ctx.fillStyle = '#222';
       ctx.beginPath(); ctx.ellipse(s*0.58, -s*0.04, s*0.03, s*0.022, 0, 0, Math.PI*2); ctx.fill();
@@ -3123,11 +3166,12 @@
       ctx.strokeStyle = '#a04010'; ctx.lineWidth = s * 0.008;
       ctx.beginPath(); ctx.arc(s*0.52, -s*0.01, s*0.04, 0.1, Math.PI - 0.1); ctx.stroke();
       // Dark socks (legs drawn darker)
-      drawPetLegs(ctx, s, lp, moving, '#5a2800');
+      if (!sleeping) drawPetLegs(ctx, s, lp, moving, '#5a2800');
     }
 
     /* ── Panda ── */
-    function drawPandaPet(ctx, s, lp, moving, hunger) {
+    function drawPandaPet(ctx, s, lp, moving, hunger, action, ap, t) {
+      const sleeping = action === 'sleep' || action === 'nap';
       // Bamboo behind body (when not too hungry)
       if (hunger > 30) {
         ctx.strokeStyle = '#5a8a3c'; ctx.lineWidth = s * 0.03; ctx.lineCap = 'round';
@@ -3160,17 +3204,20 @@
       ctx.beginPath(); ctx.ellipse(0, 0, s*0.1, s*0.075, 0, 0, Math.PI*2); ctx.fill(); ctx.restore();
       ctx.save(); ctx.translate(s*0.17, -s*0.32); ctx.rotate(0.25);
       ctx.beginPath(); ctx.ellipse(0, 0, s*0.1, s*0.075, 0, 0, Math.PI*2); ctx.fill(); ctx.restore();
-      // Eyes (white + pupils)
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-s*0.07, -s*0.32, s*0.03, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc( s*0.17, -s*0.32, s*0.03, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.arc(-s*0.07, -s*0.32, s*0.018, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc( s*0.17, -s*0.32, s*0.018, 0, Math.PI*2); ctx.fill();
-      // Eye shine
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-s*0.065, -s*0.33, s*0.007, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc( s*0.175, -s*0.33, s*0.007, 0, Math.PI*2); ctx.fill();
+      // Eyes
+      if (sleeping) {
+        drawSleepEyes(ctx, s, -s*0.07, -s*0.32, s*0.17, -s*0.32, s*0.03);
+      } else {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(-s*0.07, -s*0.32, s*0.03, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc( s*0.17, -s*0.32, s*0.03, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(-s*0.07, -s*0.32, s*0.018, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc( s*0.17, -s*0.32, s*0.018, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(-s*0.065, -s*0.33, s*0.007, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc( s*0.175, -s*0.33, s*0.007, 0, Math.PI*2); ctx.fill();
+      }
       // Oval black nose
       ctx.fillStyle = '#333';
       ctx.beginPath(); ctx.ellipse(s*0.05, -s*0.22, s*0.03, s*0.02, 0, 0, Math.PI*2); ctx.fill();
@@ -3183,7 +3230,14 @@
       ctx.fillStyle = 'rgba(255,150,150,0.2)';
       ctx.beginPath(); ctx.arc(-s*0.14, -s*0.22, s*0.04, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc( s*0.24, -s*0.22, s*0.04, 0, Math.PI*2); ctx.fill();
-      drawPetLegs(ctx, s, lp, moving, '#333');
+      if (!sleeping) drawPetLegs(ctx, s, lp, moving, '#333');
+    }
+
+    /* ── Closed sleep eyes helper ── */
+    function drawSleepEyes(ctx, s, x1, y1, x2, y2, r) {
+      ctx.strokeStyle = '#555'; ctx.lineWidth = s * 0.018; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(x1, y1, r, Math.PI, 0); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x2, y2, r, Math.PI, 0); ctx.stroke();
     }
 
     /* ── Shared leg drawing ── */
