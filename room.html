@@ -191,6 +191,25 @@
     .sub-panel { display: none; }
     .sub-panel.active { display: block; }
 
+    /* Decor category tabs (nested inside decor sub-panel) */
+    .decor-tabs {
+      display: flex; gap: 0; flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 12px;
+    }
+    .decor-tab {
+      flex: 1; min-width: 0; padding: 8px 2px; border: none;
+      background: transparent; color: rgba(255,255,255,0.35);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      text-align: center; transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .decor-tab:hover { color: rgba(255,255,255,0.6); }
+    .decor-tab.active { color: #f7c97e; border-bottom-color: #f7c97e; }
+    .decor-panel { display: none; }
+    .decor-panel.active { display: block; }
+
     /* ── Shop items ── */
     .shop-grid {
       display: grid; grid-template-columns: repeat(2, 1fr);
@@ -575,10 +594,46 @@
       </div>
     </div>
     <div class="sub-panel" id="decorShopWrap">
-      <div class="shop-section">
-        <div class="shop-section-title">🪑 Decorations</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">👆 Place decorations, then drag them around the room to reposition</div>
-        <div class="shop-grid" id="decorShop"></div>
+      <div class="decor-tabs">
+        <button class="decor-tab active" data-dcategory="wallpaper">🏠 Wall</button>
+        <button class="decor-tab" data-dcategory="window">🪟 Window</button>
+        <button class="decor-tab" data-dcategory="wallart">🖼️ Art</button>
+        <button class="decor-tab" data-dcategory="furniture">🪑 Furniture</button>
+        <button class="decor-tab" data-dcategory="rug">🟣 Rugs</button>
+      </div>
+      <div class="decor-panel active" id="dp-wallpaper">
+        <div class="shop-section">
+          <div class="shop-section-title">🏠 Wall Pattern</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Change the look of your walls</div>
+          <div class="shop-grid" id="wallShop"></div>
+        </div>
+      </div>
+      <div class="decor-panel" id="dp-window">
+        <div class="shop-section">
+          <div class="shop-section-title">🪟 Windows</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Pick a window style</div>
+          <div class="shop-grid" id="windowShop"></div>
+        </div>
+      </div>
+      <div class="decor-panel" id="dp-wallart">
+        <div class="shop-section">
+          <div class="shop-section-title">🖼️ Wall Art &amp; Hangings</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Drag to reposition on the wall</div>
+          <div class="shop-grid" id="wallDecorShop"></div>
+        </div>
+      </div>
+      <div class="decor-panel" id="dp-furniture">
+        <div class="shop-section">
+          <div class="shop-section-title">🪑 Furniture &amp; Floor Items</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Drag to reposition on the floor</div>
+          <div class="shop-grid" id="floorDecorShop"></div>
+        </div>
+      </div>
+      <div class="decor-panel" id="dp-rug">
+        <div class="shop-section">
+          <div class="shop-section-title">🟣 Rugs (1 at a time)</div>
+          <div class="shop-grid" id="rugDecorShop"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -752,17 +807,55 @@
       { id: 'hangplant',    emoji: '🌿', name: 'Hanging Plant',  cost: 200,  category: 'wall',  dx: 0.32,  dy: 0.05 },
       { id: 'stringlights', emoji: '💡', name: 'String Lights',  cost: 400,  category: 'wall',  dx: 0.50,  dy: 0.02 },
       { id: 'banner',       emoji: '🎏', name: 'Wall Banner',    cost: 250,  category: 'wall',  dx: 0.64,  dy: 0.06 },
+      { id: 'photo',        emoji: '🖼️', name: 'Photo Frame',    cost: 180,  category: 'wall',  dx: 0.40,  dy: 0.20 },
+      { id: 'mirror',       emoji: '🪞', name: 'Wall Mirror',    cost: 350,  category: 'wall',  dx: 0.70,  dy: 0.18 },
+      { id: 'antlers',      emoji: '🦌', name: 'Antler Mount',   cost: 500,  category: 'wall',  dx: 0.50,  dy: 0.12 },
+      { id: 'neon',         emoji: '✨', name: 'Neon Sign',      cost: 600,  category: 'wall',  dx: 0.50,  dy: 0.25 },
+      { id: 'poster',       emoji: '🎨', name: 'Art Poster',     cost: 120,  category: 'wall',  dx: 0.25,  dy: 0.22 },
+      { id: 'dartboard',    emoji: '🎯', name: 'Dart Board',     cost: 280,  category: 'wall',  dx: 0.88,  dy: 0.20 },
+      { id: 'wreath',       emoji: '💐', name: 'Flower Wreath',  cost: 220,  category: 'wall',  dx: 0.15,  dy: 0.10 },
       // Floor decorations
       { id: 'floorlamp',    emoji: '🪔', name: 'Floor Lamp',     cost: 350,  category: 'floor', dx: 0.78,  dy: 0.88 },
       { id: 'sidetable',    emoji: '🪑', name: 'Side Table',     cost: 200,  category: 'floor', dx: 0.08,  dy: 0.80 },
       { id: 'cushion',      emoji: '🛋️', name: 'Floor Cushion',  cost: 100,  category: 'floor', dx: 0.58,  dy: 0.86 },
       { id: 'toybox',       emoji: '🧸', name: 'Toy Box',        cost: 250,  category: 'floor', dx: 0.22,  dy: 0.84 },
       { id: 'bookcase',     emoji: '📖', name: 'Bookcase',       cost: 500,  category: 'floor', dx: 0.88,  dy: 0.88 },
+      { id: 'aquarium',     emoji: '🐠', name: 'Fish Tank',      cost: 800,  category: 'floor', dx: 0.92,  dy: 0.80 },
+      { id: 'guitar',       emoji: '🎸', name: 'Guitar Stand',   cost: 400,  category: 'floor', dx: 0.05,  dy: 0.88 },
+      { id: 'globe',        emoji: '🌍', name: 'Globe',          cost: 350,  category: 'floor', dx: 0.15,  dy: 0.78 },
+      { id: 'trashcan',     emoji: '🗑️', name: 'Trash Can',      cost: 80,   category: 'floor', dx: 0.95,  dy: 0.92 },
+      { id: 'fan',          emoji: '🌀', name: 'Standing Fan',   cost: 300,  category: 'floor', dx: 0.72,  dy: 0.85 },
+      { id: 'beanpillow',   emoji: '🫘', name: 'Bean Bag',       cost: 450,  category: 'floor', dx: 0.42,  dy: 0.90 },
+      { id: 'tv',           emoji: '📺', name: 'Retro TV',       cost: 600,  category: 'floor', dx: 0.50,  dy: 0.80 },
       // Rug styles (only one active at a time)
       { id: 'rug_blue',     emoji: '🔵', name: 'Blue Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_green',    emoji: '🟢', name: 'Green Rug',      cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_pink',     emoji: '🩷', name: 'Pink Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_star',     emoji: '⭐', name: 'Star Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_rainbow',  emoji: '🌈', name: 'Rainbow Rug',    cost: 400,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_cream',    emoji: '🤍', name: 'Cream Rug',      cost: 250,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+    ];
+
+    const WALL_PATTERNS = [
+      { id: 'wall_default',  emoji: '🏠', name: 'Default (Plain)',  cost: 0 },
+      { id: 'wall_brick',    emoji: '🧱', name: 'Brick Wall',       cost: 300 },
+      { id: 'wall_wood',     emoji: '🪵', name: 'Wood Panel',       cost: 400 },
+      { id: 'wall_stripe',   emoji: '📏', name: 'Striped',          cost: 350 },
+      { id: 'wall_dots',     emoji: '⚪', name: 'Polka Dots',       cost: 300 },
+      { id: 'wall_diamond',  emoji: '💠', name: 'Diamond',          cost: 500 },
+      { id: 'wall_pastel',   emoji: '🌸', name: 'Pastel Pink',      cost: 400 },
+      { id: 'wall_mint',     emoji: '🍃', name: 'Mint Green',       cost: 400 },
+      { id: 'wall_navy',     emoji: '🌊', name: 'Navy Blue',        cost: 450 },
+      { id: 'wall_sunset',   emoji: '🌅', name: 'Sunset Gradient',  cost: 600 },
+    ];
+
+    const WINDOWS = [
+      { id: 'win_none',      emoji: '❌', name: 'No Window',       cost: 0 },
+      { id: 'win_classic',   emoji: '🪟', name: 'Classic Window',  cost: 0 },
+      { id: 'win_large',     emoji: '🏔️', name: 'Large Window',    cost: 500 },
+      { id: 'win_round',     emoji: '⭕', name: 'Round Window',    cost: 400 },
+      { id: 'win_arch',      emoji: '🕌', name: 'Arch Window',     cost: 600 },
+      { id: 'win_double',    emoji: '🪟🪟', name: 'Double Window', cost: 800 },
     ];
 
     const PLANT_LEVELS = [
@@ -833,7 +926,7 @@
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], displayName: '', lastCoinCollect: 0 };
+    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', displayName: '', lastCoinCollect: 0 };
 
     /* ═══════════════════════════════
        Helpers
@@ -869,6 +962,10 @@
         ownedPlants: roomData.ownedPlants,
         ownedDecors: roomData.ownedDecors,
         placedDecors: roomData.placedDecors,
+        ownedWalls: roomData.ownedWalls,
+        wallPattern: roomData.wallPattern,
+        ownedWindows: roomData.ownedWindows,
+        windowStyle: roomData.windowStyle,
         plantPosition: roomData.plantPosition || null,
         displayName: getPlayerName(),
         lastCoinCollect: roomData.lastCoinCollect || Date.now(),
@@ -902,6 +999,10 @@
           roomData.ownedPets = d.ownedPets ?? [];
           roomData.ownedPlants = d.ownedPlants ?? [];
           roomData.ownedDecors = d.ownedDecors ?? [];
+          roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
+          roomData.wallPattern = d.wallPattern ?? 'wall_default';
+          roomData.ownedWindows = d.ownedWindows ?? ['win_none','win_classic'];
+          roomData.windowStyle = d.windowStyle ?? 'win_classic';
           roomData.plantPosition = d.plantPosition ?? null;
           // Migrate old string[] placedDecors to {id,x,y}[] format
           const rawPlaced = d.placedDecors ?? [];
@@ -1160,35 +1261,81 @@
     }
 
     function renderDecorShop() {
-      const el = document.getElementById('decorShop');
-      const placedCount = roomData.placedDecors.length;
-      // Update title
-      const titleEl = el.previousElementSibling;
-      if (titleEl) titleEl.innerHTML = '🪑 Decorations <span class="slot-badge">' + placedCount + ' placed</span>';
-
-      el.innerHTML = DECORATIONS.map(item => {
-        const isOwned = roomData.ownedDecors.includes(item.id);
-        const isPlaced = roomData.placedDecors.some(d => d.id === item.id);
+      // ── Wall Patterns ──
+      const wallEl = document.getElementById('wallShop');
+      wallEl.innerHTML = WALL_PATTERNS.map(item => {
+        const isOwned = roomData.ownedWalls.includes(item.id);
+        const isActive = roomData.wallPattern === item.id;
         const canAfford = roomData.coins >= item.cost;
         let btnHtml = '';
-        if (isPlaced) {
-          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
-            '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="removeDecor(\'' + item.id + '\')">Remove</button>';
-        } else if (isOwned) {
-          btnHtml = '<button class="shop-btn equip" onclick="placeDecor(\'' + item.id + '\')">Place in Room</button>';
+        if (isActive) {
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ Active</button>';
+        } else if (isOwned || item.cost === 0) {
+          btnHtml = '<button class="shop-btn equip" onclick="equipWall(\'' + item.id + '\')">Use</button>';
         } else {
-          btnHtml = '<button class="shop-btn buy" onclick="buyDecor(\'' + item.id + '\')" ' +
+          btnHtml = '<button class="shop-btn buy" onclick="buyWall(\'' + item.id + '\')" ' +
             (canAfford ? '' : 'disabled') + '>Buy</button>';
         }
-        const catLabel = item.category === 'wall' ? 'Wall' : item.category === 'floor' ? 'Floor' : 'Rug';
-        return '<div class="shop-card' + (isPlaced ? ' equipped' : isOwned ? ' owned' : '') + '">' +
+        return '<div class="shop-card' + (isActive ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px">' + catLabel + '</div>' +
-          (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
+
+      // ── Windows ──
+      const winEl = document.getElementById('windowShop');
+      winEl.innerHTML = WINDOWS.map(item => {
+        const isOwned = roomData.ownedWindows.includes(item.id);
+        const isActive = roomData.windowStyle === item.id;
+        const canAfford = roomData.coins >= item.cost;
+        let btnHtml = '';
+        if (isActive) {
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ Active</button>';
+        } else if (isOwned || item.cost === 0) {
+          btnHtml = '<button class="shop-btn equip" onclick="equipWindow(\'' + item.id + '\')">Use</button>';
+        } else {
+          btnHtml = '<button class="shop-btn buy" onclick="buyWindow(\'' + item.id + '\')" ' +
+            (canAfford ? '' : 'disabled') + '>Buy</button>';
+        }
+        return '<div class="shop-card' + (isActive ? ' equipped' : isOwned ? ' owned' : '') + '">' +
+          '<span class="shop-emoji">' + item.emoji + '</span>' +
+          '<div class="shop-name">' + item.name + '</div>' +
+          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+            '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
+          btnHtml + '</div>';
+      }).join('');
+
+      // ── Decorations by category ──
+      function renderDecorCategory(targetEl, filterCat) {
+        const items = DECORATIONS.filter(d => d.category === filterCat);
+        targetEl.innerHTML = items.map(item => {
+          const isOwned = roomData.ownedDecors.includes(item.id);
+          const isPlaced = roomData.placedDecors.some(d => d.id === item.id);
+          const canAfford = roomData.coins >= item.cost;
+          let btnHtml = '';
+          if (isPlaced) {
+            btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
+              '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="removeDecor(\'' + item.id + '\')">Remove</button>';
+          } else if (isOwned) {
+            btnHtml = '<button class="shop-btn equip" onclick="placeDecor(\'' + item.id + '\')">Place</button>';
+          } else {
+            btnHtml = '<button class="shop-btn buy" onclick="buyDecor(\'' + item.id + '\')" ' +
+              (canAfford ? '' : 'disabled') + '>Buy</button>';
+          }
+          return '<div class="shop-card' + (isPlaced ? ' equipped' : isOwned ? ' owned' : '') + '">' +
+            '<span class="shop-emoji">' + item.emoji + '</span>' +
+            '<div class="shop-name">' + item.name + '</div>' +
+            (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+              '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
+            btnHtml + '</div>';
+        }).join('');
+      }
+
+      renderDecorCategory(document.getElementById('wallDecorShop'), 'wall');
+      renderDecorCategory(document.getElementById('floorDecorShop'), 'floor');
+      renderDecorCategory(document.getElementById('rugDecorShop'), 'rug');
     }
 
     function renderUpgrade() {
@@ -1438,6 +1585,53 @@
       showToast('Removed from room!', 'success');
     }
 
+    async function buyWall(id) {
+      const item = WALL_PATTERNS.find(w => w.id === id);
+      if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
+      if (roomData.ownedWalls.includes(id)) return;
+      roomData.coins -= item.cost;
+      roomData.ownedWalls.push(id);
+      roomData.wallPattern = id;
+      _forceRedrawBg();
+      await saveRoom();
+      showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
+    }
+
+    async function equipWall(id) {
+      roomData.wallPattern = id;
+      _forceRedrawBg();
+      await saveRoom();
+      showToast('Wall pattern changed!', 'success');
+    }
+
+    async function buyWindow(id) {
+      const item = WINDOWS.find(w => w.id === id);
+      if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
+      if (roomData.ownedWindows.includes(id)) return;
+      roomData.coins -= item.cost;
+      roomData.ownedWindows.push(id);
+      roomData.windowStyle = id;
+      _forceRedrawBg();
+      await saveRoom();
+      showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
+    }
+
+    async function equipWindow(id) {
+      roomData.windowStyle = id;
+      _forceRedrawBg();
+      await saveRoom();
+      showToast('Window changed!', 'success');
+    }
+
+    function _forceRedrawBg() {
+      // Force background to re-init by clearing the init flag
+      const bgc = document.getElementById('roomBgCanvas');
+      if (bgc) { bgc.dataset.init = ''; }
+      cancelAnimationFrame(bgAnimFrame);
+      startRoomBgAnimation();
+      if (bgc) bgc.dataset.init = '1';
+    }
+
     async function feedPet(foodId, petId) {
       if (!petId) petId = roomData.pet;
       if (!petId) return;
@@ -1571,15 +1765,31 @@
       hangplant: { w: 0.12, h: 0.22 },
       stringlights: { w: 1.0, h: 0.08 },
       banner: { w: 0.10, h: 0.22 },
+      photo: { w: 0.14, h: 0.14 },
+      mirror: { w: 0.12, h: 0.18 },
+      antlers: { w: 0.18, h: 0.14 },
+      neon: { w: 0.22, h: 0.10 },
+      poster: { w: 0.14, h: 0.18 },
+      dartboard: { w: 0.14, h: 0.14 },
+      wreath: { w: 0.14, h: 0.14 },
       floorlamp: { w: 0.12, h: 0.30, base: true },
       sidetable: { w: 0.14, h: 0.16 },
       cushion: { w: 0.12, h: 0.10 },
       toybox: { w: 0.12, h: 0.12 },
       bookcase: { w: 0.16, h: 0.30, base: true },
+      aquarium: { w: 0.18, h: 0.16 },
+      guitar: { w: 0.10, h: 0.26, base: true },
+      globe: { w: 0.12, h: 0.16, base: true },
+      trashcan: { w: 0.10, h: 0.12, base: true },
+      fan: { w: 0.12, h: 0.28, base: true },
+      beanpillow: { w: 0.16, h: 0.14 },
+      tv: { w: 0.20, h: 0.18, base: true },
       rug_blue: { w: 0.30, h: 0.18 },
       rug_green: { w: 0.30, h: 0.18 },
       rug_pink: { w: 0.30, h: 0.18 },
       rug_star: { w: 0.30, h: 0.18 },
+      rug_rainbow: { w: 0.30, h: 0.18 },
+      rug_cream: { w: 0.30, h: 0.18 },
     };
 
     function decorHitTest(mx, my, p) {
@@ -2184,7 +2394,7 @@
 
     function drawRug(ctx, rw, rh, floorY) {
       // Find placed rug
-      const rugIds = ['rug_blue','rug_green','rug_pink','rug_star'];
+      const rugIds = ['rug_blue','rug_green','rug_pink','rug_star','rug_rainbow','rug_cream'];
       const placedRug = (roomData.placedDecors || []).find(d => rugIds.includes(d.id));
 
       ctx.save();
@@ -2197,33 +2407,49 @@
       let borderColor = 'rgba(140,50,50,0.18)';
       let centerColor = 'rgba(180,80,60,0.12)';
       let isStar = false;
+      let isRainbow = false;
 
       if (placedRug) {
         if (placedRug.id === 'rug_blue')  { fillColor = 'rgba(60,100,180,0.22)'; borderColor = 'rgba(50,80,160,0.2)'; centerColor = 'rgba(80,120,200,0.14)'; }
         else if (placedRug.id === 'rug_green') { fillColor = 'rgba(60,156,80,0.22)'; borderColor = 'rgba(50,130,60,0.2)'; centerColor = 'rgba(80,170,90,0.14)'; }
         else if (placedRug.id === 'rug_pink')  { fillColor = 'rgba(200,80,140,0.22)'; borderColor = 'rgba(180,60,120,0.2)'; centerColor = 'rgba(220,100,160,0.14)'; }
         else if (placedRug.id === 'rug_star')  { fillColor = 'rgba(180,150,60,0.22)'; borderColor = 'rgba(160,130,40,0.2)'; centerColor = 'rgba(200,170,80,0.14)'; isStar = true; }
+        else if (placedRug.id === 'rug_rainbow') { isRainbow = true; fillColor = 'rgba(200,180,60,0.18)'; borderColor = 'rgba(180,160,40,0.15)'; }
+        else if (placedRug.id === 'rug_cream')  { fillColor = 'rgba(240,230,210,0.3)'; borderColor = 'rgba(210,200,180,0.25)'; centerColor = 'rgba(230,220,200,0.18)'; }
       }
 
       ctx.fillStyle = 'rgba(0,0,0,0.06)';
       ctx.beginPath(); ctx.ellipse(rugCX, rugCY + 3, rugRX + 2, rugRY + 2, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = fillColor;
-      ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX, rugRY, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = borderColor; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.78, rugRY * 0.78, 0, 0, Math.PI * 2); ctx.stroke();
-      if (isStar) {
-        ctx.fillStyle = centerColor;
-        const sr = rugRX * 0.25;
-        ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
-          const method = i === 0 ? 'moveTo' : 'lineTo';
-          ctx[method](rugCX + Math.cos(a) * sr, rugCY + Math.sin(a) * sr * (rugRY / rugRX));
+
+      if (isRainbow) {
+        // Rainbow concentric rings
+        const rainColors = ['rgba(255,0,0,0.12)','rgba(255,165,0,0.12)','rgba(255,255,0,0.12)','rgba(0,200,0,0.12)','rgba(0,100,255,0.12)','rgba(128,0,255,0.12)'];
+        for (let i = 0; i < rainColors.length; i++) {
+          const scale = 1 - i * 0.13;
+          ctx.fillStyle = rainColors[i];
+          ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * scale, rugRY * scale, 0, 0, Math.PI * 2); ctx.fill();
         }
-        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = borderColor; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX, rugRY, 0, 0, Math.PI * 2); ctx.stroke();
       } else {
-        ctx.fillStyle = centerColor;
-        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.35, rugRY * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = fillColor;
+        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX, rugRY, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = borderColor; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.78, rugRY * 0.78, 0, 0, Math.PI * 2); ctx.stroke();
+        if (isStar) {
+          ctx.fillStyle = centerColor;
+          const sr = rugRX * 0.25;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+            const method = i === 0 ? 'moveTo' : 'lineTo';
+            ctx[method](rugCX + Math.cos(a) * sr, rugCY + Math.sin(a) * sr * (rugRY / rugRX));
+          }
+          ctx.closePath(); ctx.fill();
+        } else {
+          ctx.fillStyle = centerColor;
+          ctx.beginPath(); ctx.ellipse(rugCX, rugCY, rugRX * 0.35, rugRY * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+        }
       }
       ctx.restore();
     }
@@ -2383,6 +2609,162 @@
         ctx.beginPath(); ctx.arc(bx + bw / 2, by + bh - 1, 2, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       }
+
+      // Photo frame
+      if (hasDecor('photo')) {
+        ctx.save();
+        const pos = getDecorPos('photo');
+        const px = pos.x * rw, py = pos.y * rh, pw = rw * 0.07, ph = rw * 0.055;
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.fillRect(px - pw/2 + 2, py - ph/2 + 2, pw, ph);
+        ctx.fillStyle = '#8B6F47';
+        ctx.fillRect(px - pw/2 - 3, py - ph/2 - 3, pw + 6, ph + 6);
+        ctx.fillStyle = '#f0e6d6';
+        ctx.fillRect(px - pw/2, py - ph/2, pw, ph);
+        // Photo scene: sky + grass
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(px - pw/2 + 2, py - ph/2 + 2, pw - 4, ph * 0.55);
+        ctx.fillStyle = '#7bc96f';
+        ctx.fillRect(px - pw/2 + 2, py - ph/2 + 2 + ph * 0.55, pw - 4, ph * 0.4);
+        // Sun
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath(); ctx.arc(px + pw/4, py - ph/3, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Mirror
+      if (hasDecor('mirror')) {
+        ctx.save();
+        const pos = getDecorPos('mirror');
+        const mx = pos.x * rw, my = pos.y * rh, mw = rw * 0.05, mh = rw * 0.075;
+        ctx.fillStyle = '#B8860B';
+        roundRectPath(ctx, mx - mw/2 - 3, my - mh/2 - 3, mw + 6, mh + 6, 6);
+        ctx.fill();
+        const mirGrad = ctx.createLinearGradient(mx - mw/2, my - mh/2, mx + mw/2, my + mh/2);
+        mirGrad.addColorStop(0, '#e8f4fd');
+        mirGrad.addColorStop(0.4, '#d6eaf8');
+        mirGrad.addColorStop(1, '#aed6f1');
+        ctx.fillStyle = mirGrad;
+        roundRectPath(ctx, mx - mw/2, my - mh/2, mw, mh, 4);
+        ctx.fill();
+        // Shine
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(mx - mw*0.3, my - mh*0.3); ctx.lineTo(mx - mw*0.1, my - mh*0.1); ctx.stroke();
+        ctx.restore();
+      }
+
+      // Antlers
+      if (hasDecor('antlers')) {
+        ctx.save();
+        const pos = getDecorPos('antlers');
+        const ax = pos.x * rw, ay = pos.y * rh;
+        ctx.strokeStyle = '#8B6F47'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        // Left antler
+        ctx.beginPath(); ctx.moveTo(ax, ay + 8); ctx.quadraticCurveTo(ax - 16, ay - 2, ax - 22, ay - 14); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax - 14, ay - 4); ctx.lineTo(ax - 20, ay - 16); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax - 18, ay - 10); ctx.lineTo(ax - 26, ay - 18); ctx.stroke();
+        // Right antler
+        ctx.beginPath(); ctx.moveTo(ax, ay + 8); ctx.quadraticCurveTo(ax + 16, ay - 2, ax + 22, ay - 14); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax + 14, ay - 4); ctx.lineTo(ax + 20, ay - 16); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax + 18, ay - 10); ctx.lineTo(ax + 26, ay - 18); ctx.stroke();
+        // Mount plate
+        ctx.fillStyle = '#6B4226';
+        ctx.beginPath(); ctx.ellipse(ax, ay + 10, 8, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#8B6F47';
+        ctx.beginPath(); ctx.ellipse(ax, ay + 10, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Neon sign
+      if (hasDecor('neon')) {
+        ctx.save();
+        const pos = getDecorPos('neon');
+        const nx = pos.x * rw, ny = pos.y * rh;
+        const glow = 0.6 + Math.sin(t / 400) * 0.2;
+        ctx.shadowColor = '#ff6ec7'; ctx.shadowBlur = 12 * glow;
+        ctx.strokeStyle = 'rgba(255,110,199,' + glow + ')';
+        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.font = (rw * 0.028) + 'px "Segoe UI", sans-serif';
+        ctx.fillStyle = 'rgba(255,110,199,' + glow + ')';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('HELLO', nx, ny);
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      // Poster
+      if (hasDecor('poster')) {
+        ctx.save();
+        const pos = getDecorPos('poster');
+        const px = pos.x * rw, py = pos.y * rh, pw = rw * 0.06, ph = rw * 0.08;
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(px - pw/2 + 1, py - ph/2 + 1, pw, ph);
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(px - pw/2, py - ph/2, pw, ph);
+        // Abstract art
+        ctx.fillStyle = '#e94560';
+        ctx.beginPath(); ctx.arc(px - pw * 0.15, py - ph * 0.1, pw * 0.22, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f3460';
+        ctx.fillRect(px, py - ph * 0.2, pw * 0.3, ph * 0.4);
+        ctx.fillStyle = '#f9a825';
+        ctx.beginPath();
+        ctx.moveTo(px + pw * 0.1, py + ph * 0.3);
+        ctx.lineTo(px - pw * 0.2, py + ph * 0.1);
+        ctx.lineTo(px + pw * 0.35, py + ph * 0.15);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Dartboard
+      if (hasDecor('dartboard')) {
+        ctx.save();
+        const pos = getDecorPos('dartboard');
+        const dx = pos.x * rw, dy = pos.y * rh, dr = rw * 0.035;
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.beginPath(); ctx.arc(dx + 1, dy + 2, dr + 2, 0, Math.PI * 2); ctx.fill();
+        const rings = [[dr, '#1a1a1a'], [dr * 0.85, '#c0392b'], [dr * 0.65, '#f1f1f1'], [dr * 0.45, '#1a1a1a'], [dr * 0.25, '#c0392b'], [dr * 0.1, '#27ae60']];
+        rings.forEach(([r, c]) => {
+          ctx.fillStyle = c;
+          ctx.beginPath(); ctx.arc(dx, dy, r, 0, Math.PI * 2); ctx.fill();
+        });
+        // Wire frame
+        ctx.strokeStyle = 'rgba(200,200,200,0.3)'; ctx.lineWidth = 0.5;
+        for (let i = 0; i < 20; i++) {
+          const a = (i / 20) * Math.PI * 2;
+          ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(dx + Math.cos(a) * dr, dy + Math.sin(a) * dr); ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Wreath
+      if (hasDecor('wreath')) {
+        ctx.save();
+        const pos = getDecorPos('wreath');
+        const wx = pos.x * rw, wy = pos.y * rh, wr = rw * 0.032;
+        // Hanger
+        ctx.fillStyle = '#c44'; ctx.beginPath();
+        ctx.moveTo(wx - 4, wy - wr - 2); ctx.lineTo(wx, wy - wr - 8); ctx.lineTo(wx + 4, wy - wr - 2); ctx.fill();
+        // Leaves circle
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * Math.PI * 2;
+          const lx = wx + Math.cos(a) * wr, ly = wy + Math.sin(a) * wr;
+          ctx.fillStyle = i % 3 === 0 ? '#2d8a4e' : '#3da65a';
+          ctx.beginPath(); ctx.ellipse(lx, ly, 5, 3, a, 0, Math.PI * 2); ctx.fill();
+        }
+        // Berries
+        ctx.fillStyle = '#c0392b';
+        [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5].forEach(a => {
+          ctx.beginPath(); ctx.arc(wx + Math.cos(a) * wr, wy + Math.sin(a) * wr, 2.5, 0, Math.PI * 2); ctx.fill();
+        });
+        // Bow
+        ctx.fillStyle = '#c0392b';
+        ctx.beginPath();
+        ctx.moveTo(wx, wy - wr + 2); ctx.quadraticCurveTo(wx - 8, wy - wr - 4, wx - 3, wy - wr + 6);
+        ctx.quadraticCurveTo(wx, wy - wr + 2, wx + 3, wy - wr + 6);
+        ctx.quadraticCurveTo(wx + 8, wy - wr - 4, wx, wy - wr + 2);
+        ctx.fill();
+        ctx.restore();
+      }
     }
 
     function drawFloorDecorations(ctx, rw, rh, floorY, t) {
@@ -2525,6 +2907,216 @@
         }
         ctx.restore();
       }
+
+      // Aquarium
+      if (hasDecor('aquarium')) {
+        ctx.save();
+        const pos = getDecorPos('aquarium');
+        const ax = pos.x * rw, ay = pos.y * rh;
+        const aw = rw * 0.09, ah = rw * 0.06;
+        // Stand legs
+        ctx.fillStyle = '#555';
+        ctx.fillRect(ax - aw/2 + 3, ay + ah/2, 3, 10);
+        ctx.fillRect(ax + aw/2 - 6, ay + ah/2, 3, 10);
+        // Tank glass
+        ctx.fillStyle = 'rgba(100,180,220,0.25)';
+        roundRectPath(ctx, ax - aw/2, ay - ah/2, aw, ah, 3);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(150,200,230,0.4)'; ctx.lineWidth = 1.5;
+        roundRectPath(ctx, ax - aw/2, ay - ah/2, aw, ah, 3);
+        ctx.stroke();
+        // Water
+        ctx.fillStyle = 'rgba(64,164,223,0.15)';
+        ctx.fillRect(ax - aw/2 + 2, ay - ah/2 + 6, aw - 4, ah - 8);
+        // Fish
+        const fishT = t / 800;
+        const fx = ax - aw * 0.2 + Math.sin(fishT) * aw * 0.2;
+        const fy = ay - 2 + Math.cos(fishT * 1.3) * 3;
+        ctx.fillStyle = '#ff6b35';
+        ctx.beginPath(); ctx.ellipse(fx, fy, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(fx - 5, fy); ctx.lineTo(fx - 9, fy - 3); ctx.lineTo(fx - 9, fy + 3); ctx.fill();
+        // Second fish
+        const fx2 = ax + aw * 0.15 + Math.sin(fishT + 2) * aw * 0.15;
+        const fy2 = ay + 4 + Math.cos(fishT * 0.9 + 1) * 2;
+        ctx.fillStyle = '#48dbfb';
+        ctx.beginPath(); ctx.ellipse(fx2, fy2, 4, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(fx2 + 4, fy2); ctx.lineTo(fx2 + 7, fy2 - 2); ctx.lineTo(fx2 + 7, fy2 + 2); ctx.fill();
+        // Bubbles
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        const bub1y = ay - ah * 0.1 - ((t / 20) % ah * 0.4);
+        ctx.beginPath(); ctx.arc(ax - 4, bub1y, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ax + 6, bub1y + 5, 1, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Guitar
+      if (hasDecor('guitar')) {
+        ctx.save();
+        const pos = getDecorPos('guitar');
+        const gx = pos.x * rw, baseY = pos.y * rh;
+        const gh = rh * 0.12;
+        // Neck
+        ctx.fillStyle = '#6B4226';
+        ctx.fillRect(gx - 2, baseY - gh, 4, gh * 0.6);
+        // Headstock
+        ctx.fillStyle = '#4a3020';
+        roundRectPath(ctx, gx - 4, baseY - gh - 6, 8, 10, 2);
+        ctx.fill();
+        // Tuning pegs
+        ctx.fillStyle = '#ccc';
+        ctx.beginPath(); ctx.arc(gx - 5, baseY - gh - 2, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(gx + 5, baseY - gh, 1.5, 0, Math.PI * 2); ctx.fill();
+        // Body
+        ctx.fillStyle = '#D4A06A';
+        ctx.beginPath(); ctx.ellipse(gx, baseY - gh * 0.2, 14, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(gx, baseY - gh * 0.35, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
+        // Sound hole
+        ctx.fillStyle = '#3a2a1a';
+        ctx.beginPath(); ctx.arc(gx, baseY - gh * 0.22, 4, 0, Math.PI * 2); ctx.fill();
+        // Strings
+        ctx.strokeStyle = 'rgba(200,200,200,0.4)'; ctx.lineWidth = 0.5;
+        for (let i = -1; i <= 1; i++) {
+          ctx.beginPath(); ctx.moveTo(gx + i, baseY - gh + 4); ctx.lineTo(gx + i, baseY - gh * 0.1); ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Globe
+      if (hasDecor('globe')) {
+        ctx.save();
+        const pos = getDecorPos('globe');
+        const gx = pos.x * rw, baseY = pos.y * rh;
+        const gr = rw * 0.028;
+        // Stand
+        ctx.fillStyle = '#8B7355';
+        ctx.fillRect(gx - 1.5, baseY - gr * 1.5, 3, gr * 1.5);
+        ctx.beginPath(); ctx.ellipse(gx, baseY, 8, 3, 0, 0, Math.PI * 2); ctx.fill();
+        // Globe frame arc
+        ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(gx, baseY - gr * 1.5 - gr, gr + 3, 0, Math.PI * 2); ctx.stroke();
+        // Globe sphere
+        const gcy = baseY - gr * 1.5 - gr;
+        const globeGrad = ctx.createRadialGradient(gx - gr * 0.3, gcy - gr * 0.3, 0, gx, gcy, gr);
+        globeGrad.addColorStop(0, '#5bb5e0');
+        globeGrad.addColorStop(0.7, '#3498db');
+        globeGrad.addColorStop(1, '#2174a8');
+        ctx.fillStyle = globeGrad;
+        ctx.beginPath(); ctx.arc(gx, gcy, gr, 0, Math.PI * 2); ctx.fill();
+        // Continents
+        ctx.fillStyle = '#5a9a4a';
+        const spin = (t / 3000) % (Math.PI * 2);
+        ctx.beginPath(); ctx.ellipse(gx + Math.cos(spin) * gr * 0.3, gcy - gr * 0.2, gr * 0.25, gr * 0.15, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(gx + Math.cos(spin + 1) * gr * 0.4, gcy + gr * 0.15, gr * 0.2, gr * 0.12, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Trash can
+      if (hasDecor('trashcan')) {
+        ctx.save();
+        const pos = getDecorPos('trashcan');
+        const tx = pos.x * rw, baseY = pos.y * rh;
+        const tw = 16, th = 22;
+        ctx.fillStyle = '#888';
+        ctx.beginPath();
+        ctx.moveTo(tx - tw/2, baseY); ctx.lineTo(tx - tw/2 + 2, baseY - th);
+        ctx.lineTo(tx + tw/2 - 2, baseY - th); ctx.lineTo(tx + tw/2, baseY);
+        ctx.fill();
+        // Lid
+        ctx.fillStyle = '#999';
+        roundRectPath(ctx, tx - tw/2 - 1, baseY - th - 3, tw + 2, 4, 1.5);
+        ctx.fill();
+        // Handle
+        ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(tx, baseY - th - 5, 4, Math.PI, 0); ctx.stroke();
+        // Lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(tx - 3, baseY - th + 4); ctx.lineTo(tx - 2, baseY - 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 3, baseY - th + 4); ctx.lineTo(tx + 2, baseY - 2); ctx.stroke();
+        ctx.restore();
+      }
+
+      // Standing fan
+      if (hasDecor('fan')) {
+        ctx.save();
+        const pos = getDecorPos('fan');
+        const fx = pos.x * rw, baseY = pos.y * rh;
+        const fh = rh * 0.13;
+        // Base
+        ctx.fillStyle = '#666';
+        ctx.beginPath(); ctx.ellipse(fx, baseY, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+        // Pole
+        ctx.strokeStyle = '#888'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(fx, baseY); ctx.lineTo(fx, baseY - fh + 14); ctx.stroke();
+        // Fan housing
+        const fcy = baseY - fh + 6;
+        ctx.fillStyle = '#ddd';
+        ctx.beginPath(); ctx.arc(fx, fcy, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(fx, fcy, 14, 0, Math.PI * 2); ctx.stroke();
+        // Spinning blades
+        const spin = (t / 100) % (Math.PI * 2);
+        ctx.fillStyle = 'rgba(100,100,100,0.4)';
+        for (let i = 0; i < 3; i++) {
+          const a = spin + (i * Math.PI * 2 / 3);
+          ctx.beginPath();
+          ctx.ellipse(fx + Math.cos(a) * 6, fcy + Math.sin(a) * 6, 8, 3, a, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // Center hub
+        ctx.fillStyle = '#555';
+        ctx.beginPath(); ctx.arc(fx, fcy, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Bean pillow
+      if (hasDecor('beanpillow')) {
+        ctx.save();
+        const pos = getDecorPos('beanpillow');
+        const bx = pos.x * rw, by = pos.y * rh;
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.beginPath(); ctx.ellipse(bx, by + 4, 22, 6, 0, 0, Math.PI * 2); ctx.fill();
+        const beanGrad = ctx.createRadialGradient(bx - 4, by - 6, 0, bx, by, 20);
+        beanGrad.addColorStop(0, '#7c5cbf');
+        beanGrad.addColorStop(1, '#5a3d8a');
+        ctx.fillStyle = beanGrad;
+        ctx.beginPath(); ctx.ellipse(bx, by - 2, 20, 14, 0, 0, Math.PI * 2); ctx.fill();
+        // Highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath(); ctx.ellipse(bx - 5, by - 8, 10, 5, -0.3, 0, Math.PI * 2); ctx.fill();
+        // Seam line
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(bx - 8, by - 12); ctx.quadraticCurveTo(bx, by + 6, bx + 10, by - 10); ctx.stroke();
+        ctx.restore();
+      }
+
+      // TV
+      if (hasDecor('tv')) {
+        ctx.save();
+        const pos = getDecorPos('tv');
+        const tx = pos.x * rw, baseY = pos.y * rh;
+        const tw = rw * 0.1, th = rw * 0.06;
+        // Stand
+        ctx.fillStyle = '#444';
+        ctx.fillRect(tx - 12, baseY - 6, 24, 6);
+        ctx.fillRect(tx - 3, baseY - th - 2, 6, th - 4);
+        // Screen
+        ctx.fillStyle = '#111';
+        roundRectPath(ctx, tx - tw/2, baseY - th - th * 0.8, tw, th * 0.82, 3);
+        ctx.fill();
+        // Screen content (animated color bars / glow)
+        const scrGrad = ctx.createLinearGradient(tx - tw/2 + 3, 0, tx + tw/2 - 3, 0);
+        const hue = (t / 30) % 360;
+        scrGrad.addColorStop(0, 'hsl(' + hue + ',60%,30%)');
+        scrGrad.addColorStop(0.5, 'hsl(' + ((hue + 120) % 360) + ',60%,35%)');
+        scrGrad.addColorStop(1, 'hsl(' + ((hue + 240) % 360) + ',60%,30%)');
+        ctx.fillStyle = scrGrad;
+        roundRectPath(ctx, tx - tw/2 + 3, baseY - th - th * 0.78, tw - 6, th * 0.76, 2);
+        ctx.fill();
+        // Screen glare
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fillRect(tx - tw/4, baseY - th - th * 0.7, tw * 0.3, th * 0.5);
+        ctx.restore();
+      }
     }
 
     /* ═══════════════════════════════
@@ -2547,69 +3139,220 @@
         ctx.clearRect(0, 0, rw, rh);
 
         /* ── Wall ── */
-        const wallGrad = ctx.createLinearGradient(0, 0, 0, floorY);
-        wallGrad.addColorStop(0, '#c8dff0');
-        wallGrad.addColorStop(0.5, '#d6e5ee');
-        wallGrad.addColorStop(1, '#e8ddd0');
-        ctx.fillStyle = wallGrad;
-        ctx.fillRect(0, 0, rw, floorY);
-        // Subtle horizontal wall lines
-        ctx.strokeStyle = 'rgba(180,170,155,0.06)';
-        ctx.lineWidth = 1;
-        for (let y = 0; y < floorY; y += 18) {
-          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke();
+        const wp = roomData.wallPattern || 'wall_default';
+        if (wp === 'wall_brick') {
+          ctx.fillStyle = '#b5745a';
+          ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(180,140,110,0.3)'; ctx.lineWidth = 1;
+          const bh = 14, bw = 32;
+          for (let row = 0; row * bh < floorY; row++) {
+            const off = (row % 2) * bw / 2;
+            for (let x = -bw + off; x < rw + bw; x += bw) {
+              ctx.strokeRect(x, row * bh, bw - 2, bh - 2);
+            }
+          }
+        } else if (wp === 'wall_wood') {
+          const wGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+          wGrad.addColorStop(0, '#a08060'); wGrad.addColorStop(1, '#7a6040');
+          ctx.fillStyle = wGrad; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(60,40,20,0.12)'; ctx.lineWidth = 1;
+          for (let x = 0; x < rw; x += 28) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, floorY); ctx.stroke();
+          }
+          ctx.strokeStyle = 'rgba(100,70,40,0.06)'; ctx.lineWidth = 0.5;
+          for (let i = 0; i < 20; i++) {
+            const gx = (i * rw / 20) + 5, gy = Math.random() * floorY;
+            ctx.beginPath(); ctx.moveTo(gx, gy); ctx.quadraticCurveTo(gx + 10, gy + 2, gx + 20, gy - 1); ctx.stroke();
+          }
+        } else if (wp === 'wall_stripe') {
+          ctx.fillStyle = '#e0d8cc'; ctx.fillRect(0, 0, rw, floorY);
+          for (let x = 0; x < rw; x += 18) {
+            ctx.fillStyle = (x / 18) % 2 === 0 ? 'rgba(180,160,140,0.15)' : 'rgba(200,180,160,0.08)';
+            ctx.fillRect(x, 0, 9, floorY);
+          }
+        } else if (wp === 'wall_dots') {
+          ctx.fillStyle = '#e8e0d8'; ctx.fillRect(0, 0, rw, floorY);
+          ctx.fillStyle = 'rgba(180,160,140,0.18)';
+          for (let y = 8; y < floorY; y += 16) {
+            for (let x = 8 + (Math.floor(y / 16) % 2) * 8; x < rw; x += 16) {
+              ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        } else if (wp === 'wall_diamond') {
+          ctx.fillStyle = '#d8d0c4'; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(160,140,120,0.15)'; ctx.lineWidth = 1;
+          const ds = 24;
+          for (let y = 0; y < floorY + ds; y += ds) {
+            for (let x = 0; x < rw + ds; x += ds) {
+              ctx.beginPath();
+              ctx.moveTo(x, y - ds/2); ctx.lineTo(x + ds/2, y); ctx.lineTo(x, y + ds/2); ctx.lineTo(x - ds/2, y);
+              ctx.closePath(); ctx.stroke();
+            }
+          }
+        } else if (wp === 'wall_pastel') {
+          const pg = ctx.createLinearGradient(0, 0, rw, floorY);
+          pg.addColorStop(0, '#ffd1dc'); pg.addColorStop(0.5, '#c5e1f5'); pg.addColorStop(1, '#d4f0c0');
+          ctx.fillStyle = pg; ctx.fillRect(0, 0, rw, floorY);
+        } else if (wp === 'wall_mint') {
+          const mg = ctx.createLinearGradient(0, 0, 0, floorY);
+          mg.addColorStop(0, '#b8e8d0'); mg.addColorStop(1, '#8cc8a8');
+          ctx.fillStyle = mg; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(100,160,130,0.06)'; ctx.lineWidth = 1;
+          for (let y = 0; y < floorY; y += 18) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke();
+          }
+        } else if (wp === 'wall_navy') {
+          const ng = ctx.createLinearGradient(0, 0, 0, floorY);
+          ng.addColorStop(0, '#2c3e6b'); ng.addColorStop(1, '#1a2744');
+          ctx.fillStyle = ng; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(60,80,120,0.12)'; ctx.lineWidth = 1;
+          for (let y = 0; y < floorY; y += 18) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke();
+          }
+        } else if (wp === 'wall_sunset') {
+          const sg = ctx.createLinearGradient(0, 0, 0, floorY);
+          sg.addColorStop(0, '#ff7b54'); sg.addColorStop(0.4, '#ffb26b'); sg.addColorStop(0.7, '#ffd56b'); sg.addColorStop(1, '#e8ddd0');
+          ctx.fillStyle = sg; ctx.fillRect(0, 0, rw, floorY);
+        } else {
+          // Default wall
+          const wallGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+          wallGrad.addColorStop(0, '#c8dff0');
+          wallGrad.addColorStop(0.5, '#d6e5ee');
+          wallGrad.addColorStop(1, '#e8ddd0');
+          ctx.fillStyle = wallGrad;
+          ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(180,170,155,0.06)';
+          ctx.lineWidth = 1;
+          for (let y = 0; y < floorY; y += 18) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke();
+          }
         }
 
-        /* ── Window ── */
-        const winW = rw * 0.18, winH = rh * 0.3;
-        const winX = rw * 0.5 - winW / 2, winY = rh * 0.04;
-        // Shadow behind frame
-        ctx.fillStyle = 'rgba(0,0,0,0.08)';
-        ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
-        // Outer frame
-        ctx.fillStyle = '#8B7355';
-        ctx.fillRect(winX - 5, winY - 5, winW + 10, winH + 10);
-        // Inner frame
-        ctx.fillStyle = '#a08868';
-        ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
-        // Sky through window
-        const skyGrad = ctx.createLinearGradient(winX, winY, winX, winY + winH);
-        skyGrad.addColorStop(0, '#6cb4ee');
-        skyGrad.addColorStop(0.6, '#a8d8ea');
-        skyGrad.addColorStop(1, '#c5e8c5');
-        ctx.fillStyle = skyGrad;
-        ctx.fillRect(winX, winY, winW, winH);
-        // Clouds moving in window
-        ctx.save();
-        ctx.beginPath(); ctx.rect(winX, winY, winW, winH); ctx.clip();
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        bgClouds.forEach(c => {
-          const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
-          drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
-        });
-        // Distant hills
-        ctx.fillStyle = 'rgba(100,160,100,0.3)';
-        ctx.beginPath();
-        ctx.moveTo(winX, winY + winH);
-        for (let x = 0; x <= winW; x += 4) {
-          ctx.lineTo(winX + x, winY + winH * 0.7 + Math.sin(x * 0.04) * winH * 0.06);
+        /* ── Window (conditional on style) ── */
+        const winStyle = roomData.windowStyle || 'win_classic';
+        if (winStyle !== 'win_none') {
+        let winW, winH, winX, winY;
+        if (winStyle === 'win_large') {
+          winW = rw * 0.26; winH = rh * 0.38;
+        } else if (winStyle === 'win_double') {
+          winW = rw * 0.32; winH = rh * 0.3;
+        } else {
+          winW = rw * 0.18; winH = rh * 0.3;
         }
-        ctx.lineTo(winX + winW, winY + winH);
-        ctx.fill();
-        ctx.restore();
-        // Window cross
-        ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(winX + winW / 2, winY); ctx.lineTo(winX + winW / 2, winY + winH);
-        ctx.moveTo(winX, winY + winH / 2); ctx.lineTo(winX + winW, winY + winH / 2);
-        ctx.stroke();
-        // Window sill
-        ctx.fillStyle = '#a08868';
-        roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 7, 2);
-        ctx.fill();
-        // Sill highlight
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
-        ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
+        winX = rw * 0.5 - winW / 2; winY = rh * 0.04;
+
+        if (winStyle === 'win_round') {
+          // Round window
+          const cr = Math.min(winW, winH) * 0.45;
+          const cx = rw * 0.5, cy = winY + cr + 5;
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.beginPath(); ctx.arc(cx + 2, cy + 3, cr + 6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#8B7355';
+          ctx.beginPath(); ctx.arc(cx, cy, cr + 5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#a08868';
+          ctx.beginPath(); ctx.arc(cx, cy, cr + 2, 0, Math.PI * 2); ctx.fill();
+          // Sky
+          ctx.save();
+          ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.clip();
+          const skyG = ctx.createLinearGradient(cx, cy - cr, cx, cy + cr);
+          skyG.addColorStop(0, '#6cb4ee'); skyG.addColorStop(0.6, '#a8d8ea'); skyG.addColorStop(1, '#c5e8c5');
+          ctx.fillStyle = skyG; ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          bgClouds.forEach(c => {
+            const ccx = cx - cr + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * cr * 2;
+            drawBgCloud(ctx, ccx, cy - cr + c.y * cr * 2, c.w * cr * 2);
+          });
+          ctx.restore();
+          // Cross
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(cx, cy - cr); ctx.lineTo(cx, cy + cr);
+          ctx.moveTo(cx - cr, cy); ctx.lineTo(cx + cr, cy); ctx.stroke();
+        } else if (winStyle === 'win_arch') {
+          // Arched window
+          const archR = winW / 2;
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
+          ctx.fillStyle = '#8B7355';
+          ctx.beginPath();
+          ctx.moveTo(winX - 5, winY + winH + 5); ctx.lineTo(winX - 5, winY + archR);
+          ctx.arc(winX + archR, winY + archR, archR + 5, Math.PI, 0);
+          ctx.lineTo(winX + winW + 5, winY + winH + 5); ctx.fill();
+          ctx.fillStyle = '#a08868';
+          ctx.beginPath();
+          ctx.moveTo(winX - 2, winY + winH + 2); ctx.lineTo(winX - 2, winY + archR);
+          ctx.arc(winX + archR, winY + archR, archR + 2, Math.PI, 0);
+          ctx.lineTo(winX + winW + 2, winY + winH + 2); ctx.fill();
+          // Sky
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(winX, winY + winH); ctx.lineTo(winX, winY + archR);
+          ctx.arc(winX + archR, winY + archR, archR, Math.PI, 0);
+          ctx.lineTo(winX + winW, winY + winH); ctx.clip();
+          const skyG = ctx.createLinearGradient(winX, winY, winX, winY + winH);
+          skyG.addColorStop(0, '#6cb4ee'); skyG.addColorStop(0.6, '#a8d8ea'); skyG.addColorStop(1, '#c5e8c5');
+          ctx.fillStyle = skyG; ctx.fillRect(winX, winY, winW, winH);
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          bgClouds.forEach(c => {
+            const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
+            drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
+          });
+          ctx.fillStyle = 'rgba(100,160,100,0.3)';
+          ctx.beginPath(); ctx.moveTo(winX, winY + winH);
+          for (let x = 0; x <= winW; x += 4) ctx.lineTo(winX + x, winY + winH * 0.7 + Math.sin(x * 0.04) * winH * 0.06);
+          ctx.lineTo(winX + winW, winY + winH); ctx.fill();
+          ctx.restore();
+          // Cross
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(winX + winW / 2, winY); ctx.lineTo(winX + winW / 2, winY + winH);
+          ctx.moveTo(winX, winY + winH * 0.5); ctx.lineTo(winX + winW, winY + winH * 0.5); ctx.stroke();
+          // Sill
+          ctx.fillStyle = '#a08868';
+          roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 7, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.12)';
+          ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
+        } else {
+          // Classic / Large / Double — rectangular window
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
+          ctx.fillStyle = '#8B7355';
+          ctx.fillRect(winX - 5, winY - 5, winW + 10, winH + 10);
+          ctx.fillStyle = '#a08868';
+          ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
+          const skyGrad = ctx.createLinearGradient(winX, winY, winX, winY + winH);
+          skyGrad.addColorStop(0, '#6cb4ee'); skyGrad.addColorStop(0.6, '#a8d8ea'); skyGrad.addColorStop(1, '#c5e8c5');
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(winX, winY, winW, winH);
+          ctx.save();
+          ctx.beginPath(); ctx.rect(winX, winY, winW, winH); ctx.clip();
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          bgClouds.forEach(c => {
+            const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
+            drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
+          });
+          ctx.fillStyle = 'rgba(100,160,100,0.3)';
+          ctx.beginPath(); ctx.moveTo(winX, winY + winH);
+          for (let x = 0; x <= winW; x += 4) ctx.lineTo(winX + x, winY + winH * 0.7 + Math.sin(x * 0.04) * winH * 0.06);
+          ctx.lineTo(winX + winW, winY + winH); ctx.fill();
+          ctx.restore();
+          // Cross bars
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
+          ctx.beginPath();
+          if (winStyle === 'win_double') {
+            // Two panes side by side
+            ctx.moveTo(winX + winW / 3, winY); ctx.lineTo(winX + winW / 3, winY + winH);
+            ctx.moveTo(winX + winW * 2 / 3, winY); ctx.lineTo(winX + winW * 2 / 3, winY + winH);
+            ctx.moveTo(winX, winY + winH / 2); ctx.lineTo(winX + winW, winY + winH / 2);
+          } else {
+            ctx.moveTo(winX + winW / 2, winY); ctx.lineTo(winX + winW / 2, winY + winH);
+            ctx.moveTo(winX, winY + winH / 2); ctx.lineTo(winX + winW, winY + winH / 2);
+          }
+          ctx.stroke();
+          // Sill
+          ctx.fillStyle = '#a08868';
+          roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 7, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.12)';
+          ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
+        }
 
         /* ── Sunlight beam from window ── */
         ctx.save();
@@ -2622,6 +3365,7 @@
         ctx.lineTo(winX - rw * 0.05, rh);
         ctx.fill();
         ctx.restore();
+        } // end if winStyle !== 'win_none'
 
         /* ── Wall Decorations (drawn over wall, before baseboard) ── */
         drawWallDecorations(ctx, rw, rh, floorY, t);
@@ -3641,6 +4385,18 @@
         const target = btn.dataset.sub;
         btn.parentElement.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b === btn));
         btn.parentElement.parentElement.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('active', p.id === target));
+      });
+    });
+
+    // Decor sub-tabs (Wall/Window/Art/Furniture/Rug)
+    document.querySelectorAll('.decor-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.dcategory;
+        const wrap = btn.closest('#decorShopWrap');
+        wrap.querySelectorAll('.decor-tab').forEach(b => b.classList.toggle('active', b === btn));
+        wrap.querySelectorAll('.decor-panel').forEach(p => {
+          p.classList.toggle('active', p.id === 'dp-' + cat);
+        });
       });
     });
 
