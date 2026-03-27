@@ -602,6 +602,8 @@
     let board, currentPiece, nextPiece, holdPiece, holdUsed, score, lines, combo, coinsEarned;
     let gameRunning, gamePaused, dropTimer, dropInterval, lockTimer, animatingLines;
     let bestLocalScore;
+    const keyRepeatTimers = {};
+    const KEY_REPEAT_INTERVAL = 80;
 
     function getPlayerName() {
       return localStorage.getItem('flappy_name') || 'Anonymous';
@@ -979,10 +981,15 @@
       }
     }
 
+    function clearAllKeyRepeats() {
+      for (const key in keyRepeatTimers) { clearInterval(keyRepeatTimers[key]); delete keyRepeatTimers[key]; }
+    }
+
     function togglePause() {
       if (!gameRunning || animatingLines) return;
       gamePaused = !gamePaused;
       if (gamePaused) {
+        clearAllKeyRepeats();
         clearInterval(dropTimer);
         // Draw pause overlay
         ctx2d.fillStyle = 'rgba(15,12,41,0.85)';
@@ -1028,6 +1035,7 @@
 
     function gameOver() {
       gameRunning = false;
+      clearAllKeyRepeats();
       clearInterval(dropTimer);
       playGameOver();
 
@@ -1051,8 +1059,21 @@
     }
 
     /* ═══════════════════════════════
-       Input: Keyboard
+       Input: Keyboard (custom repeat for L/R/Down)
        ═══════════════════════════════ */
+    function startKeyRepeat(code, action) {
+      if (keyRepeatTimers[code]) return; // already held
+      action(); // move once immediately
+      keyRepeatTimers[code] = setInterval(action, KEY_REPEAT_INTERVAL);
+    }
+
+    function stopKeyRepeat(code) {
+      if (keyRepeatTimers[code]) {
+        clearInterval(keyRepeatTimers[code]);
+        delete keyRepeatTimers[code];
+      }
+    }
+
     document.addEventListener('keydown', e => {
       if (!gameRunning) {
         if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') {
@@ -1065,12 +1086,20 @@
       if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); togglePause(); return; }
       if (gamePaused) return;
       switch (e.code) {
-        case 'ArrowLeft': case 'KeyA':  e.preventDefault(); moveLeft(); break;
-        case 'ArrowRight': case 'KeyD': e.preventDefault(); moveRight(); break;
-        case 'ArrowDown': case 'KeyS':  e.preventDefault(); softDrop(); break;
+        case 'ArrowLeft': case 'KeyA':  e.preventDefault(); startKeyRepeat('left', moveLeft); break;
+        case 'ArrowRight': case 'KeyD': e.preventDefault(); startKeyRepeat('right', moveRight); break;
+        case 'ArrowDown': case 'KeyS':  e.preventDefault(); startKeyRepeat('down', softDrop); break;
         case 'ArrowUp': case 'KeyW':    e.preventDefault(); rotate(); break;
         case 'Space':                    e.preventDefault(); hardDrop(); break;
         case 'KeyC': case 'ShiftLeft': case 'ShiftRight': e.preventDefault(); holdSwap(); break;
+      }
+    });
+
+    document.addEventListener('keyup', e => {
+      switch (e.code) {
+        case 'ArrowLeft': case 'KeyA':  stopKeyRepeat('left'); break;
+        case 'ArrowRight': case 'KeyD': stopKeyRepeat('right'); break;
+        case 'ArrowDown': case 'KeyS':  stopKeyRepeat('down'); break;
       }
     });
 
