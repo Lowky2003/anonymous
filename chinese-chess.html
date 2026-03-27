@@ -1129,15 +1129,6 @@ async function makeMove(fromRow, fromCol, toRow, toCol) {
     winnerUid = currentGameData.turn === 'red' ? currentGameData.redUid : currentGameData.blackUid;
   }
 
-  // Check if opponent is in checkmate
-  if (!winner) {
-    const opponentColor = nextTurn;
-    if (isCheckmate(board, opponentColor)) {
-      winner = currentGameData.turn;
-      winnerUid = currentGameData.turn === 'red' ? currentGameData.redUid : currentGameData.blackUid;
-    }
-  }
-
   const update = {
     board: boardToFirestore(board),
     turn: nextTurn,
@@ -1233,14 +1224,7 @@ async function handleGameEnd() {
 function getValidMoves(board, row, col, playerColor) {
   const piece = board[row][col];
   if (!piece) return [];
-  const moves = getRawMoves(board, row, col, piece);
-  // Filter out moves that leave own general in check
-  return moves.filter(([r, c]) => {
-    const testBoard = JSON.parse(JSON.stringify(board));
-    testBoard[r][c] = testBoard[row][col];
-    testBoard[row][col] = null;
-    return !isInCheck(testBoard, playerColor);
-  });
+  return getRawMoves(board, row, col, piece);
 }
 
 function getRawMoves(board, row, col, piece) {
