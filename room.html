@@ -787,6 +787,38 @@
       { level: 30, label: 'Max ★',       cost: 2500 },
     ];
 
+    // Cheapest plant cost used as base for scaling
+    const BASE_PLANT_COST = PLANTS.reduce((m, p) => Math.min(m, p.cost), Infinity);
+
+    function getPlantCostMultiplier(plantId) {
+      const p = PLANTS.find(x => x.id === plantId);
+      return p ? p.cost / BASE_PLANT_COST : 1;
+    }
+
+    function getPlantUpgradeCost(plantId, level) {
+      const next = PLANT_LEVELS[level];
+      if (!next) return null;
+      return Math.round(next.cost * getPlantCostMultiplier(plantId));
+    }
+
+    function getTotalPlantInvestment(plantId, currentLevel) {
+      let total = 0;
+      for (let i = 1; i < currentLevel; i++) {
+        total += getPlantUpgradeCost(plantId, i) || 0;
+      }
+      return total;
+    }
+
+    function getInheritedLevel(newPlantId, totalInvestment) {
+      let spent = 0;
+      for (let lvl = 1; lvl < PLANT_LEVELS.length; lvl++) {
+        const cost = getPlantUpgradeCost(newPlantId, lvl);
+        if (cost === null || spent + cost > totalInvestment) return lvl;
+        spent += cost;
+      }
+      return PLANT_LEVELS.length;
+    }
+
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
@@ -1059,7 +1091,8 @@
       const petCount = [roomData.pet, roomData.pet2].filter(Boolean).length;
       renderShopSection('petShop', PETS, roomData.ownedPets, [roomData.pet, roomData.pet2], 'pet',
         '<span class="slot-badge' + (petCount >= 2 ? ' full' : '') + '">' + petCount + '/2 in room</span>');
-      renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant', '');
+      renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant',
+        '<span style="display:block;font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px">🌱 Only 1 plant at a time — buy a pricier plant to inherit upgrade progress!</span>');
       renderDecorShop();
     }
 
@@ -1176,20 +1209,21 @@
       if (roomData.plant) {
         const plantDef = PLANTS.find(p => p.id === roomData.plant);
         const lvl = roomData.plantLevels[roomData.plant] || 1;
-        const next = PLANT_LEVELS[lvl];
-        const coinsPerCycle = lvl * 2;
+        const nextDef = PLANT_LEVELS[lvl];
+        const scaledCost = getPlantUpgradeCost(roomData.plant, lvl);
+        const coinsPerCycle = lvl * (plantDef ? plantDef.coinRate : 1);
         plantHtml += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
         plantHtml += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
           '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
-        if (next) {
-          const nextCoins = next.level * 2;
+        if (nextDef && scaledCost !== null) {
+          const nextCoins = nextDef.level * (plantDef ? plantDef.coinRate : 1);
           plantHtml += '<div class="shop-card" style="text-align:center">' +
             '<span class="shop-emoji">' + (plantDef?.emoji || '🌱') + '</span>' +
-            '<div class="shop-name">Upgrade to Lv.' + next.level + ' (' + next.label + ')</div>' +
+            '<div class="shop-name">Upgrade to Lv.' + nextDef.level + ' (' + nextDef.label + ')</div>' +
             '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px">Earns ' + nextCoins + ' coins / 5 min</div>' +
-            '<div class="shop-price">' + coinSVG(14) + ' ' + next.cost + '</div>' +
+            '<div class="shop-price">' + coinSVG(14) + ' ' + scaledCost + '</div>' +
             '<button class="shop-btn upgrade" onclick="upgradePlant()" ' +
-            (roomData.coins >= next.cost ? '' : 'disabled') + '>Upgrade</button></div>';
+            (roomData.coins >= scaledCost ? '' : 'disabled') + '>Upgrade</button></div>';
         } else {
           plantHtml += '<div style="text-align:center;color:#98e4b0;padding:20px">★ Max Level! ★</div>';
         }
@@ -1251,7 +1285,21 @@
       roomData[ownedKey].push(id);
       // Set initial data for this item
       if (type === 'pet') roomData.petHunger[id] = 100;
-      if (type === 'plant') roomData.plantLevels[id] = 1;
+      if (type === 'plant') {
+        // Inherit only from CHEAPER plants (prevent exploit loop)
+        const newPlantCost = item.cost;
+        let totalInvest = 0;
+        for (const pid of roomData.ownedPlants) {
+          if (pid === id) continue;
+          const oldDef = PLANTS.find(p => p.id === pid);
+          if (!oldDef || oldDef.cost >= newPlantCost) continue;
+          const pLvl = roomData.plantLevels[pid] || 1;
+          totalInvest += getTotalPlantInvestment(pid, pLvl);
+        }
+        const inherited = totalInvest > 0 ? getInheritedLevel(id, totalInvest) : 1;
+        roomData.plantLevels[id] = inherited;
+        if (inherited > 1) showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
+      }
       // Auto-equip: pets fill 2 slots, plants 1 slot
       if (type === 'pet') {
         if (!roomData.pet) roomData.pet = id;
@@ -1273,6 +1321,27 @@
         else roomData.pet = id;
       } else {
         roomData[type] = id;
+        // Recalculate inheritance from CHEAPER plants only (prevent exploit loop)
+        if (type === 'plant') {
+          const targetDef = PLANTS.find(p => p.id === id);
+          const targetCost = targetDef ? targetDef.cost : 0;
+          let totalInvest = 0;
+          for (const pid of roomData.ownedPlants) {
+            if (pid === id) continue;
+            const oldDef = PLANTS.find(p => p.id === pid);
+            if (!oldDef || oldDef.cost >= targetCost) continue;
+            const pLvl = roomData.plantLevels[pid] || 1;
+            totalInvest += getTotalPlantInvestment(pid, pLvl);
+          }
+          if (totalInvest > 0) {
+            const inherited = getInheritedLevel(id, totalInvest);
+            const currentLvl = roomData.plantLevels[id] || 1;
+            if (inherited > currentLvl) {
+              roomData.plantLevels[id] = inherited;
+              showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
+            }
+          }
+        }
       }
       await saveRoom();
       showToast('Placed in room!', 'success');
@@ -1682,12 +1751,12 @@
       const plantId = roomData.plant;
       if (!plantId) return;
       const lvl = roomData.plantLevels[plantId] || 1;
-      const next = PLANT_LEVELS[lvl];
-      if (!next || roomData.coins < next.cost) return showToast('Not enough coins!', 'error');
-      roomData.coins -= next.cost;
-      roomData.plantLevels[plantId] = next.level;
+      const cost = getPlantUpgradeCost(plantId, lvl);
+      if (cost === null || roomData.coins < cost) return showToast('Not enough coins!', 'error');
+      roomData.coins -= cost;
+      roomData.plantLevels[plantId] = PLANT_LEVELS[lvl].level;
       await saveRoom();
-      showToast('Plant upgraded to Lv.' + next.level + '!', 'success');
+      showToast('Plant upgraded to Lv.' + PLANT_LEVELS[lvl].level + '!', 'success');
     }
 
     async function visitRoom(uid) {
