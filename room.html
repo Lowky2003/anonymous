@@ -1186,7 +1186,7 @@
         }
       } else {
         _lastPetKey = '';
-        petSlot.innerHTML = isOwner ? '<div style="position:absolute;bottom:22%;left:25%;transform:translateX(-50%)"><div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'petShopWrap\')">+</div></div>' : '';
+        petSlot.innerHTML = '';
       }
 
       // Plant — canvas drawn, grows per level
@@ -1212,7 +1212,7 @@
         }
       } else {
         _lastPlantKey = '';
-        plantSlot.innerHTML = isOwner ? '<div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'plantShopWrap\')">+</div>' : '';
+        plantSlot.innerHTML = '';
         plantSlot.style.left = '80%';
         plantSlot.style.bottom = '18%';
         plantSlot.style.right = '';
@@ -3495,6 +3495,47 @@
     /* ═══════════════════════════════
        Canvas Room Background
        ═══════════════════════════════ */
+    function isNightTime() {
+      const h = new Date().getHours();
+      return h >= 18 || h < 6;
+    }
+
+    // Seeded stars so they don't flicker each frame
+    let _nightStars = null;
+    function getNightStars(count) {
+      if (_nightStars && _nightStars.length === count) return _nightStars;
+      _nightStars = [];
+      for (let i = 0; i < count; i++) {
+        _nightStars.push({
+          x: Math.random(), y: Math.random(),
+          r: 0.5 + Math.random() * 1.2,
+          twinkleSpeed: 1500 + Math.random() * 3000,
+          ph: Math.random() * Math.PI * 2
+        });
+      }
+      return _nightStars;
+    }
+
+    function drawNightSky(ctx, x, y, w, h, t) {
+      const stars = getNightStars(25);
+      stars.forEach(s => {
+        const sx = x + s.x * w;
+        const sy = y + s.y * h * 0.7; // keep stars in upper 70%
+        const a = 0.5 + 0.4 * Math.sin(t / s.twinkleSpeed + s.ph);
+        ctx.fillStyle = `rgba(255,255,240,${a})`;
+        ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI * 2); ctx.fill();
+      });
+      // Moon
+      const mx = x + w * 0.75, my = y + h * 0.22, mr = Math.min(w, h) * 0.1;
+      ctx.fillStyle = '#f0e8c0';
+      ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(240,232,192,0.15)';
+      ctx.beginPath(); ctx.arc(mx, my, mr * 1.6, 0, Math.PI * 2); ctx.fill();
+      // Crescent shadow
+      ctx.fillStyle = '#0b0b2e';
+      ctx.beginPath(); ctx.arc(mx + mr * 0.35, my - mr * 0.15, mr * 0.85, 0, Math.PI * 2); ctx.fill();
+    }
+
     function startRoomBgAnimation() {
       cancelAnimationFrame(bgAnimFrame);
       const cvs = document.getElementById('roomBgCanvas');
@@ -3510,6 +3551,10 @@
 
       function frame(t) {
         ctx.clearRect(0, 0, rw, rh);
+        const nightMode = isNightTime();
+        const skyTop = nightMode ? '#0b0b2e' : '#6cb4ee';
+        const skyMid = nightMode ? '#141435' : '#a8d8ea';
+        const skyBot = nightMode ? '#0d1a28' : '#c5e8c5';
 
         /* ── Wall ── */
         const wp = roomData.wallPattern || 'wall_default';
@@ -3628,13 +3673,17 @@
           ctx.save();
           ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.clip();
           const skyG = ctx.createLinearGradient(cx, cy - cr, cx, cy + cr);
-          skyG.addColorStop(0, '#6cb4ee'); skyG.addColorStop(0.6, '#a8d8ea'); skyG.addColorStop(1, '#c5e8c5');
+          skyG.addColorStop(0, skyTop); skyG.addColorStop(0.6, skyMid); skyG.addColorStop(1, skyBot);
           ctx.fillStyle = skyG; ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          bgClouds.forEach(c => {
-            const ccx = cx - cr + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * cr * 2;
-            drawBgCloud(ctx, ccx, cy - cr + c.y * cr * 2, c.w * cr * 2);
-          });
+          if (nightMode) {
+            drawNightSky(ctx, cx - cr, cy - cr, cr * 2, cr * 2, t);
+          } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            bgClouds.forEach(c => {
+              const ccx = cx - cr + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * cr * 2;
+              drawBgCloud(ctx, ccx, cy - cr + c.y * cr * 2, c.w * cr * 2);
+            });
+          }
           ctx.restore();
           // Cross
           ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
@@ -3662,14 +3711,18 @@
           ctx.arc(winX + archR, winY + archR, archR, Math.PI, 0);
           ctx.lineTo(winX + winW, winY + winH); ctx.clip();
           const skyG = ctx.createLinearGradient(winX, winY, winX, winY + winH);
-          skyG.addColorStop(0, '#6cb4ee'); skyG.addColorStop(0.6, '#a8d8ea'); skyG.addColorStop(1, '#c5e8c5');
+          skyG.addColorStop(0, skyTop); skyG.addColorStop(0.6, skyMid); skyG.addColorStop(1, skyBot);
           ctx.fillStyle = skyG; ctx.fillRect(winX, winY, winW, winH);
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          bgClouds.forEach(c => {
-            const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
-            drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
-          });
-          ctx.fillStyle = 'rgba(100,160,100,0.3)';
+          if (nightMode) {
+            drawNightSky(ctx, winX, winY, winW, winH, t);
+          } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            bgClouds.forEach(c => {
+              const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
+              drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
+            });
+          }
+          ctx.fillStyle = nightMode ? 'rgba(30,50,30,0.35)' : 'rgba(100,160,100,0.3)';
           ctx.beginPath(); ctx.moveTo(winX, winY + winH);
           for (let x = 0; x <= winW; x += 4) ctx.lineTo(winX + x, winY + winH * 0.7 + Math.sin(x * 0.04) * winH * 0.06);
           ctx.lineTo(winX + winW, winY + winH); ctx.fill();
@@ -3692,17 +3745,21 @@
           ctx.fillStyle = '#a08868';
           ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
           const skyGrad = ctx.createLinearGradient(winX, winY, winX, winY + winH);
-          skyGrad.addColorStop(0, '#6cb4ee'); skyGrad.addColorStop(0.6, '#a8d8ea'); skyGrad.addColorStop(1, '#c5e8c5');
+          skyGrad.addColorStop(0, skyTop); skyGrad.addColorStop(0.6, skyMid); skyGrad.addColorStop(1, skyBot);
           ctx.fillStyle = skyGrad;
           ctx.fillRect(winX, winY, winW, winH);
           ctx.save();
           ctx.beginPath(); ctx.rect(winX, winY, winW, winH); ctx.clip();
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          bgClouds.forEach(c => {
-            const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
-            drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
-          });
-          ctx.fillStyle = 'rgba(100,160,100,0.3)';
+          if (nightMode) {
+            drawNightSky(ctx, winX, winY, winW, winH, t);
+          } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            bgClouds.forEach(c => {
+              const cx = winX + (((c.x + t * c.speed * 0.0001) % 1.3) - 0.15) * winW;
+              drawBgCloud(ctx, cx, winY + c.y * winH, c.w * winW);
+            });
+          }
+          ctx.fillStyle = nightMode ? 'rgba(30,50,30,0.35)' : 'rgba(100,160,100,0.3)';
           ctx.beginPath(); ctx.moveTo(winX, winY + winH);
           for (let x = 0; x <= winW; x += 4) ctx.lineTo(winX + x, winY + winH * 0.7 + Math.sin(x * 0.04) * winH * 0.06);
           ctx.lineTo(winX + winW, winY + winH); ctx.fill();
@@ -3727,10 +3784,15 @@
           ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
         }
 
-        /* ── Sunlight beam from window ── */
+        /* ── Sunlight / Moonlight beam from window ── */
         ctx.save();
-        ctx.globalAlpha = 0.04 + Math.sin(t / 3000) * 0.01;
-        ctx.fillStyle = '#fffbe0';
+        if (nightMode) {
+          ctx.globalAlpha = 0.025 + Math.sin(t / 4000) * 0.008;
+          ctx.fillStyle = '#b0c4de';
+        } else {
+          ctx.globalAlpha = 0.04 + Math.sin(t / 3000) * 0.01;
+          ctx.fillStyle = '#fffbe0';
+        }
         ctx.beginPath();
         ctx.moveTo(winX, winY + winH + 7);
         ctx.lineTo(winX + winW, winY + winH + 7);
@@ -3792,14 +3854,23 @@
         /* ── Floor Decorations ── */
         drawFloorDecorations(ctx, rw, rh, floorY, t);
 
-        /* ── Floating dust motes in sunlight ── */
+        /* ── Floating dust motes ── */
         bgDust.forEach(p => {
           const px = p.x * rw + Math.sin(t / 2500 + p.ph) * 18;
           const py = p.y * rh + Math.cos(t / 3500 + p.ph) * 12;
           const a = 0.12 + Math.sin(t / 1200 + p.ph) * 0.08;
-          ctx.fillStyle = `rgba(255,255,230,${a})`;
+          ctx.fillStyle = nightMode ? `rgba(180,200,255,${a * 0.6})` : `rgba(255,255,230,${a})`;
           ctx.beginPath(); ctx.arc(px, py, p.sz, 0, Math.PI * 2); ctx.fill();
         });
+
+        /* ── Night ambient overlay ── */
+        if (nightMode) {
+          ctx.save();
+          ctx.globalAlpha = 0.18;
+          ctx.fillStyle = '#0a0a2a';
+          ctx.fillRect(0, 0, rw, rh);
+          ctx.restore();
+        }
 
         bgAnimFrame = requestAnimationFrame(frame);
       }
