@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>中國象棋 — Chinese Chess</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100dvh;
+      overflow-x: hidden
+    }
+
+    /* ── Login overlay ── */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      transition: opacity .3s
+    }
+
+    .login-overlay.hidden {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .login-overlay.loading .login-box {
+      opacity: 0;
+      transform: translateY(20px)
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, .07);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+      transition: all .4s
+    }
+
+    .login-icon {
+      font-size: 48px;
+      margin-bottom: 12px
+    }
+
+    .login-box h2 {
+      font-size: 22px;
+      margin-bottom: 8px
+    }
+
+    .login-box p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .55);
+      margin-bottom: 24px;
+      line-height: 1.5
+    }
+
+    .google-login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      color: #333;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s
+    }
+
+    .google-login-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, .15)
+    }
+
+    .google-login-btn:active {
+      transform: scale(.98)
+    }
+
+    .google-login-btn svg {
+      width: 20px;
+      height: 20px
+    }
+
+    .login-error {
+      color: #ff6b6b;
+      font-size: 12px;
+      margin-top: 12px;
+      min-height: 18px
+    }
+
+    /* ── Settings gear ── */
+    .settings-gear {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 8999;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .1);
+      backdrop-filter: blur(6px);
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s
+    }
+
+    .settings-gear:hover {
+      background: rgba(255, 255, 255, .2)
+    }
+
+    .settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0, 0, 0, .55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .25s
+    }
+
+    .settings-overlay.hidden {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .settings-box {
+      background: rgba(30, 25, 60, .97);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center
+    }
+
+    .settings-box h3 {
+      margin-bottom: 18px;
+      font-size: 18px
+    }
+
+    .settings-logout-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 80, 80, .15);
+      color: #ff6b6b;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background .2s
+    }
+
+    .settings-logout-btn:hover {
+      background: rgba(255, 80, 80, .25)
+    }
+
+    .settings-close-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(255, 255, 255, .6);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .settings-close-btn:hover {
+      background: rgba(255, 255, 255, .06)
+    }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none
+    }
+
+    .toast {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      pointer-events: auto;
+      animation: toastIn .3s ease
+    }
+
+    .toast.success {
+      background: rgba(58, 176, 162, .92);
+      color: #fff
+    }
+
+    .toast.error {
+      background: rgba(255, 80, 80, .92);
+      color: #fff
+    }
+
+    .toast.info {
+      background: rgba(100, 140, 255, .92);
+      color: #fff
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── Back button ── */
+    .back-btn {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 8999;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .1);
+      backdrop-filter: blur(6px);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .2s
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, .2)
+    }
+
+    /* ── Lobby ── */
+    .lobby {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 60px 16px 24px
+    }
+
+    .lobby h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 4px;
+      background: linear-gradient(90deg, #f7c97e, #ff8a65);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .lobby .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255, 255, 255, .45);
+      margin-bottom: 24px
+    }
+
+    .coin-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #f7c97e
+    }
+
+    .coin-bar .coin-icon {
+      font-size: 22px
+    }
+
+    /* Create room */
+    .create-section {
+      background: rgba(255, 255, 255, .06);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px
+    }
+
+    .create-section h3 {
+      font-size: 15px;
+      margin-bottom: 12px
+    }
+
+    .bet-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .bet-btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, .12);
+      background: transparent;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .bet-btn:hover {
+      border-color: rgba(247, 201, 126, .5);
+      background: rgba(247, 201, 126, .1)
+    }
+
+    .bet-btn.selected {
+      border-color: #f7c97e;
+      background: rgba(247, 201, 126, .2);
+      color: #f7c97e
+    }
+
+    .bet-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .create-go {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f7c97e, #ff8a65);
+      color: #1a1a2e;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s
+    }
+
+    .create-go:hover {
+      transform: scale(1.02)
+    }
+
+    .create-go:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    /* Invite section */
+    .invite-section {
+      background: rgba(255, 255, 255, .06);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px
+    }
+
+    .invite-section h3 {
+      font-size: 15px;
+      margin-bottom: 12px
+    }
+
+    .online-users {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto
+    }
+
+    .online-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .04);
+      transition: background .2s
+    }
+
+    .online-user-row:hover {
+      background: rgba(255, 255, 255, .08)
+    }
+
+    .online-user-name {
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .invite-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(58, 176, 162, .25);
+      color: #3ab0a2;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .invite-btn:hover {
+      background: rgba(58, 176, 162, .4)
+    }
+
+    .invite-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    /* Room list */
+    .room-list {
+      margin-bottom: 20px
+    }
+
+    .room-list h3 {
+      font-size: 15px;
+      margin-bottom: 12px
+    }
+
+    .room-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .06);
+      margin-bottom: 8px;
+      transition: background .2s
+    }
+
+    .room-card:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .room-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .room-players {
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .room-bet {
+      font-size: 12px;
+      color: #f7c97e
+    }
+
+    .room-status {
+      font-size: 11px;
+      color: rgba(255, 255, 255, .45)
+    }
+
+    .spectate-btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(100, 140, 255, .2);
+      color: #88aaff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .spectate-btn:hover {
+      background: rgba(100, 140, 255, .35)
+    }
+
+    /* Waiting room */
+    .waiting-room {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 80px 16px 24px;
+      text-align: center
+    }
+
+    .waiting-room h2 {
+      font-size: 22px;
+      margin-bottom: 8px
+    }
+
+    .waiting-info {
+      font-size: 14px;
+      color: rgba(255, 255, 255, .55);
+      margin-bottom: 24px
+    }
+
+    .waiting-bet {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f7c97e;
+      margin-bottom: 16px
+    }
+
+    .waiting-players {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px
+    }
+
+    .waiting-player {
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .06);
+      font-size: 15px;
+      font-weight: 600
+    }
+
+    .waiting-player.empty {
+      color: rgba(255, 255, 255, .3);
+      font-weight: 400;
+      border: 2px dashed rgba(255, 255, 255, .12)
+    }
+
+    .waiting-start {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3ab0a2, #2d8f83);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s;
+      margin-bottom: 10px
+    }
+
+    .waiting-start:hover {
+      transform: scale(1.03)
+    }
+
+    .waiting-start:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .waiting-leave {
+      padding: 10px 24px;
+      border: 1px solid rgba(255, 80, 80, .3);
+      border-radius: 12px;
+      background: transparent;
+      color: #ff6b6b;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .waiting-leave:hover {
+      background: rgba(255, 80, 80, .1)
+    }
+
+    /* ── Game board ── */
+    .game-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 8px 16px
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 8px;
+      padding: 0 4px
+    }
+
+    .game-player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .game-player .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .game-player.red .color-dot {
+      background: #d32f2f
+    }
+
+    .game-player.black .color-dot {
+      background: #333
+    }
+
+    .game-turn-indicator {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 600
+    }
+
+    .game-turn-indicator.red-turn {
+      background: rgba(211, 47, 47, .2);
+      color: #ff6b6b
+    }
+
+    .game-turn-indicator.black-turn {
+      background: rgba(50, 50, 50, .4);
+      color: #aaa
+    }
+
+    .game-bet-display {
+      font-size: 13px;
+      color: #f7c97e;
+      font-weight: 600
+    }
+
+    .board-wrapper {
+      position: relative;
+      display: inline-block
+    }
+
+    canvas#chessBoard {
+      display: block;
+      border-radius: 8px;
+      touch-action: none
+    }
+
+    .game-status {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      min-height: 24px;
+      text-align: center
+    }
+
+    .game-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px
+    }
+
+    .game-buttons button {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .resign-btn {
+      background: rgba(255, 80, 80, .15);
+      color: #ff6b6b
+    }
+
+    .resign-btn:hover {
+      background: rgba(255, 80, 80, .25)
+    }
+
+    .back-lobby-btn {
+      background: rgba(255, 255, 255, .1);
+      color: #fff
+    }
+
+    .back-lobby-btn:hover {
+      background: rgba(255, 255, 255, .18)
+    }
+
+    /* Spectator bar */
+    .spectator-bar {
+      display: none;
+      text-align: center;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .5);
+      background: rgba(255, 255, 255, .04);
+      border-radius: 8px;
+      margin-top: 8px
+    }
+
+    /* ── Invite popup (shown on all pages via listener) ── */
+    .invite-popup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: rgba(0, 0, 0, .6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .2s
+    }
+
+    .invite-popup {
+      background: rgba(30, 25, 60, .97);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 340px;
+      width: 90%;
+      text-align: center
+    }
+
+    .invite-popup h3 {
+      font-size: 18px;
+      margin-bottom: 8px
+    }
+
+    .invite-popup .inv-from {
+      font-size: 14px;
+      color: rgba(255, 255, 255, .7);
+      margin-bottom: 6px
+    }
+
+    .invite-popup .inv-bet {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f7c97e;
+      margin-bottom: 20px
+    }
+
+    .invite-popup .inv-buttons {
+      display: flex;
+      gap: 10px
+    }
+
+    .invite-popup .inv-accept {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3ab0a2, #2d8f83);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .invite-popup .inv-reject {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid rgba(255, 80, 80, .3);
+      border-radius: 12px;
+      background: transparent;
+      color: #ff6b6b;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    /* ── No rooms msg ── */
+    .no-rooms {
+      text-align: center;
+      padding: 20px;
+      color: rgba(255, 255, 255, .35);
+      font-size: 13px
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Login overlay -->
+  <div class="login-overlay loading" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-icon">🔒</div>
+      <h2>Welcome</h2>
+      <p>Sign in with Google to continue.<br>Everything stays anonymous — your identity is never shown.</p>
+      <button class="google-login-btn" id="googleLoginBtn">
+        <svg viewBox="0 0 48 48">
+          <path fill="#EA4335"
+            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+          <path fill="#4285F4"
+            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+          <path fill="#FBBC05"
+            d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.998 23.998 0 0 0 0 24c0 3.77.87 7.34 2.56 10.78l7.97-6.19z" />
+          <path fill="#34A853"
+            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Back button -->
+  <a href="../index.html" class="back-btn" id="backBtn">← Back</a>
+
+  <!-- Settings gear -->
+  <button class="settings-gear" id="settingsGear">⚙️</button>
+  <div class="settings-overlay hidden" id="settingsOverlay">
+    <div class="settings-box">
+      <h3>⚙️ Settings</h3>
+      <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
+      <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ LOBBY VIEW ═══════════ -->
+  <div id="lobbyView">
+    <div class="lobby">
+      <h1>♟️ 中國象棋</h1>
+      <p class="subtitle">Chinese Chess — Challenge your friends!</p>
+      <div class="coin-bar"><span class="coin-icon">🪙</span> <span id="lobbyCoins">0</span> coins</div>
+
+      <!-- Create game -->
+      <div class="create-section" id="createSection">
+        <h3>🎲 Create Game</h3>
+        <div class="bet-options" id="betOptions">
+          <button class="bet-btn" data-bet="20">20</button>
+          <button class="bet-btn" data-bet="50">50</button>
+          <button class="bet-btn" data-bet="80">80</button>
+          <button class="bet-btn" data-bet="100">100</button>
+          <button class="bet-btn" data-bet="300">300</button>
+          <button class="bet-btn" data-bet="500">500</button>
+          <button class="bet-btn" data-bet="1000">1000</button>
+        </div>
+        <button class="create-go" id="createGameBtn" disabled>Select a bet to create game</button>
+      </div>
+
+      <!-- Active rooms -->
+      <div class="room-list">
+        <h3>🏟️ Active Games</h3>
+        <div id="roomListBody">
+          <div class="no-rooms">No active games</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ WAITING ROOM ═══════════ -->
+  <div id="waitingView" style="display:none">
+    <div class="waiting-room">
+      <h2>⏳ Waiting Room</h2>
+      <div class="waiting-bet" id="waitBet">🪙 0 coins</div>
+      <div class="waiting-players" id="waitPlayers"></div>
+      <!-- Invite players from waiting room -->
+      <div class="invite-section" id="waitInviteSection" style="display:none;text-align:left;margin-bottom:20px">
+        <h3>📨 Invite a Player</h3>
+        <div class="online-users" id="waitOnlineUsersList">
+          <div class="no-rooms">Looking for online players…</div>
+        </div>
+      </div>
+      <button class="waiting-start" id="waitStartBtn" disabled>Start Game</button>
+      <br>
+      <button class="waiting-leave" id="waitLeaveBtn">Leave Room</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME VIEW ═══════════ -->
+  <div class="game-container" id="gameView">
+    <div class="game-header">
+      <div class="game-player red"><span class="color-dot"></span><span id="redName">Red</span></div>
+      <div>
+        <div class="game-turn-indicator red-turn" id="turnIndicator">Red's Turn</div>
+        <div class="game-bet-display" id="gameBetDisplay">🪙 0</div>
+      </div>
+      <div class="game-player black"><span class="color-dot"></span><span id="blackName">Black</span></div>
+    </div>
+    <div class="board-wrapper">
+      <canvas id="chessBoard"></canvas>
+    </div>
+    <div class="game-status" id="gameStatus"></div>
+    <div class="spectator-bar" id="spectatorBar">👁️ Watching as spectator</div>
+    <div class="game-buttons" id="gameButtons">
+      <button class="resign-btn" id="resignBtn">🏳️ Resign</button>
+      <button class="back-lobby-btn" id="backLobbyBtn" style="display:none">← Back to Lobby</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="../src/js/firebase-config.js"></script>
+  <script>
+    /* ═══════════════════════════════════════════
+       CHINESE CHESS — MULTIPLAYER WITH LOBBY
+       ═══════════════════════════════════════════ */
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ── Firestore collections ──
+    const gamesRef = db.collection('chess_games');
+    const presenceRef = db.collection('chess_presence');
+    const invitesRef = db.collection('chess_invites');
+    const roomsRef = db.collection('rooms');
+
+    // ── DOM refs ──
+    const loginOverlay = document.getElementById('loginOverlay');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError = document.getElementById('loginError');
+    const lobbyView = document.getElementById('lobbyView');
+    const waitingView = document.getElementById('waitingView');
+    const gameView = document.getElementById('gameView');
+    const lobbyCoins = document.getElementById('lobbyCoins');
+    const betOptions = document.getElementById('betOptions');
+    const createGameBtn = document.getElementById('createGameBtn');
+    const roomListBody = document.getElementById('roomListBody');
+    const waitBet = document.getElementById('waitBet');
+    const waitPlayers = document.getElementById('waitPlayers');
+    const waitStartBtn = document.getElementById('waitStartBtn');
+    const waitLeaveBtn = document.getElementById('waitLeaveBtn');
+    const canvas = document.getElementById('chessBoard');
+    const ctx = canvas.getContext('2d');
+    const turnIndicator = document.getElementById('turnIndicator');
+    const gameBetDisplay = document.getElementById('gameBetDisplay');
+    const redNameEl = document.getElementById('redName');
+    const blackNameEl = document.getElementById('blackName');
+    const gameStatus = document.getElementById('gameStatus');
+    const spectatorBar = document.getElementById('spectatorBar');
+    const resignBtn = document.getElementById('resignBtn');
+    const backLobbyBtn = document.getElementById('backLobbyBtn');
+    const backBtn = document.getElementById('backBtn');
+    const waitInviteSection = document.getElementById('waitInviteSection');
+    const waitOnlineUsersList = document.getElementById('waitOnlineUsersList');
+    let currentUid = null;
+    let myName = 'Anonymous';
+    let myCoins = 0;
+    let selectedBet = 0;
+    let currentGameId = null;
+    let currentGameData = null;
+    let myColor = null; // 'red' | 'black' | null (spectator)
+    let selectedPiece = null; // {row, col}
+    let validMoves = [];
+    let unsubGame = null;
+    let unsubRooms = null;
+    let unsubPresence = null;
+    let unsubInvites = null;
+    let unsubCoins = null;
+    let presenceDocRef = null;
+
+    // ── Helpers ──
+    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function showToast(msg, type) {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast ' + (type || 'info');
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+    function getPlayerName() {
+      return (currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null) || localStorage.getItem('flappy_name') || 'Anonymous';
+    }
+
+    // ═══════════════════════════
+    // AUTH
+    // ═══════════════════════════
+    auth.getRedirectResult().catch(() => { });
+    const provider = new firebase.auth.GoogleAuthProvider();
+    googleLoginBtn.addEventListener('click', async () => {
+      googleLoginBtn.disabled = true;
+      loginError.textContent = '';
+      try {
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+          try { await auth.signInWithRedirect(provider); } catch (e) { loginError.textContent = 'Login failed: ' + (e.message || 'Unknown error'); }
+        } else if (err.code !== 'auth/popup-closed-by-user') {
+          loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+        }
+      } finally { googleLoginBtn.disabled = false; }
+    });
+
+    auth.onAuthStateChanged((user) => {
+      loginOverlay.classList.remove('loading');
+      if (user) {
+        loginOverlay.classList.add('hidden');
+        currentUser = user;
+        currentUid = user.uid;
+        const defaultName = user.displayName || user.email?.split('@')[0] || 'Player';
+        const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
+        myName = customName || defaultName;
+        localStorage.setItem('flappy_name', myName);
+        // Sync displayName in rooms collection so invite list shows correct name
+        roomsRef.doc(currentUid).set({ displayName: myName }, { merge: true }).catch(() => { });
+        // Check for ?join= param (from invite acceptance on other pages)
+        const joinParam = new URLSearchParams(window.location.search).get('join');
+        if (joinParam) {
+          // Clear the param from URL so refresh doesn't re-join
+          window.history.replaceState({}, '', window.location.pathname);
+          listenCoins();
+          setPresence();
+          listenPresence();
+          listenRooms();
+          listenInvites();
+          joinGame(joinParam);
+        } else {
+          enterLobby();
+        }
+      } else {
+        loginOverlay.classList.remove('hidden');
+        cleanupAll();
+      }
+    });
+
+    // ── Settings ──
+    document.getElementById('settingsGear').addEventListener('click', () => document.getElementById('settingsOverlay').classList.remove('hidden'));
+    document.getElementById('settingsCloseBtn').addEventListener('click', () => document.getElementById('settingsOverlay').classList.add('hidden'));
+    document.getElementById('settingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'settingsOverlay') document.getElementById('settingsOverlay').classList.add('hidden'); });
+    document.getElementById('settingsLogoutBtn').addEventListener('click', () => { cleanupAll(); auth.signOut(); });
+
+    // ═══════════════════════════
+    // LOBBY
+    // ═══════════════════════════
+    function enterLobby() {
+      showView('lobby');
+      selectedBet = 0;
+      currentGameId = null;
+      currentGameData = null;
+      myColor = null;
+      selectedPiece = null;
+      validMoves = [];
+      if (unsubGame) { unsubGame(); unsubGame = null; }
+
+      // Set bet buttons and create btn state
+      betOptions.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
+      createGameBtn.disabled = true;
+      createGameBtn.textContent = 'Select a bet to create game';
+
+      // Listen coins
+      listenCoins();
+      // Set presence
+      setPresence();
+      // Listen online users
+      listenPresence();
+      // Listen active rooms
+      listenRooms();
+      // Listen invites for me
+      listenInvites();
+    }
+
+    function showView(v) {
+      lobbyView.style.display = v === 'lobby' ? '' : 'none';
+      waitingView.style.display = v === 'waiting' ? '' : 'none';
+      gameView.style.display = v === 'game' ? 'flex' : 'none';
+      backBtn.style.display = v === 'lobby' ? '' : 'none';
+    }
+
+    function listenCoins() {
+      if (unsubCoins) unsubCoins();
+      unsubCoins = roomsRef.doc(currentUid).onSnapshot((snap) => {
+        myCoins = snap.exists ? (snap.data().coins || 0) : 0;
+        lobbyCoins.textContent = myCoins;
+        // Disable bets user can't afford
+        betOptions.querySelectorAll('.bet-btn').forEach(b => {
+          const bet = parseInt(b.dataset.bet);
+          b.disabled = bet > myCoins;
+          if (bet > myCoins && b.classList.contains('selected')) {
+            b.classList.remove('selected');
+            selectedBet = 0;
+            createGameBtn.disabled = true;
+            createGameBtn.textContent = 'Select a bet to create game';
+          }
+        });
+      });
+    }
+
+    // Bet selection
+    betOptions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.bet-btn');
+      if (!btn || btn.disabled) return;
+      betOptions.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedBet = parseInt(btn.dataset.bet);
+      createGameBtn.disabled = false;
+      createGameBtn.textContent = 'Create Game — 🪙 ' + selectedBet;
+    });
+
+    // Create game
+    createGameBtn.addEventListener('click', async () => {
+      if (!selectedBet || selectedBet > myCoins) return;
+      createGameBtn.disabled = true;
+      try {
+        const docRef = await gamesRef.add({
+          hostUid: currentUid,
+          hostName: myName,
+          guestUid: null,
+          guestName: null,
+          bet: selectedBet,
+          status: 'waiting', // waiting | playing | finished
+          board: null,
+          turn: 'red',
+          redUid: currentUid,
+          redName: myName,
+          blackUid: null,
+          blackName: null,
+          winner: null,
+          winnerUid: null,
+          lastMove: null,
+          createdAt: Date.now()
+        });
+        currentGameId = docRef.id;
+        enterWaitingRoom(currentGameId);
+      } catch (e) {
+        showToast('Failed to create game', 'error');
+        createGameBtn.disabled = false;
+      }
+    });
+
+    // ── Presence ──
+    function setPresence() {
+      if (presenceDocRef) presenceDocRef.delete().catch(() => { });
+      presenceDocRef = presenceRef.doc(currentUid);
+      presenceDocRef.set({ uid: currentUid, name: myName, ts: Date.now() });
+      // Remove on unload
+      window.addEventListener('beforeunload', cleanupPresence);
+    }
+    function cleanupPresence() {
+      if (presenceDocRef) presenceDocRef.delete().catch(() => { });
+    }
+
+    function listenPresence() {
+      if (unsubPresence) unsubPresence();
+      // Show ALL registered users (from rooms collection) — they'll see the invite popup on any page
+      unsubPresence = roomsRef.onSnapshot((snap) => {
+        const users = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (doc.id !== currentUid && d.displayName) {
+            users.push({ uid: doc.id, name: d.displayName });
+          }
+        });
+        renderOnlineUsers(users);
+      });
+    }
+
+    function renderOnlineUsers(users) {
+      const html = users.length ? users.map(u =>
+        '<div class="online-user-row">' +
+        '<span class="online-user-name">' + escapeHtml(u.name) + '</span>' +
+        '<button class="invite-btn" data-uid="' + escapeHtml(u.uid) + '">Invite</button>' +
+        '</div>'
+      ).join('') : '';
+
+      // Waiting room invite list (show when in waiting view and guest hasn't joined)
+      const inWaiting = waitingView.style.display !== 'none';
+      if (!users.length || !inWaiting || (currentGameData && currentGameData.guestUid)) {
+        waitInviteSection.style.display = 'none';
+      } else {
+        waitInviteSection.style.display = '';
+        waitOnlineUsersList.innerHTML = html;
+      }
+    }
+
+    // Send invite (shared handler for both lobby and waiting room lists)
+    async function handleInviteClick(e) {
+      const btn = e.target.closest('.invite-btn');
+      if (!btn || !currentGameId) return;
+      btn.disabled = true;
+      btn.textContent = 'Sent';
+      const targetUid = btn.dataset.uid;
+      const bet = currentGameData ? currentGameData.bet : selectedBet;
+      try {
+        await invitesRef.add({
+          fromUid: currentUid,
+          fromName: myName,
+          toUid: targetUid,
+          gameId: currentGameId,
+          bet: bet,
+          status: 'pending',
+          ts: Date.now()
+        });
+        showToast('Invite sent!', 'success');
+      } catch {
+        showToast('Failed to send invite', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Invite';
+      }
+    }
+    waitOnlineUsersList.addEventListener('click', handleInviteClick);
+
+    // ── Listen invites for me ──
+    function listenInvites() {
+      if (unsubInvites) unsubInvites();
+      unsubInvites = invitesRef
+        .where('toUid', '==', currentUid)
+        .where('status', '==', 'pending')
+        .onSnapshot((snap) => {
+          snap.docChanges().forEach(change => {
+            if (change.type === 'added') {
+              const inv = change.doc.data();
+              showInvitePopup(change.doc.id, inv);
+            }
+          });
+        });
+    }
+
+    function showInvitePopup(inviteId, inv) {
+      // Don't show if already in a game
+      if (currentGameData && currentGameData.status === 'playing') return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'invite-popup-overlay';
+      overlay.innerHTML =
+        '<div class="invite-popup">' +
+        '<h3>♟️ Chess Challenge!</h3>' +
+        '<div class="inv-from">' + escapeHtml(inv.fromName) + ' invites you</div>' +
+        '<div class="inv-bet">🪙 ' + inv.bet + ' coins</div>' +
+        '<div class="inv-buttons">' +
+        '<button class="inv-reject">Reject</button>' +
+        '<button class="inv-accept">Accept</button>' +
+        '</div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+
+      overlay.querySelector('.inv-accept').addEventListener('click', async () => {
+        overlay.remove();
+        await invitesRef.doc(inviteId).update({ status: 'accepted' });
+        joinGame(inv.gameId);
+      });
+      overlay.querySelector('.inv-reject').addEventListener('click', async () => {
+        overlay.remove();
+        await invitesRef.doc(inviteId).update({ status: 'rejected' });
+      });
+    }
+
+    // ── Listen active rooms ──
+    function listenRooms() {
+      if (unsubRooms) unsubRooms();
+      unsubRooms = gamesRef
+        .where('status', 'in', ['waiting', 'playing'])
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .onSnapshot((snap) => {
+          const rooms = [];
+          snap.forEach(doc => rooms.push({ id: doc.id, ...doc.data() }));
+          renderRoomList(rooms);
+        });
+    }
+
+    function renderRoomList(rooms) {
+      if (!rooms.length) {
+        roomListBody.innerHTML = '<div class="no-rooms">No active games</div>';
+        return;
+      }
+      roomListBody.innerHTML = rooms.map(r => {
+        const p1 = escapeHtml(r.redName || 'Waiting...');
+        const p2 = r.blackName ? escapeHtml(r.blackName) : '???';
+        const statusTxt = r.status === 'waiting' ? 'Waiting for opponent' : 'In progress';
+        const btnTxt = r.status === 'playing' ? 'Spectate' : (r.hostUid !== currentUid && !r.guestUid ? 'Join' : 'View');
+        const btnClass = r.status === 'playing' ? 'spectate-btn' : 'spectate-btn';
+        return '<div class="room-card">' +
+          '<div class="room-info">' +
+          '<div class="room-players">' + p1 + ' vs ' + p2 + '</div>' +
+          '<div class="room-bet">🪙 ' + r.bet + ' coins</div>' +
+          '<div class="room-status">' + statusTxt + '</div>' +
+          '</div>' +
+          '<button class="' + btnClass + '" data-gid="' + r.id + '" data-action="' + (r.status === 'playing' ? 'spectate' : 'join') + '">' + btnTxt + '</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    // Room list click handler
+    roomListBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-gid]');
+      if (!btn) return;
+      const gid = btn.dataset.gid;
+      const action = btn.dataset.action;
+      if (action === 'spectate') {
+        spectateGame(gid);
+      } else {
+        joinGame(gid);
+      }
+    });
+
+    // ═══════════════════════════
+    // WAITING ROOM
+    // ═══════════════════════════
+    function enterWaitingRoom(gameId) {
+      currentGameId = gameId;
+      showView('waiting');
+      // Re-trigger presence so invite list renders while waiting view is visible
+      listenPresence();
+      // Listen to this game doc
+      if (unsubGame) unsubGame();
+      unsubGame = gamesRef.doc(gameId).onSnapshot((snap) => {
+        if (!snap.exists) { showToast('Game was deleted', 'error'); enterLobby(); return; }
+        const data = snap.data();
+        currentGameData = data;
+        waitBet.textContent = '🪙 ' + data.bet + ' coins';
+
+        // Show players
+        const p1 = '<div class="waiting-player">' + (data.redName ? '🔴 ' + escapeHtml(data.redName) : '🔴 Waiting...') + '</div>';
+        const p2 = data.blackName
+          ? '<div class="waiting-player">⚫ ' + escapeHtml(data.blackName) + '</div>'
+          : '<div class="waiting-player empty">Waiting for opponent…</div>';
+        waitPlayers.innerHTML = p1 + p2;
+
+        // Host can start when guest joined
+        const isHost = data.hostUid === currentUid;
+        waitStartBtn.disabled = !isHost || !data.guestUid;
+        waitStartBtn.style.display = isHost ? '' : 'none';
+
+        // Hide invite section once guest has joined
+        if (data.guestUid) {
+          waitInviteSection.style.display = 'none';
+        }
+
+        // If game started, go to game
+        if (data.status === 'playing') {
+          myColor = data.redUid === currentUid ? 'red' : data.blackUid === currentUid ? 'black' : null;
+          enterGame();
+        }
+        // If game finished or deleted
+        if (data.status === 'finished') {
+          enterLobby();
+        }
+      });
+    }
+
+    // Join game as guest
+    async function joinGame(gameId) {
+      try {
+        const snap = await gamesRef.doc(gameId).get();
+        if (!snap.exists) { showToast('Game not found', 'error'); return; }
+        const data = snap.data();
+
+        // Already in this game?
+        if (data.redUid === currentUid || data.blackUid === currentUid) {
+          currentGameId = gameId;
+          if (data.status === 'playing') {
+            currentGameData = data;
+            myColor = data.redUid === currentUid ? 'red' : 'black';
+            enterGame();
+          } else {
+            enterWaitingRoom(gameId);
+          }
+          return;
+        }
+
+        if (data.status !== 'waiting') {
+          spectateGame(gameId);
+          return;
+        }
+        if (data.guestUid) { showToast('Room is full', 'error'); return; }
+        if (data.bet > myCoins) { showToast('Not enough coins (need ' + data.bet + ')', 'error'); return; }
+
+        await gamesRef.doc(gameId).update({
+          guestUid: currentUid,
+          guestName: myName,
+          blackUid: currentUid,
+          blackName: myName
+        });
+        currentGameId = gameId;
+        enterWaitingRoom(gameId);
+      } catch (e) {
+        showToast('Failed to join: ' + e.message, 'error');
+      }
+    }
+
+    // Start game (host only)
+    waitStartBtn.addEventListener('click', async () => {
+      if (!currentGameId) return;
+      waitStartBtn.disabled = true;
+      try {
+        await gamesRef.doc(currentGameId).update({
+          status: 'playing',
+          board: initialBoard(),
+          turn: 'red',
+          startedAt: Date.now()
+        });
+      } catch (e) {
+        showToast('Failed to start: ' + e.message, 'error');
+        waitStartBtn.disabled = false;
+      }
+    });
+
+    // Leave waiting room
+    waitLeaveBtn.addEventListener('click', async () => {
+      if (!currentGameId) { enterLobby(); return; }
+      try {
+        const snap = await gamesRef.doc(currentGameId).get();
+        if (snap.exists) {
+          const data = snap.data();
+          if (data.hostUid === currentUid) {
+            // Host leaves → delete game
+            await gamesRef.doc(currentGameId).delete();
+          } else {
+            // Guest leaves
+            await gamesRef.doc(currentGameId).update({
+              guestUid: null, guestName: null,
+              blackUid: null, blackName: null
+            });
+          }
+        }
+      } catch { }
+      enterLobby();
+    });
+
+    // ═══════════════════════════
+    // SPECTATE
+    // ═══════════════════════════
+    function spectateGame(gameId) {
+      currentGameId = gameId;
+      myColor = null;
+      if (unsubGame) unsubGame();
+      unsubGame = gamesRef.doc(gameId).onSnapshot((snap) => {
+        if (!snap.exists) { showToast('Game ended', 'info'); enterLobby(); return; }
+        currentGameData = snap.data();
+        if (currentGameData.status === 'finished' || currentGameData.status === 'waiting') {
+          // Go back to lobby after game ends
+        }
+        renderGameUI();
+        drawBoard();
+      });
+      showView('game');
+      spectatorBar.style.display = '';
+      resignBtn.style.display = 'none';
+      backLobbyBtn.style.display = '';
+      backLobbyBtn.onclick = () => { if (unsubGame) { unsubGame(); unsubGame = null; } enterLobby(); };
+      initCanvas();
+    }
+
+    // ═══════════════════════════
+    // GAME
+    // ═══════════════════════════
+    const PIECE_NAMES = {
+      K: '帥', A: '仕', E: '相', R: '車', H: '馬', C: '炮', P: '兵',
+      k: '將', a: '士', e: '象', r: '車', h: '馬', c: '炮', p: '卒'
+    };
+    const PIECE_NAMES_BLACK = {
+      k: '將', a: '士', e: '象', r: '車', h: '馬', c: '炮', p: '卒'
+    };
+
+    function initialBoard() {
+      // Standard Xiangqi starting position
+      // Row 0 = red's back rank (bottom when red), Row 9 = black's back rank
+      // Red: uppercase, Black: lowercase
+      return [
+        ['r', 'h', 'e', 'a', 'k', 'a', 'e', 'h', 'r'],
+        [null, null, null, null, null, null, null, null, null],
+        [null, 'c', null, null, null, null, null, 'c', null],
+        ['p', null, 'p', null, 'p', null, 'p', null, 'p'],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        ['P', null, 'P', null, 'P', null, 'P', null, 'P'],
+        [null, 'C', null, null, null, null, null, 'C', null],
+        [null, null, null, null, null, null, null, null, null],
+        ['R', 'H', 'E', 'A', 'K', 'A', 'E', 'H', 'R']
+      ];
+    }
+
+    function isRed(piece) { return piece && piece === piece.toUpperCase(); }
+    function isBlack(piece) { return piece && piece === piece.toLowerCase(); }
+    function sameColor(a, b) { return (isRed(a) && isRed(b)) || (isBlack(a) && isBlack(b)); }
+
+    // ── Canvas setup ──
+    let cellSize = 52;
+    let boardPadding = 28;
+    let pieceRadius = 22;
+
+    function initCanvas() {
+      const maxW = Math.min(window.innerWidth - 16, 520);
+      cellSize = Math.floor((maxW - 56) / 8);
+      cellSize = Math.max(32, Math.min(cellSize, 56));
+      boardPadding = Math.floor(cellSize * 0.5);
+      pieceRadius = Math.floor(cellSize * 0.42);
+      canvas.width = cellSize * 8 + boardPadding * 2;
+      canvas.height = cellSize * 9 + boardPadding * 2;
+      canvas.style.width = canvas.width + 'px';
+      canvas.style.height = canvas.height + 'px';
+    }
+
+    function enterGame() {
+      showView('game');
+      spectatorBar.style.display = 'none';
+      resignBtn.style.display = '';
+      backLobbyBtn.style.display = 'none';
+      initCanvas();
+      if (unsubGame) unsubGame();
+      unsubGame = gamesRef.doc(currentGameId).onSnapshot((snap) => {
+        if (!snap.exists) { showToast('Game was deleted', 'error'); enterLobby(); return; }
+        currentGameData = snap.data();
+        renderGameUI();
+        drawBoard();
+        // Check if game ended
+        if (currentGameData.status === 'finished') {
+          handleGameEnd();
+        }
+      });
+      drawBoard();
+    }
+
+    function renderGameUI() {
+      if (!currentGameData) return;
+      const d = currentGameData;
+      redNameEl.textContent = d.redName || 'Red';
+      blackNameEl.textContent = d.blackName || 'Black';
+      gameBetDisplay.textContent = '🪙 ' + d.bet;
+      // Turn indicator
+      if (d.status === 'finished') {
+        turnIndicator.textContent = d.winner ? (d.winner + ' wins!') : 'Draw';
+        turnIndicator.className = 'game-turn-indicator ' + (d.winner === 'red' ? 'red-turn' : 'black-turn');
+      } else {
+        turnIndicator.textContent = (d.turn === 'red' ? "Red's Turn" : "Black's Turn");
+        turnIndicator.className = 'game-turn-indicator ' + (d.turn === 'red' ? 'red-turn' : 'black-turn');
+      }
+      // Game status text
+      if (d.status === 'finished') {
+        if (d.winner === 'red') gameStatus.textContent = '🔴 ' + escapeHtml(d.redName) + ' wins!';
+        else if (d.winner === 'black') gameStatus.textContent = '⚫ ' + escapeHtml(d.blackName) + ' wins!';
+        else gameStatus.textContent = 'Draw!';
+        resignBtn.style.display = 'none';
+        backLobbyBtn.style.display = '';
+        backLobbyBtn.onclick = () => { if (unsubGame) { unsubGame(); unsubGame = null; } enterLobby(); };
+      } else {
+        gameStatus.textContent = '';
+      }
+    }
+
+    // ── Drawing ──
+    function drawBoard() {
+      if (!currentGameData || !currentGameData.board) return;
+      const board = currentGameData.board;
+      const w = canvas.width, h = canvas.height;
+      const p = boardPadding;
+
+      // Background
+      ctx.fillStyle = '#d4a76a';
+      ctx.fillRect(0, 0, w, h);
+      // Border
+      ctx.strokeStyle = '#5a3a1a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(2, 2, w - 4, h - 4);
+
+      // Grid lines
+      ctx.strokeStyle = '#4a2a0a';
+      ctx.lineWidth = 1;
+      for (let row = 0; row < 10; row++) {
+        ctx.beginPath();
+        ctx.moveTo(p, p + row * cellSize);
+        ctx.lineTo(p + 8 * cellSize, p + row * cellSize);
+        ctx.stroke();
+      }
+      for (let col = 0; col < 9; col++) {
+        ctx.beginPath();
+        ctx.moveTo(p + col * cellSize, p);
+        ctx.lineTo(p + col * cellSize, p + 4 * cellSize);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p + col * cellSize, p + 5 * cellSize);
+        ctx.lineTo(p + col * cellSize, p + 9 * cellSize);
+        ctx.stroke();
+      }
+
+      // River
+      ctx.fillStyle = '#c4975a';
+      ctx.fillRect(p + 1, p + 4 * cellSize + 1, 8 * cellSize - 2, cellSize - 2);
+      ctx.fillStyle = '#4a2a0a';
+      ctx.font = (Math.floor(cellSize * 0.35)) + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('楚 河', p + 2 * cellSize, p + 4.5 * cellSize);
+      ctx.fillText('漢 界', p + 6 * cellSize, p + 4.5 * cellSize);
+
+      // Palace diagonals
+      ctx.strokeStyle = '#4a2a0a';
+      ctx.lineWidth = 1;
+      // Top palace (black)
+      ctx.beginPath(); ctx.moveTo(p + 3 * cellSize, p); ctx.lineTo(p + 5 * cellSize, p + 2 * cellSize); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p + 5 * cellSize, p); ctx.lineTo(p + 3 * cellSize, p + 2 * cellSize); ctx.stroke();
+      // Bottom palace (red)
+      ctx.beginPath(); ctx.moveTo(p + 3 * cellSize, p + 7 * cellSize); ctx.lineTo(p + 5 * cellSize, p + 9 * cellSize); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p + 5 * cellSize, p + 7 * cellSize); ctx.lineTo(p + 3 * cellSize, p + 9 * cellSize); ctx.stroke();
+
+      // Highlight last move
+      if (currentGameData.lastMove) {
+        const lm = currentGameData.lastMove;
+        ctx.fillStyle = 'rgba(255,200,0,0.25)';
+        ctx.beginPath(); ctx.arc(p + lm.fromCol * cellSize, p + lm.fromRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(p + lm.toCol * cellSize, p + lm.toRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Draw pieces
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 9; col++) {
+          const piece = board[row][col];
+          if (!piece) continue;
+          drawPiece(row, col, piece);
+        }
+      }
+
+      // Highlight selected piece
+      if (selectedPiece) {
+        const { row, col } = selectedPiece;
+        ctx.strokeStyle = '#ffeb3b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(p + col * cellSize, p + row * cellSize, pieceRadius + 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Draw valid move indicators
+      if (validMoves.length) {
+        validMoves.forEach(([r, c]) => {
+          const x = p + c * cellSize;
+          const y = p + r * cellSize;
+          if (board[r][c]) {
+            // Capture target — red ring
+            ctx.strokeStyle = 'rgba(255,60,60,0.7)';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(x, y, pieceRadius + 4, 0, Math.PI * 2); ctx.stroke();
+          } else {
+            // Empty — small dot
+            ctx.fillStyle = 'rgba(255,235,59,0.5)';
+            ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+          }
+        });
+      }
+    }
+
+    function drawPiece(row, col, piece) {
+      const x = boardPadding + col * cellSize;
+      const y = boardPadding + row * cellSize;
+      const r = pieceRadius;
+      const red = isRed(piece);
+
+      // Outer ring
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#f5deb3';
+      ctx.fill();
+      ctx.strokeStyle = red ? '#c62828' : '#222';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Inner ring
+      ctx.beginPath();
+      ctx.arc(x, y, r - 4, 0, Math.PI * 2);
+      ctx.strokeStyle = red ? '#c62828' : '#222';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Character
+      const name = red ? PIECE_NAMES[piece] : PIECE_NAMES_BLACK[piece.toLowerCase()];
+      ctx.fillStyle = red ? '#c62828' : '#111';
+      ctx.font = 'bold ' + Math.floor(r * 1.1) + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(name || piece, x, y + 1);
+    }
+
+    // ── Click/touch on canvas ──
+    canvas.addEventListener('click', handleBoardClick);
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      processClick(x, y);
+    });
+
+    function handleBoardClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      processClick(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    function processClick(x, y) {
+      if (!currentGameData || currentGameData.status !== 'playing') return;
+      if (!myColor) return; // spectator
+      if (currentGameData.turn !== myColor) { showToast("It's not your turn", 'info'); return; }
+
+      const col = Math.round((x - boardPadding) / cellSize);
+      const row = Math.round((y - boardPadding) / cellSize);
+      if (row < 0 || row > 9 || col < 0 || col > 8) return;
+
+      const board = currentGameData.board;
+      const piece = board[row][col];
+
+      // If a piece is already selected
+      if (selectedPiece) {
+        // Clicking on same piece — deselect
+        if (selectedPiece.row === row && selectedPiece.col === col) {
+          selectedPiece = null;
+          validMoves = [];
+          drawBoard();
+          return;
+        }
+        // Clicking own piece — switch selection
+        if (piece && ((myColor === 'red' && isRed(piece)) || (myColor === 'black' && isBlack(piece)))) {
+          selectedPiece = { row, col };
+          validMoves = getValidMoves(board, row, col, myColor);
+          drawBoard();
+          return;
+        }
+        // Try to move
+        const isValid = validMoves.some(([r, c]) => r === row && c === col);
+        if (isValid) {
+          makeMove(selectedPiece.row, selectedPiece.col, row, col);
+        }
+        selectedPiece = null;
+        validMoves = [];
+        drawBoard();
+        return;
+      }
+
+      // No piece selected — select one of your pieces
+      if (piece && ((myColor === 'red' && isRed(piece)) || (myColor === 'black' && isBlack(piece)))) {
+        selectedPiece = { row, col };
+        validMoves = getValidMoves(board, row, col, myColor);
+        drawBoard();
+      }
+    }
+
+    // ── Make a move ──
+    async function makeMove(fromRow, fromCol, toRow, toCol) {
+      const board = JSON.parse(JSON.stringify(currentGameData.board));
+      const captured = board[toRow][toCol];
+      board[toRow][toCol] = board[fromRow][fromCol];
+      board[fromRow][fromCol] = null;
+
+      const nextTurn = currentGameData.turn === 'red' ? 'black' : 'red';
+
+      // Check if captured the general
+      let winner = null;
+      let winnerUid = null;
+      if (captured && (captured === 'K' || captured === 'k')) {
+        winner = currentGameData.turn; // current player wins
+        winnerUid = currentGameData.turn === 'red' ? currentGameData.redUid : currentGameData.blackUid;
+      }
+
+      // Check if opponent is in checkmate
+      if (!winner) {
+        const opponentColor = nextTurn;
+        if (isCheckmate(board, opponentColor)) {
+          winner = currentGameData.turn;
+          winnerUid = currentGameData.turn === 'red' ? currentGameData.redUid : currentGameData.blackUid;
+        }
+      }
+
+      const update = {
+        board: board,
+        turn: nextTurn,
+        lastMove: { fromRow, fromCol, toRow, toCol }
+      };
+
+      if (winner) {
+        update.status = 'finished';
+        update.winner = winner;
+        update.winnerUid = winnerUid;
+        update.finishedAt = Date.now();
+      }
+
+      try {
+        await gamesRef.doc(currentGameId).update(update);
+      } catch (e) {
+        showToast('Move failed: ' + e.message, 'error');
+      }
+    }
+
+    // ── Resign ──
+    resignBtn.addEventListener('click', async () => {
+      if (!currentGameId || !myColor) return;
+      if (!confirm('Are you sure you want to resign?')) return;
+      const winner = myColor === 'red' ? 'black' : 'red';
+      const winnerUid = myColor === 'red' ? currentGameData.blackUid : currentGameData.redUid;
+      try {
+        await gamesRef.doc(currentGameId).update({
+          status: 'finished',
+          winner: winner,
+          winnerUid: winnerUid,
+          finishedAt: Date.now()
+        });
+      } catch (e) {
+        showToast('Resign failed', 'error');
+      }
+    });
+
+    // ── Game end — handle coin transfer ──
+    async function handleGameEnd() {
+      if (!currentGameData) return;
+      const d = currentGameData;
+      if (!d.winner) return;
+
+      // Only the winner does the coin transfer to avoid double-writes
+      if (d.winnerUid !== currentUid) return;
+
+      const loserUid = d.winnerUid === d.redUid ? d.blackUid : d.redUid;
+      const bet = d.bet || 0;
+      if (!bet) return;
+
+      // Check if already processed (use a flag)
+      const gameSnap = await gamesRef.doc(currentGameId).get();
+      if (gameSnap.exists && gameSnap.data().coinsProcessed) return;
+
+      try {
+        await db.runTransaction(async (tx) => {
+          const winnerRef = roomsRef.doc(d.winnerUid);
+          const loserRef = roomsRef.doc(loserUid);
+          const gameRef = gamesRef.doc(currentGameId);
+
+          const [winnerSnap, loserSnap, gSnap] = await Promise.all([
+            tx.get(winnerRef), tx.get(loserRef), tx.get(gameRef)
+          ]);
+
+          if (gSnap.exists && gSnap.data().coinsProcessed) return;
+
+          const winnerCoins = winnerSnap.exists ? (winnerSnap.data().coins || 0) : 0;
+          const loserCoins = loserSnap.exists ? (loserSnap.data().coins || 0) : 0;
+          const actualBet = Math.min(bet, loserCoins); // Can't take more than they have
+
+          if (winnerSnap.exists) tx.update(winnerRef, { coins: winnerCoins + actualBet });
+          else tx.set(winnerRef, { coins: actualBet });
+
+          if (loserSnap.exists) tx.update(loserRef, { coins: Math.max(0, loserCoins - actualBet) });
+
+          tx.update(gameRef, { coinsProcessed: true });
+        });
+        showToast('🪙 +' + bet + ' coins!', 'success');
+      } catch (e) {
+        console.error('Coin transfer error:', e);
+      }
+
+      // Show end UI
+      resignBtn.style.display = 'none';
+      backLobbyBtn.style.display = '';
+      backLobbyBtn.onclick = () => { if (unsubGame) { unsubGame(); unsubGame = null; } enterLobby(); };
+    }
+
+    // ═══════════════════════════
+    // MOVE VALIDATION (Chinese Chess Rules)
+    // ═══════════════════════════
+    function getValidMoves(board, row, col, playerColor) {
+      const piece = board[row][col];
+      if (!piece) return [];
+      const moves = getRawMoves(board, row, col, piece);
+      // Filter out moves that leave own general in check
+      return moves.filter(([r, c]) => {
+        const testBoard = JSON.parse(JSON.stringify(board));
+        testBoard[r][c] = testBoard[row][col];
+        testBoard[row][col] = null;
+        return !isInCheck(testBoard, playerColor);
+      });
+    }
+
+    function getRawMoves(board, row, col, piece) {
+      const type = piece.toLowerCase();
+      const red = isRed(piece);
+      const moves = [];
+
+      switch (type) {
+        case 'r': // 車 — Rook/Chariot
+          for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+            for (let i = 1; i <= 9; i++) {
+              const nr = row + dr * i, nc = col + dc * i;
+              if (nr < 0 || nr > 9 || nc < 0 || nc > 8) break;
+              if (!board[nr][nc]) { moves.push([nr, nc]); continue; }
+              if (!sameColor(piece, board[nr][nc])) moves.push([nr, nc]);
+              break;
+            }
+          }
+          break;
+
+        case 'h': // 馬 — Horse/Knight
+          for (const [dr, dc, br, bc] of [
+            [-2, -1, -1, 0], [-2, 1, -1, 0], [2, -1, 1, 0], [2, 1, 1, 0],
+            [-1, -2, 0, -1], [-1, 2, 0, 1], [1, -2, 0, -1], [1, 2, 0, 1]
+          ]) {
+            const nr = row + dr, nc = col + dc;
+            const blockR = row + br, blockC = col + bc;
+            if (nr < 0 || nr > 9 || nc < 0 || nc > 8) continue;
+            if (board[blockR][blockC]) continue; // blocked
+            if (board[nr][nc] && sameColor(piece, board[nr][nc])) continue;
+            moves.push([nr, nc]);
+          }
+          break;
+
+        case 'e': // 相/象 — Elephant/Bishop
+          for (const [dr, dc] of [[-2, -2], [-2, 2], [2, -2], [2, 2]]) {
+            const nr = row + dr, nc = col + dc;
+            const eyeR = row + dr / 2, eyeC = col + dc / 2;
+            if (nr < 0 || nr > 9 || nc < 0 || nc > 8) continue;
+            if (board[eyeR][eyeC]) continue; // eye blocked
+            // Can't cross river
+            if (red && nr < 5) continue;
+            if (!red && nr > 4) continue;
+            if (board[nr][nc] && sameColor(piece, board[nr][nc])) continue;
+            moves.push([nr, nc]);
+          }
+          break;
+
+        case 'a': // 仕/士 — Advisor
+          for (const [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
+            const nr = row + dr, nc = col + dc;
+            if (nr < 0 || nr > 9 || nc < 0 || nc > 8) continue;
+            // Must stay in palace
+            if (nc < 3 || nc > 5) continue;
+            if (red && (nr < 7 || nr > 9)) continue;
+            if (!red && (nr < 0 || nr > 2)) continue;
+            if (board[nr][nc] && sameColor(piece, board[nr][nc])) continue;
+            moves.push([nr, nc]);
+          }
+          break;
+
+        case 'k': // 帥/將 — General/King
+          for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+            const nr = row + dr, nc = col + dc;
+            if (nr < 0 || nr > 9 || nc < 0 || nc > 8) continue;
+            if (nc < 3 || nc > 5) continue;
+            if (red && (nr < 7 || nr > 9)) continue;
+            if (!red && (nr < 0 || nr > 2)) continue;
+            if (board[nr][nc] && sameColor(piece, board[nr][nc])) continue;
+            moves.push([nr, nc]);
+          }
+          // Flying general — can capture opposing general if in same column with nothing between
+          {
+            const dc2 = red ? -1 : 1;
+            for (let r = row + dc2; r >= 0 && r <= 9; r += dc2) {
+              if (board[r][col]) {
+                if ((red && board[r][col] === 'k') || (!red && board[r][col] === 'K')) {
+                  moves.push([r, col]);
+                }
+                break;
+              }
+            }
+          }
+          break;
+
+        case 'c': // 炮 — Cannon
+          for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+            let jumped = false;
+            for (let i = 1; i <= 9; i++) {
+              const nr = row + dr * i, nc = col + dc * i;
+              if (nr < 0 || nr > 9 || nc < 0 || nc > 8) break;
+              if (!jumped) {
+                if (!board[nr][nc]) { moves.push([nr, nc]); }
+                else { jumped = true; }
+              } else {
+                if (board[nr][nc]) {
+                  if (!sameColor(piece, board[nr][nc])) moves.push([nr, nc]);
+                  break;
+                }
+              }
+            }
+          }
+          break;
+
+        case 'p': // 兵/卒 — Pawn/Soldier
+          if (red) {
+            // Red moves up (decreasing row)
+            if (row - 1 >= 0) moves.push([row - 1, col]);
+            // After crossing river (row <= 4), can also move sideways
+            if (row <= 4) {
+              if (col - 1 >= 0) moves.push([row, col - 1]);
+              if (col + 1 <= 8) moves.push([row, col + 1]);
+            }
+          } else {
+            // Black moves down (increasing row)
+            if (row + 1 <= 9) moves.push([row + 1, col]);
+            if (row >= 5) {
+              if (col - 1 >= 0) moves.push([row, col - 1]);
+              if (col + 1 <= 8) moves.push([row, col + 1]);
+            }
+          }
+          // Remove friendly captures
+          return moves.filter(([r, c]) => !board[r][c] || !sameColor(piece, board[r][c]));
+      }
+
+      return moves;
+    }
+
+    // ── Check detection ──
+    function findGeneral(board, color) {
+      const target = color === 'red' ? 'K' : 'k';
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (board[r][c] === target) return [r, c];
+        }
+      }
+      return null;
+    }
+
+    function isInCheck(board, color) {
+      const gen = findGeneral(board, color);
+      if (!gen) return true; // General captured = in check
+      const [gr, gc] = gen;
+
+      // Check if any opponent piece can capture the general
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 9; c++) {
+          const p = board[r][c];
+          if (!p) continue;
+          if (color === 'red' && isRed(p)) continue;
+          if (color === 'black' && isBlack(p)) continue;
+          const rawMoves = getRawMoves(board, r, c, p);
+          if (rawMoves.some(([mr, mc]) => mr === gr && mc === gc)) return true;
+        }
+      }
+
+      // Flying general check
+      const oppGeneral = color === 'red' ? 'k' : 'K';
+      const og = findGeneral(board, color === 'red' ? 'black' : 'red');
+      if (og && og[1] === gc) {
+        let blocked = false;
+        const minR = Math.min(gr, og[0]), maxR = Math.max(gr, og[0]);
+        for (let r = minR + 1; r < maxR; r++) {
+          if (board[r][gc]) { blocked = true; break; }
+        }
+        if (!blocked) return true;
+      }
+
+      return false;
+    }
+
+    function isCheckmate(board, color) {
+      // If the color has no valid moves, it's checkmate (or stalemate — we treat stalemate as loss in xiangqi)
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 9; c++) {
+          const p = board[r][c];
+          if (!p) continue;
+          if (color === 'red' && !isRed(p)) continue;
+          if (color === 'black' && !isBlack(p)) continue;
+          const vm = getValidMoves(board, r, c, color);
+          if (vm.length > 0) return false;
+        }
+      }
+      return true;
+    }
+
+    // ═══════════════════════════
+    // CLEANUP
+    // ═══════════════════════════
+    function cleanupAll() {
+      if (unsubGame) { unsubGame(); unsubGame = null; }
+      if (unsubRooms) { unsubRooms(); unsubRooms = null; }
+      if (unsubPresence) { unsubPresence(); unsubPresence = null; }
+      if (unsubInvites) { unsubInvites(); unsubInvites = null; }
+      if (unsubCoins) { unsubCoins(); unsubCoins = null; }
+      cleanupPresence();
+      if (window._presenceInterval) clearInterval(window._presenceInterval);
+    }
+
+    window.addEventListener('beforeunload', cleanupAll);
+  </script>
+</body>
+
+</html>
