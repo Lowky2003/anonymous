@@ -786,47 +786,70 @@
         '<text x="50" y="58" text-anchor="middle" font-size="40" font-weight="bold" fill="#8a5e1f" font-family="sans-serif">$</text></svg>';
     }
 
+    let _lastPetKey = '';
+    let _lastPlantKey = '';
+
     function renderRoom() {
       const petSlot = document.getElementById('petSlot');
       const plantSlot = document.getElementById('plantSlot');
       const isOwner = viewingUid === currentUid;
 
-      // Canvas-drawn room background
-      startRoomBgAnimation();
+      // Canvas-drawn room background (only init once)
+      if (!document.getElementById('roomBgCanvas')?.dataset.init) {
+        startRoomBgAnimation();
+        const bgc = document.getElementById('roomBgCanvas');
+        if (bgc) bgc.dataset.init = '1';
+      }
 
       // Pet — canvas drawn, walks in 2D wander path
       const activePets = [];
       if (roomData.pet) activePets.push(roomData.pet);
       if (roomData.pet2 && roomData.pet2 !== roomData.pet) activePets.push(roomData.pet2);
+      const petKey = activePets.join(',');
       if (activePets.length) {
-        petSlot.innerHTML = '<canvas id="petCanvas"></canvas>';
-        const petInfos = activePets.map(id => ({
-          type: PETS.find(p => p.id === id)?.id || 'cat',
-          hunger: roomData.petHunger[id] ?? 100
-        }));
-        startPetAnimation(petInfos);
+        // Only recreate canvas if pet types changed
+        if (petKey !== _lastPetKey) {
+          _lastPetKey = petKey;
+          petSlot.innerHTML = '<canvas id="petCanvas"></canvas>';
+          const petInfos = activePets.map(id => ({
+            type: PETS.find(p => p.id === id)?.id || 'cat',
+            hunger: roomData.petHunger[id] ?? 100
+          }));
+          startPetAnimation(petInfos);
+        } else {
+          // Update hunger values without re-creating canvas
+          activePets.forEach(id => {
+            if (petStates[id]) petStates[id]._hunger = roomData.petHunger[id] ?? 100;
+          });
+        }
       } else {
+        _lastPetKey = '';
         petSlot.innerHTML = isOwner ? '<div style="position:absolute;bottom:22%;left:25%;transform:translateX(-50%)"><div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'petShopWrap\')">+</div></div>' : '';
       }
 
       // Plant — canvas drawn, grows per level
+      const plantKey = roomData.plant ? (roomData.plant + ':' + (roomData.plantLevels[roomData.plant] || 1)) : '';
       if (roomData.plant) {
-        const plantDef = PLANTS.find(p => p.id === roomData.plant);
-        const plantLvl = roomData.plantLevels[roomData.plant] || 1;
-        const clampedLvl = Math.min(plantLvl, 30);
-        const lvl = PLANT_LEVELS[clampedLvl - 1];
-        plantSlot.innerHTML =
-          '<div class="plant-canvas-wrap"><canvas id="plantCanvas" width="120" height="140"></canvas></div>' +
-          '<div class="plant-level">Lv.' + plantLvl + ' ' + lvl.label + '</div>';
-        // Apply saved position or default
-        const pos = roomData.plantPosition || { left: 80, bottom: 18 };
-        plantSlot.style.left = pos.left + '%';
-        plantSlot.style.bottom = pos.bottom + '%';
-        plantSlot.style.right = '';
-        plantSlot.style.transform = 'translateX(-50%)';
-        drawPlant(plantDef?.id || 'seedling', clampedLvl);
-        if (isOwner) initPlantDrag(plantSlot);
+        if (plantKey !== _lastPlantKey) {
+          _lastPlantKey = plantKey;
+          const plantDef = PLANTS.find(p => p.id === roomData.plant);
+          const plantLvl = roomData.plantLevels[roomData.plant] || 1;
+          const clampedLvl = Math.min(plantLvl, 30);
+          const lvl = PLANT_LEVELS[clampedLvl - 1];
+          plantSlot.innerHTML =
+            '<div class="plant-canvas-wrap"><canvas id="plantCanvas" width="120" height="140"></canvas></div>' +
+            '<div class="plant-level">Lv.' + plantLvl + ' ' + lvl.label + '</div>';
+          // Apply saved position or default
+          const pos = roomData.plantPosition || { left: 80, bottom: 18 };
+          plantSlot.style.left = pos.left + '%';
+          plantSlot.style.bottom = pos.bottom + '%';
+          plantSlot.style.right = '';
+          plantSlot.style.transform = 'translateX(-50%)';
+          drawPlant(plantDef?.id || 'seedling', clampedLvl);
+          if (isOwner) initPlantDrag(plantSlot);
+        }
       } else {
+        _lastPlantKey = '';
         plantSlot.innerHTML = isOwner ? '<div class="empty-slot" onclick="switchTab(\'shop\');switchSubTab(\'plantShopWrap\')">+</div>' : '';
         plantSlot.style.left = '80%';
         plantSlot.style.bottom = '18%';
