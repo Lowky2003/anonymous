@@ -286,44 +286,6 @@
       letter-spacing: 1px;
       margin-bottom: 8px;
     }
-    .settings-name-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .settings-name-row input {
-      flex: 1;
-      padding: 10px 16px;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.07);
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .settings-name-row input:focus { border-color: rgba(138, 120, 255, 0.5); }
-    .settings-name-row input::placeholder { color: rgba(255,255,255,0.3); }
-    .settings-name-row button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      white-space: nowrap;
-    }
-    .settings-name-row button:hover { opacity: 0.85; }
-    .settings-name-row button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .settings-status {
-      font-size: 12px;
-      color: #34d399;
-      margin-top: 6px;
-      min-height: 18px;
-    }
     .settings-divider {
       border: none;
       border-top: 1px solid rgba(255,255,255,0.08);
@@ -466,15 +428,6 @@
   <div class="settings-overlay hidden" id="settingsOverlay">
     <div class="settings-box">
       <h3>⚙️ Settings</h3>
-      <div class="settings-section">
-        <div class="settings-label">Display Name</div>
-        <div class="settings-name-row">
-          <input type="text" id="settingsNameInput" placeholder="Your name" maxlength="20">
-          <button id="settingsNameSaveBtn">Save</button>
-        </div>
-        <div class="settings-status" id="settingsNameStatus"></div>
-      </div>
-      <hr class="settings-divider">
       <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
       <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
     </div>
@@ -570,15 +523,9 @@
 
     /* ── Settings modal ── */
     const settingsOverlay = document.getElementById('settingsOverlay');
-    const settingsNameInput = document.getElementById('settingsNameInput');
-    const settingsNameSaveBtn = document.getElementById('settingsNameSaveBtn');
-    const settingsNameStatus = document.getElementById('settingsNameStatus');
 
     document.getElementById('settingsBtn').addEventListener('click', () => {
-      settingsNameInput.value = getPlayerName();
-      settingsNameStatus.textContent = '';
       settingsOverlay.classList.remove('hidden');
-      settingsNameInput.focus();
     });
 
     document.getElementById('settingsCloseBtn').addEventListener('click', () => {
@@ -594,64 +541,6 @@
     document.getElementById('settingsLogoutBtn').addEventListener('click', async () => {
       settingsOverlay.classList.add('hidden');
       try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
-    });
-
-    // Name save
-    settingsNameInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') settingsNameSaveBtn.click();
-      if (e.key === 'Escape') settingsOverlay.classList.add('hidden');
-    });
-
-    settingsNameSaveBtn.addEventListener('click', async () => {
-      const newName = settingsNameInput.value.trim();
-      if (!newName || newName.length > 20) {
-        settingsNameStatus.style.color = '#f87171';
-        settingsNameStatus.textContent = 'Name must be 1-20 characters';
-        return;
-      }
-      const oldName = getPlayerName();
-      if (newName === oldName) {
-        settingsOverlay.classList.add('hidden');
-        return;
-      }
-      settingsNameSaveBtn.disabled = true;
-      settingsNameStatus.style.color = 'rgba(255,255,255,0.4)';
-      settingsNameStatus.textContent = 'Saving…';
-      try {
-        // Migrate leaderboard entry: copy old score to new name, delete old doc
-        const oldDoc = await lbRef.doc(oldName).get();
-        if (oldDoc.exists) {
-          const oldData = oldDoc.data();
-          const newDoc = await lbRef.doc(newName).get();
-          const newScore = newDoc.exists ? (newDoc.data().score || 0) : 0;
-          const best = Math.max(oldData.score || 0, newScore);
-          await lbRef.doc(newName).set({ name: newName, score: best, ts: Date.now() });
-          await lbRef.doc(oldName).delete();
-        }
-        // Save new name
-        localStorage.setItem('flappy_name', newName);
-        localStorage.setItem('flappy_custom_name', newName);
-        document.getElementById('playerDisplayName').textContent = newName;
-        // Migrate local best score
-        const oldBestKey = 'flappy_best_' + oldName;
-        const oldBest = localStorage.getItem(oldBestKey);
-        if (oldBest) {
-          const newBestKey = 'flappy_best_' + newName;
-          const existingBest = parseInt(localStorage.getItem(newBestKey) || '0', 10);
-          localStorage.setItem(newBestKey, Math.max(parseInt(oldBest, 10), existingBest));
-          localStorage.removeItem(oldBestKey);
-        }
-        bestLocalScore = parseInt(localStorage.getItem(getBestKey()) || '0', 10);
-        settingsNameStatus.style.color = '#34d399';
-        settingsNameStatus.textContent = '✓ Name updated!';
-        setTimeout(() => settingsOverlay.classList.add('hidden'), 800);
-      } catch (e) {
-        console.error('Name change error:', e);
-        settingsNameStatus.style.color = '#f87171';
-        settingsNameStatus.textContent = 'Failed to save — try again';
-      } finally {
-        settingsNameSaveBtn.disabled = false;
-      }
     });
 
     auth.onAuthStateChanged((user) => {
