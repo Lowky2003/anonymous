@@ -359,8 +359,15 @@
       transition: background 0.2s, color 0.2s, transform 0.3s;
     }
     .settings-btn:hover { background: rgba(255,255,255,0.1); color: #f7c97e; transform: rotate(45deg); }
+    .achieve-header-btn { position: fixed; top: 14px; right: 190px; z-index: 50; width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; background: rgba(15,12,41,0.9); backdrop-filter: blur(10px); color: rgba(255,255,255,0.7); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
+    .achieve-header-btn:hover { background: rgba(255,255,255,0.1); color: #f7c97e; }
+    .panel-shortcuts{display:flex;gap:6px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+    .panel-shortcut-btn{flex:1;padding:8px 4px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+    .panel-shortcut-btn:hover{background:rgba(255,255,255,.1);color:#f7c97e}
     @media (max-width: 768px) {
       .settings-btn { top: 10px; right: 110px; width: 36px; height: 36px; font-size: 17px; }
+      .achieve-header-btn { top: 10px; right: 155px; width: 36px; height: 36px; font-size: 17px; }
+      .panel-shortcut-btn{font-size:10px;padding:6px 2px}
     }
 
     /* ── Settings modal ── */
@@ -506,6 +513,170 @@
       .food-grid { grid-template-columns: repeat(2, 1fr); }
       .plant-canvas-wrap { transform: scale(1.2); }
     }
+    /* ── Daily Login Reward modal ── */
+    .daily-overlay{position:fixed;inset:0;z-index:9500;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;animation:dailyFadeIn .3s}
+    .daily-overlay.hidden{display:none}
+    .daily-box{width:90%;max-width:400px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
+    .daily-box h3{font-size:20px;font-weight:800;margin-bottom:6px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .daily-streak{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:16px}
+    .daily-days{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+    .daily-day{width:44px;padding:8px 4px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);text-align:center;font-size:10px;color:rgba(255,255,255,.5)}
+    .daily-day.claimed{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.3);color:#34d399}
+    .daily-day.today{background:linear-gradient(135deg,rgba(247,201,126,.2),rgba(242,161,84,.2));border-color:#f7c97e;color:#f7c97e;animation:todayPulse 1.5s ease-in-out infinite}
+    .daily-day .dd-num{font-size:11px;font-weight:700;display:block}
+    .daily-day .dd-coins{font-size:9px;display:block;margin-top:2px}
+    @keyframes todayPulse{0%,100%{box-shadow:0 0 0 0 rgba(247,201,126,.3)}50%{box-shadow:0 0 12px 4px rgba(247,201,126,.15)}}
+    .daily-claim-btn{margin-top:8px;padding:12px 32px;border:none;border-radius:14px;background:linear-gradient(135deg,#f7c97e,#f2a154);color:#1a1a2e;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+    .daily-claim-btn:hover{transform:scale(1.03)}
+    .daily-claim-btn:disabled{opacity:.4;cursor:not-allowed}
+    .daily-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+
+    /* ── Achievement/Badge modal ── */
+    .achieve-overlay{position:fixed;inset:0;z-index:9400;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+    .achieve-overlay.hidden{display:none}
+    .achieve-box{width:90%;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;scrollbar-width:none;-ms-overflow-style:none}
+    .achieve-box::-webkit-scrollbar{display:none}
+    .achieve-box h3{font-size:20px;font-weight:800;text-align:center;margin-bottom:16px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .achieve-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .achieve-header h3{margin-bottom:0;flex:1}
+    .achieve-x-btn{width:32px;height:32px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+    .achieve-x-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+    .achieve-list{display:flex;flex-direction:column;gap:8px}
+    .achieve-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .achieve-item.unlocked{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.2)}
+    .achieve-icon{font-size:28px;width:40px;text-align:center}
+    .achieve-info{flex:1}
+    .achieve-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.9)}
+    .achieve-desc{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+    .achieve-status{font-size:11px;font-weight:600;color:rgba(255,255,255,.3)}
+    .achieve-item.unlocked .achieve-status{color:#34d399}
+    .achieve-close{display:block;margin:16px auto 0;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+
+    /* ── Guestbook panel ── */
+    .guestbook-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:300px;overflow-y:auto}
+    .gb-entry{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;position:relative}
+    .gb-from{font-size:11px;font-weight:600;color:#f7c97e;margin-bottom:4px}
+    .gb-msg{font-size:13px;color:rgba(255,255,255,.8);word-break:break-word}
+    .gb-time{font-size:10px;color:rgba(255,255,255,.3);margin-top:4px}
+    .gb-sticker{font-size:32px;margin-bottom:4px}
+    .gb-input-area{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .gb-textarea{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);color:#fff;font-size:13px;resize:none;font-family:inherit}
+    .gb-textarea::placeholder{color:rgba(255,255,255,.3)}
+    .gb-sticker-row{display:flex;gap:6px;flex-wrap:wrap}
+    .gb-sticker-btn{font-size:22px;padding:4px 6px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:transparent;cursor:pointer;transition:all .2s}
+    .gb-sticker-btn:hover{background:rgba(255,255,255,.1);transform:scale(1.15)}
+    .gb-sticker-btn.selected{border-color:#f7c97e;background:rgba(247,201,126,.15)}
+    .gb-send-btn{padding:10px 20px;border:none;border-radius:12px;background:linear-gradient(135deg,#7b5ea7,#5b6abf);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .gb-send-btn:disabled{opacity:.4;cursor:not-allowed}
+    .gb-replies{margin-top:8px;padding-left:12px;border-left:2px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+    .gb-reply{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}
+    .gb-reply .gb-from{font-size:10px}
+    .gb-reply .gb-msg{font-size:12px}
+    .gb-reply .gb-time{font-size:9px}
+    .gb-reply-btn{font-size:10px;padding:4px 10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:transparent;color:rgba(255,255,255,.5);cursor:pointer;margin-top:6px}
+    .gb-reply-btn:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8)}
+    .gb-reply-form{display:flex;gap:6px;margin-top:6px;align-items:center}
+    .gb-reply-input{flex:1;padding:6px 10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.05);color:#fff;font-size:12px;font-family:inherit}
+    .gb-reply-input::placeholder{color:rgba(255,255,255,.3)}
+    .gb-reply-send{padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#7b5ea7,#5b6abf);color:#fff;font-size:11px;font-weight:600;cursor:pointer}
+
+    /* ── Gift System ── */
+    .gift-overlay{position:fixed;inset:0;z-index:9300;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+    .gift-overlay.hidden{display:none}
+    .gift-box{width:90%;max-width:380px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
+    .gift-box h3{font-size:18px;font-weight:800;margin-bottom:16px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .gift-amounts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+    .gift-amt{padding:10px 18px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.05);color:#f7c97e;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+    .gift-amt:hover{background:rgba(247,201,126,.15)}
+    .gift-amt.selected{border-color:#f7c97e;background:rgba(247,201,126,.2)}
+    .gift-send-btn{padding:12px 32px;border:none;border-radius:14px;background:linear-gradient(135deg,#f7c97e,#f2a154);color:#1a1a2e;font-size:15px;font-weight:700;cursor:pointer}
+    .gift-send-btn:disabled{opacity:.4;cursor:not-allowed}
+    .gift-close{margin-top:10px;display:block;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;margin-left:auto;margin-right:auto}
+
+    /* ── Pet Accessories ── */
+    .acc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+    .acc-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 6px;text-align:center;transition:all .2s;overflow:visible}
+    .acc-card:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+    .acc-card.equipped{border-color:#f7c97e;background:rgba(247,201,126,.08)}
+    .acc-card.owned{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.04)}
+    .acc-emoji{font-size:24px;display:block;margin-bottom:4px}
+    .acc-name{font-size:11px;font-weight:600;color:rgba(255,255,255,.7)}
+    .acc-price{font-size:10px;color:#f7c97e;margin-top:2px}
+
+    /* ── Jukebox ── */
+    .jukebox-wrap{margin-top:10px}
+    .jukebox-now{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;margin-bottom:10px}
+    .jukebox-title{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
+    .jukebox-controls{display:flex;gap:6px}
+    .jukebox-btn{width:32px;height:32px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:rgba(255,255,255,.05);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .jukebox-btn:hover{background:rgba(255,255,255,.15)}
+    .jukebox-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+    .jukebox-track{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:all .2s;font-size:12px;color:rgba(255,255,255,.6)}
+    .jukebox-track:hover{background:rgba(255,255,255,.06)}
+    .jukebox-track.playing{background:rgba(247,201,126,.1);color:#f7c97e}
+    .jukebox-vol{width:80px;accent-color:#f7c97e}
+
+    /* ── Gacha/Lucky Draw ── */
+    .gacha-overlay{position:fixed;inset:0;z-index:9200;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+    .gacha-overlay.hidden{display:none}
+    .gacha-box{width:90%;max-width:400px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
+    .gacha-box h3{font-size:20px;font-weight:800;margin-bottom:6px;background:linear-gradient(90deg,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .gacha-desc{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px}
+    .gacha-result{min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:14px}
+    .gacha-result-icon{font-size:60px;animation:gachaReveal .5s ease-out}
+    .gacha-result-name{font-size:16px;font-weight:700;margin-top:8px;color:#fff}
+    .gacha-result-rarity{font-size:12px;font-weight:600;margin-top:4px}
+    .gacha-rarity-common{color:rgba(255,255,255,.5)}
+    .gacha-rarity-uncommon{color:#34d399}
+    .gacha-rarity-rare{color:#60a5fa}
+    .gacha-rarity-epic{color:#c084fc}
+    .gacha-rarity-legendary{color:#fbbf24}
+    @keyframes gachaReveal{0%{transform:scale(0) rotate(-180deg);opacity:0}60%{transform:scale(1.2) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+    @keyframes gachaSpin{0%{transform:translateY(0)}100%{transform:translateY(-100%)}}
+    @keyframes gachaGlow{0%{box-shadow:0 0 0 rgba(192,132,252,0)}50%{box-shadow:0 0 30px rgba(192,132,252,.5)}100%{box-shadow:0 0 0 rgba(192,132,252,0)}}
+    @keyframes gachaBounce{0%{transform:scale(0);opacity:0}40%{transform:scale(1.25);opacity:1}60%{transform:scale(0.9)}80%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+    @keyframes gachaShine{0%{background-position:-200% center}100%{background-position:200% center}}
+    @keyframes gachaFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(60px) rotate(360deg);opacity:0}}
+    .gacha-reel-window{width:90px;height:90px;overflow:hidden;border-radius:18px;border:2px solid rgba(192,132,252,.3);margin:0 auto 14px;background:rgba(0,0,0,.3);position:relative}
+    .gacha-reel-strip{display:flex;flex-direction:column;align-items:center;position:relative;transition:none}
+    .gacha-reel-item{width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0}
+    .gacha-prize-reveal{animation:gachaBounce .7s ease-out forwards;text-align:center}
+    .gacha-prize-emoji{font-size:56px;animation:gachaFloat 2s ease-in-out infinite;margin-bottom:6px}
+    .gacha-prize-name{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+    .gacha-prize-rarity{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+    .gacha-prize-rarity.legendary{color:#fbbf24;text-shadow:0 0 12px rgba(251,191,36,.5);background:linear-gradient(90deg,#fbbf24,#fff,#fbbf24);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gachaShine 2s linear infinite}
+    .gacha-prize-rarity.epic{color:#c084fc;text-shadow:0 0 8px rgba(192,132,252,.4)}
+    .gacha-prize-rarity.rare{color:#60a5fa;text-shadow:0 0 6px rgba(96,165,250,.3)}
+    .gacha-prize-rarity.uncommon{color:#34d399}
+    .gacha-prize-rarity.common{color:rgba(255,255,255,.5)}
+    .gacha-confetti{position:absolute;width:6px;height:6px;border-radius:50%;animation:confettiFall 1.5s ease-out forwards;pointer-events:none}
+    .gacha-pull-btn{padding:14px 32px;border:none;border-radius:14px;background:linear-gradient(135deg,#c084fc,#818cf8);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+    .gacha-pull-btn:hover{transform:scale(1.03)}
+    .gacha-pull-btn:disabled{opacity:.4;cursor:not-allowed}
+    .gacha-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+
+    /* ── Leaderboard ── */
+    .lb-overlay{position:fixed;inset:0;z-index:9100;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+    .lb-overlay.hidden{display:none}
+    .lb-box{width:90%;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px}
+    .lb-box h3{font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lb-tabs{display:flex;gap:4px;margin:12px 0;flex-wrap:wrap;justify-content:center}
+    .lb-tab{padding:6px 12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+    .lb-tab.active{background:rgba(247,201,126,.15);border-color:#f7c97e;color:#f7c97e}
+    .lb-list{display:flex;flex-direction:column;gap:4px}
+    .lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03)}
+    .lb-row.top1{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.15)}
+    .lb-row.top2{background:rgba(192,192,192,.06);border:1px solid rgba(192,192,192,.1)}
+    .lb-row.top3{background:rgba(205,127,50,.06);border:1px solid rgba(205,127,50,.1)}
+    .lb-rank{width:28px;font-size:14px;font-weight:700;text-align:center}
+    .lb-name{flex:1;font-size:13px;color:rgba(255,255,255,.8)}
+    .lb-score{font-size:13px;font-weight:700;color:#f7c97e}
+    .lb-close{display:block;margin:16px auto 0;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+
+    /* ── Weather Effects (rain/snow/leaves on window) ── */
+    .weather-badge{position:absolute;top:8px;left:8px;z-index:20;font-size:11px;padding:4px 10px;border-radius:10px;background:rgba(0,0,0,.25);color:rgba(255,255,255,.6);pointer-events:none}
+
     /* Chess invite popup */
     .chess-invite-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
     .chess-invite-box{background:rgba(30,25,60,.97);backdrop-filter:blur(16px);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
@@ -540,6 +711,10 @@
   <div class="settings-overlay hidden" id="settingsOverlay">
     <div class="settings-box">
       <h3>⚙️ Settings</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showDailyReward()">🎁 Daily Reward</button>
+        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showAchievements()">🏆 Achievements</button>
+      </div>
       <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
       <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
     </div>
@@ -572,6 +747,7 @@
     <div class="tabs" id="tabsBar">
       <button class="tab-btn active" data-tab="shop">🛒 Shop</button>
       <button class="tab-btn" data-tab="upgrade">🍖 Feed</button>
+      <button class="tab-btn" data-tab="extras">✨ More</button>
       <button class="tab-btn" data-tab="visit">👀 Visit</button>
     </div>
 
@@ -653,19 +829,121 @@
     </div>
   </div>
 
+  <!-- Extras panel -->
+  <div class="tab-panel" id="panel-extras">
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-sub="accessoryWrap">🎩 Accessory</button>
+      <button class="sub-tab" data-sub="jukeboxWrap">🎵 Music</button>
+      <button class="sub-tab" data-sub="guestbookWrap">📝 Guestbook</button>
+      <button class="sub-tab" data-sub="gachaWrapTab">🎰 Gacha</button>
+    </div>
+    <div class="sub-panel active" id="accessoryWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">🎩 Pet Accessories</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Hats, glasses & scarves for your pets</div>
+        <div id="accShop"></div>
+      </div>
+    </div>
+    <div class="sub-panel" id="jukeboxWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">🎵 Jukebox</div>
+        <div id="jukeboxContent"></div>
+      </div>
+    </div>
+    <div class="sub-panel" id="guestbookWrap">
+      <div class="shop-section">
+        <div class="shop-section-title">📝 Guestbook</div>
+        <div id="guestbookContent"></div>
+      </div>
+    </div>
+    <div class="sub-panel" id="gachaWrapTab">
+      <div class="shop-section">
+        <div class="shop-section-title">🎰 Lucky Draw</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Spend coins for random rare items!</div>
+        <div id="gachaTabContent"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Visit panel -->
   <div class="tab-panel" id="panel-visit">
     <div class="visit-header">
       <h4>👀 Visit Rooms</h4>
       <div class="online-count-badge" id="onlineCountBadge"><div class="pulse-dot"></div> <span id="onlineCountNum">0</span> online</div>
     </div>
+    <!-- Visitor guestbook (shown when visiting another player) -->
+    <div id="visitorGuestbook" style="display:none">
+      <div class="shop-section" style="margin-bottom:12px">
+        <div class="shop-section-title">📝 Guestbook</div>
+        <div id="visitorGbContent"></div>
+      </div>
+    </div>
     <div class="visit-list" id="visitList">
       <div class="visit-empty">Loading rooms…</div>
     </div>
   </div>
+
     </div><!-- /.panel-inner -->
     </div><!-- /.panel-wrap -->
   </div><!-- /.main-wrap -->
+
+  <!-- Daily Login Reward modal -->
+  <div class="daily-overlay hidden" id="dailyOverlay">
+    <div class="daily-box">
+      <h3>🎁 Daily Login Reward</h3>
+      <div class="daily-streak" id="dailyStreak"></div>
+      <div class="daily-days" id="dailyDays"></div>
+      <button class="daily-claim-btn" id="dailyClaimBtn">Claim Today's Reward!</button>
+      <button class="daily-close" id="dailyCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Achievement modal -->
+  <div class="achieve-overlay hidden" id="achieveOverlay">
+    <div class="achieve-box">
+      <div class="achieve-header">
+        <h3>🏆 Achievements</h3>
+        <button class="achieve-x-btn" id="achieveXBtn">✕</button>
+      </div>
+      <div class="achieve-list" id="achieveList"></div>
+    </div>
+  </div>
+
+  <!-- Gift modal -->
+  <div class="gift-overlay hidden" id="giftOverlay">
+    <div class="gift-box">
+      <h3>🎁 Send Gift</h3>
+      <div id="giftTarget" style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px"></div>
+      <div class="gift-amounts" id="giftAmounts"></div>
+      <button class="gift-send-btn" id="giftSendBtn" disabled>Send Gift</button>
+      <button class="gift-close" id="giftCloseBtn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Gacha modal -->
+  <div class="gacha-overlay hidden" id="gachaOverlay">
+    <div class="gacha-box">
+      <h3>🎰 Lucky Draw</h3>
+      <div class="gacha-desc">Spend 100 coins for a random item!</div>
+      <div class="gacha-result" id="gachaResult">
+        <div style="font-size:40px;opacity:.3">🎲</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:8px">Pull to reveal!</div>
+      </div>
+      <button class="gacha-pull-btn" id="gachaPullBtn">🎲 Pull (100 coins)</button>
+      <br>
+      <button class="gacha-close" id="gachaCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Leaderboard modal -->
+  <div class="lb-overlay hidden" id="lbOverlay">
+    <div class="lb-box">
+      <h3>🏅 Mini-Game Leaderboard</h3>
+      <div class="lb-tabs" id="lbTabs"></div>
+      <div class="lb-list" id="lbList"></div>
+      <button class="lb-close" id="lbCloseBtn">Close</button>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
@@ -982,9 +1260,108 @@
     }
 
     /* ═══════════════════════════════
+       Pet Accessories
+       ═══════════════════════════════ */
+    const PET_ACCESSORIES = [
+      { id: 'acc_tophat',    emoji: '🎩', name: 'Top Hat',       cost: 300,  draw: 'tophat' },
+      { id: 'acc_crown',     emoji: '👑', name: 'Crown',         cost: 800,  draw: 'crown' },
+      { id: 'acc_glasses',   emoji: '🕶️', name: 'Sunglasses',    cost: 200,  draw: 'glasses' },
+      { id: 'acc_bow',       emoji: '🎀', name: 'Bow',           cost: 150,  draw: 'bow' },
+      { id: 'acc_scarf',     emoji: '🧣', name: 'Scarf',         cost: 250,  draw: 'scarf' },
+      { id: 'acc_flower',    emoji: '🌸', name: 'Flower',        cost: 100,  draw: 'flower' },
+      { id: 'acc_bandana',   emoji: '🏴', name: 'Bandana',       cost: 180,  draw: 'bandana' },
+      { id: 'acc_monocle',   emoji: '🧐', name: 'Monocle',       cost: 350,  draw: 'monocle' },
+      { id: 'acc_halo',      emoji: '😇', name: 'Halo',          cost: 500,  draw: 'halo' },
+    ];
+
+    /* ═══════════════════════════════
+       Daily Login Rewards
+       ═══════════════════════════════ */
+    const DAILY_REWARDS = [
+      { day: 1, coins: 10,  label: 'Day 1' },
+      { day: 2, coins: 20,  label: 'Day 2' },
+      { day: 3, coins: 35,  label: 'Day 3' },
+      { day: 4, coins: 50,  label: 'Day 4' },
+      { day: 5, coins: 75,  label: 'Day 5' },
+      { day: 6, coins: 100, label: 'Day 6' },
+      { day: 7, coins: 200, label: 'Day 7 🎉' },
+    ];
+
+    /* ═══════════════════════════════
+       Achievements
+       ═══════════════════════════════ */
+    const ACHIEVEMENTS = [
+      { id: 'ach_first_pet',     icon: '🐾', name: 'First Friend',       desc: 'Buy your first pet',          check: (d) => d.ownedPets.length >= 1 },
+      { id: 'ach_two_pets',      icon: '🐾🐾', name: 'Dynamic Duo',     desc: 'Own 2 pets',                  check: (d) => d.ownedPets.length >= 2 },
+      { id: 'ach_all_pets',      icon: '🏆', name: 'Pet Collector',      desc: 'Own all 6 pets',              check: (d) => d.ownedPets.length >= 6 },
+      { id: 'ach_first_plant',   icon: '🌱', name: 'Green Thumb',        desc: 'Buy your first plant',        check: (d) => d.ownedPlants.length >= 1 },
+      { id: 'ach_plant_max',     icon: '🌳', name: 'Master Gardener',    desc: 'Reach plant level 30',        check: (d) => Object.values(d.plantLevels).some(l => l >= 30) },
+      { id: 'ach_coins_1k',      icon: '💰', name: 'Piggy Bank',         desc: 'Accumulate 1,000 coins',      check: (d) => d.coins >= 1000 },
+      { id: 'ach_coins_10k',     icon: '💎', name: 'Rich Room',          desc: 'Accumulate 10,000 coins',     check: (d) => d.coins >= 10000 },
+      { id: 'ach_decor_5',       icon: '🎨', name: 'Decorator',          desc: 'Own 5 decorations',           check: (d) => d.ownedDecors.length >= 5 },
+      { id: 'ach_decor_15',      icon: '🏡', name: 'Interior Designer',  desc: 'Own 15 decorations',          check: (d) => d.ownedDecors.length >= 15 },
+      { id: 'ach_streak_7',      icon: '🔥', name: 'Dedicated',          desc: '7-day login streak',          check: (d) => (d.loginStreak || 0) >= 7 },
+      { id: 'ach_best_friend',   icon: '❤️', name: 'Best Friend',        desc: 'Reach Best Friend with a pet',check: (d) => Object.values(d.petAffection).some(a => a >= 500) },
+      { id: 'ach_legendary',     icon: '⭐', name: 'Legendary Bond',     desc: 'Reach Legendary Bond (2000)', check: (d) => Object.values(d.petAffection).some(a => a >= 2000) },
+      { id: 'ach_acc_3',         icon: '🎩', name: 'Fashionista',        desc: 'Own 3 accessories',           check: (d) => (d.ownedAccessories || []).length >= 3 },
+      { id: 'ach_gacha_5',       icon: '🎰', name: 'Lucky Player',       desc: 'Pull gacha 5 times',          check: (d) => (d.gachaPulls || 0) >= 5 },
+      { id: 'ach_gift_given',    icon: '🎁', name: 'Generous',           desc: 'Send a gift to someone',      check: (d) => (d.giftsGiven || 0) >= 1 },
+    ];
+
+    /* ═══════════════════════════════
+       Gacha Pool
+       ═══════════════════════════════ */
+    const GACHA_COST = 100;
+    const GACHA_POOL = [
+      { id: 'gacha_coins_50',   emoji: '🪙', name: '50 Coins',       rarity: 'common',    weight: 30, type: 'coins', value: 50 },
+      { id: 'gacha_coins_100',  emoji: '💰', name: '100 Coins',      rarity: 'common',    weight: 20, type: 'coins', value: 100 },
+      { id: 'gacha_coins_300',  emoji: '💎', name: '300 Coins',      rarity: 'uncommon',  weight: 12, type: 'coins', value: 300 },
+      { id: 'gacha_coins_500',  emoji: '👑', name: '500 Coins',      rarity: 'rare',      weight: 6,  type: 'coins', value: 500 },
+      { id: 'gacha_acc_bow',    emoji: '🎀', name: 'Bow',            rarity: 'uncommon',  weight: 8,  type: 'accessory', value: 'acc_bow' },
+      { id: 'gacha_acc_flower', emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 10, type: 'accessory', value: 'acc_flower' },
+      { id: 'gacha_acc_crown',  emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 3,  type: 'accessory', value: 'acc_crown' },
+      { id: 'gacha_acc_halo',   emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 5,  type: 'accessory', value: 'acc_halo' },
+      { id: 'gacha_coins_1000', emoji: '🏅', name: '1000 Coins!',    rarity: 'legendary', weight: 2,  type: 'coins', value: 1000 },
+      { id: 'gacha_acc_mono',   emoji: '🧐', name: 'Monocle',        rarity: 'epic',      weight: 4,  type: 'accessory', value: 'acc_monocle' },
+    ];
+
+    /* ═══════════════════════════════
+       Jukebox Tracks (Web Audio API tone-generated)
+       ═══════════════════════════════ */
+    const JUKEBOX_TRACKS = [
+      { id: 'jb_lofi',     name: '🎵 Lo-fi Chill',     bpm: 75,  key: 'C',  style: 'lofi' },
+      { id: 'jb_jazz',     name: '🎷 Smooth Jazz',      bpm: 105, key: 'Eb', style: 'jazz' },
+      { id: 'jb_rain',     name: '🌧️ Rain Ambience',    bpm: 0,   key: '-',  style: 'rain' },
+      { id: 'jb_retro',    name: '🎮 8-bit Retro',      bpm: 130, key: 'G',  style: 'retro' },
+      { id: 'jb_forest',   name: '🌲 Forest Sounds',    bpm: 0,   key: '-',  style: 'forest' },
+      { id: 'jb_piano',    name: '🎹 Soft Piano',       bpm: 68,  key: 'F',  style: 'piano' },
+      { id: 'jb_ocean',    name: '🌊 Ocean Waves',      bpm: 0,   key: '-',  style: 'ocean' },
+      { id: 'jb_lullaby',  name: '🌙 Lullaby',          bpm: 60,  key: 'D',  style: 'lullaby' },
+      { id: 'jb_cafe',     name: '☕ Café Bossa',        bpm: 115, key: 'A',  style: 'bossa' },
+      { id: 'jb_space',    name: '🚀 Space Ambient',    bpm: 0,   key: '-',  style: 'space' },
+      { id: 'jb_music_box',name: '🎠 Music Box',        bpm: 90,  key: 'G',  style: 'musicbox' },
+    ];
+
+    /* ═══════════════════════════════
+       Guestbook Stickers
+       ═══════════════════════════════ */
+    const GB_STICKERS = ['❤️','⭐','🎉','🔥','😊','👋','🌈','🎵','✨','💎','🐾','🌸'];
+
+    /* ═══════════════════════════════
+       Leaderboard Games
+       ═══════════════════════════════ */
+    const LB_GAMES = [
+      { id: 'flappy',   name: '🐦 Flappy',   key: 'flappy_scores' },
+      { id: 'snake',    name: '🐍 Snake',     key: 'snake_scores' },
+      { id: 'tetris',   name: '🧱 Tetris',    key: 'tetris_scores' },
+      { id: '2048',     name: '🔢 2048',      key: '2048_scores' },
+      { id: 'blast',    name: '💥 Block Blast',key: 'blast_scores' },
+    ];
+
+    /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', displayName: '', lastCoinCollect: 0 };
+    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, petAccessories: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
 
     /* ═══════════════════════════════
        Helpers
@@ -1016,6 +1393,7 @@
         petHunger: roomData.petHunger,
         petAffection: roomData.petAffection,
         petColors: roomData.petColors,
+        petAccessories: roomData.petAccessories || {},
         plantLevels: roomData.plantLevels,
         ownedPets: roomData.ownedPets,
         ownedPlants: roomData.ownedPlants,
@@ -1025,11 +1403,20 @@
         wallPattern: roomData.wallPattern,
         ownedWindows: roomData.ownedWindows,
         windowStyle: roomData.windowStyle,
+        ownedAccessories: roomData.ownedAccessories || [],
         plantPosition: roomData.plantPosition || null,
         displayName: getPlayerName(),
         lastCoinCollect: roomData.lastCoinCollect || Date.now(),
         lastSeen: Date.now(),
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        loginStreak: roomData.loginStreak || 0,
+        lastLoginDay: roomData.lastLoginDay || '',
+        achievements: roomData.achievements || [],
+        gachaPulls: roomData.gachaPulls || 0,
+        giftsGiven: roomData.giftsGiven || 0,
+        giftsReceived: roomData.giftsReceived || 0,
+        jukeboxTrack: roomData.jukeboxTrack || null,
+        jukeboxVol: roomData.jukeboxVol ?? 0.5
       };
       await userDocRef().set(data, { merge: true });
     }
@@ -1039,6 +1426,7 @@
        ═══════════════════════════════ */
     let _offlineCoinsCollected = false;
     let _plantCoinInterval = null;
+    let _lastLocalSaveTime = 0;
     async function initRoom() {
       _offlineCoinsCollected = false;
       initRoomDropZone();
@@ -1075,6 +1463,16 @@
           });
           roomData.displayName = d.displayName ?? '';
           roomData.lastCoinCollect = d.lastCoinCollect ?? d.updatedAt ?? Date.now();
+          roomData.petAccessories = d.petAccessories ?? {};
+          roomData.ownedAccessories = d.ownedAccessories ?? [];
+          roomData.loginStreak = d.loginStreak ?? 0;
+          roomData.lastLoginDay = d.lastLoginDay ?? '';
+          roomData.achievements = d.achievements ?? [];
+          roomData.gachaPulls = d.gachaPulls ?? 0;
+          roomData.giftsGiven = d.giftsGiven ?? 0;
+          roomData.giftsReceived = d.giftsReceived ?? 0;
+          roomData.jukeboxTrack = d.jukeboxTrack ?? null;
+          roomData.jukeboxVol = d.jukeboxVol ?? 0.5;
           // Decay hunger based on elapsed time (1% per 10 min)
           const lastUpdate = d.updatedAt ?? Date.now();
           const elapsed = Date.now() - lastUpdate;
@@ -1109,6 +1507,8 @@
             }
           }
         }
+        // Skip renderAll if a local save just happened (prevents jump)
+        if (Date.now() - _lastLocalSaveTime < 2000) return;
         renderAll();
       });
 
@@ -1169,6 +1569,9 @@
         renderAll();
         showToast('🌱 ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins!', 'success');
       }, 5 * 60 * 1000);
+
+      // Check daily login reward & achievements on load
+      setTimeout(() => { checkDailyOnLogin(); checkAchievements(); }, 1500);
     }
 
     /* ═══════════════════════════════
@@ -1196,7 +1599,11 @@
       if (isOwner) {
         renderShop();
         renderUpgrade();
+        renderAccessoryShop();
+        renderJukebox();
+        renderGachaTab();
       }
+      renderGuestbook();
       renderVisitList();
     }
 
@@ -2091,6 +2498,7 @@
             '<div class="visit-name">' + dot + escapeHtml(r.displayName || 'Anonymous') + '</div>' +
             '<span class="visit-peek">' + (peekItems.length ? peekItems.join(' ') : '<span style="font-size:12px;opacity:0.4">Empty room</span>') + '</span>' +
             '</div>' +
+            '<button class="food-btn" style="font-size:10px;padding:6px 10px;margin-right:6px" onclick="event.stopPropagation();showGiftModal(\'' + r.uid + '\',\'' + escapeHtml(r.displayName || 'Anonymous').replace(/'/g, "\\'") + '\')">🎁</button>' +
             '<span class="visit-arrow">›</span></div>';
         }).join('');
       }, () => {
@@ -2692,6 +3100,7 @@
       roomData.petHunger = d.petHunger ?? {};
       roomData.petAffection = d.petAffection ?? {};
       roomData.petColors = d.petColors ?? {};
+      roomData.petAccessories = d.petAccessories ?? {};
       roomData.plantLevels = d.plantLevels ?? {};
       roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
@@ -5205,6 +5614,10 @@
       cvs.width = rw; cvs.height = rh;
       const ctx = cvs.getContext('2d');
       initBgParticles(rw, rh);
+      // Init weather
+      currentWeather = getWeatherForDate();
+      const wCount = currentWeather === 'snow' ? 40 : currentWeather === 'rain' ? 60 : currentWeather === 'leaves' ? 25 : currentWeather === 'petals' ? 30 : currentWeather === 'fireflies' ? 15 : currentWeather === 'sunny' ? 20 : 0;
+      initWeatherParticles(currentWeather, wCount);
 
       const floorY = rh * 0.65;
       const plankH = (rh - floorY) / 7;
@@ -5448,6 +5861,10 @@
         ctx.lineTo(winX - rw * 0.05, rh);
         ctx.fill();
         ctx.restore();
+        // ── Weather effects on window ──
+        if (weatherParticles.length && typeof winX !== 'undefined') {
+          drawWeatherEffects(ctx, rw, rh, winX, winY, winW, winH, t);
+        }
         } // end if winStyle !== 'win_none'
 
         /* ── Wall Decorations (drawn over wall, before baseboard) ── */
@@ -5547,17 +5964,23 @@
     }
 
     const PET_ACTIONS = {
-      cat:     ['groom', 'stretch', 'nap', 'yawn', 'sleep'],
-      dog:     ['sit', 'pant', 'scratch', 'playbow', 'sleep'],
-      bunny:   ['sniff', 'hop', 'standup', 'eartwitch', 'sleep'],
-      hamster: ['stuff', 'groom', 'spin', 'sleep'],
-      fox:     ['pounce', 'yawn', 'crouch', 'sneak', 'sleep'],
-      panda:   ['eat', 'roll', 'wave', 'sit', 'sleep']
+      cat:     ['groom', 'stretch', 'nap', 'yawn', 'sleep', 'pawlick', 'tailflick', 'headtilt', 'knead'],
+      dog:     ['sit', 'pant', 'scratch', 'playbow', 'sleep', 'tailwag', 'headtilt', 'shake', 'sniff'],
+      bunny:   ['sniff', 'hop', 'standup', 'eartwitch', 'sleep', 'nosewiggle', 'binky', 'flop', 'groom'],
+      hamster: ['stuff', 'groom', 'spin', 'sleep', 'wash', 'peek', 'dig', 'stretch'],
+      fox:     ['pounce', 'yawn', 'crouch', 'sneak', 'sleep', 'tailflick', 'headtilt', 'stretch', 'dig'],
+      panda:   ['eat', 'roll', 'wave', 'sit', 'sleep', 'stretch', 'yawn', 'headtilt', 'tumble']
     };
 
+    let _lastPetAction = {};
     function pickAction(type) {
       const acts = PET_ACTIONS[type] || PET_ACTIONS.cat;
-      return acts[Math.floor(Math.random() * acts.length)];
+      // Avoid repeating the same action twice in a row
+      let choice;
+      do { choice = acts[Math.floor(Math.random() * acts.length)]; }
+      while (choice === _lastPetAction[type] && acts.length > 1);
+      _lastPetAction[type] = choice;
+      return choice;
     }
 
     function startPetAnimation(pets) {
@@ -5602,8 +6025,16 @@
             }
             if (!st.action && now > st.actionCooldown && Math.random() < 0.008) {
               st.action = pickAction(p.type);
-              // Sleep/nap lasts longer
-              st.actionDur = (st.action === 'sleep' || st.action === 'nap') ? 5000 + Math.random() * 3000 : 2500;
+              // Varied durations by action type for more natural feel
+              if (st.action === 'sleep' || st.action === 'nap' || st.action === 'flop') {
+                st.actionDur = 5000 + Math.random() * 3000;
+              } else if (st.action === 'yawn' || st.action === 'headtilt' || st.action === 'peek' || st.action === 'nosewiggle') {
+                st.actionDur = 1500 + Math.random() * 1000;
+              } else if (st.action === 'binky' || st.action === 'tumble' || st.action === 'shake') {
+                st.actionDur = 1800 + Math.random() * 800;
+              } else {
+                st.actionDur = 2200 + Math.random() * 1200;
+              }
               st.actionEnd = now + st.actionDur;
             }
 
@@ -5687,6 +6118,9 @@
           }
 
           drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress, p.color);
+          // Draw accessory on top
+          const accId = (roomData.petAccessories || {})[p.type];
+          if (accId) drawPetAccessory(ctx, p.type, accId, size);
           ctx.restore();
 
           // Action floating effects
@@ -5821,6 +6255,81 @@
         case 'eat':
           ctx.translate(Math.sin(t / 200) * s * 0.01, 0);
           break;
+        // ── New natural actions ──
+        case 'pawlick': {
+          const lick = Math.sin(ap * Math.PI * 4) * 0.04;
+          ctx.rotate(-0.12 * ease);
+          ctx.translate(s * 0.03 * ease, s * 0.05 * ease);
+          ctx.rotate(lick);
+          break;
+        }
+        case 'tailflick': {
+          ctx.rotate(Math.sin(t / 80 + ap * 8) * 0.06 * ease);
+          break;
+        }
+        case 'headtilt': {
+          const tilt = Math.sin(ap * Math.PI) * 0.18;
+          ctx.rotate(tilt);
+          ctx.translate(0, -s * 0.02 * ease);
+          break;
+        }
+        case 'knead': {
+          const k = Math.sin(ap * Math.PI * 6) * 0.03;
+          ctx.translate(0, s * 0.04 * ease);
+          ctx.scale(1 + k, 1 - k * 0.5);
+          break;
+        }
+        case 'tailwag': {
+          ctx.rotate(Math.sin(t / 50) * 0.1 * ease);
+          ctx.translate(0, Math.abs(Math.sin(t / 100)) * s * 0.02 * ease);
+          break;
+        }
+        case 'shake': {
+          const shk = Math.sin(ap * Math.PI * 8) * 0.12 * (1 - ap);
+          ctx.rotate(shk);
+          break;
+        }
+        case 'nosewiggle': {
+          ctx.translate(Math.sin(t / 40) * s * 0.015 * ease, 0);
+          ctx.scale(1 + Math.sin(t / 60) * 0.02 * ease, 1);
+          break;
+        }
+        case 'binky': {
+          // Joyful jump with twist
+          const jumpH = Math.sin(ap * Math.PI);
+          ctx.translate(Math.sin(ap * Math.PI * 3) * s * 0.08, -s * 0.4 * jumpH);
+          ctx.rotate(Math.sin(ap * Math.PI * 2) * 0.2);
+          break;
+        }
+        case 'flop': {
+          const settle = Math.min(1, ap * 3);
+          ctx.translate(0, s * 0.12 * settle);
+          ctx.rotate(0.35 * settle);
+          ctx.scale(1.15, 0.78);
+          break;
+        }
+        case 'wash': {
+          ctx.rotate(Math.sin(t / 70) * 0.08 * ease);
+          ctx.translate(0, s * 0.03 * ease);
+          break;
+        }
+        case 'peek': {
+          const peekUp = Math.sin(ap * Math.PI);
+          ctx.translate(0, s * 0.08 * (1 - peekUp));
+          ctx.scale(1, 0.85 + 0.15 * peekUp);
+          break;
+        }
+        case 'dig': {
+          ctx.translate(Math.sin(t / 40) * s * 0.02 * ease, s * 0.06 * ease);
+          ctx.rotate(Math.sin(t / 60) * 0.06 * ease);
+          ctx.scale(1, 1 - 0.08 * ease);
+          break;
+        }
+        case 'tumble': {
+          ctx.translate(s * 0.15 * ap - s * 0.075, -s * 0.2 * Math.sin(ap * Math.PI));
+          ctx.rotate(ap * Math.PI * 1.5);
+          break;
+        }
       }
     }
 
@@ -5876,6 +6385,87 @@
           }
           break;
         }
+        case 'headtilt': {
+          // Question mark / curiosity sparkle
+          if (ease > 0.3) {
+            ctx.globalAlpha = (ease - 0.3) * 0.7;
+            ctx.fillStyle = '#f7c97e';
+            ctx.font = 'bold ' + Math.round(14 * ds) + 'px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('?', px + size * 0.4, py - size * 0.45 - Math.sin(t / 400) * 3);
+          }
+          break;
+        }
+        case 'tailwag': case 'tailflick': {
+          // Happy sparkles
+          ctx.globalAlpha = ease * 0.4;
+          const sparkleCount = 3;
+          for (let i = 0; i < sparkleCount; i++) {
+            const angle = (t / 300 + i * 2.1) % (Math.PI * 2);
+            const dist = size * 0.55 + Math.sin(t / 200 + i) * 4;
+            const sx = px + Math.cos(angle) * dist;
+            const sy = py - size * 0.1 + Math.sin(angle) * dist * 0.5;
+            ctx.fillStyle = 'rgba(255,220,100,0.6)';
+            ctx.beginPath(); ctx.arc(sx, sy, 1.5 * ds, 0, Math.PI * 2); ctx.fill();
+          }
+          break;
+        }
+        case 'binky': case 'tumble': {
+          // Joy lines radiating out
+          ctx.strokeStyle = 'rgba(255,200,100,0.35)';
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = ease * 0.5;
+          for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2 + t / 500;
+            const r1 = size * 0.5, r2 = size * 0.7;
+            ctx.beginPath();
+            ctx.moveTo(px + Math.cos(angle) * r1, py - size * 0.15 + Math.sin(angle) * r1 * 0.6);
+            ctx.lineTo(px + Math.cos(angle) * r2, py - size * 0.15 + Math.sin(angle) * r2 * 0.6);
+            ctx.stroke();
+          }
+          break;
+        }
+        case 'dig': {
+          // Dirt particles
+          ctx.globalAlpha = ease * 0.5;
+          ctx.fillStyle = 'rgba(160,120,80,0.5)';
+          for (let i = 0; i < 4; i++) {
+            const dx = px + (Math.sin(t / 60 + i * 1.5)) * size * 0.3;
+            const dy = py + size * 0.05 - Math.abs(Math.sin(t / 80 + i * 2)) * size * 0.2;
+            ctx.beginPath(); ctx.arc(dx, dy, 2 * ds, 0, Math.PI * 2); ctx.fill();
+          }
+          break;
+        }
+        case 'knead': case 'pawlick': case 'wash': {
+          // Soft motion lines
+          ctx.strokeStyle = 'rgba(200,200,255,0.3)';
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = ease * 0.4;
+          for (let i = 0; i < 2; i++) {
+            const mx = px + (i === 0 ? -1 : 1) * size * 0.25;
+            const my = py + size * 0.1;
+            ctx.beginPath();
+            ctx.moveTo(mx, my);
+            ctx.lineTo(mx + Math.sin(t / 80 + i) * 4 * ds, my + 5 * ds);
+            ctx.stroke();
+          }
+          break;
+        }
+        case 'shake': {
+          // Water/fur droplets
+          ctx.globalAlpha = ease * 0.5;
+          ctx.fillStyle = 'rgba(150,200,255,0.5)';
+          for (let i = 0; i < 5; i++) {
+            const angle = (t / 40 + i * 1.3) % (Math.PI * 2);
+            const r = size * (0.45 + ap * 0.3);
+            ctx.beginPath();
+            ctx.arc(px + Math.cos(angle) * r, py - size * 0.1 + Math.sin(angle) * r * 0.5, 1.5 * ds, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          break;
+        }
+        case 'flop': case 'peek': case 'nosewiggle':
+          break; // Subtle — no extra effect needed
         case 'stretch': {
           // Stretch lines
           ctx.strokeStyle = 'rgba(255,220,150,0.3)';
@@ -6537,6 +7127,1053 @@
     });
     // Set initial toggle icon based on viewport
     if (isMobile()) panelToggle.textContent = '▼';
+
+    /* ═══════════════════════════════
+       1. DAILY LOGIN REWARDS
+       ═══════════════════════════════ */
+    function getTodayStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function showDailyReward() {
+      document.getElementById('settingsOverlay').classList.add('hidden');
+      const ov = document.getElementById('dailyOverlay');
+      ov.classList.remove('hidden');
+      const today = getTodayStr();
+      const alreadyClaimed = roomData.lastLoginDay === today;
+      const streak = roomData.loginStreak || 0;
+      document.getElementById('dailyStreak').textContent = '🔥 Current streak: ' + streak + ' day' + (streak !== 1 ? 's' : '');
+      let daysHtml = '';
+      DAILY_REWARDS.forEach((r, i) => {
+        const dayNum = i + 1;
+        let cls = '';
+        if (dayNum <= streak && alreadyClaimed) cls = 'claimed';
+        else if (dayNum === streak + 1 && !alreadyClaimed) cls = 'today';
+        else if (dayNum <= streak) cls = 'claimed';
+        daysHtml += '<div class="daily-day ' + cls + '"><span class="dd-num">' + r.label + '</span><span class="dd-coins">🪙' + r.coins + '</span></div>';
+      });
+      document.getElementById('dailyDays').innerHTML = daysHtml;
+      const btn = document.getElementById('dailyClaimBtn');
+      btn.disabled = alreadyClaimed;
+      btn.textContent = alreadyClaimed ? '✓ Claimed Today' : 'Claim Today\'s Reward!';
+    }
+
+    document.getElementById('dailyClaimBtn').addEventListener('click', async () => {
+      const today = getTodayStr();
+      if (roomData.lastLoginDay === today) return;
+      // Check if streak continues (yesterday)
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = yesterday.getFullYear() + '-' + String(yesterday.getMonth()+1).padStart(2,'0') + '-' + String(yesterday.getDate()).padStart(2,'0');
+      let newStreak = (roomData.lastLoginDay === yStr) ? (roomData.loginStreak || 0) + 1 : 1;
+      if (newStreak > 7) newStreak = ((newStreak - 1) % 7) + 1;
+      const reward = DAILY_REWARDS[Math.min(newStreak, 7) - 1];
+      roomData.loginStreak = newStreak;
+      roomData.lastLoginDay = today;
+      roomData.coins += reward.coins;
+      await saveRoom();
+      showToast('🎁 Claimed ' + reward.coins + ' coins! Streak: ' + newStreak, 'success');
+      checkAchievements();
+      showDailyReward();
+    });
+
+    document.getElementById('dailyCloseBtn').addEventListener('click', () => {
+      document.getElementById('dailyOverlay').classList.add('hidden');
+    });
+
+    // Auto-show daily reward on login if not yet claimed
+    function checkDailyOnLogin() {
+      const today = getTodayStr();
+      if (roomData.lastLoginDay !== today) {
+        setTimeout(() => showDailyReward(), 1200);
+      }
+    }
+
+    /* ═══════════════════════════════
+       2. ACHIEVEMENTS
+       ═══════════════════════════════ */
+    function showAchievements() {
+      document.getElementById('settingsOverlay').classList.add('hidden');
+      const ov = document.getElementById('achieveOverlay');
+      ov.classList.remove('hidden');
+      const unlocked = roomData.achievements || [];
+      let html = '';
+      ACHIEVEMENTS.forEach(a => {
+        const isUnlocked = unlocked.includes(a.id);
+        html += '<div class="achieve-item ' + (isUnlocked ? 'unlocked' : '') + '">' +
+          '<div class="achieve-icon">' + a.icon + '</div>' +
+          '<div class="achieve-info"><div class="achieve-name">' + a.name + '</div><div class="achieve-desc">' + a.desc + '</div></div>' +
+          '<div class="achieve-status">' + (isUnlocked ? '✓ Unlocked' : '🔒') + '</div></div>';
+      });
+      document.getElementById('achieveList').innerHTML = html;
+    }
+
+    document.getElementById('achieveXBtn').addEventListener('click', () => {
+      document.getElementById('achieveOverlay').classList.add('hidden');
+    });
+    document.getElementById('achieveOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('achieveOverlay')) {
+        document.getElementById('achieveOverlay').classList.add('hidden');
+      }
+    });
+
+    async function checkAchievements() {
+      if (viewingUid !== currentUid) return;
+      const unlocked = roomData.achievements || [];
+      let newUnlocks = [];
+      ACHIEVEMENTS.forEach(a => {
+        if (!unlocked.includes(a.id) && a.check(roomData)) {
+          newUnlocks.push(a.id);
+        }
+      });
+      if (newUnlocks.length) {
+        roomData.achievements = [...unlocked, ...newUnlocks];
+        await saveRoom();
+        newUnlocks.forEach(id => {
+          const a = ACHIEVEMENTS.find(x => x.id === id);
+          if (a) showToast('🏆 Achievement: ' + a.name + '!', 'success');
+        });
+      }
+    }
+
+    /* ═══════════════════════════════
+       3. GUESTBOOK
+       ═══════════════════════════════ */
+    let _gbSelectedSticker = null;
+
+    function renderGuestbook() {
+      const isOwner = viewingUid === currentUid;
+      const targetUid = viewingUid;
+
+      // Build guestbook HTML
+      let html = '<div class="gb-input-area">' +
+        '<textarea class="gb-textarea" id="gbText" placeholder="Leave a message..." maxlength="200" rows="2"></textarea>' +
+        '<div class="gb-sticker-row">' +
+        GB_STICKERS.map(s => '<button class="gb-sticker-btn" onclick="selectGbSticker(this,\'' + s + '\')">' + s + '</button>').join('') +
+        '</div>' +
+        '<button class="gb-send-btn" onclick="sendGuestbookMsg()">📝 Post</button></div>';
+      html += '<div class="guestbook-list gb-list-target"><div style="text-align:center;color:rgba(255,255,255,.3);font-size:12px;padding:20px">Loading...</div></div>';
+
+      // Owner sees guestbook in Extras tab
+      const ownerEl = document.getElementById('guestbookContent');
+      if (ownerEl) ownerEl.innerHTML = isOwner ? html : '';
+
+      // Visitor sees guestbook in visit panel
+      const visitorWrap = document.getElementById('visitorGuestbook');
+      const visitorEl = document.getElementById('visitorGbContent');
+      if (visitorWrap && visitorEl) {
+        if (!isOwner) {
+          visitorWrap.style.display = 'block';
+          visitorEl.innerHTML = html;
+        } else {
+          visitorWrap.style.display = 'none';
+          visitorEl.innerHTML = '';
+        }
+      }
+
+      // Load guestbook entries
+      loadGuestbookEntries(targetUid);
+    }
+
+    function selectGbSticker(btn, sticker) {
+      document.querySelectorAll('.gb-sticker-btn').forEach(b => b.classList.remove('selected'));
+      if (_gbSelectedSticker === sticker) {
+        _gbSelectedSticker = null;
+      } else {
+        _gbSelectedSticker = sticker;
+        btn.classList.add('selected');
+      }
+    }
+
+    async function sendGuestbookMsg() {
+      const text = (document.getElementById('gbText')?.value || '').trim();
+      if (!text && !_gbSelectedSticker) return showToast('Write something or pick a sticker!', 'error');
+      if (text.length > 200) return showToast('Message too long!', 'error');
+      const targetUid = viewingUid;
+      await db.collection('rooms').doc(targetUid).collection('guestbook').add({
+        fromUid: currentUid,
+        fromName: getPlayerName(),
+        text: text,
+        sticker: _gbSelectedSticker || null,
+        createdAt: Date.now()
+      });
+      const gbText = document.getElementById('gbText');
+      if (gbText) gbText.value = '';
+      _gbSelectedSticker = null;
+      document.querySelectorAll('.gb-sticker-btn').forEach(b => b.classList.remove('selected'));
+      showToast('📝 Message posted!', 'success');
+      loadGuestbookEntries(targetUid);
+    }
+
+    async function loadGuestbookEntries(uid) {
+      const listEls = document.querySelectorAll('.gb-list-target');
+      if (!listEls.length) return;
+      try {
+        const snap = await db.collection('rooms').doc(uid).collection('guestbook')
+          .orderBy('createdAt', 'desc').limit(30).get();
+        let html;
+        if (snap.empty) {
+          html = '<div style="text-align:center;color:rgba(255,255,255,.3);font-size:12px;padding:20px">No messages yet. Be the first!</div>';
+        } else {
+          html = '';
+          const docs = [];
+          snap.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+
+          // Load replies for all entries in parallel
+          const replySnaps = await Promise.all(
+            docs.map(d => db.collection('rooms').doc(uid).collection('guestbook').doc(d.id)
+              .collection('replies').orderBy('createdAt', 'asc').limit(10).get())
+          );
+
+          docs.forEach((e, idx) => {
+            const timeAgo = getTimeAgo(e.createdAt);
+            html += '<div class="gb-entry" data-gb-id="' + e.id + '">' +
+              (e.sticker ? '<div class="gb-sticker">' + e.sticker + '</div>' : '') +
+              '<div class="gb-from">' + escapeHtml(e.fromName || 'Anonymous') + '</div>' +
+              (e.text ? '<div class="gb-msg">' + escapeHtml(e.text) + '</div>' : '') +
+              '<div class="gb-time">' + timeAgo + '</div>';
+
+            // Replies
+            const replies = [];
+            replySnaps[idx].forEach(r => replies.push(r.data()));
+            if (replies.length) {
+              html += '<div class="gb-replies">';
+              replies.forEach(r => {
+                html += '<div class="gb-reply">' +
+                  '<div class="gb-from">' + escapeHtml(r.fromName || 'Anonymous') + '</div>' +
+                  '<div class="gb-msg">' + escapeHtml(r.text || '') + '</div>' +
+                  '<div class="gb-time">' + getTimeAgo(r.createdAt) + '</div></div>';
+              });
+              html += '</div>';
+            }
+
+            // Reply button
+            html += '<button class="gb-reply-btn" onclick="toggleGbReply(this,\'' + e.id + '\')">💬 Reply</button>';
+            html += '</div>';
+          });
+        }
+        listEls.forEach(el => el.innerHTML = html);
+      } catch(e) { listEls.forEach(el => el.innerHTML = '<div style="color:rgba(255,255,255,.3);font-size:12px;padding:20px">Could not load guestbook</div>'); }
+    }
+
+    function toggleGbReply(btn, entryId) {
+      const entry = btn.closest('.gb-entry');
+      const existing = entry.querySelector('.gb-reply-form');
+      if (existing) { existing.remove(); return; }
+      const form = document.createElement('div');
+      form.className = 'gb-reply-form';
+      form.innerHTML = '<input class="gb-reply-input" placeholder="Write a reply..." maxlength="150">' +
+        '<button class="gb-reply-send" onclick="sendGbReply(this,\'' + entryId + '\')">Send</button>';
+      entry.appendChild(form);
+      const input = form.querySelector('input');
+      input.focus();
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendGbReply(form.querySelector('.gb-reply-send'), entryId); }
+      });
+    }
+
+    async function sendGbReply(btn, entryId) {
+      const form = btn.closest('.gb-reply-form');
+      const input = form.querySelector('input');
+      const text = (input.value || '').trim();
+      if (!text) return showToast('Write something!', 'error');
+      btn.disabled = true;
+      const targetUid = viewingUid;
+      await db.collection('rooms').doc(targetUid).collection('guestbook').doc(entryId)
+        .collection('replies').add({
+          fromUid: currentUid,
+          fromName: getPlayerName(),
+          text: text,
+          createdAt: Date.now()
+        });
+      showToast('💬 Reply sent!', 'success');
+      loadGuestbookEntries(targetUid);
+    }
+
+    function getTimeAgo(ts) {
+      const diff = Date.now() - ts;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + 'm ago';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h ago';
+      const days = Math.floor(hrs / 24);
+      return days + 'd ago';
+    }
+
+    /* ═══════════════════════════════
+       4. GIFT SYSTEM
+       ═══════════════════════════════ */
+    let _giftTargetUid = null;
+    let _giftAmount = 0;
+    const GIFT_AMOUNTS = [10, 50, 100, 250, 500];
+
+    function showGiftModal(uid, name) {
+      _giftTargetUid = uid;
+      _giftAmount = 0;
+      document.getElementById('giftTarget').textContent = 'To: ' + (name || 'Anonymous');
+      const el = document.getElementById('giftAmounts');
+      el.innerHTML = GIFT_AMOUNTS.map(a =>
+        '<div class="gift-amt" onclick="selectGiftAmount(this,' + a + ')">🪙 ' + a + '</div>'
+      ).join('');
+      document.getElementById('giftSendBtn').disabled = true;
+      document.getElementById('giftOverlay').classList.remove('hidden');
+    }
+
+    function selectGiftAmount(el, amount) {
+      _giftAmount = amount;
+      document.querySelectorAll('.gift-amt').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('giftSendBtn').disabled = (roomData.coins < amount);
+    }
+
+    document.getElementById('giftSendBtn').addEventListener('click', async () => {
+      if (!_giftTargetUid || _giftAmount <= 0 || roomData.coins < _giftAmount) return;
+      if (_giftTargetUid === currentUid) return showToast('Can\'t gift yourself!', 'error');
+      roomData.coins -= _giftAmount;
+      roomData.giftsGiven = (roomData.giftsGiven || 0) + 1;
+      await saveRoom();
+      // Add coins to target
+      await db.collection('rooms').doc(_giftTargetUid).update({
+        coins: firebase.firestore.FieldValue.increment(_giftAmount),
+        giftsReceived: firebase.firestore.FieldValue.increment(1)
+      });
+      // Leave guestbook entry
+      await db.collection('rooms').doc(_giftTargetUid).collection('guestbook').add({
+        fromUid: currentUid,
+        fromName: getPlayerName(),
+        text: 'Sent a gift of ' + _giftAmount + ' coins! 🎁',
+        sticker: '🎁',
+        createdAt: Date.now()
+      });
+      showToast('🎁 Sent ' + _giftAmount + ' coins!', 'success');
+      checkAchievements();
+      document.getElementById('giftOverlay').classList.add('hidden');
+    });
+
+    document.getElementById('giftCloseBtn').addEventListener('click', () => {
+      document.getElementById('giftOverlay').classList.add('hidden');
+    });
+
+    /* ═══════════════════════════════
+       5. PET TRICKS (extends PET_ACTIONS)
+       ═══════════════════════════════ */
+    const PET_TRICKS = {
+      cat:     [{ id: 'trick_sit', name: 'Sit', minAffection: 100 }, { id: 'trick_spin', name: 'Spin', minAffection: 300 }, { id: 'trick_dance', name: 'Dance', minAffection: 600 }, { id: 'trick_backflip', name: 'Backflip', minAffection: 1200 }],
+      dog:     [{ id: 'trick_sit', name: 'Sit', minAffection: 50 },  { id: 'trick_roll', name: 'Roll Over', minAffection: 200 }, { id: 'trick_dance', name: 'Dance', minAffection: 500 }, { id: 'trick_backflip', name: 'Backflip', minAffection: 1000 }],
+      bunny:   [{ id: 'trick_stand', name: 'Stand Up', minAffection: 80 }, { id: 'trick_spin', name: 'Spin', minAffection: 250 }, { id: 'trick_binky', name: 'Binky Jump', minAffection: 600 }],
+      hamster: [{ id: 'trick_spin', name: 'Spin', minAffection: 60 }, { id: 'trick_stand', name: 'Stand Up', minAffection: 200 }, { id: 'trick_roll', name: 'Roll', minAffection: 500 }],
+      fox:     [{ id: 'trick_pounce', name: 'Pounce', minAffection: 150 }, { id: 'trick_spin', name: 'Spin', minAffection: 400 }, { id: 'trick_dance', name: 'Dance', minAffection: 800 }],
+      panda:   [{ id: 'trick_wave', name: 'Wave', minAffection: 100 }, { id: 'trick_roll', name: 'Roll', minAffection: 300 }, { id: 'trick_dance', name: 'Dance', minAffection: 700 }],
+    };
+
+    function triggerPetTrick(petType, trickId) {
+      const st = petStates[petType];
+      if (!st) return;
+      // Map trick to action transform
+      const trickActionMap = {
+        'trick_sit': 'sit', 'trick_roll': 'roll', 'trick_spin': 'spin',
+        'trick_dance': 'dance', 'trick_backflip': 'backflip',
+        'trick_stand': 'standup', 'trick_pounce': 'pounce',
+        'trick_binky': 'hop', 'trick_wave': 'wave'
+      };
+      st.action = trickActionMap[trickId] || 'sit';
+      st.actionDur = 3000;
+      st.actionEnd = Date.now() + 3000;
+      showToast('🎪 ' + (PETS.find(p => p.id === petType)?.name || petType) + ' does a trick!', 'success');
+    }
+
+    /* ═══════════════════════════════
+       6. PET ACCESSORIES — render & shop
+       ═══════════════════════════════ */
+    function renderAccessoryShop() {
+      const el = document.getElementById('accShop');
+      if (!el) return;
+      const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+      let html = '';
+
+      // Accessory cards
+      html += '<div class="acc-grid">';
+      PET_ACCESSORIES.forEach(acc => {
+        const isOwned = (roomData.ownedAccessories || []).includes(acc.id);
+        const canAfford = roomData.coins >= acc.cost;
+        // Check if currently equipped on any pet
+        const equippedOn = activePets.filter(pid => (roomData.petAccessories || {})[pid] === acc.id);
+        const isEquipped = equippedOn.length > 0;
+        let cls = isEquipped ? 'equipped' : isOwned ? 'owned' : '';
+        html += '<div class="acc-card ' + cls + '">' +
+          '<div class="acc-emoji">' + acc.emoji + '</div>' +
+          '<div class="acc-name">' + acc.name + '</div>';
+        if (isOwned) {
+          html += '<div class="acc-price" style="color:#34d399">Owned</div>';
+          // Equip/remove buttons for each active pet
+          if (activePets.length) {
+            html += '<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">';
+            activePets.forEach(pid => {
+              const petName = PETS.find(p => p.id === pid)?.name || pid;
+              const equipped = (roomData.petAccessories || {})[pid] === acc.id;
+              if (equipped) {
+                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;background:rgba(239,68,68,.2);color:#f87171;width:100%;position:relative;z-index:5" onclick="window.removePetAcc(\'' + pid + '\');return false;">✕ ' + petName + '</button>';
+              } else {
+                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;width:100%;position:relative;z-index:5" onclick="window.equipPetAcc(\'' + pid + '\',\'' + acc.id + '\');return false;">' + petName + '</button>';
+              }
+            });
+            html += '</div>';
+          }
+        } else {
+          html += '<div class="acc-price">🪙 ' + acc.cost + '</div>';
+          html += '<button class="food-btn" style="margin-top:4px;font-size:10px" onclick="window.buyAccessory(\'' + acc.id + '\');return false;" ' + (canAfford ? '' : 'disabled') + '>Buy</button>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+
+      // Pet Tricks section
+      if (activePets.length) {
+        html += '<div class="shop-section-title" style="margin-top:20px">🎪 Pet Tricks</div>';
+        html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-align:center">Pets learn tricks as affection grows!</div>';
+        activePets.forEach(pid => {
+          const petDef = PETS.find(p => p.id === pid);
+          const affection = roomData.petAffection[pid] || 0;
+          const tricks = PET_TRICKS[pid] || [];
+          if (!tricks.length) return;
+          html += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px">' + (petDef?.emoji || '') + ' ' + (petDef?.name || pid) + ' (❤️ ' + affection + ')</div>';
+          html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+          tricks.forEach(tr => {
+            const unlocked = affection >= tr.minAffection;
+            html += '<button class="food-btn" style="font-size:10px;' + (unlocked ? '' : 'opacity:.4;cursor:not-allowed') + '" ' +
+              (unlocked ? 'onclick="window.triggerPetTrick(\'' + pid + '\',\'' + tr.id + '\');return false;"' : 'disabled') +
+              '>' + tr.name + (unlocked ? '' : ' (❤️' + tr.minAffection + ')') + '</button>';
+          });
+          html += '</div></div>';
+        });
+      }
+      el.innerHTML = html;
+    }
+
+    async function buyAccessory(accId) {
+      const acc = PET_ACCESSORIES.find(a => a.id === accId);
+      if (!acc || roomData.coins < acc.cost) return showToast('Not enough coins!', 'error');
+      if ((roomData.ownedAccessories || []).includes(accId)) return;
+      roomData.coins -= acc.cost;
+      roomData.ownedAccessories = [...(roomData.ownedAccessories || []), accId];
+      await saveRoom();
+      showToast('🎩 Bought ' + acc.name + '!', 'success');
+      checkAchievements();
+      renderAccessoryShop();
+    }
+
+    async function equipPetAcc(petId, accId) {
+      roomData.petAccessories = roomData.petAccessories || {};
+      roomData.petAccessories[petId] = accId;
+      _lastPetKey = '';
+      _lastLocalSaveTime = Date.now();
+      const panelInner = document.querySelector('.panel-inner');
+      const scrollTop = panelInner ? panelInner.scrollTop : 0;
+      await saveRoom();
+      renderAccessoryShop();
+      if (panelInner) panelInner.scrollTop = scrollTop;
+    }
+
+    async function removePetAcc(petId) {
+      roomData.petAccessories = roomData.petAccessories || {};
+      delete roomData.petAccessories[petId];
+      _lastPetKey = '';
+      _lastLocalSaveTime = Date.now();
+      const panelInner = document.querySelector('.panel-inner');
+      const scrollTop = panelInner ? panelInner.scrollTop : 0;
+      // Use FieldValue.delete() so Firestore actually removes the key (merge won't do it)
+      await userDocRef().update({
+        ['petAccessories.' + petId]: firebase.firestore.FieldValue.delete(),
+        updatedAt: Date.now()
+      });
+      renderAccessoryShop();
+      if (panelInner) panelInner.scrollTop = scrollTop;
+      showToast('Accessory removed!', 'success');
+    }
+
+    // Expose accessory functions to window for onclick handlers
+    window.removePetAcc = removePetAcc;
+    window.equipPetAcc = equipPetAcc;
+    window.buyAccessory = buyAccessory;
+    window.triggerPetTrick = triggerPetTrick;
+
+    // Draw accessory on pet canvas — offset to each pet's actual head position
+    const PET_HEAD_OFFSETS = {
+      cat:     { hx:  0.35, hy: -0.18, r: 0.28 },
+      dog:     { hx:  0.35, hy: -0.14, r: 0.28 },
+      bunny:   { hx:  0.30, hy: -0.16, r: 0.26 },
+      hamster: { hx:  0.25, hy: -0.10, r: 0.30 },
+      fox:     { hx:  0.38, hy: -0.14, r: 0.27 },
+      panda:   { hx:  0.05, hy: -0.30, r: 0.30 }
+    };
+
+    function drawPetAccessory(ctx, petType, accId, s) {
+      if (!accId) return;
+      const acc = PET_ACCESSORIES.find(a => a.id === accId);
+      if (!acc) return;
+      const ho = PET_HEAD_OFFSETS[petType] || { hx: 0, hy: -0.3, r: 0.28 };
+      const hx = s * ho.hx;   // head centre X
+      const hy = s * ho.hy;   // head centre Y
+      const hr = s * ho.r;    // head radius
+      switch (acc.draw) {
+        case 'tophat':
+          ctx.fillStyle = '#1a1a2e';
+          ctx.fillRect(hx - s*0.12, hy - hr - s*0.2, s*0.24, s*0.2);
+          ctx.fillRect(hx - s*0.18, hy - hr - s*0.02, s*0.36, s*0.07);
+          ctx.fillStyle = '#c084fc';
+          ctx.fillRect(hx - s*0.1, hy - hr - s*0.08, s*0.2, s*0.03);
+          break;
+        case 'crown':
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.15, hy - hr + s*0.02);
+          ctx.lineTo(hx - s*0.18, hy - hr - s*0.16);
+          ctx.lineTo(hx - s*0.08, hy - hr - s*0.08);
+          ctx.lineTo(hx, hy - hr - s*0.20);
+          ctx.lineTo(hx + s*0.08, hy - hr - s*0.08);
+          ctx.lineTo(hx + s*0.18, hy - hr - s*0.16);
+          ctx.lineTo(hx + s*0.15, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#e74c3c';
+          ctx.beginPath(); ctx.arc(hx, hy - hr - s*0.12, s*0.025, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'glasses':
+          ctx.strokeStyle = '#333'; ctx.lineWidth = s*0.02;
+          ctx.beginPath(); ctx.arc(hx - s*0.08, hy, s*0.06, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(hx + s*0.08, hy, s*0.06, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(hx - s*0.02, hy); ctx.lineTo(hx + s*0.02, hy); ctx.stroke();
+          ctx.fillStyle = 'rgba(0,0,0,0.25)';
+          ctx.beginPath(); ctx.arc(hx - s*0.08, hy, s*0.055, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(hx + s*0.08, hy, s*0.055, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'bow':
+          ctx.fillStyle = '#ff69b4';
+          ctx.beginPath(); ctx.ellipse(hx - s*0.08, hy - hr, s*0.08, s*0.05, -0.3, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(hx + s*0.08, hy - hr, s*0.08, s*0.05, 0.3, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#ff1493';
+          ctx.beginPath(); ctx.arc(hx, hy - hr, s*0.025, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'scarf':
+          ctx.fillStyle = '#e74c3c';
+          ctx.fillRect(hx - s*0.2, hy + hr - s*0.02, s*0.4, s*0.08);
+          ctx.fillStyle = '#c0392b';
+          ctx.fillRect(hx + s*0.1, hy + hr - s*0.02, s*0.08, s*0.2);
+          ctx.fillStyle = '#27ae60';
+          for (let i = 0; i < 3; i++) ctx.fillRect(hx - s*0.15 + i*s*0.12, hy + hr, s*0.06, s*0.02);
+          break;
+        case 'flower': {
+          const fc = ['#ff69b4','#ff69b4','#ff69b4','#ff69b4','#ff69b4'];
+          fc.forEach((c, i) => {
+            const a = (i / 5) * Math.PI * 2;
+            ctx.fillStyle = c;
+            ctx.beginPath(); ctx.arc(hx + Math.cos(a)*s*0.06, hy - hr + Math.sin(a)*s*0.06, s*0.03, 0, Math.PI*2); ctx.fill();
+          });
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath(); ctx.arc(hx, hy - hr, s*0.025, 0, Math.PI*2); ctx.fill();
+          break;
+        }
+        case 'bandana':
+          ctx.fillStyle = '#2c3e50';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.18, hy - s*0.02); ctx.lineTo(hx + s*0.18, hy - s*0.02);
+          ctx.lineTo(hx + s*0.14, hy + s*0.06); ctx.lineTo(hx - s*0.14, hy + s*0.06);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#ecf0f1';
+          ctx.beginPath(); ctx.arc(hx, hy + s*0.02, s*0.015, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'monocle':
+          ctx.strokeStyle = '#c9952a'; ctx.lineWidth = s*0.015;
+          ctx.beginPath(); ctx.arc(hx + s*0.08, hy, s*0.07, 0, Math.PI*2); ctx.stroke();
+          ctx.fillStyle = 'rgba(200,220,255,0.15)';
+          ctx.beginPath(); ctx.arc(hx + s*0.08, hy, s*0.06, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = '#c9952a'; ctx.lineWidth = s*0.008;
+          ctx.beginPath(); ctx.moveTo(hx + s*0.08, hy + s*0.07); ctx.lineTo(hx + s*0.08, hy + s*0.3); ctx.stroke();
+          break;
+        case 'halo':
+          ctx.strokeStyle = '#ffd700'; ctx.lineWidth = s*0.025;
+          ctx.globalAlpha = 0.7;
+          ctx.beginPath(); ctx.ellipse(hx, hy - hr - s*0.06, s*0.14, s*0.04, 0, 0, Math.PI*2); ctx.stroke();
+          ctx.globalAlpha = 1;
+          break;
+      }
+    }
+
+    /* ═══════════════════════════════
+       7. JUKEBOX (Web Audio API)
+       ═══════════════════════════════ */
+    let _audioCtx = null;
+    let _jukeboxNodes = [];
+    let _jukeboxPlaying = null;
+    let _jukeboxGain = null;
+
+    function getAudioCtx() {
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        _jukeboxGain = _audioCtx.createGain();
+        _jukeboxGain.gain.value = roomData.jukeboxVol ?? 0.5;
+        _jukeboxGain.connect(_audioCtx.destination);
+      }
+      return _audioCtx;
+    }
+
+    function stopJukebox() {
+      _jukeboxNodes.forEach(n => { try { n.stop(); } catch(e) {} try { n.disconnect(); } catch(e) {} });
+      _jukeboxNodes = [];
+      _jukeboxPlaying = null;
+    }
+
+    function playJukeboxTrack(trackId) {
+      stopJukebox();
+      const track = JUKEBOX_TRACKS.find(t => t.id === trackId);
+      if (!track) return;
+      const ctx = getAudioCtx();
+      _jukeboxPlaying = trackId;
+
+      const isAmbient = ['rain','forest','ocean','space'].includes(track.style);
+      if (isAmbient) {
+        // Ambient noise generation
+        const bufferSize = ctx.sampleRate * 4;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let b0=0,b1=0,b2=0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          if (track.style === 'rain') {
+            // Rain with varying intensity
+            const dropChance = Math.sin(i / (ctx.sampleRate * 2)) * 0.5 + 0.5;
+            data[i] = white * (0.15 + dropChance * 0.2);
+          } else if (track.style === 'ocean') {
+            b0 = 0.99 * b0 + white * 0.1;
+            data[i] = b0 * Math.sin(i / (ctx.sampleRate * 3)) * 2.5 * (0.6 + 0.4 * Math.sin(i / (ctx.sampleRate * 8)));
+          } else if (track.style === 'space') {
+            // Deep space drone with slow modulation
+            b0 = 0.998 * b0 + white * 0.02;
+            b1 = 0.995 * b1 + white * 0.05;
+            data[i] = (b0 * Math.sin(i / (ctx.sampleRate * 6)) + b1 * 0.3) * 1.5;
+          } else {
+            // Forest — pink noise with bird chirp modulation
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.969 * b2 + white * 0.153852;
+            const chirp = Math.sin(i / 800) > 0.95 ? Math.sin(i / 20) * 0.05 : 0;
+            data[i] = (b0 + b1 + b2 + white * 0.5362) * 0.11 + chirp;
+          }
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buffer; src.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = track.style === 'ocean' ? 400 : track.style === 'rain' ? 2000 : track.style === 'space' ? 300 : 800;
+        src.connect(filter); filter.connect(_jukeboxGain);
+        src.start();
+        _jukeboxNodes.push(src);
+        // Space: add tonal drone layer
+        if (track.style === 'space') {
+          [55, 82.41, 110].forEach(freq => {
+            const drone = ctx.createOscillator();
+            const dGain = ctx.createGain();
+            drone.type = 'sine'; drone.frequency.value = freq;
+            dGain.gain.value = 0.015;
+            drone.connect(dGain); dGain.connect(_jukeboxGain);
+            drone.start(); _jukeboxNodes.push(drone);
+          });
+        }
+      } else {
+        // Musical tones — unique melodies per style
+        const noteMap = {
+          'C':  [261.63,293.66,329.63,349.23,392,440,493.88],
+          'Eb': [311.13,349.23,392,415.3,466.16,523.25,587.33],
+          'G':  [392,440,493.88,523.25,587.33,659.25,739.99],
+          'F':  [349.23,392,440,466.16,523.25,587.33,659.25],
+          'D':  [293.66,329.63,369.99,392,440,493.88,554.37],
+          'A':  [220,246.94,277.18,293.66,329.63,369.99,415.3]
+        };
+        const notes = noteMap[track.key] || noteMap['C'];
+        const beatLen = 60 / (track.bpm || 80);
+        // Different melody patterns per style
+        const melodyPatterns = {
+          lofi:    [0,2,4,3, 2,4,6,5, 4,2,3,1, 0,2,4,0],
+          jazz:    [0,4,6,2, 5,3,6,4, 2,6,5,1, 3,0,4,2],
+          retro:   [0,0,4,4, 5,5,4,-1, 3,3,2,2, 1,1,0,-1],
+          piano:   [4,2,0,2, 4,4,4,-1, 2,2,2,-1, 4,6,6,-1],
+          lullaby: [0,1,2,0, 2,3,4,-1, 4,5,4,3, 2,0,1,-1],
+          bossa:   [0,2,4,2, 5,4,2,0, 3,5,6,4, 2,0,5,3],
+          musicbox:[4,2,5,3, 6,4,2,0, 1,3,5,6, 4,2,0,1]
+        };
+        const pattern = melodyPatterns[track.style] || melodyPatterns.lofi;
+
+        // Style-specific wave types and octave multipliers
+        const waveTypes = { retro:'square', jazz:'triangle', bossa:'triangle', musicbox:'sine', lullaby:'sine', piano:'sine', lofi:'sine' };
+        const octaveMul = { piano:0.5, lullaby:1, musicbox:2, bossa:1, retro:1, jazz:1, lofi:1 };
+        const volume = { lofi:0.07, jazz:0.05, retro:0.04, piano:0.08, lullaby:0.06, bossa:0.05, musicbox:0.05 };
+
+        function scheduleNotes() {
+          if (_jukeboxPlaying !== trackId) return;
+          const now = ctx.currentTime;
+          for (let i = 0; i < 16; i++) {
+            const noteIdx = pattern[i % 16];
+            if (noteIdx < 0) continue; // rest note
+            const osc = ctx.createOscillator();
+            const env = ctx.createGain();
+            osc.type = waveTypes[track.style] || 'sine';
+            const mul = octaveMul[track.style] || 1;
+            osc.frequency.value = notes[noteIdx] * mul;
+            const start = now + i * beatLen;
+            const vol = volume[track.style] || 0.06;
+            // Style-specific envelope shapes
+            env.gain.setValueAtTime(0, start);
+            if (track.style === 'musicbox') {
+              env.gain.linearRampToValueAtTime(vol, start + 0.01);
+              env.gain.exponentialRampToValueAtTime(0.001, start + beatLen * 1.5);
+            } else if (track.style === 'lullaby') {
+              env.gain.linearRampToValueAtTime(vol, start + 0.08);
+              env.gain.exponentialRampToValueAtTime(0.001, start + beatLen * 1.2);
+            } else if (track.style === 'bossa') {
+              env.gain.linearRampToValueAtTime(vol, start + 0.02);
+              env.gain.setValueAtTime(vol * 0.7, start + beatLen * 0.2);
+              env.gain.exponentialRampToValueAtTime(0.001, start + beatLen * 0.85);
+            } else {
+              env.gain.linearRampToValueAtTime(vol, start + 0.05);
+              env.gain.exponentialRampToValueAtTime(0.001, start + beatLen * 0.9);
+            }
+            osc.connect(env); env.connect(_jukeboxGain);
+            osc.start(start); osc.stop(start + beatLen * 1.5);
+            _jukeboxNodes.push(osc);
+          }
+          setTimeout(scheduleNotes, beatLen * 16 * 1000 - 200);
+        }
+        scheduleNotes();
+      }
+      roomData.jukeboxTrack = trackId;
+      saveRoom();
+      renderJukebox();
+    }
+
+    function renderJukebox() {
+      const el = document.getElementById('jukeboxContent');
+      if (!el) return;
+      const current = JUKEBOX_TRACKS.find(t => t.id === _jukeboxPlaying);
+      let html = '<div class="jukebox-now">' +
+        '<div class="jukebox-title">' + (current ? '♫ ' + current.name : 'No track playing') + '</div>' +
+        '<div class="jukebox-controls">' +
+        '<button class="jukebox-btn" onclick="' + (_jukeboxPlaying ? 'stopJukebox();renderJukebox()' : '') + '" title="Stop">⏹</button>' +
+        '</div></div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:11px;color:rgba(255,255,255,.5)">🔊</span>' +
+        '<input type="range" class="jukebox-vol" min="0" max="100" value="' + Math.round((roomData.jukeboxVol ?? 0.5) * 100) + '" oninput="setJukeboxVol(this.value)">' +
+        '</div>';
+      html += '<div class="jukebox-list">';
+      JUKEBOX_TRACKS.forEach(t => {
+        const playing = _jukeboxPlaying === t.id;
+        html += '<div class="jukebox-track ' + (playing ? 'playing' : '') + '" onclick="playJukeboxTrack(\'' + t.id + '\')">' +
+          (playing ? '▶ ' : '♪ ') + t.name + '</div>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    function setJukeboxVol(val) {
+      const v = Math.max(0, Math.min(1, val / 100));
+      roomData.jukeboxVol = v;
+      if (_jukeboxGain) _jukeboxGain.gain.value = v;
+      saveRoom();
+    }
+
+    /* ═══════════════════════════════
+       8. WEATHER / SEASON EFFECTS
+       ═══════════════════════════════ */
+    let weatherParticles = [];
+    let currentWeather = 'clear';
+
+    function getWeatherForDate() {
+      const now = new Date();
+      const month = now.getMonth(); // 0-11
+      const day = now.getDate();
+      // Season-based weather
+      if (month === 11 || month === 0 || month === 1) {
+        // Winter: snow
+        return (day % 3 === 0) ? 'snow' : 'snow'; // always snow in winter
+      } else if (month >= 2 && month <= 4) {
+        // Spring: rain or cherry blossoms
+        return (day % 2 === 0) ? 'rain' : 'petals';
+      } else if (month >= 5 && month <= 7) {
+        // Summer: clear with fireflies at night, or sunny sparkles
+        const hr = now.getHours();
+        return (hr >= 19 || hr < 6) ? 'fireflies' : 'sunny';
+      } else {
+        // Autumn: falling leaves
+        return 'leaves';
+      }
+    }
+
+    function initWeatherParticles(weather, count) {
+      weatherParticles = [];
+      for (let i = 0; i < count; i++) {
+        weatherParticles.push({
+          x: Math.random(), y: Math.random(),
+          speed: 0.0005 + Math.random() * 0.002,
+          size: 2 + Math.random() * 4,
+          phase: Math.random() * Math.PI * 2,
+          rot: Math.random() * Math.PI * 2,
+          type: weather
+        });
+      }
+    }
+
+    function drawWeatherEffects(ctx, rw, rh, winX, winY, winW, winH, t) {
+      if (!weatherParticles.length) return;
+      ctx.save();
+      // Clip to window area
+      ctx.beginPath();
+      ctx.rect(winX, winY, winW, winH);
+      ctx.clip();
+
+      weatherParticles.forEach(p => {
+        const weather = p.type;
+        const px = winX + p.x * winW;
+        let py = winY + p.y * winH;
+
+        if (weather === 'snow') {
+          p.y += p.speed;
+          p.x += Math.sin(t / 2000 + p.phase) * 0.0003;
+          if (p.y > 1) { p.y = -0.05; p.x = Math.random(); }
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI*2); ctx.fill();
+        } else if (weather === 'rain') {
+          p.y += p.speed * 3;
+          if (p.y > 1) { p.y = -0.05; p.x = Math.random(); }
+          ctx.strokeStyle = 'rgba(180,200,255,0.5)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - 1, py + p.size * 3); ctx.stroke();
+        } else if (weather === 'petals') {
+          p.y += p.speed * 0.8;
+          p.x += Math.sin(t / 1500 + p.phase) * 0.0005;
+          p.rot += 0.02;
+          if (p.y > 1) { p.y = -0.05; p.x = Math.random(); }
+          ctx.save(); ctx.translate(px, py); ctx.rotate(p.rot);
+          ctx.fillStyle = 'rgba(255,183,197,0.7)';
+          ctx.beginPath(); ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, Math.PI*2); ctx.fill();
+          ctx.restore();
+        } else if (weather === 'leaves') {
+          p.y += p.speed * 0.7;
+          p.x += Math.sin(t / 1800 + p.phase) * 0.0008;
+          p.rot += 0.015;
+          if (p.y > 1) { p.y = -0.05; p.x = Math.random(); }
+          const colors = ['#d4762c','#c0392b','#e67e22','#f39c12','#8e5828'];
+          ctx.save(); ctx.translate(px, py); ctx.rotate(p.rot);
+          ctx.fillStyle = colors[Math.floor(p.phase * 10) % colors.length];
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size); ctx.quadraticCurveTo(p.size, 0, 0, p.size);
+          ctx.quadraticCurveTo(-p.size, 0, 0, -p.size); ctx.fill();
+          ctx.restore();
+        } else if (weather === 'fireflies') {
+          const glow = 0.4 + Math.sin(t / 500 + p.phase) * 0.4;
+          p.x += Math.sin(t / 3000 + p.phase) * 0.0003;
+          p.y += Math.cos(t / 2500 + p.phase * 2) * 0.0002;
+          if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+          if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+          ctx.fillStyle = 'rgba(255,255,100,' + glow + ')';
+          ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,100,' + glow * 0.3 + ')';
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fill();
+        } else if (weather === 'sunny') {
+          const sparkle = Math.sin(t / 300 + p.phase * 10);
+          if (sparkle > 0.7) {
+            ctx.fillStyle = 'rgba(255,255,200,' + (sparkle - 0.7) * 2 + ')';
+            ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI*2); ctx.fill();
+          }
+        }
+      });
+      ctx.restore();
+    }
+
+    /* ═══════════════════════════════
+       9. GACHA / LUCKY DRAW
+       ═══════════════════════════════ */
+    let _gachaSpinning = false;
+
+    function renderGachaTab() {
+      const el = document.getElementById('gachaTabContent');
+      if (!el) return;
+      const canAfford = roomData.coins >= GACHA_COST && !_gachaSpinning;
+      let html = '<div style="text-align:center;padding:10px 0">' +
+        '<div class="gacha-reel-window" id="gachaReelWindow"><div class="gacha-reel-strip" id="gachaReelStrip">' +
+        '<div class="gacha-reel-item" style="opacity:.3">🎲</div></div></div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: 🪙 ' + GACHA_COST + ' per pull</div>' +
+        '<button class="gacha-pull-btn" id="gachaPullTabBtn" onclick="pullGacha()" ' + (canAfford ? '' : 'disabled') + '>🎲 Pull!</button>' +
+        '<div id="gachaTabResult" style="margin-top:16px;min-height:80px"></div></div>';
+      el.innerHTML = html;
+    }
+
+    function spawnGachaConfetti(container, rarity) {
+      if (rarity === 'common' || rarity === 'uncommon') return;
+      const colors = {
+        rare: ['#60a5fa','#93c5fd','#3b82f6'],
+        epic: ['#c084fc','#a855f7','#e9d5ff'],
+        legendary: ['#fbbf24','#fde68a','#f59e0b','#fff']
+      };
+      const cols = colors[rarity] || colors.rare;
+      const count = rarity === 'legendary' ? 24 : 14;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'gacha-confetti';
+        dot.style.background = cols[Math.floor(Math.random() * cols.length)];
+        dot.style.left = (20 + Math.random() * 60) + '%';
+        dot.style.top = '30%';
+        dot.style.animationDelay = (Math.random() * 0.6) + 's';
+        dot.style.animationDuration = (1 + Math.random() * 1) + 's';
+        container.style.position = 'relative';
+        container.appendChild(dot);
+        setTimeout(() => dot.remove(), 2500);
+      }
+    }
+
+    async function pullGacha() {
+      if (_gachaSpinning) return;
+      if (roomData.coins < GACHA_COST) return showToast('Not enough coins!', 'error');
+      _gachaSpinning = true;
+
+      // Disable button immediately
+      const btn = document.getElementById('gachaPullTabBtn');
+      if (btn) btn.disabled = true;
+      const resultEl = document.getElementById('gachaTabResult');
+      if (resultEl) resultEl.innerHTML = '';
+
+      roomData.coins -= GACHA_COST;
+      roomData.gachaPulls = (roomData.gachaPulls || 0) + 1;
+
+      // Weighted random — determine prize now
+      const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
+      let rand = Math.random() * totalWeight;
+      let prize = GACHA_POOL[0];
+      for (const item of GACHA_POOL) {
+        rand -= item.weight;
+        if (rand <= 0) { prize = item; break; }
+      }
+
+      // Apply prize
+      if (prize.type === 'coins') {
+        roomData.coins += prize.value;
+      } else if (prize.type === 'accessory') {
+        if (!(roomData.ownedAccessories || []).includes(prize.value)) {
+          roomData.ownedAccessories = [...(roomData.ownedAccessories || []), prize.value];
+        } else {
+          roomData.coins += 75;
+          prize = { ...prize, name: prize.name + ' (owned → 75 coins)', emoji: '🪙' };
+        }
+      }
+
+      await saveRoom();
+      checkAchievements();
+
+      // ── Spin animation in reel ──
+      const strip = document.getElementById('gachaReelStrip');
+      const reelWin = document.getElementById('gachaReelWindow');
+      if (strip && reelWin) {
+        // Build reel: 20 random items + prize at end
+        const reelCount = 20;
+        let reelHtml = '';
+        for (let i = 0; i < reelCount; i++) {
+          const rItem = GACHA_POOL[Math.floor(Math.random() * GACHA_POOL.length)];
+          reelHtml += '<div class="gacha-reel-item">' + rItem.emoji + '</div>';
+        }
+        reelHtml += '<div class="gacha-reel-item">' + prize.emoji + '</div>';
+        strip.innerHTML = reelHtml;
+
+        // Animate: scroll through all items
+        const itemH = 90;
+        const totalScroll = reelCount * itemH;
+        strip.style.transition = 'none';
+        strip.style.transform = 'translateY(0)';
+        strip.offsetHeight; // force reflow
+        strip.style.transition = 'transform 2.5s cubic-bezier(0.12, 0.8, 0.3, 1)';
+        strip.style.transform = 'translateY(-' + totalScroll + 'px)';
+
+        // Glow effect on window
+        reelWin.style.animation = 'gachaGlow 2.5s ease-in-out';
+
+        // After spin completes, show full prize reveal
+        setTimeout(() => {
+          reelWin.style.animation = '';
+          if (resultEl) {
+            resultEl.innerHTML = '<div class="gacha-prize-reveal">' +
+              '<div class="gacha-prize-emoji">' + prize.emoji + '</div>' +
+              '<div class="gacha-prize-name">' + prize.name + '</div>' +
+              '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' +
+              '</div>';
+            // Confetti for rare+
+            spawnGachaConfetti(resultEl, prize.rarity);
+          }
+          // Update coin display
+          document.getElementById('coinAmount').textContent = roomData.coins;
+          _gachaSpinning = false;
+          if (btn) btn.disabled = roomData.coins < GACHA_COST;
+          renderAccessoryShop();
+        }, 2700);
+      } else {
+        _gachaSpinning = false;
+        renderGachaTab();
+        renderAccessoryShop();
+      }
+    }
+
+    /* ═══════════════════════════════
+       10. MINI-GAME LEADERBOARD
+       ═══════════════════════════════ */
+    let _lbCurrentGame = 'flappy';
+
+    function showLeaderboard() {
+      document.getElementById('settingsOverlay').classList.add('hidden');
+      document.getElementById('lbOverlay').classList.remove('hidden');
+      renderLeaderboardTabs();
+      loadLeaderboard(_lbCurrentGame);
+    }
+
+    function renderLeaderboardTabs() {
+      const el = document.getElementById('lbTabs');
+      el.innerHTML = LB_GAMES.map(g =>
+        '<button class="lb-tab ' + (g.id === _lbCurrentGame ? 'active' : '') + '" onclick="switchLbGame(\'' + g.id + '\')">' + g.name + '</button>'
+      ).join('');
+    }
+
+    function switchLbGame(gameId) {
+      _lbCurrentGame = gameId;
+      renderLeaderboardTabs();
+      loadLeaderboard(gameId);
+    }
+
+    async function loadLeaderboard(gameId) {
+      const listEl = document.getElementById('lbList');
+      listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">Loading...</div>';
+      const game = LB_GAMES.find(g => g.id === gameId);
+      if (!game) return;
+      try {
+        const snap = await db.collection(game.key)
+          .orderBy('score', 'desc').limit(20).get();
+        if (snap.empty) {
+          listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">No scores yet!</div>';
+          return;
+        }
+        let html = '';
+        let rank = 0;
+        snap.forEach(doc => {
+          rank++;
+          const d = doc.data();
+          const medals = ['🥇','🥈','🥉'];
+          const cls = rank <= 3 ? ' top' + rank : '';
+          html += '<div class="lb-row' + cls + '">' +
+            '<div class="lb-rank">' + (rank <= 3 ? medals[rank-1] : '#' + rank) + '</div>' +
+            '<div class="lb-name">' + escapeHtml(d.name || 'Anonymous') + '</div>' +
+            '<div class="lb-score">' + (d.score || 0) + '</div></div>';
+        });
+        listEl.innerHTML = html;
+      } catch(e) {
+        listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">Could not load scores</div>';
+      }
+    }
+
+    document.getElementById('lbCloseBtn').addEventListener('click', () => {
+      document.getElementById('lbOverlay').classList.add('hidden');
+    });
 
     // ═══ Chinese Chess invite listener ═══
     (function() {
