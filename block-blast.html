@@ -634,15 +634,26 @@
 
     function moveDragGhost(cx, cy) {
       if (!dragGhost) return;
-      dragGhost.style.left = (cx - dragOffX) + 'px';
-      dragGhost.style.top  = (cy - dragOffY) + 'px';
 
-      // Show preview on board — offset by half piece size so preview aligns with centered ghost
       const boardRect = boardEl.getBoundingClientRect();
-      const bx = cx - boardRect.left - 4;
-      const by = cy - boardRect.top - 4;
-      const gc = Math.round(bx / (CELL + 2) - dragPieceCols / 2);
-      const gr = Math.round(by / (CELL + 2) - dragPieceRows / 2);
+      // Ghost top-left in board-content coordinates
+      const ghostBx = cx - dragOffX - boardRect.left - 4;
+      const ghostBy = cy - dragOffY - boardRect.top  - 4;
+      // Grid cell nearest to the ghost's first-cell center
+      const pitch = CELL + 2;
+      const gc = Math.floor((ghostBx + CELL / 2) / pitch);
+      const gr = Math.floor((ghostBy + CELL / 2) / pitch);
+
+      // Snap ghost to the board grid when piece overlaps the board
+      const overBoard = gc >= -dragPieceCols && gc < GRID && gr >= -dragPieceRows && gr < GRID;
+      if (overBoard) {
+        dragGhost.style.left = (boardRect.left + 4 + gc * pitch) + 'px';
+        dragGhost.style.top  = (boardRect.top  + 4 + gr * pitch) + 'px';
+      } else {
+        dragGhost.style.left = (cx - dragOffX) + 'px';
+        dragGhost.style.top  = (cy - dragOffY) + 'px';
+      }
+
       showPreview(pieces[dragPieceIdx], gr, gc);
     }
 
@@ -654,12 +665,13 @@
       if (dragGhost) { dragGhost.remove(); dragGhost = null; }
       clearPreview();
 
-      // Use finger position — offset by half piece size to match centered ghost
+      // Use ghost top-left for accurate grid cell calculation
       const boardRect = boardEl.getBoundingClientRect();
-      const bx = cx - boardRect.left - 4;
-      const by = cy - boardRect.top - 4;
-      const gc = Math.round(bx / (CELL + 2) - dragPieceCols / 2);
-      const gr = Math.round(by / (CELL + 2) - dragPieceRows / 2);
+      const ghostBx = cx - dragOffX - boardRect.left - 4;
+      const ghostBy = cy - dragOffY - boardRect.top  - 4;
+      const pitch = CELL + 2;
+      const gc = Math.floor((ghostBx + CELL / 2) / pitch);
+      const gr = Math.floor((ghostBy + CELL / 2) / pitch);
 
       const p = pieces[dragPieceIdx];
       if (canPlace(p, gr, gc)) {
