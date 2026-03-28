@@ -549,7 +549,7 @@
 
         // Tap to select
         slot.addEventListener('click', (e) => {
-          if (p.used || dragActive) return;
+          if (p.used || dragActive || dragJustEnded) return;
           selectedPiece = selectedPiece === i ? null : i;
           renderTray();
         });
@@ -579,6 +579,7 @@
     let dragPieceIdx = -1;
     let dragGhost = null;
     let dragOffX = 0, dragOffY = 0;
+    let dragJustEnded = false;
 
     function startDrag(idx, cx, cy) {
       dragActive = true;
@@ -618,12 +619,10 @@
       dragOffY = gh2 / 2;
       moveDragGhost(cx, cy);
 
-      // Mark source slot
+      // Mark source slot visually (do NOT call renderTray — it destroys DOM and kills the touch gesture)
       const slots = trayEl.querySelectorAll('.piece-slot');
       slots.forEach(s => s.classList.remove('selected', 'dragging'));
       slots[idx]?.classList.add('dragging');
-
-      renderTray();
     }
 
     function moveDragGhost(cx, cy) {
@@ -645,6 +644,8 @@
     function endDrag(cx, cy) {
       if (!dragActive) return;
       dragActive = false;
+      dragJustEnded = true;
+      setTimeout(() => { dragJustEnded = false; }, 300);
       if (dragGhost) { dragGhost.remove(); dragGhost = null; }
       clearPreview();
 
