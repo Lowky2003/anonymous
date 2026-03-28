@@ -162,7 +162,7 @@
 </head>
 <body>
 
-  <a class="back-btn" href="index.html">← Back</a>
+  <a class="back-btn" href="../index.html">← Back</a>
   <button class="settings-btn" id="settingsBtn">⚙</button>
 
   <!-- Settings modal -->
@@ -222,7 +222,7 @@
     <h2>🐍 Snake</h2>
     <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px" id="playerDisplayName"></div>
     <button class="play-btn" id="playBtn">▶ Play</button>
-    <a href="index.html" style="display:inline-block;margin-top:10px;padding:10px 32px;border:1px solid rgba(255,255,255,0.15);border-radius:14px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">← Back to Lobby</a>
+    <a href="../index.html" style="display:inline-block;margin-top:10px;padding:10px 32px;border:1px solid rgba(255,255,255,0.15);border-radius:14px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">← Back to Lobby</a>
     <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:10px">Press <strong>P</strong> or <strong>Space</strong> to pause</div>
     <div class="leaderboard" id="startLeaderboard">
       <div class="lb-title">🏆 Leaderboard</div>
@@ -241,7 +241,7 @@
       <span>Coins: <strong id="finalCoins">0</strong></span>
     </div>
     <button class="play-btn" id="retryBtn">Play Again</button>
-    <a href="index.html" style="display:inline-block;margin-top:10px;padding:10px 32px;border:1px solid rgba(255,255,255,0.15);border-radius:14px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">← Back to Lobby</a>
+    <a href="../index.html" style="display:inline-block;margin-top:10px;padding:10px 32px;border:1px solid rgba(255,255,255,0.15);border-radius:14px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:background 0.2s;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">← Back to Lobby</a>
     <div class="leaderboard" id="overLeaderboard">
       <div class="lb-title">🏆 Leaderboard</div>
       <div id="overLbBody"></div>
@@ -252,7 +252,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="../src/js/firebase-config.js"></script>
 
   <script>
     firebase.initializeApp(firebaseConfig);
