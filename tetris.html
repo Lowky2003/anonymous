@@ -285,6 +285,20 @@
       .touch-btn { height: 48px; width: 56px; font-size: 20px; }
       .touch-btn.wide { width: 120px; }
     }
+
+    /* Pause button in side panel (mobile) */
+    .panel-pause-btn {
+      width: 100%; padding: 8px 0; margin-top: 4px;
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      cursor: pointer; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .panel-pause-btn:active { background: rgba(255,255,255,0.15); }
+    @media (pointer: coarse) { .panel-pause-btn { display: block !important; } }
+    @media (max-width: 520px) { .panel-pause-btn { display: block !important; } }
+
     /* Chess invite popup */
     .chess-invite-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
     .chess-invite-box{background:rgba(30,25,60,.97);backdrop-filter:blur(16px);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
@@ -357,6 +371,7 @@
         <div class="panel-label">Coins</div>
         <div class="panel-value" id="coinDisplay">0</div>
       </div>
+      <button class="panel-pause-btn" id="btnPauseSide" style="display:none">⏸ PAUSE</button>
     </div>
   </div>
 
@@ -368,7 +383,6 @@
     <button class="touch-btn" id="btnDown">▼</button>
     <button class="touch-btn wide" id="btnDrop">DROP</button>
     <button class="touch-btn wide" id="btnHold" style="background:rgba(167,139,250,0.15);color:#a78bfa">HOLD</button>
-    <button class="touch-btn wide" id="btnPause" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7)">PAUSE</button>
   </div>
 
   <!-- Combo popup -->
@@ -1143,8 +1157,8 @@
     document.getElementById('btnDrop').addEventListener('touchstart', e => { e.preventDefault(); hardDrop(); }, { passive: false });
     document.getElementById('btnHold').addEventListener('click', holdSwap);
     document.getElementById('btnHold').addEventListener('touchstart', e => { e.preventDefault(); holdSwap(); }, { passive: false });
-    document.getElementById('btnPause').addEventListener('click', togglePause);
-    document.getElementById('btnPause').addEventListener('touchstart', e => { e.preventDefault(); togglePause(); }, { passive: false });
+    document.getElementById('btnPauseSide').addEventListener('click', togglePause);
+    document.getElementById('btnPauseSide').addEventListener('touchstart', e => { e.preventDefault(); togglePause(); }, { passive: false });
 
     /* ═══════════════════════════════
        Buttons
