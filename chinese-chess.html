@@ -586,16 +586,23 @@ function listenPresence() {
 
 function renderOnlineUsers(users) {
   const count = users.length;
-  const html = count ? users.map(u =>
+  const inviteHtml = count ? users.map(u =>
     '<div class="online-user-row">' +
       '<span class="online-user-name">' + escapeHtml(u.name) + '</span>' +
       '<button class="invite-btn" data-uid="' + escapeHtml(u.uid) + '">Invite</button>' +
     '</div>'
   ).join('') : '<div class="no-rooms">No other players online</div>';
 
-  // Update lobby online section
+  // Lobby shows online players WITHOUT invite buttons (invite only in waiting room)
+  const lobbyHtml = count ? users.map(u =>
+    '<div class="online-user-row">' +
+      '<span class="online-user-name">' + escapeHtml(u.name) + '</span>' +
+    '</div>'
+  ).join('') : '<div class="no-rooms">No other players online</div>';
+
+  // Update lobby online section (no invite buttons)
   const lobbyList = document.getElementById('lobbyOnlineUsers');
-  if (lobbyList) lobbyList.innerHTML = html;
+  if (lobbyList) lobbyList.innerHTML = lobbyHtml;
   const lobbyNum = document.getElementById('lobbyOnlineNum');
   if (lobbyNum) lobbyNum.textContent = count;
 
@@ -609,7 +616,7 @@ function renderOnlineUsers(users) {
     waitInviteSection.style.display = 'none';
   } else {
     waitInviteSection.style.display = '';
-    waitOnlineUsersList.innerHTML = html;
+    waitOnlineUsersList.innerHTML = inviteHtml;
   }
 }
 
@@ -671,7 +678,6 @@ async function handleInviteClick(e) {
   }
 }
 waitOnlineUsersList.addEventListener('click', handleInviteClick);
-document.getElementById('lobbyOnlineUsers').addEventListener('click', handleInviteClick);
 
 // ── Listen invites for me ──
 function listenInvites() {
@@ -1022,8 +1028,25 @@ function enterGame() {
 function renderGameUI() {
   if (!currentGameData) return;
   const d = currentGameData;
-  redNameEl.textContent   = d.redName || 'Red';
-  blackNameEl.textContent = d.blackName || 'Black';
+  const flipped = myColor === 'black';
+  // When flipped, swap header positions: black name on left (bottom of board), red on right (top of board)
+  const leftEl  = document.querySelector('.game-header').children[0];
+  const rightEl = document.querySelector('.game-header').children[2];
+  if (flipped) {
+    leftEl.className  = 'game-player black';
+    rightEl.className = 'game-player red';
+    leftEl.querySelector('span:last-child').id  = 'blackName';
+    rightEl.querySelector('span:last-child').id = 'redName';
+    leftEl.querySelector('span:last-child').textContent  = d.blackName || 'Black';
+    rightEl.querySelector('span:last-child').textContent = d.redName || 'Red';
+  } else {
+    leftEl.className  = 'game-player red';
+    rightEl.className = 'game-player black';
+    leftEl.querySelector('span:last-child').id  = 'redName';
+    rightEl.querySelector('span:last-child').id = 'blackName';
+    leftEl.querySelector('span:last-child').textContent  = d.redName || 'Red';
+    rightEl.querySelector('span:last-child').textContent = d.blackName || 'Black';
+  }
   gameBetDisplay.textContent = '🪙 ' + d.bet;
   // Turn indicator
   if (d.status === 'finished') {
@@ -1244,11 +1267,16 @@ function resetWinAnim() {
 }
 
 // ── Drawing ──
+// Board flip helpers: when playing as black, flip the board so black is at bottom
+function vRow(row) { return myColor === 'black' ? (9 - row) : row; }
+function vCol(col) { return myColor === 'black' ? (8 - col) : col; }
+
 function drawBoard() {
   if (!currentGameData || !currentGameData.board) return;
   const board = currentGameData.board;
   const w = canvas.width, h = canvas.height;
   const p = boardPadding;
+  const flipped = myColor === 'black';
 
   // Background
   ctx.fillStyle = '#d4a76a';
@@ -1285,51 +1313,60 @@ function drawBoard() {
   ctx.font = (Math.floor(cellSize * 0.35)) + 'px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('楚 河', p + 2 * cellSize, p + 4.5 * cellSize);
-  ctx.fillText('漢 界', p + 6 * cellSize, p + 4.5 * cellSize);
+  if (flipped) {
+    ctx.fillText('漢 界', p + 2 * cellSize, p + 4.5 * cellSize);
+    ctx.fillText('楚 河', p + 6 * cellSize, p + 4.5 * cellSize);
+  } else {
+    ctx.fillText('楚 河', p + 2 * cellSize, p + 4.5 * cellSize);
+    ctx.fillText('漢 界', p + 6 * cellSize, p + 4.5 * cellSize);
+  }
 
   // Palace diagonals
   ctx.strokeStyle = '#4a2a0a';
   ctx.lineWidth = 1;
-  // Top palace (black)
+  // Top palace
   ctx.beginPath(); ctx.moveTo(p + 3 * cellSize, p); ctx.lineTo(p + 5 * cellSize, p + 2 * cellSize); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(p + 5 * cellSize, p); ctx.lineTo(p + 3 * cellSize, p + 2 * cellSize); ctx.stroke();
-  // Bottom palace (red)
+  // Bottom palace
   ctx.beginPath(); ctx.moveTo(p + 3 * cellSize, p + 7 * cellSize); ctx.lineTo(p + 5 * cellSize, p + 9 * cellSize); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(p + 5 * cellSize, p + 7 * cellSize); ctx.lineTo(p + 3 * cellSize, p + 9 * cellSize); ctx.stroke();
 
-  // Highlight last move
+  // Highlight last move (with flipped coordinates)
   if (currentGameData.lastMove) {
     const lm = currentGameData.lastMove;
+    const fFromCol = vCol(lm.fromCol), fFromRow = vRow(lm.fromRow);
+    const fToCol = vCol(lm.toCol), fToRow = vRow(lm.toRow);
     ctx.fillStyle = 'rgba(255,200,0,0.25)';
-    ctx.beginPath(); ctx.arc(p + lm.fromCol * cellSize, p + lm.fromRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(p + lm.toCol * cellSize, p + lm.toRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(p + fFromCol * cellSize, p + fFromRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(p + fToCol * cellSize, p + fToRow * cellSize, pieceRadius + 2, 0, Math.PI * 2); ctx.fill();
   }
 
-  // Draw pieces
+  // Draw pieces (with flipped coordinates)
   for (let row = 0; row < 10; row++) {
     for (let col = 0; col < 9; col++) {
       const piece = board[row][col];
       if (!piece) continue;
-      drawPiece(row, col, piece);
+      drawPiece(vRow(row), vCol(col), piece);
     }
   }
 
-  // Highlight selected piece
+  // Highlight selected piece (selectedPiece stores LOGICAL coords, display with flip)
   if (selectedPiece) {
     const { row, col } = selectedPiece;
+    const dr = vRow(row), dc = vCol(col);
     ctx.strokeStyle = '#ffeb3b';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(p + col * cellSize, p + row * cellSize, pieceRadius + 4, 0, Math.PI * 2);
+    ctx.arc(p + dc * cellSize, p + dr * cellSize, pieceRadius + 4, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Draw valid move indicators
+  // Draw valid move indicators (validMoves are logical coords, display with flip)
   if (validMoves.length) {
     validMoves.forEach(([r, c]) => {
-      const x = p + c * cellSize;
-      const y = p + r * cellSize;
+      const dr = vRow(r), dc = vCol(c);
+      const x = p + dc * cellSize;
+      const y = p + dr * cellSize;
       if (board[r][c]) {
         // Capture target — red ring
         ctx.strokeStyle = 'rgba(255,60,60,0.7)';
@@ -1396,9 +1433,16 @@ function processClick(x, y) {
   if (!myColor) return; // spectator
   if (currentGameData.turn !== myColor) { showToast("It's not your turn", 'info'); return; }
 
-  const col = Math.round((x - boardPadding) / cellSize);
-  const row = Math.round((y - boardPadding) / cellSize);
+  // Convert screen coords to visual grid position
+  let col = Math.round((x - boardPadding) / cellSize);
+  let row = Math.round((y - boardPadding) / cellSize);
   if (row < 0 || row > 9 || col < 0 || col > 8) return;
+
+  // If board is flipped (black player), convert visual coords back to logical coords
+  if (myColor === 'black') {
+    row = 9 - row;
+    col = 8 - col;
+  }
 
   const board = currentGameData.board;
   const piece = board[row][col];

@@ -12,8 +12,8 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       display: flex; flex-direction: column; align-items: center;
-      overflow-x: hidden; overflow-y: auto;
-      touch-action: manipulation;
+      overflow-x: hidden; overflow-y: hidden;
+      touch-action: none;
       user-select: none; -webkit-user-select: none;
     }
 
@@ -563,9 +563,10 @@
         // Drag start (touch)
         slot.addEventListener('touchstart', (e) => {
           if (p.used) return;
+          e.preventDefault();
           const t = e.touches[0];
           startDrag(i, t.clientX, t.clientY);
-        }, { passive: true });
+        }, { passive: false });
 
         trayEl.appendChild(slot);
       });
@@ -676,9 +677,10 @@
     // Touch move/end (global)
     document.addEventListener('touchmove', (e) => {
       if (!dragActive) return;
+      e.preventDefault();
       const t = e.touches[0];
       moveDragGhost(t.clientX, t.clientY);
-    }, { passive: true });
+    }, { passive: false });
     document.addEventListener('touchend', (e) => {
       if (!dragActive) return;
       const t = e.changedTouches[0];

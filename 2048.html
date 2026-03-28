@@ -12,8 +12,8 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       display: flex; flex-direction: column; align-items: center;
-      overflow-x: hidden; overflow-y: auto;
-      touch-action: manipulation;
+      overflow-x: hidden; overflow-y: hidden;
+      touch-action: none;
       user-select: none; -webkit-user-select: none;
     }
 
@@ -580,6 +580,10 @@
       touchSX = e.touches[0].clientX;
       touchSY = e.touches[0].clientY;
     }, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+      if (!gameActive) return;
+      e.preventDefault();
+    }, { passive: false });
     document.addEventListener('touchend', (e) => {
       if (!gameActive) return;
       const dx = e.changedTouches[0].clientX - touchSX;
