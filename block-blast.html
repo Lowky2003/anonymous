@@ -611,11 +611,11 @@
       }
       document.body.appendChild(dragGhost);
 
-      // Offset so piece is centered under finger
+      // Center ghost under finger directly for intuitive drag-and-drop
       const gw = cols * (CELL + 2);
-      const gh = rows * (CELL + 2);
+      const gh2 = rows * (CELL + 2);
       dragOffX = gw / 2;
-      dragOffY = gh + 40; // above finger
+      dragOffY = gh2 / 2;
       moveDragGhost(cx, cy);
 
       // Mark source slot
@@ -631,10 +631,12 @@
       dragGhost.style.left = (cx - dragOffX) + 'px';
       dragGhost.style.top  = (cy - dragOffY) + 'px';
 
-      // Show preview on board
+      // Show preview on board — calculate which grid cell the center of the ghost is over
       const boardRect = boardEl.getBoundingClientRect();
-      const bx = cx - dragOffX - boardRect.left - 4;
-      const by = cy - dragOffY - boardRect.top - 4;
+      const ghostCenterX = cx;
+      const ghostCenterY = cy;
+      const bx = ghostCenterX - boardRect.left - 4;
+      const by = ghostCenterY - boardRect.top - 4;
       const gc = Math.round(bx / (CELL + 2));
       const gr = Math.round(by / (CELL + 2));
       showPreview(pieces[dragPieceIdx], gr, gc);
@@ -646,9 +648,10 @@
       if (dragGhost) { dragGhost.remove(); dragGhost = null; }
       clearPreview();
 
+      // Use finger position (center of ghost) to determine placement
       const boardRect = boardEl.getBoundingClientRect();
-      const bx = cx - dragOffX - boardRect.left - 4;
-      const by = cy - dragOffY - boardRect.top - 4;
+      const bx = cx - boardRect.left - 4;
+      const by = cy - boardRect.top - 4;
       const gc = Math.round(bx / (CELL + 2));
       const gr = Math.round(by / (CELL + 2));
 
