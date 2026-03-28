@@ -114,9 +114,11 @@
     .piece-slot.dragging { opacity: 0.4; transform: scale(0.9); }
     .piece-grid {
       display: grid; gap: 1px;
+      pointer-events: none; touch-action: none;
     }
     .piece-cell {
       border-radius: 3px;
+      pointer-events: none; touch-action: none;
     }
     .piece-cell.on { box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.3); }
     .piece-cell.off { background: transparent; }
@@ -582,6 +584,8 @@
     let dragJustEnded = false;
 
     function startDrag(idx, cx, cy) {
+      // Clean up any stale ghost from a cancelled drag
+      if (dragGhost) { dragGhost.remove(); dragGhost = null; }
       dragActive = true;
       dragPieceIdx = idx;
       selectedPiece = idx;
@@ -689,6 +693,16 @@
       if (!dragActive) return;
       const t = e.changedTouches[0];
       endDrag(t.clientX, t.clientY);
+    });
+    document.addEventListener('touchcancel', (e) => {
+      if (!dragActive) return;
+      dragActive = false;
+      if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+      clearPreview();
+      const slots = trayEl.querySelectorAll('.piece-slot');
+      slots.forEach(s => s.classList.remove('dragging'));
+      selectedPiece = null;
+      renderTray();
     });
 
     /* ═══════════════════════════════
