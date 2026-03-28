@@ -95,6 +95,87 @@
       100% { transform: scale(0); opacity: 0; }
     }
 
+    /* Piece placement pop-in */
+    .cell.placed {
+      animation: cellPlace 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes cellPlace {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Score bump */
+    .score-val.bump {
+      animation: scoreBump 0.35s ease-out;
+    }
+    @keyframes scoreBump {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.3); filter: brightness(1.5); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    /* Piece spawn stagger */
+    .piece-slot.spawning {
+      animation: pieceSpawn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes pieceSpawn {
+      0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* Board shake on game over */
+    .board-wrap.shaking {
+      animation: boardShake 0.5s ease-out;
+    }
+    @keyframes boardShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-6px) rotate(-1deg); }
+      30% { transform: translateX(5px) rotate(1deg); }
+      45% { transform: translateX(-4px); }
+      60% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+
+    /* Invalid placement shake */
+    .cell.invalid-shake {
+      animation: invalidShake 0.3s ease-out;
+    }
+    @keyframes invalidShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+
+    /* Overlay entrance */
+    .overlay.showing {
+      animation: overlayFadeIn 0.4s ease-out both;
+    }
+    @keyframes overlayFadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Game over cells fade */
+    .cell.game-over-fade {
+      animation: cellGameOver 0.6s ease-out forwards;
+    }
+    @keyframes cellGameOver {
+      0% { opacity: 1; }
+      100% { opacity: 0.3; filter: grayscale(1); }
+    }
+
+    /* New best celebration */
+    .final-score.celebrate {
+      animation: newBestPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes newBestPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     /* ── Piece tray ── */
     .piece-tray {
       display: flex; justify-content: center; gap: 14px;
@@ -179,13 +260,13 @@
 
     /* ── Combo popup ── */
     .combo-popup {
-      position: fixed; top: 35%; left: 50%; transform: translate(-50%,-50%);
+      position: fixed; top: 35%; left: 50%; transform: translate(-50%,-50%) scale(0.3);
       font-size: 32px; font-weight: 900; color: #f472b6;
       text-shadow: 0 2px 12px rgba(244,114,182,0.6);
       pointer-events: none; opacity: 0; z-index: 90;
-      transition: all 0.4s ease-out;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .combo-popup.show { opacity: 1; top: 30%; }
+    .combo-popup.show { opacity: 1; top: 30%; transform: translate(-50%,-50%) scale(1); }
 
     /* Chess invite popup */
     .chess-invite-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:chessInvFade .2s}
@@ -197,6 +278,17 @@
     .chess-invite-box .ci-accept{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#3ab0a2,#2d8f83);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
     .chess-invite-box .ci-reject{flex:1;padding:12px;border:1px solid rgba(255,80,80,.3);border-radius:12px;background:transparent;color:#ff6b6b;font-size:15px;font-weight:600;cursor:pointer}
     @keyframes chessInvFade{from{opacity:0}to{opacity:1}}
+
+    /* End Game button */
+    .end-game-btn {
+      margin-top: 8px; padding: 8px 24px;
+      border: 1px solid rgba(248,113,113,0.25); border-radius: 12px;
+      background: rgba(248,113,113,0.08); color: #f87171;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .end-game-btn:hover { background: rgba(248,113,113,0.18); transform: scale(1.04); }
+    .end-game-btn.hidden { display: none; }
   </style>
 </head>
 <body>
@@ -229,6 +321,7 @@
   </div>
 
   <div class="piece-tray" id="pieceTray"></div>
+  <button class="end-game-btn hidden" id="endGameBtn">✖ End Game</button>
   <div class="combo-popup" id="comboPopup"></div>
 
   <!-- Login -->
@@ -466,7 +559,8 @@
         for (let c = 0; c < GRID; c++) {
           const el = cells[r * GRID + c];
           const v = board[r][c];
-          el.classList.remove('filled', 'preview', 'preview-invalid', 'clearing');
+          el.classList.remove('filled', 'preview', 'preview-invalid', 'clearing', 'placed', 'game-over-fade', 'invalid-shake');
+          el.style.animationDelay = '';
           if (v) {
             el.classList.add('filled');
             el.style.background = v;
@@ -513,6 +607,13 @@
       pieces = [randomPiece(), randomPiece(), randomPiece()];
       selectedPiece = null;
       renderTray();
+      // Staggered spawn animation
+      const slots = trayEl.querySelectorAll('.piece-slot');
+      slots.forEach((s, i) => {
+        s.classList.add('spawning');
+        s.style.animationDelay = (i * 100) + 'ms';
+        setTimeout(() => { s.classList.remove('spawning'); s.style.animationDelay = ''; }, 450 + i * 100);
+      });
     }
 
     function renderTray() {
@@ -731,6 +832,18 @@
         placePiece(p, r, c);
         selectedPiece = null;
         renderTray();
+      } else {
+        // Invalid placement shake
+        p.shape.cells.forEach(([dc, dr]) => {
+          const pr = r + dr, pc = c + dc;
+          if (pr >= 0 && pr < GRID && pc >= 0 && pc < GRID) {
+            const el = boardEl.children[pr * GRID + pc];
+            el.classList.remove('invalid-shake');
+            void el.offsetWidth;
+            el.classList.add('invalid-shake');
+            setTimeout(() => el.classList.remove('invalid-shake'), 300);
+          }
+        });
       }
     });
 
@@ -765,10 +878,16 @@
     }
 
     function placePiece(piece, startR, startC) {
-      // Place cells
-      for (const [dc, dr] of piece.shape.cells) {
-        board[startR + dr][startC + dc] = piece.color;
-      }
+      // Place cells with pop-in animation
+      piece.shape.cells.forEach(([dc, dr], i) => {
+        const r = startR + dr, c = startC + dc;
+        board[r][c] = piece.color;
+        const el = boardEl.children[r * GRID + c];
+        el.classList.add('filled', 'placed');
+        el.style.background = piece.color;
+        el.style.animationDelay = (i * 30) + 'ms';
+        setTimeout(() => { el.classList.remove('placed'); el.style.animationDelay = ''; }, 300 + i * 30);
+      });
       piece.used = true;
       score += piece.shape.cells.length;
       playSound('place');
@@ -799,11 +918,15 @@
         rowsToClear.forEach(r => { for (let c = 0; c < GRID; c++) clearSet.add(r + ',' + c); });
         colsToClear.forEach(c => { for (let r = 0; r < GRID; r++) clearSet.add(r + ',' + c); });
 
+        let clearIdx = 0;
         clearSet.forEach(key => {
           const [r, c] = key.split(',').map(Number);
           const el = boardEl.children[r * GRID + c];
+          el.style.animationDelay = (clearIdx * 15) + 'ms';
           el.classList.add('clearing');
+          clearIdx++;
         });
+        const clearDuration = 350 + clearSet.size * 15;
 
         setTimeout(() => {
           clearSet.forEach(key => {
@@ -811,7 +934,7 @@
             board[r][c] = null;
           });
           renderBoard();
-        }, 350);
+        }, clearDuration);
 
         playSound('clear');
         if (combo > 1) showCombo(combo);
@@ -819,6 +942,7 @@
         combo = 0;
       }
 
+      const afterClearDelay = totalLines > 0 ? (350 + totalLines * 8 * 15 + 50) : 0;
       updateUI();
       renderBoard();
 
@@ -827,9 +951,9 @@
         setTimeout(() => {
           spawnPieces();
           checkGameOver();
-        }, totalLines > 0 ? 400 : 100);
+        }, totalLines > 0 ? afterClearDelay : 100);
       } else {
-        setTimeout(() => checkGameOver(), totalLines > 0 ? 400 : 50);
+        setTimeout(() => checkGameOver(), totalLines > 0 ? afterClearDelay : 50);
       }
     }
 
@@ -842,15 +966,24 @@
     }
 
     function updateUI() {
+      const prev = parseInt(scoreEl.textContent) || 0;
       scoreEl.textContent = score;
       comboEl.textContent = combo;
       coinsEl.textContent = coinsEarned;
       const best = parseInt(localStorage.getItem('bb_best_' + playerName)) || 0;
       bestEl.textContent = best;
+      // Bump animation on score change
+      if (score > prev) {
+        scoreEl.classList.remove('bump');
+        void scoreEl.offsetWidth;
+        scoreEl.classList.add('bump');
+        setTimeout(() => scoreEl.classList.remove('bump'), 400);
+      }
     }
 
     function showCombo(n) {
       comboPopup.textContent = n + 'x COMBO!';
+      comboPopup.style.fontSize = Math.min(32 + (n - 1) * 4, 52) + 'px';
       comboPopup.classList.remove('show');
       void comboPopup.offsetWidth;
       comboPopup.classList.add('show');
@@ -862,22 +995,47 @@
        ═══════════════════════════════ */
     function gameOver() {
       gameActive = false;
+      document.getElementById('endGameBtn').classList.add('hidden');
       playSound('die');
+
+      // Board shake
+      const boardWrap = document.querySelector('.board-wrap');
+      boardWrap.classList.add('shaking');
+      setTimeout(() => boardWrap.classList.remove('shaking'), 500);
+
+      // Fade out filled board cells
+      const filledCells = boardEl.querySelectorAll('.cell.filled');
+      filledCells.forEach((el, i) => {
+        el.style.animationDelay = (i * 10) + 'ms';
+        el.classList.add('game-over-fade');
+      });
 
       const best = parseInt(localStorage.getItem('bb_best_' + playerName)) || 0;
       const isNew = score > best;
       if (isNew) localStorage.setItem('bb_best_' + playerName, score);
 
-      document.getElementById('finalScore').textContent = score;
-      document.getElementById('bestScore').textContent = isNew ? '' : 'Best: ' + best;
-      document.getElementById('newBestLabel').classList.toggle('hidden', !isNew);
-      document.getElementById('finalLines').textContent = linesCleared;
-      document.getElementById('finalCoins').textContent = coinsEarned;
+      // Show game over screen after shake + fade
+      setTimeout(() => {
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('bestScore').textContent = isNew ? '' : 'Best: ' + best;
+        document.getElementById('newBestLabel').classList.toggle('hidden', !isNew);
+        document.getElementById('finalLines').textContent = linesCleared;
+        document.getElementById('finalCoins').textContent = coinsEarned;
 
-      document.getElementById('gameOverScreen').classList.remove('hidden');
+        const goScreen = document.getElementById('gameOverScreen');
+        goScreen.classList.remove('hidden');
+        goScreen.classList.add('showing');
 
-      submitScore(score);
-      if (coinsEarned > 0) awardCoins(coinsEarned);
+        // Celebrate new best with pop animation
+        if (isNew) {
+          const fs = document.getElementById('finalScore');
+          fs.classList.add('celebrate');
+          setTimeout(() => fs.classList.remove('celebrate'), 700);
+        }
+
+        submitScore(score);
+        if (coinsEarned > 0) awardCoins(coinsEarned);
+      }, 700);
     }
 
     /* ═══════════════════════════════
@@ -892,27 +1050,45 @@
     }
 
     function startGame() {
-      document.getElementById('startScreen').classList.add('hidden');
-      document.getElementById('gameOverScreen').classList.add('hidden');
-      applyCellSize();
+      // Fade out overlays smoothly
+      const startScreen = document.getElementById('startScreen');
+      const goScreen = document.getElementById('gameOverScreen');
+      [startScreen, goScreen].forEach(el => {
+        if (!el.classList.contains('hidden')) {
+          el.style.transition = 'opacity 0.3s ease-out';
+          el.style.opacity = '0';
+        }
+      });
+      setTimeout(() => {
+        startScreen.classList.add('hidden');
+        startScreen.style.opacity = ''; startScreen.style.transition = '';
+        goScreen.classList.add('hidden');
+        goScreen.style.opacity = ''; goScreen.style.transition = '';
+        goScreen.classList.remove('showing');
+        applyCellSize();
 
-      // Init board
-      board = [];
-      for (let r = 0; r < GRID; r++) {
-        board[r] = [];
-        for (let c = 0; c < GRID; c++) board[r][c] = null;
-      }
-      score = 0; coinsEarned = 0; linesCleared = 0; combo = 0;
-      selectedPiece = null;
-      gameActive = true;
+        // Init board
+        board = [];
+        for (let r = 0; r < GRID; r++) {
+          board[r] = [];
+          for (let c = 0; c < GRID; c++) board[r][c] = null;
+        }
+        score = 0; coinsEarned = 0; linesCleared = 0; combo = 0;
+        selectedPiece = null;
+        gameActive = true;
 
-      renderBoard();
-      spawnPieces();
-      updateUI();
+        renderBoard();
+        spawnPieces();
+        updateUI();
+        document.getElementById('endGameBtn').classList.remove('hidden');
+      }, 300);
     }
 
     document.getElementById('playBtn').addEventListener('click', startGame);
     document.getElementById('retryBtn').addEventListener('click', startGame);
+    document.getElementById('endGameBtn').addEventListener('click', () => {
+      if (gameActive) gameOver();
+    });
 
     /* ═══════════════════════════════
        Audio
@@ -999,12 +1175,13 @@
       let el = document.getElementById('coinReward');
       if (!el) {
         el = document.createElement('div'); el.id = 'coinReward';
-        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;font-size:28px;font-weight:800;color:#f7c97e;text-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;opacity:0;transition:all 0.6s;';
+        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;font-size:28px;font-weight:800;color:#f7c97e;text-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;opacity:0;transition:all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);';
         document.body.appendChild(el);
       }
       el.textContent = '🪙 +' + n + ' coins!';
-      el.style.opacity = '1'; el.style.transform = 'translate(-50%,-80%)';
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translate(-50%,-50%)'; }, 2000);
+      el.style.opacity = '1'; el.style.transform = 'translate(-50%,-80%) scale(1.1)';
+      setTimeout(() => { el.style.transform = 'translate(-50%,-80%) scale(1)'; }, 200);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translate(-50%,-120%) scale(0.8)'; }, 2000);
     }
 
     function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
