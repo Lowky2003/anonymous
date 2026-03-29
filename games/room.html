@@ -1021,6 +1021,10 @@
         currentUid = user.uid;
         currentUser = user;
         viewingUid = user.uid;
+        // Update localStorage with current user's name so it stays in sync
+        const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
+        const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
+        localStorage.setItem('flappy_name', displayName);
         initRoom();
       } else {
         loginOverlay.classList.remove('hidden');
@@ -1380,7 +1384,9 @@
     function getPlayerName() {
       const custom = currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null;
       if (custom) return custom;
-      return localStorage.getItem('flappy_name') || (currentUser && currentUser.displayName) || 'Anonymous';
+      // Prefer current Firebase user's displayName over potentially stale localStorage
+      if (currentUser && currentUser.displayName) return currentUser.displayName;
+      return localStorage.getItem('flappy_name') || 'Anonymous';
     }
 
     async function saveRoom() {

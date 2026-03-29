@@ -931,6 +931,68 @@ body.light-theme .settings-cache-btn {
 }
 body.light-theme .settings-about { color: rgba(0,0,0,0.35); }
 
+/* Light mode — sidebar sections, food, countdown, spin */
+body.light-theme .sidebar-section h3 { color: rgba(0,0,0,0.5); }
+body.light-theme .sidebar-section { border-bottom-color: rgba(0,0,0,0.06); }
+body.light-theme .random-result { background: rgba(0,0,0,0.04); color: #b8860b; }
+body.light-theme .random-result.winner { background: rgba(247,201,126,0.2); border-color: rgba(200,160,60,0.3); box-shadow: 0 0 24px rgba(200,160,60,0.15); }
+body.light-theme .spin-actions .remove-btn { color: #fff; }
+body.light-theme .restore-btn { color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.12); }
+body.light-theme .restore-btn:hover { color: #333; border-color: rgba(0,0,0,0.25); }
+body.light-theme .food-input-row input {
+    background: rgba(0,0,0,0.04); color: #333;
+    border-color: rgba(0,0,0,0.12);
+}
+body.light-theme .food-input-row input::placeholder { color: rgba(0,0,0,0.35); }
+body.light-theme .countdown-display { background: rgba(0,0,0,0.04); }
+body.light-theme .countdown-label { color: rgba(0,0,0,0.45); }
+body.light-theme .countdown-input-row input[type="time"] {
+    background: rgba(0,0,0,0.04); color: #333;
+    border-color: rgba(0,0,0,0.12); color-scheme: light;
+}
+body.light-theme .countdown-clear { color: rgba(0,0,0,0.4); border-color: rgba(0,0,0,0.1); }
+body.light-theme .countdown-clear:hover { color: #333; border-color: rgba(0,0,0,0.25); }
+body.light-theme .countdown-schedule { color: rgba(0,0,0,0.4); }
+body.light-theme .vote-item .vote-text { color: rgba(0,0,0,0.8); }
+body.light-theme .vote-item .vote-count { color: #6b5ce7; }
+body.light-theme .vote-item .vote-action { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.5); }
+body.light-theme .vote-item .vote-action:hover { background: rgba(0,0,0,0.1); color: #333; }
+body.light-theme .vote-empty { color: rgba(0,0,0,0.3); }
+body.light-theme .reset-info { color: rgba(0,0,0,0.4); }
+body.light-theme .collapse-toggle { background: rgba(0,0,0,0.04) !important; }
+body.light-theme .collapse-arrow { color: rgba(0,0,0,0.4) !important; }
+body.light-theme .sidebar-overlay { background: rgba(0,0,0,0.3); }
+body.light-theme .settings-logout-btn { background: rgba(248,113,113,0.08); }
+body.light-theme .settings-name-row button { color: #fff; }
+body.light-theme .settings-status { color: rgba(0,0,0,0.5); }
+body.light-theme .toast { color: #fff; }
+body.light-theme .mood-panel { background: rgba(245,243,250,0.97); border-color: rgba(0,0,0,0.1); }
+body.light-theme .mood-panel h4 { color: #333; }
+body.light-theme .mood-chart .count { color: rgba(0,0,0,0.5); }
+body.light-theme .attach-btn { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
+body.light-theme .gif-btn { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.6); }
+body.light-theme .gif-picker { background: rgba(245,243,250,0.97); border-color: rgba(0,0,0,0.1); }
+body.light-theme .gif-picker-header input { background: rgba(0,0,0,0.04); color: #333; border-color: rgba(0,0,0,0.1); }
+body.light-theme .gif-picker-header input::placeholder { color: rgba(0,0,0,0.35); }
+body.light-theme .gif-picker-close { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
+body.light-theme .reaction-btn { color: rgba(0,0,0,0.65); border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.04); }
+body.light-theme .reaction-btn:hover { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.2); }
+body.light-theme .reaction-add { color: rgba(0,0,0,0.3); border-color: rgba(0,0,0,0.15); }
+body.light-theme .reaction-add:hover { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.6); }
+body.light-theme .reaction-picker-popup { background: rgba(245,243,250,0.97); border-color: rgba(0,0,0,0.1); }
+body.light-theme .reply-toggle { color: rgba(0,0,0,0.45); }
+body.light-theme .reply-toggle:hover { color: #333; background: rgba(0,0,0,0.06); }
+body.light-theme .replies-container { border-top-color: rgba(0,0,0,0.1); }
+body.light-theme .reply-input-row .reply-send-btn { background: rgba(0,0,0,0.1); color: #333; }
+body.light-theme .reply-input-row .reply-send-btn:hover { background: rgba(0,0,0,0.18); }
+body.light-theme .reply-attach { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
+body.light-theme .reply-attach:hover { background: rgba(0,0,0,0.12); }
+body.light-theme .bubble-hp { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.15); }
+body.light-theme .bubble-hp-label { color: rgba(0,0,0,0.5); }
+body.light-theme .empty-state { color: rgba(0,0,0,0.3); }
+body.light-theme .bubble-footer { color: rgba(0,0,0,0.4); }
+body.light-theme .input-area button { color: #fff; }
+
 /* Font size classes */
 body.font-small .bubble { font-size: 13px; }
 body.font-small .bubble .reply-item { font-size: 12px; }
@@ -1036,14 +1098,27 @@ body.sidebar-open { overflow: hidden; touch-action: none; }
     justify-content: center;
     word-break: break-word;
     line-height: 1.4;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 .random-result.spinning {
     animation: slotSpin 0.1s linear infinite;
+}
+.random-result.winner {
+    animation: winnerPop 0.6s ease-out forwards;
+    background: rgba(247,201,126,0.15);
+    box-shadow: 0 0 24px rgba(247,201,126,0.25);
+    border: 1px solid rgba(247,201,126,0.3);
+    font-size: 20px;
 }
 @keyframes slotSpin {
     0%   { opacity: 1; }
     50%  { opacity: 0.5; }
     100% { opacity: 1; }
+}
+@keyframes winnerPop {
+    0%   { transform: scale(0.8); opacity: 0.5; }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 /* ── Spin action buttons ── */

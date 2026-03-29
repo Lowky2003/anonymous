@@ -628,7 +628,8 @@
     let gameRunning, gamePaused, dropTimer, dropInterval, lockTimer, animatingLines;
     let bestLocalScore;
     const keyRepeatTimers = {};
-    const KEY_REPEAT_INTERVAL = 80;
+    const KEY_REPEAT_INTERVAL = 120;
+    const KEY_REPEAT_DELAY = 180;
 
     function getPlayerName() {
       return localStorage.getItem('flappy_name') || 'Anonymous';
@@ -1089,11 +1090,14 @@
     function startKeyRepeat(code, action) {
       if (keyRepeatTimers[code]) return; // already held
       action(); // move once immediately
-      keyRepeatTimers[code] = setInterval(action, KEY_REPEAT_INTERVAL);
+      keyRepeatTimers[code] = setTimeout(() => {
+        keyRepeatTimers[code] = setInterval(action, KEY_REPEAT_INTERVAL);
+      }, KEY_REPEAT_DELAY);
     }
 
     function stopKeyRepeat(code) {
       if (keyRepeatTimers[code]) {
+        clearTimeout(keyRepeatTimers[code]);
         clearInterval(keyRepeatTimers[code]);
         delete keyRepeatTimers[code];
       }
@@ -1131,15 +1135,18 @@
     /* ═══════════════════════════════
        Input: Touch buttons
        ═══════════════════════════════ */
-    function addTouchRepeat(btnId, action, interval) {
+    function addTouchRepeat(btnId, action, interval, initialDelay) {
       const btn = document.getElementById(btnId);
       let timer = null;
+      let delayTimer = null;
       const start = (e) => {
         e.preventDefault();
         action();
-        timer = setInterval(action, interval);
+        delayTimer = setTimeout(() => {
+          timer = setInterval(action, interval);
+        }, initialDelay || interval);
       };
-      const stop = (e) => { e.preventDefault(); clearInterval(timer); timer = null; };
+      const stop = (e) => { e.preventDefault(); clearTimeout(delayTimer); clearInterval(timer); timer = null; delayTimer = null; };
       btn.addEventListener('touchstart', start, { passive: false });
       btn.addEventListener('touchend', stop, { passive: false });
       btn.addEventListener('touchcancel', stop, { passive: false });
@@ -1148,9 +1155,9 @@
       btn.addEventListener('mouseleave', stop);
     }
 
-    addTouchRepeat('btnLeft', moveLeft, 100);
-    addTouchRepeat('btnRight', moveRight, 100);
-    addTouchRepeat('btnDown', softDrop, 60);
+    addTouchRepeat('btnLeft', moveLeft, 150, 200);
+    addTouchRepeat('btnRight', moveRight, 150, 200);
+    addTouchRepeat('btnDown', softDrop, 80, 120);
     document.getElementById('btnRotate').addEventListener('click', rotate);
     document.getElementById('btnRotate').addEventListener('touchstart', e => { e.preventDefault(); rotate(); }, { passive: false });
     document.getElementById('btnDrop').addEventListener('click', hardDrop);
@@ -1188,7 +1195,7 @@
       const absDy = Math.abs(dy);
 
       // Tap (no significant movement + short duration) → rotate
-      if (absDx < 20 && absDy < 20 && dt < 300) {
+      if (absDx < 25 && absDy < 25 && dt < 300) {
         rotate();
         return;
       }

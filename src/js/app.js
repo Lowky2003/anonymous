@@ -54,6 +54,7 @@ auth.onAuthStateChanged((user) => {
     // Sync displayName to rooms collection so chess invite list shows correct name
     const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
     const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
+    localStorage.setItem('flappy_name', displayName);
     db.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
     // Heartbeat: update lastSeen every 2 min so others see you online
     if (_lastSeenInterval) clearInterval(_lastSeenInterval);
@@ -1164,25 +1165,35 @@ randomBtn.addEventListener('click', () => {
     randomBtn.disabled = true;
     spinActions.classList.remove('show');
     randomResult.classList.add('spinning');
+    randomResult.classList.remove('winner');
     lastSpinDocId = null;
     let ticks = 0;
     const totalTicks = 18 + Math.floor(Math.random() * 8);
     let picked;
-    const interval = setInterval(() => {
+    let currentDelay = 50;
+    function tick() {
     picked = active[Math.floor(Math.random() * active.length)];
     randomResult.textContent = picked.text;
     ticks++;
     if (ticks >= totalTicks) {
-        clearInterval(interval);
         randomResult.classList.remove('spinning');
+        randomResult.classList.add('winner');
         randomResult.textContent = '\uD83C\uDF7D\uFE0F ' + picked.text + ' \uD83C\uDF89';
         lastSpinDocId = picked.id;
         spinActions.classList.add('show');
         randomBtn.disabled = false;
+        showToast('🎉 You got: ' + picked.text + '!', 'success');
         // Sync result to Firestore so all users see it
         spinResultRef.set({ text: picked.text, foodId: picked.id, ts: Date.now() }).catch(() => {});
+    } else {
+        // Slow down gradually near the end
+        if (ticks > totalTicks - 6) {
+        currentDelay += 40;
+        }
+        setTimeout(tick, currentDelay);
     }
-    }, 90);
+    }
+    setTimeout(tick, currentDelay);
 });
 
 // Remove the spun food
