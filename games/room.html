@@ -1429,13 +1429,16 @@
     let _offlineCoinsCollected = false;
     let _plantCoinInterval = null;
     let _lastLocalSaveTime = 0;
+    let _unsubRoomSnap = null;
     async function initRoom() {
       _offlineCoinsCollected = false;
+      // Unsubscribe previous room listener (account switch)
+      if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
       initRoomDropZone();
       initDecorDrag();
       initMobileFoodTap();
       // Listen to own room data
-      userDocRef().onSnapshot((snap) => {
+      _unsubRoomSnap = userDocRef().onSnapshot((snap) => {
         if (snap.exists) {
           const d = snap.data();
           roomData.coins = d.coins ?? 0;
