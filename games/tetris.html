@@ -628,8 +628,8 @@
     let gameRunning, gamePaused, dropTimer, dropInterval, lockTimer, animatingLines;
     let bestLocalScore;
     const keyRepeatTimers = {};
-    const KEY_REPEAT_INTERVAL = 130;
-    const KEY_REPEAT_DELAY = 200;
+    const KEY_REPEAT_INTERVAL = 60;
+    const KEY_REPEAT_DELAY = 60;
 
     function getPlayerName() {
       return localStorage.getItem('flappy_name') || 'Anonymous';
@@ -1155,9 +1155,9 @@
       btn.addEventListener('mouseleave', stop);
     }
 
-    addTouchRepeat('btnLeft', moveLeft, 130, 170);
-    addTouchRepeat('btnRight', moveRight, 130, 170);
-    addTouchRepeat('btnDown', softDrop, 80, 120);
+    addTouchRepeat('btnLeft', moveLeft, 50, 30);
+    addTouchRepeat('btnRight', moveRight, 50, 30);
+    addTouchRepeat('btnDown', softDrop, 35, 30);
     document.getElementById('btnRotate').addEventListener('click', rotate);
     document.getElementById('btnRotate').addEventListener('touchstart', e => { e.preventDefault(); rotate(); }, { passive: false });
     document.getElementById('btnDrop').addEventListener('click', hardDrop);

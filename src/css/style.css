@@ -993,6 +993,28 @@ body.light-theme .empty-state { color: rgba(0,0,0,0.3); }
 body.light-theme .bubble-footer { color: rgba(0,0,0,0.4); }
 body.light-theme .input-area button { color: #fff; }
 
+/* Light mode — sidebar game links */
+body.light-theme .sidebar-section a[href] {
+    background: rgba(0,0,0,0.04) !important;
+    color: #333 !important;
+}
+body.light-theme .sidebar-section a[href]:hover {
+    background: rgba(0,0,0,0.08) !important;
+}
+body.light-theme .sidebar-section a[href] div div:last-child {
+    color: rgba(0,0,0,0.45) !important;
+}
+body.light-theme .collapse-toggle {
+    background: rgba(0,0,0,0.04) !important;
+    color: #333 !important;
+}
+body.light-theme .collapse-arrow {
+    color: rgba(0,0,0,0.4) !important;
+}
+body.light-theme .countdown-input-row button { color: #fff; }
+body.light-theme .food-input-row button { color: #fff; }
+body.light-theme .random-btn { color: #fff; }
+
 /* Font size classes */
 body.font-small .bubble { font-size: 13px; }
 body.font-small .bubble .reply-item { font-size: 12px; }
