@@ -1001,15 +1001,28 @@ body.light-theme .sidebar-section a[href] {
 body.light-theme .sidebar-section a[href]:hover {
     background: rgba(0,0,0,0.08) !important;
 }
+body.light-theme .sidebar-section a[href] div,
+body.light-theme .sidebar-section a[href] div div {
+    color: #333 !important;
+}
 body.light-theme .sidebar-section a[href] div div:last-child {
     color: rgba(0,0,0,0.45) !important;
+}
+body.light-theme .sidebar-section a[href] span {
+    color: inherit !important;
 }
 body.light-theme .collapse-toggle {
     background: rgba(0,0,0,0.04) !important;
     color: #333 !important;
 }
+body.light-theme .collapse-toggle span {
+    color: #333 !important;
+}
 body.light-theme .collapse-arrow {
     color: rgba(0,0,0,0.4) !important;
+}
+body.light-theme .sidebar-body {
+    color: #333;
 }
 body.light-theme .countdown-input-row button { color: #fff; }
 body.light-theme .food-input-row button { color: #fff; }
