@@ -85,7 +85,16 @@ const lbRef      = db.collection('leaderboard_flappy');
 const roomsRef   = db.collection('rooms');
 
 const SIX_HOURS = 6 * 60 * 60 * 1000;
-const COLORS = 8;
+const COLORS = 16;
+
+// Simple hash for consistent pseudo-random assignment per bubble id
+function hashId(id) {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) {
+        h = ((h << 5) - h + id.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+}
 
 const wrap = document.getElementById('bubbleWrap');
 const input = document.getElementById('answerInput');
@@ -539,28 +548,46 @@ function render(items) {
     }
     // New bubble — animate in
     const bubble = document.createElement('div');
-    bubble.className = 'bubble c' + (i % COLORS);
+    const h = hashId(a.id);
+    const colorIdx = h % COLORS;
+    const shapeIdx = (h >> 4) % 4;
+    const sizeIdx = (h >> 6) % 3;
+    const bobIdx = (h >> 8) % 4;
+    const bobNames = ['bobbing','bobbing2','bobbing3','bobbing4'];
+    const bobSpeeds = [5, 4.5, 6, 5.5];
+    bubble.className = 'bubble c' + colorIdx + ' shape' + shapeIdx + ' sz' + sizeIdx;
     bubble.dataset.id = a.id;
     bubble.style.animationDelay = '0s, 0s';
+    bubble.style.animationName = 'floatIn, ' + bobNames[bobIdx];
+    bubble.style.animationDuration = '0.5s, ' + bobSpeeds[bobIdx] + 's';
 
-    // Decorative emojis
-    const DECO_SETS = [['✨','💫'],['🌸','💗'],['⭐','🌟'],['💜','🔮'],['💎','🎀'],['🌈','☁️'],['🍬','🧁'],['🦋','🌺']];
-    const decos = DECO_SETS[i % DECO_SETS.length];
-    const positions = [
-        { side: Math.random() < 0.5 ? 'left' : 'right', vert: Math.random() < 0.5 ? 'top' : 'bottom' },
-        { side: Math.random() < 0.5 ? 'left' : 'right', vert: Math.random() < 0.5 ? 'top' : 'bottom' }
+    // Decorative emojis — 16 sets for variety
+    const DECO_SETS = [
+        ['✨','💫'],['🌸','💗'],['⭐','🌟'],['💜','🔮'],
+        ['💎','🎀'],['🌈','☁️'],['🍬','🧁'],['🦋','🌺'],
+        ['🍀','🌿'],['🎵','🎶'],['🌙','⭐'],['🧿','💠'],
+        ['🔥','💥'],['🐚','🌊'],['🍂','🍁'],['❄️','💎']
     ];
-    decos.forEach((emoji, di) => {
+    const decos = DECO_SETS[h % DECO_SETS.length];
+    const decoCount = 2 + ((h >> 3) % 2);  // 2 or 3 decos
+    const positions = [];
+    for (let di = 0; di < decoCount; di++) {
+        positions.push({
+            side: ((h >> (di + 10)) & 1) ? 'left' : 'right',
+            vert: ((h >> (di + 12)) & 1) ? 'top' : 'bottom'
+        });
+    }
+    for (let di = 0; di < decoCount; di++) {
         const d = document.createElement('span');
         d.className = 'bubble-deco';
-        d.textContent = emoji;
+        d.textContent = decos[di % decos.length];
         const p = positions[di];
         d.style[p.vert] = (-6 + Math.random() * -6) + 'px';
         d.style[p.side] = (Math.random() * 60 + 5) + '%';
         d.style.animationDelay = (Math.random() * 3).toFixed(1) + 's';
-        d.style.fontSize = (12 + Math.random() * 6) + 'px';
+        d.style.fontSize = (11 + Math.random() * 8) + 'px';
         bubble.appendChild(d);
-    });
+    }
 
     // HP bar (game-style)
     const hpWrapper = document.createElement('div');
