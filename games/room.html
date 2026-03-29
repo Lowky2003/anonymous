@@ -638,6 +638,7 @@
     @keyframes gachaShine{0%{background-position:-200% center}100%{background-position:200% center}}
     @keyframes gachaFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
     @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(60px) rotate(360deg);opacity:0}}
+    @keyframes roomSpin{to{transform:rotate(360deg)}}
     .gacha-reel-window{width:90px;height:90px;overflow:hidden;border-radius:18px;border:2px solid rgba(192,132,252,.3);margin:0 auto 14px;background:rgba(0,0,0,.3);position:relative}
     .gacha-reel-strip{display:flex;flex-direction:column;align-items:center;position:relative;transition:none}
     .gacha-reel-item{width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0}
@@ -735,6 +736,10 @@
   <div class="main-wrap">
     <div class="room-container">
       <div class="room" id="roomView">
+        <div id="roomLoadingOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,20,30,0.85);z-index:50;border-radius:18px;flex-direction:column;gap:12px">
+          <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,0.15);border-top-color:#f7c97e;border-radius:50%;animation:roomSpin .7s linear infinite"></div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px">Loading room...</div>
+        </div>
         <canvas id="roomBgCanvas"></canvas>
         <div class="pet-slot" id="petSlot"></div>
         <div class="plant-slot" id="plantSlot"></div>
@@ -1137,6 +1142,15 @@
       { id: 'macrame',      emoji: '🪢', name: 'Macramé',         cost: 280,  category: 'wall',  dx: 0.28,  dy: 0.08 },
       { id: 'thermometer',  emoji: '🌡️', name: 'Thermometer',    cost: 100,  category: 'wall',  dx: 0.92,  dy: 0.15 },
       { id: 'plate',        emoji: '🍽️', name: 'Decor Plate',    cost: 160,  category: 'wall',  dx: 0.78,  dy: 0.12 },
+      { id: 'butterfly',    emoji: '🦋', name: 'Butterfly Frame', cost: 240,  category: 'wall',  dx: 0.55,  dy: 0.18 },
+      { id: 'medal',        emoji: '🏅', name: 'Medal Display',  cost: 320,  category: 'wall',  dx: 0.42,  dy: 0.10 },
+      { id: 'lantern',      emoji: '🏮', name: 'Paper Lantern',  cost: 280,  category: 'wall',  dx: 0.68,  dy: 0.05 },
+      { id: 'dreamcatcher', emoji: '🪶', name: 'Dreamcatcher',   cost: 360,  category: 'wall',  dx: 0.20,  dy: 0.06 },
+      { id: 'speaker',      emoji: '🔊', name: 'Wall Speaker',   cost: 420,  category: 'wall',  dx: 0.90,  dy: 0.08 },
+      { id: 'mask',         emoji: '🎭', name: 'Theater Masks',  cost: 380,  category: 'wall',  dx: 0.60,  dy: 0.14 },
+      { id: 'calendar',     emoji: '📅', name: 'Wall Calendar',  cost: 100,  category: 'wall',  dx: 0.05,  dy: 0.22 },
+      { id: 'katana',       emoji: '⚔️', name: 'Crossed Swords', cost: 650,  category: 'wall',  dx: 0.50,  dy: 0.08 },
+      { id: 'diploma',      emoji: '📜', name: 'Diploma',        cost: 200,  category: 'wall',  dx: 0.35,  dy: 0.25 },
       // Floor decorations
       { id: 'floorlamp',    emoji: '🪔', name: 'Floor Lamp',     cost: 350,  category: 'floor', dx: 0.78,  dy: 0.88 },
       { id: 'sidetable',    emoji: '🪑', name: 'Side Table',     cost: 200,  category: 'floor', dx: 0.08,  dy: 0.80 },
@@ -1158,6 +1172,17 @@
       { id: 'vinylplayer',  emoji: '💿', name: 'Vinyl Player',   cost: 550,  category: 'floor', dx: 0.10,  dy: 0.84 },
       { id: 'umbrella',     emoji: '☂️', name: 'Umbrella Stand',  cost: 190,  category: 'floor', dx: 0.94,  dy: 0.86 },
       { id: 'terrarium',    emoji: '🪴', name: 'Terrarium',      cost: 420,  category: 'floor', dx: 0.48,  dy: 0.78 },
+      { id: 'coffeemaker',  emoji: '☕', name: 'Coffee Maker',   cost: 350,  category: 'floor', dx: 0.82,  dy: 0.76 },
+      { id: 'gaming',       emoji: '🎮', name: 'Game Console',   cost: 600,  category: 'floor', dx: 0.55,  dy: 0.82 },
+      { id: 'camera',       emoji: '📷', name: 'Camera Tripod',  cost: 480,  category: 'floor', dx: 0.68,  dy: 0.88 },
+      { id: 'fountain',     emoji: '⛲', name: 'Mini Fountain',  cost: 750,  category: 'floor', dx: 0.40,  dy: 0.84 },
+      { id: 'chessset',     emoji: '♟️', name: 'Chess Set',       cost: 320,  category: 'floor', dx: 0.25,  dy: 0.90 },
+      { id: 'bonsai',       emoji: '🌳', name: 'Bonsai Tree',    cost: 500,  category: 'floor', dx: 0.75,  dy: 0.78 },
+      { id: 'speaker2',     emoji: '🎵', name: 'Bluetooth Speaker', cost: 380, category: 'floor', dx: 0.62, dy: 0.92 },
+      { id: 'shoe_rack',    emoji: '👟', name: 'Shoe Rack',      cost: 200,  category: 'floor', dx: 0.02,  dy: 0.92 },
+      { id: 'xmastree',     emoji: '🎄', name: 'Christmas Tree', cost: 800,  category: 'floor', dx: 0.20,  dy: 0.78 },
+      { id: 'rocket',       emoji: '🚀', name: 'Model Rocket',   cost: 450,  category: 'floor', dx: 0.88,  dy: 0.82 },
+      { id: 'minifridge',   emoji: '🧊', name: 'Mini Fridge',    cost: 500,  category: 'floor', dx: 0.96,  dy: 0.78 },
       // Rug styles (only one active at a time)
       { id: 'rug_blue',     emoji: '🔵', name: 'Blue Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_green',    emoji: '🟢', name: 'Green Rug',      cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
@@ -1170,6 +1195,11 @@
       { id: 'rug_red',      emoji: '🔴', name: 'Red Rug',        cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_purple',   emoji: '🟣', name: 'Purple Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
       { id: 'rug_checker',  emoji: '🏁', name: 'Checker Rug',    cost: 450,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_ocean',    emoji: '🌊', name: 'Ocean Rug',      cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_forest',   emoji: '🌲', name: 'Forest Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_gold',     emoji: '🟡', name: 'Gold Rug',       cost: 500,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_galaxy',   emoji: '🌌', name: 'Galaxy Rug',     cost: 600,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_heart',    emoji: '❤️', name: 'Heart Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
     ];
 
     const WALL_PATTERNS = [
@@ -1183,6 +1213,12 @@
       { id: 'wall_mint',     emoji: '🍃', name: 'Mint Green',       cost: 400 },
       { id: 'wall_navy',     emoji: '🌊', name: 'Navy Blue',        cost: 450 },
       { id: 'wall_sunset',   emoji: '🌅', name: 'Sunset Gradient',  cost: 600 },
+      { id: 'wall_marble',   emoji: '🪨', name: 'Marble',           cost: 700 },
+      { id: 'wall_lavender', emoji: '💜', name: 'Lavender',         cost: 400 },
+      { id: 'wall_forest',   emoji: '🌲', name: 'Forest Green',     cost: 450 },
+      { id: 'wall_galaxy',   emoji: '🌌', name: 'Galaxy',           cost: 800 },
+      { id: 'wall_bamboo',   emoji: '🎋', name: 'Bamboo',           cost: 500 },
+      { id: 'wall_cherry',   emoji: '🌸', name: 'Cherry Blossom',   cost: 550 },
     ];
 
     const WINDOWS = [
@@ -1192,6 +1228,9 @@
       { id: 'win_round',     emoji: '⭕', name: 'Round Window',    cost: 400 },
       { id: 'win_arch',      emoji: '🕌', name: 'Arch Window',     cost: 600 },
       { id: 'win_double',    emoji: '🪟🪟', name: 'Double Window', cost: 800 },
+      { id: 'win_skylight',  emoji: '☀️', name: 'Skylight',        cost: 700 },
+      { id: 'win_stained',   emoji: '🎨', name: 'Stained Glass',   cost: 900 },
+      { id: 'win_porthole',  emoji: '🚢', name: 'Porthole',        cost: 350 },
     ];
 
     const PLANT_LEVELS = [
@@ -1420,6 +1459,7 @@
         jukeboxTrack: roomData.jukeboxTrack || null,
         jukeboxVol: roomData.jukeboxVol ?? 0.5
       };
+      _lastLocalSaveTime = Date.now();
       await userDocRef().set(data, { merge: true });
     }
 
@@ -1434,6 +1474,7 @@
       _offlineCoinsCollected = false;
       // Unsubscribe previous room listener (account switch)
       if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
+      if (unsubVisitList) { unsubVisitList(); unsubVisitList = null; }
       // Reset roomData to defaults for clean account switch
       roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, petAccessories: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
       renderAll(); // Immediately show current user before Firestore loads
@@ -1441,8 +1482,17 @@
       initDecorDrag();
       initMobileFoodTap();
       // Listen to own room data
+      // Ensure room doc exists and displayName is current — use onSnapshot for reads,
+      // only write if needed (avoids redundant .get())
       _unsubRoomSnap = userDocRef().onSnapshot((snap) => {
         if (snap.exists) {
+          // Check displayName sync once on first snapshot
+          if (!_offlineCoinsCollected) {
+            const currentName = getPlayerName();
+            if (snap.data().displayName !== currentName) {
+              userDocRef().update({ displayName: currentName });
+            }
+          }
           const d = snap.data();
           roomData.coins = d.coins ?? 0;
           roomData.pet = d.pet ?? null;
@@ -1514,24 +1564,18 @@
               }, 800);
             }
           }
+        } else {
+          // New user — create room document
+          roomData.displayName = getPlayerName();
+          saveRoom();
         }
+        // Hide loading overlay
+        const _loadOv = document.getElementById('roomLoadingOverlay');
+        if (_loadOv) _loadOv.style.display = 'none';
         // Skip renderAll if a local save just happened (prevents jump)
         if (Date.now() - _lastLocalSaveTime < 2000) return;
-        renderAll();
+        renderAllDebounced();
       });
-
-      // Ensure room doc exists and displayName is current
-      const snap = await userDocRef().get();
-      if (!snap.exists) {
-        roomData.displayName = getPlayerName();
-        await saveRoom();
-      } else {
-        // Always sync displayName in case user changed their name on another page
-        const currentName = getPlayerName();
-        if (snap.data().displayName !== currentName) {
-          await userDocRef().update({ displayName: currentName });
-        }
-      }
 
       // Periodic hunger decay: -1% every 10 min while page is open
       setInterval(async () => {
@@ -1541,7 +1585,7 @@
           const cur = roomData.petHunger[pid] ?? 100;
           if (cur > 0) { roomData.petHunger[pid] = cur - 1; changed = true; }
         }
-        if (changed) { await saveRoom(); renderAll(); }
+        if (changed) { await saveRoom(); renderAllDebounced(); }
       }, 10 * 60 * 1000);
 
       // Heartbeat: update lastSeen every 30s so others see you online
@@ -1574,7 +1618,7 @@
         roomData.coins += earned;
         roomData.lastCoinCollect = Date.now();
         await saveRoom();
-        renderAll();
+        renderAllDebounced();
         showToast('🌱 ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins!', 'success');
       }, 5 * 60 * 1000);
 
@@ -1585,6 +1629,11 @@
     /* ═══════════════════════════════
        Render
        ═══════════════════════════════ */
+    let _renderAllTimer = null;
+    function renderAllDebounced() {
+      if (_renderAllTimer) return;
+      _renderAllTimer = requestAnimationFrame(() => { _renderAllTimer = null; renderAll(); });
+    }
     function renderAll() {
       const isOwner = viewingUid === currentUid;
 
@@ -1604,15 +1653,19 @@
       if (!isOwner) document.getElementById('panel-visit').classList.add('active');
 
       renderRoom();
+      const activeTab = document.querySelector('.tab-btn.active');
+      const tabId = activeTab ? activeTab.dataset.tab : 'shop';
       if (isOwner) {
-        renderShop();
-        renderUpgrade();
-        renderAccessoryShop();
-        renderJukebox();
-        renderGachaTab();
+        renderActiveTab(tabId);
       }
-      renderGuestbook();
+      if (!isOwner || tabId === 'extras') renderGuestbook();
       renderVisitList();
+    }
+
+    function renderActiveTab(tabId) {
+      if (tabId === 'shop') { renderShop(); }
+      else if (tabId === 'upgrade') { renderUpgrade(); }
+      else if (tabId === 'extras') { renderAccessoryShop(); renderJukebox(); renderGachaTab(); }
     }
 
     function coinSVG(size) {
@@ -1701,7 +1754,9 @@
         '<span class="slot-badge' + (petCount >= 2 ? ' full' : '') + '">' + petCount + '/2 in room</span>');
       renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant',
         '<span style="display:block;font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px">🌱 Only 1 plant at a time — buy a pricier plant to inherit upgrade progress!</span>');
-      renderDecorShop();
+      // Only render decor shop if its sub-panel is visible (avoids 99 canvas preview draws)
+      const decorPanel = document.getElementById('decorShopWrap');
+      if (decorPanel && decorPanel.classList.contains('active')) renderDecorShop();
     }
 
     function renderShopSection(containerId, items, owned, equippedArr, type, slotHtml) {
@@ -1807,6 +1862,40 @@
         const g = ctx.createLinearGradient(0, 0, 0, h);
         g.addColorStop(0, '#ff7b54'); g.addColorStop(0.4, '#ffb26b'); g.addColorStop(0.7, '#ffd56b'); g.addColorStop(1, '#e8ddd0');
         ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      } else if (wallId === 'wall_marble') {
+        ctx.fillStyle = '#e8e4e0'; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(160,140,130,0.12)'; ctx.lineWidth = 0.6;
+        for (let i = 0; i < 8; i++) {
+          ctx.beginPath(); ctx.moveTo(Math.random()*w, 0); ctx.bezierCurveTo(Math.random()*w, h*0.3, Math.random()*w, h*0.7, Math.random()*w, h); ctx.stroke();
+        }
+      } else if (wallId === 'wall_lavender') {
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, '#c8a8e8'); g.addColorStop(1, '#a888c8');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      } else if (wallId === 'wall_forest') {
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, '#3a6b4a'); g.addColorStop(1, '#2a4a3a');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(80,140,90,0.1)'; ctx.lineWidth = 0.8;
+        for (let y = 0; y < h; y += 8) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+      } else if (wallId === 'wall_galaxy') {
+        const g = ctx.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0, '#0a0a2a'); g.addColorStop(0.5, '#1a1040'); g.addColorStop(1, '#0a0a2a');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < 20; i++) { ctx.fillRect(Math.random()*w, Math.random()*h, 1, 1); }
+      } else if (wallId === 'wall_bamboo') {
+        ctx.fillStyle = '#d8cc98'; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(140,120,60,0.2)'; ctx.lineWidth = 2;
+        for (let x = 6; x < w; x += 12) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        ctx.strokeStyle = 'rgba(100,90,40,0.15)'; ctx.lineWidth = 0.5;
+        for (let x = 6; x < w; x += 12) for (let y = 8; y < h; y += 12) { ctx.beginPath(); ctx.moveTo(x-2, y); ctx.lineTo(x+2, y); ctx.stroke(); }
+      } else if (wallId === 'wall_cherry') {
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, '#fce4ec'); g.addColorStop(1, '#f8bbd0');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(240,150,180,0.3)'; ctx.font = '8px sans-serif';
+        for (let i = 0; i < 6; i++) ctx.fillText('🌸', Math.random()*w, Math.random()*h);
       } else {
         const g = ctx.createLinearGradient(0, 0, 0, h);
         g.addColorStop(0, '#c8dff0'); g.addColorStop(0.5, '#d6e5ee'); g.addColorStop(1, '#e8ddd0');
@@ -1863,6 +1952,36 @@
         ctx.moveTo(wx + ww * 2 / 3, wy); ctx.lineTo(wx + ww * 2 / 3, wy + wh);
         ctx.moveTo(wx, wy + wh / 2); ctx.lineTo(wx + ww, wy + wh / 2); ctx.stroke();
         ctx.fillStyle = '#a08868'; ctx.fillRect(wx - 4, wy + wh, ww + 8, 3);
+      } else if (winId === 'win_skylight') {
+        const ww = 36, wh = 18, wx = cx - ww / 2, wy = 3;
+        ctx.fillStyle = '#8B7355'; ctx.fillRect(wx - 3, wy - 2, ww + 6, wh + 4);
+        ctx.fillStyle = '#a08868'; ctx.fillRect(wx - 1, wy, ww + 2, wh);
+        const sg = ctx.createLinearGradient(wx, wy, wx, wy + wh);
+        sg.addColorStop(0, '#87ceeb'); sg.addColorStop(1, '#fff8dc');
+        ctx.fillStyle = sg; ctx.fillRect(wx, wy, ww, wh);
+        ctx.fillStyle = 'rgba(255,255,200,0.4)'; ctx.beginPath(); ctx.arc(wx + ww*0.7, wy+6, 5, 0, Math.PI*2); ctx.fill();
+      } else if (winId === 'win_stained') {
+        const ww = 26, wh = 36, wx = cx - ww / 2, wy = 5;
+        ctx.fillStyle = '#8B7355'; ctx.fillRect(wx - 3, wy - 3, ww + 6, wh + 6);
+        const colors = ['#ff6b6b','#4ecdc4','#ffe66d','#a855f7','#60a5fa'];
+        const segH = wh / colors.length;
+        for (let i = 0; i < colors.length; i++) {
+          ctx.fillStyle = colors[i]; ctx.globalAlpha = 0.7;
+          ctx.fillRect(wx, wy + i * segH, ww, segH);
+        }
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(cx, wy); ctx.lineTo(cx, wy + wh); ctx.stroke();
+        for (let i = 1; i < colors.length; i++) { ctx.beginPath(); ctx.moveTo(wx, wy + i*segH); ctx.lineTo(wx+ww, wy+i*segH); ctx.stroke(); }
+      } else if (winId === 'win_porthole') {
+        const r = 14;
+        ctx.fillStyle = '#6d5a42'; ctx.beginPath(); ctx.arc(cx, cy, r + 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#8B7355'; ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI*2); ctx.fill();
+        const sg = ctx.createLinearGradient(cx-r, cy-r, cx+r, cy+r);
+        sg.addColorStop(0, '#4a90d9'); sg.addColorStop(1, '#87ceeb');
+        ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(cx-r, cy); ctx.lineTo(cx+r, cy); ctx.moveTo(cx, cy-r); ctx.lineTo(cx, cy+r); ctx.stroke();
       } else if (winId === 'win_large') {
         const ww = 34, wh = 34, wx = cx - ww / 2, wy = 6;
         ctx.fillStyle = '#8B7355'; ctx.fillRect(wx - 3, wy - 3, ww + 6, wh + 6);
@@ -2294,6 +2413,11 @@
           return;
         } else if (decorId === 'rug_red') fill = '#b83030';
         else if (decorId === 'rug_purple') fill = '#7040a0';
+        else if (decorId === 'rug_ocean') fill = '#2080b0';
+        else if (decorId === 'rug_forest') fill = '#2a6a3a';
+        else if (decorId === 'rug_gold') fill = '#c8a020';
+        else if (decorId === 'rug_galaxy') fill = '#1a1040';
+        else if (decorId === 'rug_heart') fill = '#c03060';
         else if (decorId === 'rug_checker') {
           ctx.fillStyle = '#e8e0d0'; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
           ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
@@ -2314,10 +2438,43 @@
           for (let i = 0; i < 5; i++) { const a = (i * 4 * Math.PI / 5) - Math.PI / 2; ctx[i === 0 ? 'moveTo' : 'lineTo'](cx + Math.cos(a) * sr, cy + Math.sin(a) * sr * (ry / rx)); }
           ctx.closePath(); ctx.fill();
         }
+      } else {
+        // Generic fallback: draw the emoji
+        const item = DECORATIONS.find(d => d.id === decorId);
+        if (item) {
+          ctx.font = '28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(item.emoji, cx, cy + 2);
+        }
       }
     }
 
+    // Lazy-draw preview canvases only when visible
+    let _previewObserver = null;
+    function _lazyDrawPreview(canvas, type) {
+      if (!_previewObserver) {
+        _previewObserver = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            const c = e.target;
+            _previewObserver.unobserve(c);
+            const pid = c.dataset.pid;
+            if (c.dataset.preview === 'wall') drawWallPreview(c, pid);
+            else if (c.dataset.preview === 'window') drawWindowPreview(c, pid);
+            else if (c.dataset.preview === 'decor') drawDecorPreview(c, pid, c.dataset.cat);
+          });
+        }, { rootMargin: '100px' });
+      }
+      _previewObserver.observe(canvas);
+    }
+
     function renderDecorShop() {
+      const activeDecorTab = document.querySelector('#decorShopWrap .decor-tab.active');
+      const cat = activeDecorTab ? activeDecorTab.dataset.dcategory : 'wallpaper';
+      _renderDecorCategory(cat);
+    }
+
+    function _renderDecorCategory(cat) {
+      if (cat === 'wallpaper') {
       // ── Wall Patterns ──
       const wallEl = document.getElementById('wallShop');
       wallEl.innerHTML = WALL_PATTERNS.map(item => {
@@ -2340,8 +2497,9 @@
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
-      wallEl.querySelectorAll('canvas[data-preview="wall"]').forEach(c => drawWallPreview(c, c.dataset.pid));
+      wallEl.querySelectorAll('canvas[data-preview="wall"]').forEach(c => _lazyDrawPreview(c, 'wall'));
 
+      } else if (cat === 'window') {
       // ── Windows ──
       const winEl = document.getElementById('windowShop');
       winEl.innerHTML = WINDOWS.map(item => {
@@ -2364,10 +2522,20 @@
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
-      winEl.querySelectorAll('canvas[data-preview="window"]').forEach(c => drawWindowPreview(c, c.dataset.pid));
+      winEl.querySelectorAll('canvas[data-preview="window"]').forEach(c => _lazyDrawPreview(c, 'window'));
 
-      // ── Decorations by category ──
-      function renderDecorCategory(targetEl, filterCat) {
+      } else if (cat === 'wallart') {
+      _renderDecorGrid(document.getElementById('wallDecorShop'), 'wall');
+
+      } else if (cat === 'furniture') {
+      _renderDecorGrid(document.getElementById('floorDecorShop'), 'floor');
+
+      } else if (cat === 'rug') {
+      _renderDecorGrid(document.getElementById('rugDecorShop'), 'rug');
+      }
+    }
+
+    function _renderDecorGrid(targetEl, filterCat) {
         const items = DECORATIONS.filter(d => d.category === filterCat);
         targetEl.innerHTML = items.map(item => {
           const isOwned = roomData.ownedDecors.includes(item.id);
@@ -2390,12 +2558,7 @@
               '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
             btnHtml + '</div>';
         }).join('');
-        targetEl.querySelectorAll('canvas[data-preview="decor"]').forEach(c => drawDecorPreview(c, c.dataset.pid, c.dataset.cat));
-      }
-
-      renderDecorCategory(document.getElementById('wallDecorShop'), 'wall');
-      renderDecorCategory(document.getElementById('floorDecorShop'), 'floor');
-      renderDecorCategory(document.getElementById('rugDecorShop'), 'rug');
+        targetEl.querySelectorAll('canvas[data-preview="decor"]').forEach(c => _lazyDrawPreview(c, 'decor'));
     }
 
     function renderUpgrade() {
@@ -2474,8 +2637,8 @@
 
     let unsubVisitList = null;
     function renderVisitList() {
+      if (unsubVisitList) return; // Listener already active, snapshot handles DOM updates
       const el = document.getElementById('visitList');
-      if (unsubVisitList) unsubVisitList();
       unsubVisitList = db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).onSnapshot((snap) => {
         const rooms = [];
         const now = Date.now();
@@ -2556,6 +2719,7 @@
         if (!roomData[type]) roomData[type] = id;
       }
       await saveRoom();
+      renderAll();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
     }
 
@@ -2592,6 +2756,7 @@
         }
       }
       await saveRoom();
+      renderAll();
       showToast('Placed in room!', 'success');
     }
 
@@ -2603,6 +2768,7 @@
         roomData[type] = null;
       }
       await saveRoom();
+      renderAll();
       showToast('Removed from room!', 'success');
     }
 
@@ -2628,6 +2794,7 @@
       }
       roomData.placedDecors.push({ id: id, x: item.dx, y: item.dy });
       await saveRoom();
+      renderDecorShop();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
     }
 
@@ -2644,12 +2811,14 @@
       }
       roomData.placedDecors.push({ id: id, x: item.dx, y: item.dy });
       await saveRoom();
+      renderDecorShop();
       showToast('Placed ' + item.emoji + ' in room!', 'success');
     }
 
     async function removeDecor(id) {
       roomData.placedDecors = roomData.placedDecors.filter(d => d.id !== id);
       await saveRoom();
+      renderDecorShop();
       showToast('Removed from room!', 'success');
     }
 
@@ -2662,6 +2831,7 @@
       roomData.wallPattern = id;
       _forceRedrawBg();
       await saveRoom();
+      renderDecorShop();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
     }
 
@@ -2669,6 +2839,7 @@
       roomData.wallPattern = id;
       _forceRedrawBg();
       await saveRoom();
+      renderDecorShop();
       showToast('Wall pattern changed!', 'success');
     }
 
@@ -2681,6 +2852,7 @@
       roomData.windowStyle = id;
       _forceRedrawBg();
       await saveRoom();
+      renderDecorShop();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
     }
 
@@ -2688,6 +2860,7 @@
       roomData.windowStyle = id;
       _forceRedrawBg();
       await saveRoom();
+      renderDecorShop();
       showToast('Window changed!', 'success');
     }
 
@@ -2878,6 +3051,34 @@
       rug_red: { w: 0.30, h: 0.18 },
       rug_purple: { w: 0.30, h: 0.18 },
       rug_checker: { w: 0.30, h: 0.18 },
+      // New wall decorations
+      butterfly: { w: 0.14, h: 0.14 },
+      medal: { w: 0.10, h: 0.14 },
+      lantern: { w: 0.10, h: 0.16 },
+      dreamcatcher: { w: 0.12, h: 0.20 },
+      speaker: { w: 0.12, h: 0.12 },
+      mask: { w: 0.16, h: 0.12 },
+      calendar: { w: 0.12, h: 0.14 },
+      katana: { w: 0.18, h: 0.14 },
+      diploma: { w: 0.14, h: 0.12 },
+      // New floor decorations
+      coffeemaker: { w: 0.12, h: 0.14, base: true },
+      gaming: { w: 0.14, h: 0.10 },
+      camera: { w: 0.10, h: 0.22, base: true },
+      fountain: { w: 0.14, h: 0.18, base: true },
+      chessset: { w: 0.14, h: 0.10 },
+      bonsai: { w: 0.12, h: 0.14, base: true },
+      speaker2: { w: 0.12, h: 0.18, base: true },
+      shoe_rack: { w: 0.16, h: 0.16, base: true },
+      xmastree: { w: 0.14, h: 0.28, base: true },
+      rocket: { w: 0.10, h: 0.22, base: true },
+      minifridge: { w: 0.12, h: 0.16, base: true },
+      // New rugs
+      rug_ocean: { w: 0.30, h: 0.18 },
+      rug_forest: { w: 0.30, h: 0.18 },
+      rug_gold: { w: 0.30, h: 0.18 },
+      rug_galaxy: { w: 0.30, h: 0.18 },
+      rug_heart: { w: 0.30, h: 0.18 },
     };
 
     function decorHitTest(mx, my, p) {
@@ -3152,7 +3353,10 @@
       if (!cvs) return;
       const ctx = cvs.getContext('2d');
       const W = cvs.width, H = cvs.height;
+      let _lastPlantFrame = 0;
       function frame(t) {
+        if (t - _lastPlantFrame < 33) { plantAnimFrame = requestAnimationFrame(frame); return; }
+        _lastPlantFrame = t;
         ctx.clearRect(0, 0, W, H);
         ctx.save();
         ctx.scale(W / 80, H / 100);
@@ -3984,8 +4188,7 @@
 
     function drawRug(ctx, rw, rh, floorY) {
       // Find placed rug
-      const rugIds = ['rug_blue','rug_green','rug_pink','rug_star','rug_rainbow','rug_cream','rug_persian','rug_zebra','rug_red','rug_purple','rug_checker'];
-      const placedRug = (roomData.placedDecors || []).find(d => rugIds.includes(d.id));
+      const placedRug = (roomData.placedDecors || []).find(d => d.id.startsWith('rug_'));
 
       ctx.save();
       const pos = placedRug ? placedRug : null;
@@ -4014,6 +4217,11 @@
         else if (placedRug.id === 'rug_red')     { fillColor = '#b83030'; borderColor = '#981818'; centerColor = '#d04848'; }
         else if (placedRug.id === 'rug_purple')  { fillColor = '#7040a0'; borderColor = '#5a2e88'; centerColor = '#8858b8'; }
         else if (placedRug.id === 'rug_checker') { fillColor = '#e8e0d0'; borderColor = '#888'; isChecker = true; }
+        else if (placedRug.id === 'rug_ocean')   { fillColor = '#2080b0'; borderColor = '#1868a0'; centerColor = '#40a0d0'; }
+        else if (placedRug.id === 'rug_forest')  { fillColor = '#2a6a3a'; borderColor = '#1e5a2e'; centerColor = '#3c8a50'; }
+        else if (placedRug.id === 'rug_gold')    { fillColor = '#c8a020'; borderColor = '#b08818'; centerColor = '#e0b830'; }
+        else if (placedRug.id === 'rug_galaxy')  { fillColor = '#1a1040'; borderColor = '#100830'; centerColor = '#3020a0'; }
+        else if (placedRug.id === 'rug_heart')   { fillColor = '#c03060'; borderColor = '#a02848'; centerColor = '#e04878'; }
       }
 
       ctx.fillStyle = 'rgba(0,0,0,0.06)';
@@ -4702,6 +4910,21 @@
         }
         ctx.restore();
       }
+
+      // Generic fallback: draw emoji for any wall decoration with no specific drawing code
+      const knownWallDecors = ['stringlights','clock','shelf','hangplant','banner','photo','mirror','antlers','neon','poster','dartboard','wreath','tapestry','sconce','map','cuckoo','macrame','thermometer','plate'];
+      (roomData.placedDecors || []).filter(d => {
+        const def = DECORATIONS.find(x => x.id === d.id);
+        return def && def.category === 'wall' && !knownWallDecors.includes(d.id);
+      }).forEach(d => {
+        const def = DECORATIONS.find(x => x.id === d.id);
+        const px = d.x * rw, py = d.y * floorY;
+        ctx.save();
+        ctx.font = Math.round(rw * 0.06) + 'px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(def.emoji, px, py);
+        ctx.restore();
+      });
     }
 
     function drawFloorDecorations(ctx, rw, rh, floorY, t) {
@@ -5409,6 +5632,21 @@
         ctx.beginPath(); ctx.arc(tx - tr * 0.3, baseY - tr * 0.9, tr * 0.25, 0.5, 1.8); ctx.stroke();
         ctx.restore();
       }
+
+      // Generic emoji fallback for new floor decorations without specific drawing code
+      const knownFloorDecors = ['floorlamp','sidetable','cushion','toybox','bookcase','aquarium','guitar','globe','trashcan','fan','beanpillow','tv','piano','telescope','cactus','candles','skateboard','vinylplayer','umbrella','terrarium'];
+      (roomData.placedDecors || []).filter(d => {
+        const def = DECORATIONS.find(x => x.id === d.id);
+        return def && def.category === 'floor' && !knownFloorDecors.includes(d.id);
+      }).forEach(d => {
+        const def = DECORATIONS.find(x => x.id === d.id);
+        const px = d.x * rw, py = d.y * rh;
+        ctx.save();
+        ctx.font = Math.round(rw * 0.07) + 'px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(def.emoji, px, py);
+        ctx.restore();
+      });
     }
 
     /* ═══════════════════════════════
@@ -5613,6 +5851,14 @@
       });
     }
 
+    let _bgWallCanvas = null;
+    let _bgWallCacheKey = '';
+    let _bgFloorCanvas = null;
+    let _lastBgFrame = 0;
+    let _galaxyStars = [];
+    let _marbleVeins = [];
+    let _cherryBlossoms = [];
+
     function startRoomBgAnimation() {
       cancelAnimationFrame(bgAnimFrame);
       const cvs = document.getElementById('roomBgCanvas');
@@ -5630,7 +5876,18 @@
       const floorY = rh * 0.65;
       const plankH = (rh - floorY) / 7;
 
+      // Pre-compute random positions for wall patterns
+      _galaxyStars = Array.from({length: 60}, () => ({x: Math.random()*rw, y: Math.random()*floorY, r: 0.5 + Math.random()*1.2, a: 0.4 + Math.random()*0.6}));
+      _marbleVeins = Array.from({length: 30}, () => ({x1: Math.random()*rw, cp1x: Math.random()*rw, cp2x: Math.random()*rw, x2: Math.random()*rw}));
+      _cherryBlossoms = Array.from({length: 12}, () => ({x: Math.random()*rw, y: Math.random()*floorY}));
+      // Invalidate wall and floor cache on resize/init
+      _bgWallCacheKey = '';
+      _bgFloorCanvas = null;
+
       function frame(t) {
+        // Throttle to ~30fps to save CPU
+        if (t - (_lastBgFrame || 0) < 33) { bgAnimFrame = requestAnimationFrame(frame); return; }
+        _lastBgFrame = t;
         ctx.clearRect(0, 0, rw, rh);
         const nightMode = isNightTime();
         const skyTop = nightMode ? '#0b0b2e' : '#6cb4ee';
@@ -5639,6 +5896,10 @@
 
         /* ── Wall ── */
         const wp = roomData.wallPattern || 'wall_default';
+        const _wallCK = wp + ':' + rw + ':' + Math.round(floorY);
+        if (_wallCK === _bgWallCacheKey && _bgWallCanvas) {
+          ctx.drawImage(_bgWallCanvas, 0, 0);
+        } else {
         if (wp === 'wall_brick') {
           ctx.fillStyle = '#b5745a';
           ctx.fillRect(0, 0, rw, floorY);
@@ -5712,6 +5973,47 @@
           const sg = ctx.createLinearGradient(0, 0, 0, floorY);
           sg.addColorStop(0, '#ff7b54'); sg.addColorStop(0.4, '#ffb26b'); sg.addColorStop(0.7, '#ffd56b'); sg.addColorStop(1, '#e8ddd0');
           ctx.fillStyle = sg; ctx.fillRect(0, 0, rw, floorY);
+        } else if (wp === 'wall_marble') {
+          ctx.fillStyle = '#e8e4e0'; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(160,140,130,0.08)'; ctx.lineWidth = 0.8;
+          _marbleVeins.forEach(v => {
+            ctx.beginPath(); ctx.moveTo(v.x1, 0);
+            ctx.bezierCurveTo(v.cp1x, floorY*0.3, v.cp2x, floorY*0.7, v.x2, floorY);
+            ctx.stroke();
+          });
+        } else if (wp === 'wall_lavender') {
+          const lg = ctx.createLinearGradient(0, 0, 0, floorY);
+          lg.addColorStop(0, '#c8a8e8'); lg.addColorStop(1, '#a888c8');
+          ctx.fillStyle = lg; ctx.fillRect(0, 0, rw, floorY);
+        } else if (wp === 'wall_forest') {
+          const fg = ctx.createLinearGradient(0, 0, 0, floorY);
+          fg.addColorStop(0, '#3a6b4a'); fg.addColorStop(1, '#2a4a3a');
+          ctx.fillStyle = fg; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(80,140,90,0.08)'; ctx.lineWidth = 1;
+          for (let y = 0; y < floorY; y += 14) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke(); }
+        } else if (wp === 'wall_galaxy') {
+          const gg = ctx.createLinearGradient(0, 0, rw, floorY);
+          gg.addColorStop(0, '#0a0a2a'); gg.addColorStop(0.3, '#1a1040'); gg.addColorStop(0.7, '#0a1030'); gg.addColorStop(1, '#0a0a2a');
+          ctx.fillStyle = gg; ctx.fillRect(0, 0, rw, floorY);
+          ctx.fillStyle = '#fff';
+          _galaxyStars.forEach(s => {
+            ctx.globalAlpha = s.a;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+          });
+          ctx.globalAlpha = 1;
+        } else if (wp === 'wall_bamboo') {
+          ctx.fillStyle = '#d8cc98'; ctx.fillRect(0, 0, rw, floorY);
+          ctx.strokeStyle = 'rgba(140,120,60,0.18)'; ctx.lineWidth = 3;
+          for (let x = 10; x < rw; x += 22) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, floorY); ctx.stroke(); }
+          ctx.strokeStyle = 'rgba(100,90,40,0.12)'; ctx.lineWidth = 0.8;
+          for (let x = 10; x < rw; x += 22) for (let y = 15; y < floorY; y += 20) { ctx.beginPath(); ctx.moveTo(x-4, y); ctx.lineTo(x+4, y); ctx.stroke(); }
+        } else if (wp === 'wall_cherry') {
+          const cg = ctx.createLinearGradient(0, 0, 0, floorY);
+          cg.addColorStop(0, '#fce4ec'); cg.addColorStop(1, '#f8bbd0');
+          ctx.fillStyle = cg; ctx.fillRect(0, 0, rw, floorY);
+          ctx.font = '14px sans-serif'; ctx.globalAlpha = 0.25;
+          _cherryBlossoms.forEach(b => ctx.fillText('🌸', b.x, b.y));
+          ctx.globalAlpha = 1;
         } else {
           // Default wall
           const wallGrad = ctx.createLinearGradient(0, 0, 0, floorY);
@@ -5726,6 +6028,13 @@
             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rw, y); ctx.stroke();
           }
         }
+        // Cache the wall drawing for future frames
+        if (!_bgWallCanvas) _bgWallCanvas = document.createElement('canvas');
+        _bgWallCanvas.width = rw;
+        _bgWallCanvas.height = Math.ceil(floorY);
+        _bgWallCanvas.getContext('2d').drawImage(cvs, 0, 0, rw, Math.ceil(floorY), 0, 0, rw, Math.ceil(floorY));
+        _bgWallCacheKey = _wallCK;
+        } // end wall cache miss
 
         /* ── Window (conditional on style) ── */
         const winStyle = roomData.windowStyle || 'win_classic';
@@ -5735,6 +6044,10 @@
           winW = rw * 0.26; winH = rh * 0.38;
         } else if (winStyle === 'win_double') {
           winW = rw * 0.32; winH = rh * 0.3;
+        } else if (winStyle === 'win_skylight') {
+          winW = rw * 0.30; winH = rh * 0.15;
+        } else if (winStyle === 'win_porthole') {
+          winW = rw * 0.14; winH = rw * 0.14;
         } else {
           winW = rw * 0.18; winH = rh * 0.3;
         }
@@ -5809,6 +6122,67 @@
           roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 7, 2); ctx.fill();
           ctx.fillStyle = 'rgba(255,255,255,0.12)';
           ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
+        } else if (winStyle === 'win_skylight') {
+          // Wide horizontal skylight at top
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
+          ctx.fillStyle = '#8B7355'; ctx.fillRect(winX - 5, winY - 5, winW + 10, winH + 10);
+          ctx.fillStyle = '#a08868'; ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
+          const skyG = ctx.createLinearGradient(winX, winY, winX, winY + winH);
+          skyG.addColorStop(0, skyTop); skyG.addColorStop(1, skyMid);
+          ctx.fillStyle = skyG; ctx.fillRect(winX, winY, winW, winH);
+          ctx.save(); ctx.beginPath(); ctx.rect(winX, winY, winW, winH); ctx.clip();
+          if (nightMode) { drawNightSky(ctx, winX, winY, winW, winH, t); }
+          else { drawDaySky(ctx, winX, winY, winW, winH, t, bgClouds); }
+          ctx.restore();
+          // Sun/moon glow
+          ctx.fillStyle = nightMode ? 'rgba(200,210,230,0.15)' : 'rgba(255,255,200,0.2)';
+          ctx.beginPath(); ctx.arc(winX + winW * 0.7, winY + winH * 0.4, winH * 0.5, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(winX + winW * 0.33, winY); ctx.lineTo(winX + winW * 0.33, winY + winH);
+          ctx.moveTo(winX + winW * 0.66, winY); ctx.lineTo(winX + winW * 0.66, winY + winH); ctx.stroke();
+          ctx.fillStyle = '#a08868'; roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 5, 2); ctx.fill();
+        } else if (winStyle === 'win_stained') {
+          // Tall stained glass window
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
+          ctx.fillStyle = '#8B7355'; ctx.fillRect(winX - 5, winY - 5, winW + 10, winH + 10);
+          ctx.fillStyle = '#a08868'; ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
+          const stColors = ['rgba(255,107,107,0.6)','rgba(78,205,196,0.6)','rgba(255,230,109,0.6)','rgba(168,85,247,0.6)','rgba(96,165,250,0.6)'];
+          const segH = winH / stColors.length;
+          for (let i = 0; i < stColors.length; i++) {
+            ctx.fillStyle = stColors[i]; ctx.fillRect(winX, winY + i * segH, winW, segH);
+          }
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(winX + winW / 2, winY); ctx.lineTo(winX + winW / 2, winY + winH);
+          for (let i = 1; i < stColors.length; i++) { ctx.moveTo(winX, winY + i * segH); ctx.lineTo(winX + winW, winY + i * segH); }
+          ctx.stroke();
+          // Colored light cast
+          ctx.save(); ctx.globalAlpha = 0.08;
+          for (let i = 0; i < stColors.length; i++) {
+            ctx.fillStyle = stColors[i]; ctx.fillRect(winX - 10, winY + winH + 5 + i * 8, winW + 20, 8);
+          }
+          ctx.restore();
+          ctx.fillStyle = '#a08868'; roundRectPath(ctx, winX - 8, winY + winH, winW + 16, 7, 2); ctx.fill();
+        } else if (winStyle === 'win_porthole') {
+          // Small circular porthole
+          const pr = Math.min(winW, winH) * 0.45;
+          const px = rw * 0.5, py = winY + pr + 8;
+          ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.beginPath(); ctx.arc(px+2, py+3, pr+7, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#6d5a42'; ctx.beginPath(); ctx.arc(px, py, pr + 6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#8B7355'; ctx.beginPath(); ctx.arc(px, py, pr + 4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#a08868'; ctx.beginPath(); ctx.arc(px, py, pr + 2, 0, Math.PI * 2); ctx.fill();
+          ctx.save();
+          ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2); ctx.clip();
+          const skyG = ctx.createLinearGradient(px, py - pr, px, py + pr);
+          skyG.addColorStop(0, skyTop); skyG.addColorStop(0.6, skyMid); skyG.addColorStop(1, skyBot);
+          ctx.fillStyle = skyG; ctx.fillRect(px - pr, py - pr, pr * 2, pr * 2);
+          if (nightMode) { drawNightSky(ctx, px - pr, py - pr, pr * 2, pr * 2, t); }
+          else { drawDaySky(ctx, px - pr, py - pr, pr * 2, pr * 2, t, bgClouds); }
+          ctx.restore();
+          ctx.strokeStyle = '#6d5a42'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(px - pr, py); ctx.lineTo(px + pr, py);
+          ctx.moveTo(px, py - pr); ctx.lineTo(px, py + pr); ctx.stroke();
         } else {
           // Classic / Large / Double — rectangular window
           ctx.fillStyle = 'rgba(0,0,0,0.08)';
@@ -5878,48 +6252,49 @@
         /* ── Wall Decorations (drawn over wall, before baseboard) ── */
         drawWallDecorations(ctx, rw, rh, floorY, t);
 
-        /* ── Baseboard ── */
-        ctx.fillStyle = '#6d5a42';
-        ctx.fillRect(0, floorY - 2, rw, 8);
-        ctx.fillStyle = 'rgba(255,255,255,0.06)';
-        ctx.fillRect(0, floorY - 2, rw, 2);
-
-        /* ── Floor ── */
-        const floorGrad = ctx.createLinearGradient(0, floorY + 6, 0, rh);
-        floorGrad.addColorStop(0, '#b89a6e');
-        floorGrad.addColorStop(0.3, '#a68a5e');
-        floorGrad.addColorStop(1, '#8B7355');
-        ctx.fillStyle = floorGrad;
-        ctx.fillRect(0, floorY + 6, rw, rh - floorY - 6);
-
-        // Plank lines
-        ctx.strokeStyle = 'rgba(90,70,48,0.25)';
-        ctx.lineWidth = 1;
-        for (let i = 1; i < 7; i++) {
-          const py = floorY + 6 + i * plankH;
-          ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(rw, py); ctx.stroke();
-        }
-        // Vertical joints (staggered)
-        for (let i = 0; i < 7; i++) {
-          const off = (i % 2) * rw * 0.15;
-          for (let x = off; x < rw; x += rw * 0.22) {
-            ctx.beginPath();
-            ctx.moveTo(x, floorY + 6 + i * plankH);
-            ctx.lineTo(x, floorY + 6 + (i + 1) * plankH);
-            ctx.stroke();
+        /* ── Baseboard + Floor (cached) ── */
+        if (!_bgFloorCanvas) {
+          _bgFloorCanvas = document.createElement('canvas');
+          _bgFloorCanvas.width = rw;
+          _bgFloorCanvas.height = rh;
+          const fc = _bgFloorCanvas.getContext('2d');
+          fc.fillStyle = '#6d5a42';
+          fc.fillRect(0, floorY - 2, rw, 8);
+          fc.fillStyle = 'rgba(255,255,255,0.06)';
+          fc.fillRect(0, floorY - 2, rw, 2);
+          const floorGrad = fc.createLinearGradient(0, floorY + 6, 0, rh);
+          floorGrad.addColorStop(0, '#b89a6e');
+          floorGrad.addColorStop(0.3, '#a68a5e');
+          floorGrad.addColorStop(1, '#8B7355');
+          fc.fillStyle = floorGrad;
+          fc.fillRect(0, floorY + 6, rw, rh - floorY - 6);
+          fc.strokeStyle = 'rgba(90,70,48,0.25)';
+          fc.lineWidth = 1;
+          for (let i = 1; i < 7; i++) {
+            const py = floorY + 6 + i * plankH;
+            fc.beginPath(); fc.moveTo(0, py); fc.lineTo(rw, py); fc.stroke();
+          }
+          for (let i = 0; i < 7; i++) {
+            const off = (i % 2) * rw * 0.15;
+            for (let x = off; x < rw; x += rw * 0.22) {
+              fc.beginPath();
+              fc.moveTo(x, floorY + 6 + i * plankH);
+              fc.lineTo(x, floorY + 6 + (i + 1) * plankH);
+              fc.stroke();
+            }
+          }
+          fc.strokeStyle = 'rgba(120,90,55,0.06)';
+          fc.lineWidth = 0.5;
+          for (let i = 0; i < 30; i++) {
+            const gx = (i * rw / 30) + 5;
+            const gy = floorY + 10 + (i * 17) % (rh - floorY - 20);
+            fc.beginPath();
+            fc.moveTo(gx, gy);
+            fc.quadraticCurveTo(gx + 15, gy + 3, gx + 30, gy - 1);
+            fc.stroke();
           }
         }
-        // Wood grain (subtle)
-        ctx.strokeStyle = 'rgba(120,90,55,0.06)';
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < 30; i++) {
-          const gx = (i * rw / 30) + 5;
-          const gy = floorY + 10 + (i * 17) % (rh - floorY - 20);
-          ctx.beginPath();
-          ctx.moveTo(gx, gy);
-          ctx.quadraticCurveTo(gx + 15, gy + 3, gx + 30, gy - 1);
-          ctx.stroke();
-        }
+        ctx.drawImage(_bgFloorCanvas, 0, 0);
 
         /* ── Oval rug (dynamic based on placed rug decor) ── */
         drawRug(ctx, rw, rh, floorY);
@@ -6003,7 +6378,11 @@
       // Ensure each pet has a state
       pets.forEach((p, i) => getPetState(p.type, i));
 
+      let _lastPetFrame = 0;
       function frame(t) {
+        // Throttle to ~30fps
+        if (t - _lastPetFrame < 33) { petAnimFrame = requestAnimationFrame(frame); return; }
+        _lastPetFrame = t;
         // Update canvas size if room resized
         const nw = room.clientWidth, nh = room.clientHeight;
         if (nw && nh && (nw !== rw || nh !== rh)) {
@@ -7064,6 +7443,8 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
+      if (viewingUid === currentUid) renderActiveTab(tabId);
+      if (tabId === 'extras') renderGuestbook();
     }
 
     function switchSubTab(subId) {
@@ -7084,6 +7465,8 @@
         const target = btn.dataset.sub;
         btn.parentElement.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b === btn));
         btn.parentElement.parentElement.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('active', p.id === target));
+        // Trigger decor shop render when switching to decor tab
+        if (target === 'decorShopWrap') renderDecorShop();
       });
     });
 
@@ -7096,6 +7479,7 @@
         wrap.querySelectorAll('.decor-panel').forEach(p => {
           p.classList.toggle('active', p.id === 'dp-' + cat);
         });
+        _renderDecorCategory(cat);
       });
     });
 
@@ -7510,7 +7894,7 @@
         const isEquipped = equippedOn.length > 0;
         let cls = isEquipped ? 'equipped' : isOwned ? 'owned' : '';
         html += '<div class="acc-card ' + cls + '">' +
-          '<div class="acc-emoji">' + acc.emoji + '</div>' +
+          '<canvas class="acc-preview-cvs" data-acc="' + acc.id + '" width="60" height="60" style="display:block;margin:0 auto 4px"></canvas>' +
           '<div class="acc-name">' + acc.name + '</div>';
         if (isOwned) {
           html += '<div class="acc-price" style="color:#34d399">Owned</div>';
@@ -7557,6 +7941,33 @@
         });
       }
       el.innerHTML = html;
+
+      // Draw accessory previews on canvases
+      el.querySelectorAll('.acc-preview-cvs').forEach(cvs => {
+        const accId = cvs.dataset.acc;
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        const s = w * 0.7;
+        const ho = PET_HEAD_OFFSETS['cat'] || { hx: 0, hy: -0.3, r: 0.28 };
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        // Centre so the cat head offset lands in the middle of canvas
+        ctx.translate(w / 2 - s * ho.hx, h / 2 + s * 0.1 - s * ho.hy);
+        // Simple pet head silhouette at the head offset position
+        const hx = s * ho.hx, hy = s * ho.hy;
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath(); ctx.arc(hx, hy, s * ho.r, 0, Math.PI * 2); ctx.fill();
+        // Ears
+        ctx.beginPath(); ctx.moveTo(hx - s*0.22, hy - s*0.18); ctx.lineTo(hx - s*0.16, hy - s*0.38); ctx.lineTo(hx - s*0.06, hy - s*0.22); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(hx + s*0.22, hy - s*0.18); ctx.lineTo(hx + s*0.16, hy - s*0.38); ctx.lineTo(hx + s*0.06, hy - s*0.22); ctx.fill();
+        // Eyes
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath(); ctx.arc(hx - s*0.08, hy - s*0.02, s*0.03, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(hx + s*0.08, hy - s*0.02, s*0.03, 0, Math.PI*2); ctx.fill();
+        // Draw the accessory on top
+        drawPetAccessory(ctx, 'cat', accId, s);
+        ctx.restore();
+      });
     }
 
     async function buyAccessory(accId) {
