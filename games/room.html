@@ -655,6 +655,7 @@
     .gacha-pull-btn:hover{transform:scale(1.03)}
     .gacha-pull-btn:disabled{opacity:.4;cursor:not-allowed}
     .gacha-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+    #gachaPrizeOverlay .gacha-box::-webkit-scrollbar{display:none}
 
     /* ── Leaderboard ── */
     .lb-overlay{position:fixed;inset:0;z-index:9100;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
@@ -920,18 +921,13 @@
     </div>
   </div>
 
-  <!-- Gacha modal -->
-  <div class="gacha-overlay hidden" id="gachaOverlay">
-    <div class="gacha-box">
-      <h3>🎰 Lucky Draw</h3>
-      <div class="gacha-desc">Spend 100 coins for a random item!</div>
-      <div class="gacha-result" id="gachaResult">
-        <div style="font-size:40px;opacity:.3">🎲</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:8px">Pull to reveal!</div>
-      </div>
-      <button class="gacha-pull-btn" id="gachaPullBtn">🎲 Pull (100 coins)</button>
-      <br>
-      <button class="gacha-close" id="gachaCloseBtn">Close</button>
+  <!-- Gacha prize preview modal -->
+  <div class="gacha-overlay hidden" id="gachaPrizeOverlay" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="gacha-box" style="max-height:80vh;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none">
+      <h3>📋 Prize Pool</h3>
+      <div class="gacha-desc">All possible prizes and their drop rates</div>
+      <div id="gachaPrizeModalList" style="text-align:left;margin-bottom:14px"></div>
+      <button class="gacha-close" onclick="document.getElementById('gachaPrizeOverlay').classList.add('hidden')">Close</button>
     </div>
   </div>
 
@@ -1317,15 +1313,15 @@
        ═══════════════════════════════ */
     const GACHA_COST = 100;
     const GACHA_POOL = [
-      { id: 'gacha_coins_50',   emoji: '🪙', name: '50 Coins',       rarity: 'common',    weight: 30, type: 'coins', value: 50 },
-      { id: 'gacha_coins_100',  emoji: '💰', name: '100 Coins',      rarity: 'common',    weight: 20, type: 'coins', value: 100 },
-      { id: 'gacha_coins_300',  emoji: '💎', name: '300 Coins',      rarity: 'uncommon',  weight: 12, type: 'coins', value: 300 },
-      { id: 'gacha_coins_500',  emoji: '👑', name: '500 Coins',      rarity: 'rare',      weight: 6,  type: 'coins', value: 500 },
-      { id: 'gacha_acc_bow',    emoji: '🎀', name: 'Bow',            rarity: 'uncommon',  weight: 8,  type: 'accessory', value: 'acc_bow' },
-      { id: 'gacha_acc_flower', emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 10, type: 'accessory', value: 'acc_flower' },
-      { id: 'gacha_acc_crown',  emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 3,  type: 'accessory', value: 'acc_crown' },
-      { id: 'gacha_acc_halo',   emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 5,  type: 'accessory', value: 'acc_halo' },
-      { id: 'gacha_coins_1000', emoji: '🏅', name: '1000 Coins!',    rarity: 'legendary', weight: 2,  type: 'coins', value: 1000 },
+      { id: 'gacha_coins_50',   emoji: '🪙', name: '50 Coins',       rarity: 'common',    weight: 40, type: 'coins', value: 50 },
+      { id: 'gacha_coins_100',  emoji: '💰', name: '100 Coins',      rarity: 'rare',      weight: 1,  type: 'coins', value: 100 },
+      { id: 'gacha_coins_300',  emoji: '💎', name: '300 Coins',      rarity: 'epic',      weight: 5,  type: 'coins', value: 300 },
+      { id: 'gacha_coins_500',  emoji: '👑', name: '500 Coins',      rarity: 'legendary', weight: 2,  type: 'coins', value: 500 },
+      { id: 'gacha_acc_bow',    emoji: '🎀', name: 'Bow',            rarity: 'uncommon',  weight: 12, type: 'accessory', value: 'acc_bow' },
+      { id: 'gacha_acc_flower', emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 20, type: 'accessory', value: 'acc_flower' },
+      { id: 'gacha_acc_crown',  emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 4,  type: 'accessory', value: 'acc_crown' },
+      { id: 'gacha_acc_halo',   emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 7,  type: 'accessory', value: 'acc_halo' },
+      { id: 'gacha_coins_1000', emoji: '🏅', name: '1000 Coins!',    rarity: 'legendary', weight: 1,  type: 'coins', value: 1000 },
       { id: 'gacha_acc_mono',   emoji: '🧐', name: 'Monocle',        rarity: 'epic',      weight: 4,  type: 'accessory', value: 'acc_monocle' },
     ];
 
@@ -7998,6 +7994,7 @@
     let _gachaSpinning = false;
 
     function renderGachaTab() {
+      if (_gachaSpinning) return; // Don't rebuild during animation
       const el = document.getElementById('gachaTabContent');
       if (!el) return;
       const canAfford = roomData.coins >= GACHA_COST && !_gachaSpinning;
@@ -8006,8 +8003,29 @@
         '<div class="gacha-reel-item" style="opacity:.3">🎲</div></div></div>' +
         '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: 🪙 ' + GACHA_COST + ' per pull</div>' +
         '<button class="gacha-pull-btn" id="gachaPullTabBtn" onclick="pullGacha()" ' + (canAfford ? '' : 'disabled') + '>🎲 Pull!</button>' +
+        '<button onclick="showGachaPrizeModal()" style="margin-top:10px;padding:8px 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">📋 View Prizes</button>' +
         '<div id="gachaTabResult" style="margin-top:16px;min-height:80px"></div></div>';
       el.innerHTML = html;
+    }
+
+    function showGachaPrizeModal() {
+      const el = document.getElementById('gachaPrizeModalList');
+      if (!el) return;
+      const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
+      const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
+      const sorted = [...GACHA_POOL].sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+      let html = '';
+      sorted.forEach(item => {
+        const pct = ((item.weight / totalWeight) * 100).toFixed(1);
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:5px">' +
+          '<span style="font-size:24px;width:36px;text-align:center">' + item.emoji + '</span>' +
+          '<div style="flex:1"><div style="font-size:13px;color:#fff;font-weight:600">' + item.name + '</div>' +
+          '<div class="gacha-prize-rarity ' + item.rarity + '" style="font-size:10px;margin-top:2px">' + item.rarity + '</div></div>' +
+          '<span style="font-size:12px;color:rgba(255,255,255,.4);font-weight:600">' + pct + '%</span>' +
+          '</div>';
+      });
+      el.innerHTML = html;
+      document.getElementById('gachaPrizeOverlay').classList.remove('hidden');
     }
 
     function spawnGachaConfetti(container, rarity) {
@@ -8047,6 +8065,9 @@
       roomData.coins -= GACHA_COST;
       roomData.gachaPulls = (roomData.gachaPulls || 0) + 1;
 
+      // Show coin deduction immediately
+      document.getElementById('coinAmount').textContent = roomData.coins;
+
       // Weighted random — determine prize now
       const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
       let rand = Math.random() * totalWeight;
@@ -8068,8 +8089,9 @@
         }
       }
 
-      await saveRoom();
-      checkAchievements();
+      // Save in background (don't await — let animation run immediately)
+      _lastLocalSaveTime = Date.now();
+      saveRoom().then(() => checkAchievements());
 
       // ── Spin animation in reel ──
       const strip = document.getElementById('gachaReelStrip');
@@ -8100,19 +8122,23 @@
         // After spin completes, show full prize reveal
         setTimeout(() => {
           reelWin.style.animation = '';
-          if (resultEl) {
-            resultEl.innerHTML = '<div class="gacha-prize-reveal">' +
+          // Re-acquire resultEl (original may be stale if DOM was rebuilt)
+          const revealEl = document.getElementById('gachaTabResult');
+          if (revealEl) {
+            const showRarity = prize.rarity !== 'common' && prize.rarity !== 'uncommon';
+            revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
               '<div class="gacha-prize-emoji">' + prize.emoji + '</div>' +
               '<div class="gacha-prize-name">' + prize.name + '</div>' +
-              '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' +
+              (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
               '</div>';
             // Confetti for rare+
-            spawnGachaConfetti(resultEl, prize.rarity);
+            spawnGachaConfetti(revealEl, prize.rarity);
           }
           // Update coin display
           document.getElementById('coinAmount').textContent = roomData.coins;
           _gachaSpinning = false;
-          if (btn) btn.disabled = roomData.coins < GACHA_COST;
+          const pullBtn = document.getElementById('gachaPullTabBtn');
+          if (pullBtn) pullBtn.disabled = roomData.coins < GACHA_COST;
           renderAccessoryShop();
         }, 2700);
       } else {

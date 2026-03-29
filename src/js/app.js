@@ -1182,7 +1182,10 @@ randomBtn.addEventListener('click', () => {
         lastSpinDocId = picked.id;
         spinActions.classList.add('show');
         randomBtn.disabled = false;
-        showToast('🎉 You got: ' + picked.text + '!', 'success');
+        // Show result popup
+        const overlay = document.getElementById('spinResultOverlay');
+        document.getElementById('spinResultFood').textContent = picked.text;
+        overlay.classList.remove('hidden');
         // Sync result to Firestore so all users see it
         spinResultRef.set({ text: picked.text, foodId: picked.id, ts: Date.now() }).catch(() => {});
     } else {
@@ -1231,6 +1234,14 @@ function updateRestoreBtn() {
     const hasRemoved = foodItems.some(f => f.removed);
     restoreBtn.classList.toggle('show', hasRemoved);
 }
+
+// Spin result popup close
+document.getElementById('spinResultClose').addEventListener('click', () => {
+    document.getElementById('spinResultOverlay').classList.add('hidden');
+});
+document.getElementById('spinResultOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+});
 
 // Listen for shared spin result so all users see it in real-time
 spinResultRef.onSnapshot((snap) => {

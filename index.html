@@ -297,6 +297,16 @@
 
   </div> <!-- /app-content -->
 
+  <!-- Spin result popup (outside sidebar/app-content for proper z-index) -->
+  <div class="spin-result-overlay hidden" id="spinResultOverlay">
+    <div class="spin-result-box">
+      <div class="spin-result-emoji">🎉</div>
+      <div class="spin-result-title">You got:</div>
+      <div class="spin-result-food" id="spinResultFood"></div>
+      <button class="spin-result-close" id="spinResultClose">OK!</button>
+    </div>
+  </div>
+
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
