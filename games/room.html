@@ -1434,6 +1434,8 @@
       _offlineCoinsCollected = false;
       // Unsubscribe previous room listener (account switch)
       if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
+      // Reset roomData to defaults for clean account switch
+      roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, petAccessories: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
       initRoomDropZone();
       initDecorDrag();
       initMobileFoodTap();
