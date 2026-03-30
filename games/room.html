@@ -1523,6 +1523,7 @@
       // Ensure room doc exists and displayName is current — use onSnapshot for reads,
       // only write if needed (avoids redundant .get())
       _unsubRoomSnap = userDocRef().onSnapshot((snap) => {
+        if (viewingUid !== currentUid) return; // Don't overwrite visited room data
         if (snap.exists) {
           // Check displayName sync once on first snapshot
           if (!_offlineCoinsCollected) {
@@ -2723,6 +2724,7 @@
        Actions
        ═══════════════════════════════ */
     async function buyItem(type, id) {
+      if (viewingUid !== currentUid) return;
       const list = type === 'pet' ? PETS : PLANTS;
       const item = list.find(i => i.id === id);
       if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
@@ -2762,6 +2764,7 @@
     }
 
     async function equipItem(type, id) {
+      if (viewingUid !== currentUid) return;
       if (type === 'pet') {
         // Already equipped?
         if (roomData.pet === id || roomData.pet2 === id) return;
@@ -2799,6 +2802,7 @@
     }
 
     async function unequipItem(type, id) {
+      if (viewingUid !== currentUid) return;
       if (type === 'pet') {
         if (roomData.pet === id) roomData.pet = null;
         else if (roomData.pet2 === id) roomData.pet2 = null;
@@ -2811,6 +2815,7 @@
     }
 
     async function setPetColor(petId, colorKey) {
+      if (viewingUid !== currentUid) return;
       roomData.petColors[petId] = colorKey;
       await saveRoom();
       renderRoom();
@@ -2818,6 +2823,7 @@
     }
 
     async function buyDecor(id) {
+      if (viewingUid !== currentUid) return;
       const item = DECORATIONS.find(d => d.id === id);
       if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
       if (roomData.ownedDecors.includes(id)) return;
@@ -2837,6 +2843,7 @@
     }
 
     async function placeDecor(id) {
+      if (viewingUid !== currentUid) return;
       const item = DECORATIONS.find(d => d.id === id);
       if (!item) return;
       if (roomData.placedDecors.some(d => d.id === id)) return;
@@ -2854,6 +2861,7 @@
     }
 
     async function removeDecor(id) {
+      if (viewingUid !== currentUid) return;
       roomData.placedDecors = roomData.placedDecors.filter(d => d.id !== id);
       await saveRoom();
       renderDecorShop();
@@ -2861,6 +2869,7 @@
     }
 
     async function buyWall(id) {
+      if (viewingUid !== currentUid) return;
       const item = WALL_PATTERNS.find(w => w.id === id);
       if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
       if (roomData.ownedWalls.includes(id)) return;
@@ -2874,6 +2883,7 @@
     }
 
     async function equipWall(id) {
+      if (viewingUid !== currentUid) return;
       roomData.wallPattern = id;
       _forceRedrawBg();
       await saveRoom();
@@ -2882,6 +2892,7 @@
     }
 
     async function buyWindow(id) {
+      if (viewingUid !== currentUid) return;
       const item = WINDOWS.find(w => w.id === id);
       if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
       if (roomData.ownedWindows.includes(id)) return;
@@ -2895,6 +2906,7 @@
     }
 
     async function equipWindow(id) {
+      if (viewingUid !== currentUid) return;
       roomData.windowStyle = id;
       _forceRedrawBg();
       await saveRoom();
@@ -2912,6 +2924,7 @@
     }
 
     async function feedPet(foodId, petId) {
+      if (viewingUid !== currentUid) return;
       if (!petId) petId = roomData.pet;
       if (!petId) return;
       const food = FOODS.find(f => f.id === foodId);
@@ -3325,6 +3338,7 @@
     }
 
     async function upgradePlant() {
+      if (viewingUid !== currentUid) return;
       const plantId = roomData.plant;
       if (!plantId) return;
       const lvl = roomData.plantLevels[plantId] || 1;
@@ -3351,6 +3365,12 @@
       roomData.plantLevels = d.plantLevels ?? {};
       roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
+      roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
+      roomData.wallPattern = d.wallPattern ?? 'wall_default';
+      roomData.ownedWindows = d.ownedWindows ?? ['win_none','win_classic'];
+      roomData.windowStyle = d.windowStyle ?? 'win_classic';
+      roomData.jukeboxTrack = d.jukeboxTrack ?? null;
+      roomData.jukeboxVol = d.jukeboxVol ?? 0.5;
       roomData.ownedDecors = d.ownedDecors ?? [];
       const rawPlaced = d.placedDecors ?? [];
       roomData.placedDecors = rawPlaced.map(pd => {
