@@ -952,6 +952,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="../src/js/space-guard.js"></script>
   <script src="../src/js/firebase-config.js"></script>
 
   <!-- Pet drawing modules -->
@@ -967,6 +968,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const _spc = db.collection('spaces').doc(window.SPACE_CODE);
 
     /* ── Auth gate ── */
     const loginOverlay = document.getElementById('loginOverlay');
@@ -1452,7 +1454,7 @@
       toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
     }
 
-    function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
+    function userDocRef(uid) { return _spc.collection('rooms').doc(uid || currentUid); }
 
     function getPlayerName() {
       const custom = currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null;
@@ -2678,7 +2680,7 @@
     function renderVisitList() {
       if (unsubVisitList) return; // Listener already active, snapshot handles DOM updates
       const el = document.getElementById('visitList');
-      unsubVisitList = db.collection('rooms').orderBy('updatedAt', 'desc').limit(20).onSnapshot((snap) => {
+      unsubVisitList = _spc.collection('rooms').orderBy('updatedAt', 'desc').limit(20).onSnapshot((snap) => {
         const rooms = [];
         const now = Date.now();
         const ONLINE_THRESHOLD = 60 * 1000; // 60 seconds
@@ -7324,7 +7326,7 @@
       if (!text && !_gbSelectedSticker) return showToast('Write something or pick a sticker!', 'error');
       if (text.length > 200) return showToast('Message too long!', 'error');
       const targetUid = viewingUid;
-      await db.collection('rooms').doc(targetUid).collection('guestbook').add({
+      await _spc.collection('rooms').doc(targetUid).collection('guestbook').add({
         fromUid: currentUid,
         fromName: getPlayerName(),
         text: text,
@@ -7343,7 +7345,7 @@
       const listEls = document.querySelectorAll('.gb-list-target');
       if (!listEls.length) return;
       try {
-        const snap = await db.collection('rooms').doc(uid).collection('guestbook')
+        const snap = await _spc.collection('rooms').doc(uid).collection('guestbook')
           .orderBy('createdAt', 'desc').limit(30).get();
         let html;
         if (snap.empty) {
@@ -7355,7 +7357,7 @@
 
           // Load replies for all entries in parallel
           const replySnaps = await Promise.all(
-            docs.map(d => db.collection('rooms').doc(uid).collection('guestbook').doc(d.id)
+            docs.map(d => _spc.collection('rooms').doc(uid).collection('guestbook').doc(d.id)
               .collection('replies').orderBy('createdAt', 'asc').limit(10).get())
           );
 
@@ -7413,7 +7415,7 @@
       if (!text) return showToast('Write something!', 'error');
       btn.disabled = true;
       const targetUid = viewingUid;
-      await db.collection('rooms').doc(targetUid).collection('guestbook').doc(entryId)
+      await _spc.collection('rooms').doc(targetUid).collection('guestbook').doc(entryId)
         .collection('replies').add({
           fromUid: currentUid,
           fromName: getPlayerName(),
@@ -7484,12 +7486,12 @@
         document.getElementById('coinAmount').textContent = roomData.coins;
       }
       // Add coins to target
-      await db.collection('rooms').doc(_giftTargetUid).update({
+      await _spc.collection('rooms').doc(_giftTargetUid).update({
         coins: firebase.firestore.FieldValue.increment(_giftAmount),
         giftsReceived: firebase.firestore.FieldValue.increment(1)
       });
       // Leave guestbook entry
-      await db.collection('rooms').doc(_giftTargetUid).collection('guestbook').add({
+      await _spc.collection('rooms').doc(_giftTargetUid).collection('guestbook').add({
         fromUid: currentUid,
         fromName: getPlayerName(),
         text: 'Sent a gift of ' + _giftAmount + ' coins! 🎁',
@@ -8463,7 +8465,7 @@
       const game = LB_GAMES.find(g => g.id === gameId);
       if (!game) return;
       try {
-        const snap = await db.collection(game.key)
+        const snap = await _spc.collection(game.key)
           .orderBy('score', 'desc').limit(20).get();
         if (snap.empty) {
           listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">No scores yet!</div>';
@@ -8500,7 +8502,7 @@
         if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
         if (!u) return;
         console.log('[ChessInvite] Listening for invites on room, uid:', u.uid);
-        chessInvUnsub = _db.collection('chess_invites')
+        chessInvUnsub = _spc.collection('chess_invites')
           .where('toUid', '==', u.uid)
           .where('status', '==', 'pending')
           .onSnapshot((snap) => {
@@ -8523,12 +8525,12 @@
               document.body.appendChild(ov);
               ov.querySelector('.ci-accept').addEventListener('click', () => {
                 ov.remove();
-                _db.collection('chess_invites').doc(id).update({status:'accepted'});
+                _spc.collection('chess_invites').doc(id).update({status:'accepted'});
                 window.location.href = 'chinese-chess.html?join=' + inv.gameId;
               });
               ov.querySelector('.ci-reject').addEventListener('click', () => {
                 ov.remove();
-                _db.collection('chess_invites').doc(id).update({status:'rejected'});
+                _spc.collection('chess_invites').doc(id).update({status:'rejected'});
               });
             });
           }, (err) => { console.error('[ChessInvite] onSnapshot error on room:', err); });

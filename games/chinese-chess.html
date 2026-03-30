@@ -293,6 +293,7 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../src/js/space-guard.js"></script>
 <script src="../src/js/firebase-config.js"></script>
 <script>
 /* ═══════════════════════════════════════════
@@ -302,12 +303,13 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
+const _spc = db.collection('spaces').doc(window.SPACE_CODE);
 
 // ── Firestore collections ──
-const gamesRef    = db.collection('chess_games');
-const presenceRef = db.collection('chess_presence');
-const invitesRef  = db.collection('chess_invites');
-const roomsRef    = db.collection('rooms');
+const gamesRef    = _spc.collection('chess_games');
+const presenceRef = _spc.collection('chess_presence');
+const invitesRef  = _spc.collection('chess_invites');
+const roomsRef    = _spc.collection('rooms');
 
 // ── DOM refs ──
 const loginOverlay   = document.getElementById('loginOverlay');

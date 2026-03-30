@@ -485,13 +485,15 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="../src/js/space-guard.js"></script>
   <script src="../src/js/firebase-config.js"></script>
 
   <script>
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const lbRef = db.collection('leaderboard_flappy');
+    const _spc = db.collection('spaces').doc(window.SPACE_CODE);
+    const lbRef = _spc.collection('leaderboard_flappy');
 
     /* ── Google Auth Gate ── */
     const loginOverlay = document.getElementById('loginOverlay');
@@ -565,11 +567,11 @@
         localStorage.setItem('flappy_name', displayName);
         document.getElementById('playerDisplayName').textContent = displayName;
         // Sync displayName to rooms collection so chess invite list shows correct name
-        db.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
+        _spc.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
         // Heartbeat: update lastSeen every 2 min so others see you online
         if (_lastSeenInterval) clearInterval(_lastSeenInterval);
         _lastSeenInterval = setInterval(() => {
-          if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
+          if (auth.currentUser) _spc.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
         }, 120000);
         // Start leaderboard listener AFTER auth succeeds
         if (!lbUnsubscribe) startLeaderboardListener();
@@ -580,7 +582,7 @@
       }
     });
     window.addEventListener('beforeunload', () => {
-      if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
+      if (auth.currentUser) _spc.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
     });
 
     /* ═══════════════════════════════
@@ -944,7 +946,7 @@
       if (!user) return;
       const coins = Math.max(1, Math.floor(s));
       try {
-        const roomRef = db.collection('rooms').doc(user.uid);
+        const roomRef = _spc.collection('rooms').doc(user.uid);
         await db.runTransaction(async (tx) => {
           const snap = await tx.get(roomRef);
           const current = snap.exists ? (snap.data().coins || 0) : 0;
@@ -1034,7 +1036,7 @@
         if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
         if (!u) return;
         console.log('[ChessInvite] Listening for invites on flappy, uid:', u.uid);
-        chessInvUnsub = _db.collection('chess_invites')
+        chessInvUnsub = _spc.collection('chess_invites')
           .where('toUid', '==', u.uid)
           .where('status', '==', 'pending')
           .onSnapshot((snap) => {
@@ -1057,12 +1059,12 @@
               document.body.appendChild(ov);
               ov.querySelector('.ci-accept').addEventListener('click', () => {
                 ov.remove();
-                _db.collection('chess_invites').doc(id).update({status:'accepted'});
+                _spc.collection('chess_invites').doc(id).update({status:'accepted'});
                 window.location.href = 'chinese-chess.html?join=' + inv.gameId;
               });
               ov.querySelector('.ci-reject').addEventListener('click', () => {
                 ov.remove();
-                _db.collection('chess_invites').doc(id).update({status:'rejected'});
+                _spc.collection('chess_invites').doc(id).update({status:'rejected'});
               });
             });
           }, (err) => { console.error('[ChessInvite] onSnapshot error on flappy:', err); });

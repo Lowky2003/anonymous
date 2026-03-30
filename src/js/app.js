@@ -5,6 +5,7 @@
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const _spc = db.collection('spaces').doc(window.SPACE_CODE);
 
 /* ═══════════════════════════════════════════
     Google Auth Gate
@@ -56,7 +57,7 @@ auth.onAuthStateChanged(async (user) => {
     // If no local custom name, try fetching from Firestore (cross-device sync)
     if (!customName) {
         try {
-            const roomDoc = await db.collection('rooms').doc(user.uid).get();
+            const roomDoc = await _spc.collection('rooms').doc(user.uid).get();
             if (roomDoc.exists && roomDoc.data().displayName) {
                 customName = roomDoc.data().displayName;
                 localStorage.setItem('flappy_custom_name_' + user.uid, customName);
@@ -65,11 +66,11 @@ auth.onAuthStateChanged(async (user) => {
     }
     const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
     localStorage.setItem('flappy_name', displayName);
-    db.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
+    _spc.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
     // Heartbeat: update lastSeen every 2 min so others see you online
     if (_lastSeenInterval) clearInterval(_lastSeenInterval);
     _lastSeenInterval = setInterval(() => {
-        if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
+        if (auth.currentUser) _spc.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
     }, 120000);
     } else {
     loginOverlay.classList.remove('hidden');
@@ -78,7 +79,7 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 window.addEventListener('beforeunload', () => {
-    if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
+    if (auth.currentUser) _spc.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
 });
 // Enable Firestore offline persistence (IndexedDB cache)
 db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
@@ -88,11 +89,11 @@ db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
     console.warn('Firestore persistence not supported in this browser');
     }
 });
-const answersRef = db.collection('answers');
-const foodRef    = db.collection('food_suggestions');
-const spinResultRef = db.doc('app_state/spin_result');
-const lbRef      = db.collection('leaderboard_flappy');
-const roomsRef   = db.collection('rooms');
+const answersRef    = _spc.collection('answers');
+const foodRef       = _spc.collection('food_suggestions');
+const spinResultRef = _spc.collection('app_state').doc('spin_result');
+const lbRef         = _spc.collection('leaderboard_flappy');
+const roomsRef      = _spc.collection('rooms');
 
 const SIX_HOURS = 6 * 60 * 60 * 1000;
 const COLORS = 16;
@@ -1619,7 +1620,7 @@ settingsNameSaveBtn.addEventListener('click', async () => {
     }
     // Migrate tetris leaderboard entry
     if (oldName) {
-        const tetrisLbRef = db.collection('leaderboard_tetris');
+        const tetrisLbRef = _spc.collection('leaderboard_tetris');
         const oldTDoc = await tetrisLbRef.doc(oldName).get();
         if (oldTDoc.exists) {
         const oldTData = oldTDoc.data();
@@ -1634,9 +1635,9 @@ settingsNameSaveBtn.addEventListener('click', async () => {
     const uid = auth.currentUser?.uid;
     if (uid) {
         const uidLbs = [
-        db.collection('leaderboard_2048'),
-        db.collection('leaderboard_snake'),
-        db.collection('leaderboard_blockblast'),
+        _spc.collection('leaderboard_2048'),
+        _spc.collection('leaderboard_snake'),
+        _spc.collection('leaderboard_blockblast'),
         ];
         for (const ref of uidLbs) {
         const d = await ref.doc(uid).get();
@@ -1994,7 +1995,7 @@ async function dailyReset() {
     const today = getTodayKey();
 
     // Check Firestore meta doc (shared across all users)
-    const metaRef = db.collection('_meta').doc('daily_reset');
+    const metaRef = _spc.collection('_meta').doc('daily_reset');
     const metaDoc = await metaRef.get();
     const lastResetDay = metaDoc.exists ? (metaDoc.data().day ?? '') : '';
 
@@ -2055,7 +2056,7 @@ const countdownSetBtn    = document.getElementById('countdownSetBtn');
 const countdownDigits    = document.getElementById('countdownDigits');
 const countdownLabel     = document.getElementById('countdownLabel');
 const countdownClear     = document.getElementById('countdownClear');
-const countdownRef       = db.doc('app_state/countdown');
+const countdownRef       = _spc.collection('app_state').doc('countdown');
 const celebrationOverlay = document.getElementById('celebrationOverlay');
 const celebrationClose   = document.getElementById('celebrationClose');
 let countdownInterval    = null;
@@ -2249,7 +2250,7 @@ countdownRef.onSnapshot((snap) => {
     const moodFab = document.getElementById('moodFab');
     const moodPanel = document.getElementById('moodPanel');
     const checkinArea = document.getElementById('moodCheckinArea');
-    const moodRef = db.collection('mood_checkins');
+    const moodRef = _spc.collection('mood_checkins');
 
     function todayKey() {
     const d = new Date();
@@ -2392,7 +2393,7 @@ countdownRef.onSnapshot((snap) => {
     if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
     if (!u) return;
     console.log('[ChessInvite] Listening for invites on index, uid:', u.uid);
-    chessInvUnsub = _db.collection('chess_invites')
+    chessInvUnsub = _spc.collection('chess_invites')
         .where('toUid', '==', u.uid)
         .where('status', '==', 'pending')
         .onSnapshot((snap) => {
@@ -2415,14 +2416,28 @@ countdownRef.onSnapshot((snap) => {
             document.body.appendChild(ov);
             ov.querySelector('.ci-accept').addEventListener('click', () => {
             ov.remove();
-            _db.collection('chess_invites').doc(id).update({status:'accepted'});
+            _spc.collection('chess_invites').doc(id).update({status:'accepted'});
             window.location.href = '/games/chinese-chess.html?join=' + inv.gameId;
             });
             ov.querySelector('.ci-reject').addEventListener('click', () => {
             ov.remove();
-            _db.collection('chess_invites').doc(id).update({status:'rejected'});
+            _spc.collection('chess_invites').doc(id).update({status:'rejected'});
             });
         });
         }, (err) => { console.error('[ChessInvite] onSnapshot error on index:', err); });
     });
+})();
+
+/* ═══════════════════════════════════════════
+    Space code display + Change Space button
+    ═══════════════════════════════════════════ */
+(function () {
+    const spaceCodeEl = document.getElementById('settingsSpaceCode');
+    const changeSpaceBtn = document.getElementById('changeSpaceBtn');
+    if (spaceCodeEl) spaceCodeEl.textContent = window.SPACE_CODE || '';
+    if (changeSpaceBtn) {
+        changeSpaceBtn.addEventListener('click', () => {
+            window.location.href = 'join.html';
+        });
+    }
 })();
