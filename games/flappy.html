@@ -948,7 +948,7 @@
         await db.runTransaction(async (tx) => {
           const snap = await tx.get(roomRef);
           const current = snap.exists ? (snap.data().coins || 0) : 0;
-          const update = { coins: current + coins, displayName: user.displayName || 'Anonymous', updatedAt: Date.now() };
+          const update = { coins: current + coins, displayName: getPlayerName(), updatedAt: Date.now() };
           if (snap.exists) { tx.update(roomRef, update); }
           else { tx.set(roomRef, { ...update, pet: null, plant: null, petHunger: {}, plantLevels: {}, ownedPets: [], ownedPlants: [] }); }
         });

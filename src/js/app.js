@@ -1414,8 +1414,20 @@ settingsNameSaveBtn.addEventListener('click', async () => {
         await tetrisLbRef.doc(oldName).delete();
         }
     }
-    // Update room displayName (merge: true creates doc if it doesn't exist)
+    // Update uid-keyed leaderboards (2048, snake, block-blast)
     const uid = auth.currentUser?.uid;
+    if (uid) {
+        const uidLbs = [
+        db.collection('leaderboard_2048'),
+        db.collection('leaderboard_snake'),
+        db.collection('leaderboard_blockblast'),
+        ];
+        for (const ref of uidLbs) {
+        const d = await ref.doc(uid).get();
+        if (d.exists) await ref.doc(uid).update({ name: newName });
+        }
+    }
+    // Update room displayName (merge: true creates doc if it doesn't exist)
     if (uid) {
         await roomsRef.doc(uid).set({ displayName: newName }, { merge: true });
     }
@@ -1440,6 +1452,18 @@ settingsNameSaveBtn.addEventListener('click', async () => {
         const existingTBest = parseInt(localStorage.getItem(newTetrisKey) || '0', 10);
         localStorage.setItem(newTetrisKey, Math.max(parseInt(oldTetrisBest, 10), existingTBest));
         localStorage.removeItem(oldTetrisKey);
+        }
+        // Migrate 2048, snake, block-blast local best scores
+        const otherBests = [['2048_best_'], ['snake_best_'], ['bb_best_']];
+        for (const [prefix] of otherBests) {
+        const oKey = prefix + oldName;
+        const oVal = localStorage.getItem(oKey);
+        if (oVal) {
+            const nKey = prefix + newName;
+            const existing = parseInt(localStorage.getItem(nKey) || '0', 10);
+            localStorage.setItem(nKey, Math.max(parseInt(oVal, 10), existing));
+            localStorage.removeItem(oKey);
+        }
         }
     }
     settingsNameStatus.style.color = '#34d399';
