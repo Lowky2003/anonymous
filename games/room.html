@@ -1464,6 +1464,7 @@
 
     async function saveRoom() {
       if (viewingUid !== currentUid) return;
+      if (!_roomLoaded) return; // Don't save defaults before Firestore data loads
       const data = {
         coins: roomData.coins,
         pet: roomData.pet,
@@ -1508,8 +1509,10 @@
     let _plantCoinInterval = null;
     let _lastLocalSaveTime = 0;
     let _unsubRoomSnap = null;
+    let _roomLoaded = false;
     async function initRoom() {
       _offlineCoinsCollected = false;
+      _roomLoaded = false;
       // Unsubscribe previous room listener (account switch)
       if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
       if (unsubVisitList) { unsubVisitList(); unsubVisitList = null; }
@@ -1523,6 +1526,8 @@
       // Ensure room doc exists and displayName is current — use onSnapshot for reads,
       // only write if needed (avoids redundant .get())
       _unsubRoomSnap = userDocRef().onSnapshot((snap) => {
+        // Guard: if currentUid changed mid-flight, ignore stale snapshot
+        if (!currentUid) return;
         if (viewingUid !== currentUid) return; // Don't overwrite visited room data
         if (snap.exists) {
           // Check displayName sync once on first snapshot
@@ -1570,6 +1575,7 @@
           roomData.giftsReceived = d.giftsReceived ?? 0;
           roomData.jukeboxTrack = d.jukeboxTrack ?? null;
           roomData.jukeboxVol = d.jukeboxVol ?? 0.5;
+          _roomLoaded = true;
           // Decay hunger based on elapsed time (1% per 10 min)
           const lastUpdate = d.updatedAt ?? Date.now();
           const elapsed = Date.now() - lastUpdate;
@@ -1603,8 +1609,10 @@
               }, 800);
             }
           }
+          _roomLoaded = true;
         } else {
           // New user — create room document
+          _roomLoaded = true;
           roomData.displayName = getPlayerName();
           saveRoom();
         }
@@ -1614,6 +1622,10 @@
         // Skip renderAll if a local save just happened (prevents jump)
         if (Date.now() - _lastLocalSaveTime < 2000) return;
         renderAllDebounced();
+      }, (err) => {
+        console.error('Room onSnapshot error:', err);
+        const _loadOv = document.getElementById('roomLoadingOverlay');
+        if (_loadOv) _loadOv.style.display = 'none';
       });
 
       // Periodic hunger decay: -1% every 10 min while page is open
