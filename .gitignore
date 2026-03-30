@@ -1,2 +1,2 @@
-# Firebase config (contains API keys)
-src/js/firebase-config.js
+# node_modules (if ever added)
+node_modules/
