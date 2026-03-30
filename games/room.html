@@ -846,7 +846,7 @@
     <div class="sub-panel active" id="accessoryWrap">
       <div class="shop-section">
         <div class="shop-section-title">🎩 Pet Accessories</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Hats, glasses & scarves for your pets</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Win accessories from Gacha! Equip them on your pets</div>
         <div id="accShop"></div>
       </div>
     </div>
@@ -1302,15 +1302,25 @@
        Pet Accessories
        ═══════════════════════════════ */
     const PET_ACCESSORIES = [
-      { id: 'acc_tophat',    emoji: '🎩', name: 'Top Hat',       cost: 300,  draw: 'tophat' },
-      { id: 'acc_crown',     emoji: '👑', name: 'Crown',         cost: 800,  draw: 'crown' },
-      { id: 'acc_glasses',   emoji: '🕶️', name: 'Sunglasses',    cost: 200,  draw: 'glasses' },
-      { id: 'acc_bow',       emoji: '🎀', name: 'Bow',           cost: 150,  draw: 'bow' },
-      { id: 'acc_scarf',     emoji: '🧣', name: 'Scarf',         cost: 250,  draw: 'scarf' },
-      { id: 'acc_flower',    emoji: '🌸', name: 'Flower',        cost: 100,  draw: 'flower' },
-      { id: 'acc_bandana',   emoji: '🏴', name: 'Bandana',       cost: 180,  draw: 'bandana' },
-      { id: 'acc_monocle',   emoji: '🧐', name: 'Monocle',       cost: 350,  draw: 'monocle' },
-      { id: 'acc_halo',      emoji: '😇', name: 'Halo',          cost: 500,  draw: 'halo' },
+      { id: 'acc_tophat',    emoji: '🎩', name: 'Top Hat',       draw: 'tophat' },
+      { id: 'acc_crown',     emoji: '👑', name: 'Crown',         draw: 'crown' },
+      { id: 'acc_glasses',   emoji: '🕶️', name: 'Sunglasses',    draw: 'glasses' },
+      { id: 'acc_bow',       emoji: '🎀', name: 'Bow',           draw: 'bow' },
+      { id: 'acc_scarf',     emoji: '🧣', name: 'Scarf',         draw: 'scarf' },
+      { id: 'acc_flower',    emoji: '🌸', name: 'Flower',        draw: 'flower' },
+      { id: 'acc_bandana',   emoji: '🏴', name: 'Bandana',       draw: 'bandana' },
+      { id: 'acc_monocle',   emoji: '🧐', name: 'Monocle',       draw: 'monocle' },
+      { id: 'acc_halo',      emoji: '😇', name: 'Halo',          draw: 'halo' },
+      { id: 'acc_wizard',    emoji: '🧙', name: 'Wizard Hat',    draw: 'wizard',    gachaOnly: true },
+      { id: 'acc_partyhat',  emoji: '🥳', name: 'Party Hat',     draw: 'partyhat',  gachaOnly: true },
+      { id: 'acc_heartglass',emoji: '💕', name: 'Heart Glasses', draw: 'heartglass',gachaOnly: true },
+      { id: 'acc_devil',     emoji: '😈', name: 'Devil Horns',   draw: 'devil',     gachaOnly: true },
+      { id: 'acc_wings',     emoji: '🪽', name: 'Angel Wings',   draw: 'wings',     gachaOnly: true },
+      { id: 'acc_cape',      emoji: '🦸', name: 'Cape',          draw: 'cape',      gachaOnly: true },
+      { id: 'acc_ninja',     emoji: '🥷', name: 'Ninja Mask',    draw: 'ninja',     gachaOnly: true },
+      { id: 'acc_pirate',    emoji: '🏴‍☠️', name: 'Pirate Patch',  draw: 'pirate',    gachaOnly: true },
+      { id: 'acc_tiara',     emoji: '👸', name: 'Tiara',         draw: 'tiara',     gachaOnly: true },
+      { id: 'acc_starbadge', emoji: '⭐', name: 'Star Badge',    draw: 'starbadge', gachaOnly: true },
     ];
 
     /* ═══════════════════════════════
@@ -1350,18 +1360,37 @@
     /* ═══════════════════════════════
        Gacha Pool
        ═══════════════════════════════ */
-    const GACHA_COST = 100;
+    const GACHA_COST = 200;
     const GACHA_POOL = [
-      { id: 'gacha_coins_50',   emoji: '🪙', name: '50 Coins',       rarity: 'common',    weight: 40, type: 'coins', value: 50 },
-      { id: 'gacha_coins_100',  emoji: '💰', name: '100 Coins',      rarity: 'rare',      weight: 1,  type: 'coins', value: 100 },
-      { id: 'gacha_coins_300',  emoji: '💎', name: '300 Coins',      rarity: 'epic',      weight: 5,  type: 'coins', value: 300 },
-      { id: 'gacha_coins_500',  emoji: '👑', name: '500 Coins',      rarity: 'legendary', weight: 2,  type: 'coins', value: 500 },
-      { id: 'gacha_acc_bow',    emoji: '🎀', name: 'Bow',            rarity: 'uncommon',  weight: 12, type: 'accessory', value: 'acc_bow' },
-      { id: 'gacha_acc_flower', emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 20, type: 'accessory', value: 'acc_flower' },
-      { id: 'gacha_acc_crown',  emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 4,  type: 'accessory', value: 'acc_crown' },
-      { id: 'gacha_acc_halo',   emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 7,  type: 'accessory', value: 'acc_halo' },
-      { id: 'gacha_coins_1000', emoji: '🏅', name: '1000 Coins!',    rarity: 'legendary', weight: 1,  type: 'coins', value: 1000 },
-      { id: 'gacha_acc_mono',   emoji: '🧐', name: 'Monocle',        rarity: 'epic',      weight: 4,  type: 'accessory', value: 'acc_monocle' },
+      // Coin prizes
+      { id: 'gacha_50coins',  emoji: '💰', name: '50 Coins',       rarity: 'common',    weight: 25, type: 'coins', amount: 50 },
+      { id: 'gacha_100coins', emoji: '💰', name: '100 Coins',      rarity: 'uncommon',  weight: 12, type: 'coins', amount: 100 },
+      { id: 'gacha_200coins', emoji: '💰', name: '200 Coins',      rarity: 'rare',      weight: 5,  type: 'coins', amount: 200 },
+      { id: 'gacha_500coins', emoji: '💰', name: '500 Coins',      rarity: 'epic',      weight: 2,  type: 'coins', amount: 500 },
+      // Common Accessories
+      { id: 'acc_bow',        emoji: '🎀', name: 'Bow',            rarity: 'common',    weight: 8,  type: 'accessory' },
+      { id: 'acc_flower',     emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 8,  type: 'accessory' },
+      { id: 'acc_bandana',    emoji: '🏴', name: 'Bandana',        rarity: 'common',    weight: 8,  type: 'accessory' },
+      // Uncommon Accessories
+      { id: 'acc_glasses',    emoji: '🕶️', name: 'Sunglasses',     rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_scarf',      emoji: '🧣', name: 'Scarf',          rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_tophat',     emoji: '🎩', name: 'Top Hat',        rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_partyhat',   emoji: '🥳', name: 'Party Hat',      rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      // Rare Accessories
+      { id: 'acc_halo',       emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_monocle',    emoji: '🧐', name: 'Monocle',        rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_heartglass', emoji: '💕', name: 'Heart Glasses',  rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_wizard',     emoji: '🧙', name: 'Wizard Hat',     rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_devil',      emoji: '😈', name: 'Devil Horns',    rarity: 'rare',      weight: 3,  type: 'accessory' },
+      // Epic Accessories
+      { id: 'acc_crown',      emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_ninja',      emoji: '🥷', name: 'Ninja Mask',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_pirate',     emoji: '🏴‍☠️', name: 'Pirate Patch',   rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_cape',       emoji: '🦸', name: 'Cape',           rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_starbadge',  emoji: '⭐', name: 'Star Badge',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      // Legendary Accessories
+      { id: 'acc_tiara',      emoji: '👸', name: 'Tiara',          rarity: 'legendary', weight: 0.5, type: 'accessory' },
+      { id: 'acc_wings',      emoji: '🪽', name: 'Angel Wings',    rarity: 'legendary', weight: 0.5, type: 'accessory' },
     ];
 
     /* ═══════════════════════════════
@@ -7543,7 +7572,7 @@
         if (dayNum <= streak && alreadyClaimed) cls = 'claimed';
         else if (dayNum === streak + 1 && !alreadyClaimed) cls = 'today';
         else if (dayNum <= streak) cls = 'claimed';
-        daysHtml += '<div class="daily-day ' + cls + '"><span class="dd-num">' + r.label + '</span><span class="dd-coins">🪙' + r.coins + '</span></div>';
+        daysHtml += '<div class="daily-day ' + cls + '"><span class="dd-num">' + r.label + '</span><span class="dd-coins">💰' + r.coins + '</span></div>';
       });
       document.getElementById('dailyDays').innerHTML = daysHtml;
       const btn = document.getElementById('dailyClaimBtn');
@@ -7806,7 +7835,7 @@
       document.getElementById('giftTarget').textContent = 'To: ' + (name || 'Anonymous');
       const el = document.getElementById('giftAmounts');
       el.innerHTML = GIFT_AMOUNTS.map(a =>
-        '<div class="gift-amt" onclick="selectGiftAmount(this,' + a + ')">🪙 ' + a + '</div>'
+        '<div class="gift-amt" onclick="selectGiftAmount(this,' + a + ')">💰 ' + a + '</div>'
       ).join('');
       document.getElementById('giftSendBtn').disabled = true;
       document.getElementById('giftOverlay').classList.remove('hidden');
@@ -7888,7 +7917,6 @@
       html += '<div class="acc-grid">';
       PET_ACCESSORIES.forEach(acc => {
         const isOwned = (roomData.ownedAccessories || []).includes(acc.id);
-        const canAfford = roomData.coins >= acc.cost;
         // Check if currently equipped on any pet
         const equippedOn = activePets.filter(pid => (roomData.petAccessories || {})[pid] === acc.id);
         const isEquipped = equippedOn.length > 0;
@@ -7913,8 +7941,7 @@
             html += '</div>';
           }
         } else {
-          html += '<div class="acc-price">🪙 ' + acc.cost + '</div>';
-          html += '<button class="food-btn" style="margin-top:4px;font-size:10px" onclick="window.buyAccessory(\'' + acc.id + '\');return false;" ' + (canAfford ? '' : 'disabled') + '>Buy</button>';
+          html += '<div class="acc-price" style="color:rgba(255,255,255,.35);font-size:11px">🎰 Gacha Only</div>';
         }
         html += '</div>';
       });
@@ -7971,15 +7998,7 @@
     }
 
     async function buyAccessory(accId) {
-      const acc = PET_ACCESSORIES.find(a => a.id === accId);
-      if (!acc || roomData.coins < acc.cost) return showToast('Not enough coins!', 'error');
-      if ((roomData.ownedAccessories || []).includes(accId)) return;
-      roomData.coins -= acc.cost;
-      roomData.ownedAccessories = [...(roomData.ownedAccessories || []), accId];
-      await saveRoom();
-      showToast('🎩 Bought ' + acc.name + '!', 'success');
-      checkAchievements();
-      renderAccessoryShop();
+      return showToast('Accessories can only be obtained from Gacha!', 'error');
     }
 
     async function equipPetAcc(petId, accId) {
@@ -8114,6 +8133,156 @@
           ctx.globalAlpha = 0.7;
           ctx.beginPath(); ctx.ellipse(hx, hy - hr - s*0.06, s*0.14, s*0.04, 0, 0, Math.PI*2); ctx.stroke();
           ctx.globalAlpha = 1;
+          break;
+        case 'wizard':
+          ctx.fillStyle = '#2c1654';
+          ctx.beginPath();
+          ctx.moveTo(hx, hy - hr - s*0.35);
+          ctx.lineTo(hx - s*0.2, hy - hr + s*0.02);
+          ctx.lineTo(hx + s*0.2, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath(); ctx.arc(hx, hy - hr - s*0.28, s*0.025, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#8b5cf6';
+          ctx.fillRect(hx - s*0.2, hy - hr - s*0.02, s*0.4, s*0.04);
+          break;
+        case 'partyhat':
+          ctx.fillStyle = '#ff6b6b';
+          ctx.beginPath();
+          ctx.moveTo(hx, hy - hr - s*0.28);
+          ctx.lineTo(hx - s*0.14, hy - hr + s*0.02);
+          ctx.lineTo(hx + s*0.14, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Stripes
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.04, hy - hr - s*0.16);
+          ctx.lineTo(hx - s*0.1, hy - hr - s*0.04);
+          ctx.lineTo(hx + s*0.02, hy - hr - s*0.04);
+          ctx.closePath(); ctx.fill();
+          // Pom pom
+          ctx.fillStyle = '#34d399';
+          ctx.beginPath(); ctx.arc(hx, hy - hr - s*0.28, s*0.03, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'heartglass':
+          ctx.fillStyle = '#ff1493';
+          // Left heart lens
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.08, hy + s*0.02);
+          ctx.bezierCurveTo(hx - s*0.08, hy - s*0.04, hx - s*0.16, hy - s*0.04, hx - s*0.16, hy);
+          ctx.bezierCurveTo(hx - s*0.16, hy + s*0.04, hx - s*0.08, hy + s*0.06, hx - s*0.08, hy + s*0.02);
+          ctx.fill();
+          // Right heart lens
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.08, hy + s*0.02);
+          ctx.bezierCurveTo(hx + s*0.08, hy - s*0.04, hx + s*0.16, hy - s*0.04, hx + s*0.16, hy);
+          ctx.bezierCurveTo(hx + s*0.16, hy + s*0.04, hx + s*0.08, hy + s*0.06, hx + s*0.08, hy + s*0.02);
+          ctx.fill();
+          // Bridge
+          ctx.strokeStyle = '#ff1493'; ctx.lineWidth = s*0.015;
+          ctx.beginPath(); ctx.moveTo(hx - s*0.02, hy); ctx.lineTo(hx + s*0.02, hy); ctx.stroke();
+          break;
+        case 'devil':
+          ctx.fillStyle = '#dc2626';
+          // Left horn
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.14, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx - s*0.2, hy - hr - s*0.2, hx - s*0.08, hy - hr - s*0.12);
+          ctx.lineTo(hx - s*0.1, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Right horn
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.14, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.2, hy - hr - s*0.2, hx + s*0.08, hy - hr - s*0.12);
+          ctx.lineTo(hx + s*0.1, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          break;
+        case 'wings':
+          ctx.globalAlpha = 0.7;
+          ctx.fillStyle = '#e0e7ff';
+          // Left wing
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.18, hy + s*0.1);
+          ctx.quadraticCurveTo(hx - s*0.45, hy - s*0.1, hx - s*0.35, hy + s*0.2);
+          ctx.quadraticCurveTo(hx - s*0.3, hy + s*0.3, hx - s*0.18, hy + s*0.15);
+          ctx.closePath(); ctx.fill();
+          // Right wing
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.18, hy + s*0.1);
+          ctx.quadraticCurveTo(hx + s*0.45, hy - s*0.1, hx + s*0.35, hy + s*0.2);
+          ctx.quadraticCurveTo(hx + s*0.3, hy + s*0.3, hx + s*0.18, hy + s*0.15);
+          ctx.closePath(); ctx.fill();
+          ctx.globalAlpha = 1;
+          break;
+        case 'cape':
+          ctx.globalAlpha = 0.8;
+          ctx.fillStyle = '#7c3aed';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.14, hy + hr - s*0.02);
+          ctx.lineTo(hx + s*0.14, hy + hr - s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.2, hy + hr + s*0.3, hx + s*0.05, hy + hr + s*0.35);
+          ctx.lineTo(hx - s*0.05, hy + hr + s*0.35);
+          ctx.quadraticCurveTo(hx - s*0.2, hy + hr + s*0.3, hx - s*0.14, hy + hr - s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Collar clasp
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath(); ctx.arc(hx, hy + hr, s*0.025, 0, Math.PI*2); ctx.fill();
+          ctx.globalAlpha = 1;
+          break;
+        case 'ninja':
+          ctx.fillStyle = '#1a1a2e';
+          // Mask across face
+          ctx.fillRect(hx - s*0.18, hy - s*0.04, s*0.36, s*0.1);
+          // Eye slit
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.fillRect(hx - s*0.14, hy - s*0.01, s*0.28, s*0.035);
+          // Tail flap
+          ctx.fillStyle = '#1a1a2e';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.18, hy); ctx.lineTo(hx + s*0.3, hy + s*0.08);
+          ctx.lineTo(hx + s*0.28, hy - s*0.04); ctx.closePath(); ctx.fill();
+          break;
+        case 'pirate':
+          // Eye patch
+          ctx.fillStyle = '#1a1a2e';
+          ctx.beginPath(); ctx.ellipse(hx - s*0.08, hy, s*0.055, s*0.045, 0, 0, Math.PI*2); ctx.fill();
+          // Strap
+          ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = s*0.012;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.08, hy - s*0.04);
+          ctx.quadraticCurveTo(hx, hy - hr - s*0.02, hx + s*0.12, hy - s*0.02);
+          ctx.stroke();
+          break;
+        case 'tiara':
+          ctx.fillStyle = '#f0abfc';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.16, hy - hr + s*0.02);
+          ctx.lineTo(hx - s*0.12, hy - hr - s*0.1);
+          ctx.lineTo(hx - s*0.06, hy - hr - s*0.04);
+          ctx.lineTo(hx, hy - hr - s*0.15);
+          ctx.lineTo(hx + s*0.06, hy - hr - s*0.04);
+          ctx.lineTo(hx + s*0.12, hy - hr - s*0.1);
+          ctx.lineTo(hx + s*0.16, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Centre gem
+          ctx.fillStyle = '#ec4899';
+          ctx.beginPath(); ctx.arc(hx, hy - hr - s*0.08, s*0.02, 0, Math.PI*2); ctx.fill();
+          // Side gems
+          ctx.fillStyle = '#a78bfa';
+          ctx.beginPath(); ctx.arc(hx - s*0.1, hy - hr - s*0.04, s*0.015, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(hx + s*0.1, hy - hr - s*0.04, s*0.015, 0, Math.PI*2); ctx.fill();
+          break;
+        case 'starbadge':
+          ctx.fillStyle = '#fbbf24';
+          const sx = hx + s*0.14, sy = hy - s*0.02;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a = -Math.PI/2 + i * Math.PI*2/5;
+            const ai = a + Math.PI/5;
+            ctx.lineTo(sx + Math.cos(a)*s*0.06, sy + Math.sin(a)*s*0.06);
+            ctx.lineTo(sx + Math.cos(ai)*s*0.025, sy + Math.sin(ai)*s*0.025);
+          }
+          ctx.closePath(); ctx.fill();
           break;
       }
     }
@@ -8418,31 +8587,77 @@
       let html = '<div style="text-align:center;padding:10px 0">' +
         '<div class="gacha-reel-window" id="gachaReelWindow"><div class="gacha-reel-strip" id="gachaReelStrip">' +
         '<div class="gacha-reel-item" style="opacity:.3">🎲</div></div></div>' +
-        '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: 🪙 ' + GACHA_COST + ' per pull</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: 💰 ' + GACHA_COST + ' per pull</div>' +
         '<button class="gacha-pull-btn" id="gachaPullTabBtn" onclick="pullGacha()" ' + (canAfford ? '' : 'disabled') + '>🎲 Pull!</button>' +
         '<button onclick="showGachaPrizeModal()" style="margin-top:10px;padding:8px 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">📋 View Prizes</button>' +
         '<div id="gachaTabResult" style="margin-top:16px;min-height:80px"></div></div>';
       el.innerHTML = html;
     }
 
+    function _drawAccPreviewOnCanvas(cvs, accId) {
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+      const s = w * 0.7;
+      const ho = PET_HEAD_OFFSETS['cat'] || { hx: 0, hy: -0.3, r: 0.28 };
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2 - s * ho.hx, h / 2 + s * 0.1 - s * ho.hy);
+      const hx = s * ho.hx, hy = s * ho.hy;
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.beginPath(); ctx.arc(hx, hy, s * ho.r, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(hx - s*0.22, hy - s*0.18); ctx.lineTo(hx - s*0.16, hy - s*0.38); ctx.lineTo(hx - s*0.06, hy - s*0.22); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(hx + s*0.22, hy - s*0.18); ctx.lineTo(hx + s*0.16, hy - s*0.38); ctx.lineTo(hx + s*0.06, hy - s*0.22); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.arc(hx - s*0.08, hy - s*0.02, s*0.025, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(hx + s*0.08, hy - s*0.02, s*0.025, 0, Math.PI*2); ctx.fill();
+      drawPetAccessory(ctx, 'cat', accId, s);
+      ctx.restore();
+    }
+
     function showGachaPrizeModal() {
       const el = document.getElementById('gachaPrizeModalList');
       if (!el) return;
       const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
-      const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
-      const sorted = [...GACHA_POOL].sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+      const owned = roomData.ownedAccessories || [];
+      const rarityColors = { legendary: '#fbbf24', epic: '#c084fc', rare: '#60a5fa', uncommon: '#34d399', common: 'rgba(255,255,255,.5)' };
+      const rarityLabels = { legendary: '★ Legendary', epic: '✦ Epic', rare: '◆ Rare', uncommon: '● Uncommon', common: '○ Common' };
+      const order = ['legendary','epic','rare','uncommon','common'];
       let html = '';
-      sorted.forEach(item => {
-        const pct = ((item.weight / totalWeight) * 100).toFixed(1);
-        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:5px">' +
-          '<span style="font-size:24px;width:36px;text-align:center">' + item.emoji + '</span>' +
-          '<div style="flex:1"><div style="font-size:13px;color:#fff;font-weight:600">' + item.name + '</div>' +
-          '<div class="gacha-prize-rarity ' + item.rarity + '" style="font-size:10px;margin-top:2px">' + item.rarity + '</div></div>' +
-          '<span style="font-size:12px;color:rgba(255,255,255,.4);font-weight:600">' + pct + '%</span>' +
-          '</div>';
+
+      order.forEach(rarity => {
+        const items = GACHA_POOL.filter(p => p.rarity === rarity);
+        if (!items.length) return;
+        const groupPct = items.reduce((s, i) => s + (i.weight / totalWeight) * 100, 0).toFixed(1);
+
+        html += '<div style="margin-bottom:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+        html += '<span style="font-size:13px;font-weight:700;color:' + rarityColors[rarity] + '">' + rarityLabels[rarity] + '</span>';
+        html += '<span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">' + groupPct + '%</span>';
+        html += '</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+        items.forEach(item => {
+          const pct = ((item.weight / totalWeight) * 100).toFixed(1);
+          const isAcc = item.type === 'accessory';
+          const isOwned = isAcc && owned.includes(item.id);
+          const isExcl = isAcc && (PET_ACCESSORIES.find(a => a.id === item.id) || {}).gachaOnly;
+          html += '<div style="text-align:center;padding:6px 4px;border-radius:8px;background:rgba(255,255,255,.04);min-width:60px;opacity:' + (isOwned ? '0.45' : '1') + '">';
+          if (isAcc) {
+            html += '<canvas class="gacha-preview-cvs" data-acc="' + item.id + '" width="48" height="48" style="width:36px;height:36px;display:block;margin:0 auto 3px"></canvas>';
+          } else {
+            html += '<div style="font-size:24px;line-height:36px;height:36px">' + item.emoji + '</div>';
+          }
+          html += '<div style="font-size:9px;color:#fff;font-weight:600">' + item.name + '</div>';
+          html += '<div style="font-size:8px;color:rgba(255,255,255,.3)">' + pct + '%</div>';
+          if (isOwned) html += '<div style="font-size:8px;color:#34d399">✓</div>';
+          if (isExcl) html += '<div style="font-size:8px;color:#c084fc">★</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
       });
+
       el.innerHTML = html;
       document.getElementById('gachaPrizeOverlay').classList.remove('hidden');
+      el.querySelectorAll('.gacha-preview-cvs').forEach(cvs => _drawAccPreviewOnCanvas(cvs, cvs.dataset.acc));
     }
 
     function spawnGachaConfetti(container, rarity) {
@@ -8485,7 +8700,7 @@
       // Show coin deduction immediately
       document.getElementById('coinAmount').textContent = roomData.coins;
 
-      // Weighted random — determine prize now
+      // Weighted random — pick a single prize
       const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
       let rand = Math.random() * totalWeight;
       let prize = GACHA_POOL[0];
@@ -8494,27 +8709,10 @@
         if (rand <= 0) { prize = item; break; }
       }
 
-      // Apply prize
-      if (prize.type === 'coins') {
-        roomData.coins += prize.value;
-      } else if (prize.type === 'accessory') {
-        if (!(roomData.ownedAccessories || []).includes(prize.value)) {
-          roomData.ownedAccessories = [...(roomData.ownedAccessories || []), prize.value];
-        } else {
-          roomData.coins += 75;
-          prize = { ...prize, name: prize.name + ' (owned → 75 coins)', emoji: '🪙' };
-        }
-      }
-
-      // Save in background (don't await — let animation run immediately)
-      _lastLocalSaveTime = Date.now();
-      saveRoom().then(() => checkAchievements());
-
       // ── Spin animation in reel ──
       const strip = document.getElementById('gachaReelStrip');
       const reelWin = document.getElementById('gachaReelWindow');
       if (strip && reelWin) {
-        // Build reel: 20 random items + prize at end
         const reelCount = 20;
         let reelHtml = '';
         for (let i = 0; i < reelCount; i++) {
@@ -8524,44 +8722,81 @@
         reelHtml += '<div class="gacha-reel-item">' + prize.emoji + '</div>';
         strip.innerHTML = reelHtml;
 
-        // Animate: scroll through all items
         const itemH = 90;
         const totalScroll = reelCount * itemH;
         strip.style.transition = 'none';
         strip.style.transform = 'translateY(0)';
-        strip.offsetHeight; // force reflow
+        strip.offsetHeight;
         strip.style.transition = 'transform 2.5s cubic-bezier(0.12, 0.8, 0.3, 1)';
         strip.style.transform = 'translateY(-' + totalScroll + 'px)';
-
-        // Glow effect on window
         reelWin.style.animation = 'gachaGlow 2.5s ease-in-out';
 
-        // After spin completes, show full prize reveal
         setTimeout(() => {
           reelWin.style.animation = '';
-          // Re-acquire resultEl (original may be stale if DOM was rebuilt)
-          const revealEl = document.getElementById('gachaTabResult');
-          if (revealEl) {
-            const showRarity = prize.rarity !== 'common' && prize.rarity !== 'uncommon';
-            revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
-              '<div class="gacha-prize-emoji">' + prize.emoji + '</div>' +
-              '<div class="gacha-prize-name">' + prize.name + '</div>' +
-              (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
-              '</div>';
-            // Confetti for rare+
-            spawnGachaConfetti(revealEl, prize.rarity);
-          }
-          // Update coin display
-          document.getElementById('coinAmount').textContent = roomData.coins;
           _gachaSpinning = false;
           const pullBtn = document.getElementById('gachaPullTabBtn');
           if (pullBtn) pullBtn.disabled = roomData.coins < GACHA_COST;
-          renderAccessoryShop();
+          revealGachaPrize(prize);
         }, 2700);
       } else {
         _gachaSpinning = false;
-        renderGachaTab();
-        renderAccessoryShop();
+        revealGachaPrize(prize);
+      }
+    }
+
+    async function revealGachaPrize(prize) {
+      const revealEl = document.getElementById('gachaTabResult');
+      if (!revealEl) return;
+      const showRarity = prize.rarity !== 'common' && prize.rarity !== 'uncommon';
+
+      if (prize.type === 'coins') {
+        // Coin prize — add coins
+        roomData.coins += prize.amount;
+        document.getElementById('coinAmount').textContent = roomData.coins;
+        _lastLocalSaveTime = Date.now();
+        saveRoom().then(() => checkAchievements());
+        revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
+          '<div class="gacha-prize-emoji" style="font-size:48px">💰</div>' +
+          (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
+          '<div class="gacha-prize-name">' + prize.name + '</div>' +
+          '<div style="font-size:13px;color:#f7c97e;margin-top:6px">+' + prize.amount + ' coins!</div></div>';
+        spawnGachaConfetti(revealEl, prize.rarity);
+
+      } else if (prize.type === 'accessory') {
+        const owned = roomData.ownedAccessories || [];
+        const acc = PET_ACCESSORIES.find(a => a.id === prize.id);
+
+        if (owned.includes(prize.id)) {
+          // Already owned — give coin consolation based on rarity
+          const refund = { common: 25, uncommon: 50, rare: 100, epic: 200, legendary: 400 }[prize.rarity] || 25;
+          roomData.coins += refund;
+          document.getElementById('coinAmount').textContent = roomData.coins;
+          _lastLocalSaveTime = Date.now();
+          saveRoom().then(() => checkAchievements());
+          revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
+            '<canvas class="gacha-reveal-cvs" data-acc="' + prize.id + '" width="80" height="80" style="width:80px;height:80px;margin:0 auto 6px;display:block"></canvas>' +
+            (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
+            '<div class="gacha-prize-name">' + prize.name + '</div>' +
+            '<div style="font-size:12px;color:#f7c97e;margin-top:4px">Already owned — +' + refund + ' coins</div></div>';
+          const rcvs = revealEl.querySelector('.gacha-reveal-cvs');
+          if (rcvs) _drawAccPreviewOnCanvas(rcvs, prize.id);
+        } else {
+          // New accessory — add to collection
+          roomData.ownedAccessories = [...owned, prize.id];
+          _lastLocalSaveTime = Date.now();
+          await saveRoom();
+          checkAchievements();
+          showToast('🎉 Got ' + (acc ? acc.name : prize.id) + '!', 'success');
+          revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
+            '<canvas class="gacha-reveal-cvs" data-acc="' + prize.id + '" width="80" height="80" style="width:80px;height:80px;margin:0 auto 6px;display:block;animation:gachaFloat 2s ease-in-out infinite"></canvas>' +
+            (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
+            '<div class="gacha-prize-name">' + (acc ? acc.name : prize.id) + '</div>' +
+            '<div style="font-size:12px;color:#34d399;margin-top:4px">Added to collection! Equip it on your pet in the Accessories tab.</div></div>';
+          const rcvs = revealEl.querySelector('.gacha-reveal-cvs');
+          if (rcvs) _drawAccPreviewOnCanvas(rcvs, prize.id);
+          renderAccessoryShop();
+        }
+        spawnGachaConfetti(revealEl, prize.rarity);
       }
     }
 
@@ -8648,7 +8883,7 @@
               ov.innerHTML = '<div class="chess-invite-box">' +
                 '<h3>♟️ Chess Challenge!</h3>' +
                 '<div class="ci-from">' + (inv.fromName||'Someone') + ' invites you</div>' +
-                '<div class="ci-bet">🪙 ' + inv.bet + ' coins</div>' +
+                '<div class="ci-bet">💰 ' + inv.bet + ' coins</div>' +
                 '<div class="ci-buttons">' +
                   '<button class="ci-reject">Reject</button>' +
                   '<button class="ci-accept">Accept</button>' +
