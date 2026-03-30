@@ -512,6 +512,193 @@ lightbox.addEventListener('wheel', (e) => {
     lbUpdateTransform(false);
 }, { passive: false });
 
+/* ── Poll creator ── */
+const pollBtnEl = document.getElementById('pollBtn');
+const pollCreator = document.getElementById('pollCreator');
+const pollCreatorClose = document.getElementById('pollCreatorClose');
+const pollQuestionInput = document.getElementById('pollQuestionInput');
+const pollOptionsList = document.getElementById('pollOptionsList');
+const pollAddOptionBtn = document.getElementById('pollAddOptionBtn');
+const pollSubmitBtn = document.getElementById('pollSubmitBtn');
+
+pollBtnEl.addEventListener('click', () => {
+    pollCreator.classList.toggle('show');
+    pollBtnEl.classList.toggle('active', pollCreator.classList.contains('show'));
+    if (pollCreator.classList.contains('show')) pollQuestionInput.focus();
+});
+pollCreatorClose.addEventListener('click', () => {
+    pollCreator.classList.remove('show');
+    pollBtnEl.classList.remove('active');
+});
+
+pollAddOptionBtn.addEventListener('click', () => {
+    const count = pollOptionsList.querySelectorAll('.poll-option-input').length;
+    if (count >= 10) return showToast('Max 10 options', 'error');
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'poll-option-input';
+    inp.placeholder = 'Option ' + (count + 1);
+    inp.maxLength = 100;
+    pollOptionsList.appendChild(inp);
+    inp.focus();
+});
+
+pollSubmitBtn.addEventListener('click', async () => {
+    const question = pollQuestionInput.value.trim();
+    if (!question) return showToast('Enter a question', 'error');
+    const inputs = pollOptionsList.querySelectorAll('.poll-option-input');
+    const options = [];
+    inputs.forEach(inp => {
+        const v = inp.value.trim();
+        if (v) options.push(v);
+    });
+    if (options.length < 2) return showToast('Add at least 2 options', 'error');
+    pollSubmitBtn.disabled = true;
+    try {
+        suppressNextNotif = true;
+        shouldScrollToBottom = true;
+        await answersRef.add({
+            ts: Date.now(),
+            text: question,
+            type: 'poll',
+            pollOptions: options,
+            pollVotes: {}
+        });
+        pollQuestionInput.value = '';
+        inputs.forEach(inp => inp.value = '');
+        // Reset to 2 inputs
+        while (pollOptionsList.children.length > 2) pollOptionsList.lastChild.remove();
+        pollCreator.classList.remove('show');
+        pollBtnEl.classList.remove('active');
+        showToast('Poll posted!', 'success');
+    } catch {
+        showToast('Failed to post poll', 'error');
+    } finally {
+        pollSubmitBtn.disabled = false;
+    }
+});
+
+async function pollVote(docId, optionIndex) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return showToast('Sign in to vote', 'error');
+    try {
+        await answersRef.doc(docId).update({
+            ['pollVotes.' + uid]: optionIndex
+        });
+    } catch {
+        showToast('Vote failed', 'error');
+    }
+}
+
+async function pollAddOption(docId, text) {
+    if (!text || text.length > 100) return;
+    try {
+        await answersRef.doc(docId).update({
+            pollOptions: firebase.firestore.FieldValue.arrayUnion(text)
+        });
+        showToast('Option added!', 'success');
+    } catch {
+        showToast('Failed to add option', 'error');
+    }
+}
+
+function buildPollContent(a) {
+    const container = document.createElement('div');
+    container.className = 'poll-content';
+
+    const q = document.createElement('div');
+    q.className = 'poll-question';
+    q.textContent = '📊 ' + (a.text || 'Poll');
+    container.appendChild(q);
+
+    const uid = auth.currentUser?.uid;
+    const votes = a.pollVotes || {};
+    const myVote = uid && votes[uid] !== undefined ? votes[uid] : -1;
+
+    // Count votes per option
+    const counts = {};
+    let totalVotes = 0;
+    Object.values(votes).forEach(idx => {
+        counts[idx] = (counts[idx] || 0) + 1;
+        totalVotes++;
+    });
+
+    const optionsWrap = document.createElement('div');
+    optionsWrap.className = 'poll-options';
+
+    (a.pollOptions || []).forEach((opt, i) => {
+        const row = document.createElement('div');
+        row.className = 'poll-option-row' + (myVote === i ? ' voted' : '');
+        row.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pollVote(a.id, i);
+        });
+
+        const count = counts[i] || 0;
+        const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+
+        const bar = document.createElement('div');
+        bar.className = 'poll-option-bar';
+        bar.style.width = pct + '%';
+        row.appendChild(bar);
+
+        if (myVote === i) {
+            const check = document.createElement('span');
+            check.className = 'poll-check';
+            check.textContent = '✓';
+            row.appendChild(check);
+        }
+
+        const text = document.createElement('span');
+        text.className = 'poll-option-text';
+        text.textContent = opt;
+        row.appendChild(text);
+
+        const countEl = document.createElement('span');
+        countEl.className = 'poll-vote-count';
+        countEl.textContent = count + (totalVotes > 0 ? ' (' + pct + '%)' : '');
+        row.appendChild(countEl);
+
+        optionsWrap.appendChild(row);
+    });
+
+    container.appendChild(optionsWrap);
+
+    // Total votes
+    const total = document.createElement('div');
+    total.className = 'poll-total';
+    total.textContent = totalVotes + ' vote' + (totalVotes !== 1 ? 's' : '');
+    container.appendChild(total);
+
+    // Add option row
+    const addRow = document.createElement('div');
+    addRow.className = 'poll-add-row';
+    const addInput = document.createElement('input');
+    addInput.type = 'text';
+    addInput.placeholder = 'Add an option…';
+    addInput.maxLength = 100;
+    addInput.addEventListener('click', (e) => e.stopPropagation());
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+ Add';
+    addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = addInput.value.trim();
+        if (!val) return;
+        if ((a.pollOptions || []).includes(val)) return showToast('Option already exists', 'error');
+        pollAddOption(a.id, val);
+        addInput.value = '';
+    });
+    addInput.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
+    });
+    addRow.appendChild(addInput);
+    addRow.appendChild(addBtn);
+    container.appendChild(addRow);
+
+    return container;
+}
+
 /* ── Render bubbles ── */
 let knownIds = new Set();
 
@@ -541,6 +728,11 @@ function render(items) {
         hpFill.style.background = pct > 50 ? '#58c5b5' : pct > 20 ? '#f2a154' : '#e06377';
         const hpLabel = existing.querySelector('.bubble-hp-label');
         if (hpLabel) hpLabel.textContent = 'HP ' + Math.round(pct) + '%';
+        }
+        // Update poll content live
+        if (a.type === 'poll') {
+        const oldPoll = existing.querySelector('.poll-content');
+        if (oldPoll) oldPoll.replaceWith(buildPollContent(a));
         }
         updateReplies(existing, a);
         updateReactions(existing, a);
@@ -607,22 +799,27 @@ function render(items) {
     hpWrapper.appendChild(hpBar);
     bubble.appendChild(hpWrapper);
 
-    if (a.image) {
-        const img = document.createElement('img');
-        img.className = 'bubble-img';
-        img.src = a.image;
-        img.alt = 'image';
-        img.addEventListener('click', (e) => {
-        e.stopPropagation();
-        lightboxImg.src = a.image;
-        lightbox.classList.add('show');
-        });
-        bubble.appendChild(img);
-    }
+    if (a.type === 'poll') {
+        // Poll bubble — render poll UI instead of text/image
+        bubble.appendChild(buildPollContent(a));
+    } else {
+        if (a.image) {
+            const img = document.createElement('img');
+            img.className = 'bubble-img';
+            img.src = a.image;
+            img.alt = 'image';
+            img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            lightboxImg.src = a.image;
+            lightbox.classList.add('show');
+            });
+            bubble.appendChild(img);
+        }
 
-    const txt = document.createElement('span');
-    safeTextWithBreaks(txt, a.text);
-    bubble.appendChild(txt);
+        const txt = document.createElement('span');
+        safeTextWithBreaks(txt, a.text);
+        bubble.appendChild(txt);
+    }
 
     // Reactions row
     const reactionsRow = buildReactionsRow(a);
@@ -1731,7 +1928,7 @@ answersRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
     snapshot.forEach((doc) => {
     const d = doc.data();
     if (now - d.ts < SIX_HOURS) {
-        items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [], reactions: d.reactions ?? {} });
+        items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [], reactions: d.reactions ?? {}, type: d.type ?? null, pollOptions: d.pollOptions ?? null, pollVotes: d.pollVotes ?? {} });
     }
     });
     // Cache to localStorage (strip large images from replies to save space)

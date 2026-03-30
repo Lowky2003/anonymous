@@ -7458,15 +7458,31 @@
       _giftAmount = amount;
       document.querySelectorAll('.gift-amt').forEach(e => e.classList.remove('selected'));
       el.classList.add('selected');
-      document.getElementById('giftSendBtn').disabled = (roomData.coins < amount);
+      // Always use own coins for affordability check (roomData.coins may be visited user's)
+      document.getElementById('giftSendBtn').disabled = false; // enabled, actual balance checked on send
     }
 
     document.getElementById('giftSendBtn').addEventListener('click', async () => {
-      if (!_giftTargetUid || _giftAmount <= 0 || roomData.coins < _giftAmount) return;
+      if (!_giftTargetUid || _giftAmount <= 0) return;
       if (_giftTargetUid === currentUid) return showToast('Can\'t gift yourself!', 'error');
-      roomData.coins -= _giftAmount;
-      roomData.giftsGiven = (roomData.giftsGiven || 0) + 1;
-      await saveRoom();
+
+      // Always read sender's own coins fresh to avoid visiting-room data confusion
+      const senderSnap = await userDocRef(currentUid).get();
+      const senderCoins = senderSnap.exists ? (senderSnap.data().coins ?? 0) : 0;
+      if (senderCoins < _giftAmount) return showToast('Not enough coins!', 'error');
+
+      // Deduct from sender's own doc directly
+      await userDocRef(currentUid).update({
+        coins: firebase.firestore.FieldValue.increment(-_giftAmount),
+        giftsGiven: firebase.firestore.FieldValue.increment(1),
+        updatedAt: Date.now()
+      });
+      // Update local roomData only if viewing own room
+      if (viewingUid === currentUid) {
+        roomData.coins -= _giftAmount;
+        roomData.giftsGiven = (roomData.giftsGiven || 0) + 1;
+        document.getElementById('coinAmount').textContent = roomData.coins;
+      }
       // Add coins to target
       await db.collection('rooms').doc(_giftTargetUid).update({
         coins: firebase.firestore.FieldValue.increment(_giftAmount),
@@ -7615,6 +7631,7 @@
     }
 
     async function equipPetAcc(petId, accId) {
+      if (viewingUid !== currentUid) return;
       roomData.petAccessories = roomData.petAccessories || {};
       roomData.petAccessories[petId] = accId;
       _lastPetKey = '';
@@ -7627,6 +7644,7 @@
     }
 
     async function removePetAcc(petId) {
+      if (viewingUid !== currentUid) return;
       roomData.petAccessories = roomData.petAccessories || {};
       delete roomData.petAccessories[petId];
       _lastPetKey = '';
@@ -8297,6 +8315,7 @@
     }
 
     async function pullGacha() {
+      if (viewingUid !== currentUid) return;
       if (_gachaSpinning) return;
       if (roomData.coins < GACHA_COST) return showToast('Not enough coins!', 'error');
       _gachaSpinning = true;

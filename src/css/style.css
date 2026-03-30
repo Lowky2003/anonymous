@@ -1938,3 +1938,209 @@ body.sidebar-open .bubble-wrap {
 .chess-invite-box .ci-accept{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#3ab0a2,#2d8f83);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .chess-invite-box .ci-reject{flex:1;padding:12px;border:1px solid rgba(255,80,80,.3);border-radius:12px;background:transparent;color:#ff6b6b;font-size:15px;font-weight:600;cursor:pointer}
 @keyframes chessInvFade{from{opacity:0}to{opacity:1}}
+
+/* ═══════════════════════════════════════════
+   Poll feature
+   ═══════════════════════════════════════════ */
+/* Poll creation button */
+.poll-btn {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.poll-btn:hover { background: rgba(255,255,255,0.18); }
+.poll-btn:active { transform: scale(0.92); }
+.poll-btn.active { background: rgba(123,94,167,0.4); color: #c8b6ff; }
+
+/* Poll creator form */
+.poll-creator {
+    position: fixed;
+    bottom: 76px;
+    left: 14px;
+    right: 14px;
+    max-width: 420px;
+    z-index: 110;
+    background: rgba(20, 16, 50, 0.97);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+    display: none;
+    flex-direction: column;
+    padding: 0 14px 14px;
+}
+.poll-creator.show { display: flex; }
+.poll-creator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #c8b6ff;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 10px;
+}
+.poll-creator-close {
+    width: 28px; height: 28px;
+    border: none; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.poll-creator-close:hover { background: rgba(255,255,255,0.15); }
+.poll-question-input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    color: #fff; font-size: 14px;
+    outline: none; font-family: inherit;
+    margin-bottom: 8px;
+}
+.poll-question-input::placeholder { color: rgba(255,255,255,0.35); }
+.poll-question-input:focus { border-color: rgba(138,120,255,0.5); }
+.poll-options-list {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 8px;
+}
+.poll-option-input {
+    width: 100%; padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: #fff; font-size: 13px;
+    outline: none; font-family: inherit;
+}
+.poll-option-input::placeholder { color: rgba(255,255,255,0.3); }
+.poll-option-input:focus { border-color: rgba(138,120,255,0.4); }
+.poll-add-option-btn {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-size: 12px; cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+}
+.poll-add-option-btn:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+.poll-submit-btn {
+    width: 100%; padding: 10px;
+    border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+    color: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+}
+.poll-submit-btn:hover { opacity: 0.9; }
+.poll-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Poll inside bubble */
+.poll-question {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+.poll-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.poll-option-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+}
+.poll-option-row:hover { background: rgba(255,255,255,0.08); }
+.poll-option-row.voted {
+    border-color: rgba(200,182,255,0.4);
+    background: rgba(123,94,167,0.12);
+}
+.poll-option-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: rgba(123,94,167,0.15);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+    pointer-events: none;
+}
+.poll-option-row.voted .poll-option-bar {
+    background: rgba(123,94,167,0.25);
+}
+.poll-option-text {
+    position: relative;
+    flex: 1;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    z-index: 1;
+}
+.poll-vote-count {
+    position: relative;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 600;
+    z-index: 1;
+    white-space: nowrap;
+}
+.poll-check {
+    position: relative;
+    font-size: 12px;
+    z-index: 1;
+}
+.poll-total {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin-top: 2px;
+}
+.poll-add-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+.poll-add-row input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-size: 12px;
+    outline: none;
+    font-family: inherit;
+}
+.poll-add-row input::placeholder { color: rgba(255,255,255,0.3); }
+.poll-add-row button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(123,94,167,0.3);
+    color: #c8b6ff;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.poll-add-row button:hover { background: rgba(123,94,167,0.5); }

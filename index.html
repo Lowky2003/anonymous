@@ -29,6 +29,17 @@
     body.light-theme .restore-btn { color: rgba(0,0,0,0.5) !important; border-color: rgba(0,0,0,0.12) !important; }
     body.light-theme .reset-info { color: rgba(0,0,0,0.4) !important; }
     body.light-theme .vote-empty { color: rgba(0,0,0,0.3) !important; }
+    body.light-theme .poll-question { color: #222 !important; }
+    body.light-theme .poll-option-row { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.08) !important; }
+    body.light-theme .poll-option-row:hover { background: rgba(0,0,0,0.07) !important; }
+    body.light-theme .poll-option-row.voted { border-color: rgba(90,70,180,0.4) !important; background: rgba(90,70,180,0.06) !important; }
+    body.light-theme .poll-option-text { color: #333 !important; }
+    body.light-theme .poll-vote-count { color: rgba(0,0,0,0.5) !important; }
+    body.light-theme .poll-total { color: rgba(0,0,0,0.4) !important; }
+    body.light-theme .poll-add-row input { background: rgba(0,0,0,0.04) !important; color: #333 !important; border-color: rgba(0,0,0,0.1) !important; }
+    body.light-theme .poll-creator { background: rgba(245,243,250,0.97) !important; border-color: rgba(0,0,0,0.1) !important; }
+    body.light-theme .poll-creator-header { color: #333 !important; border-bottom-color: rgba(0,0,0,0.06) !important; }
+    body.light-theme .poll-question-input, body.light-theme .poll-option-input { background: rgba(0,0,0,0.04) !important; color: #333 !important; border-color: rgba(0,0,0,0.1) !important; }
   </style>
 </head>
 <body>
@@ -267,9 +278,25 @@
   <div class="input-area">
     <button class="attach-btn" id="attachBtn" title="Attach image">📷</button>
     <button class="gif-btn" id="gifBtn" title="Search GIFs">GIF</button>
+    <button class="poll-btn" id="pollBtn" title="Create a poll">📊</button>
     <input type="file" id="imageInput" accept="image/*" style="display:none">
     <textarea id="answerInput" placeholder="Type your anonymous answer…" maxlength="500"></textarea>
     <button id="sendBtn">Send</button>
+  </div>
+
+  <!-- Poll creation form -->
+  <div class="poll-creator" id="pollCreator">
+    <div class="poll-creator-header">
+      <span>📊 Create a Poll</span>
+      <button class="poll-creator-close" id="pollCreatorClose">✕</button>
+    </div>
+    <input type="text" class="poll-question-input" id="pollQuestionInput" placeholder="Ask a question…" maxlength="200">
+    <div class="poll-options-list" id="pollOptionsList">
+      <input type="text" class="poll-option-input" placeholder="Option 1" maxlength="100">
+      <input type="text" class="poll-option-input" placeholder="Option 2" maxlength="100">
+    </div>
+    <button class="poll-add-option-btn" id="pollAddOptionBtn">+ Add option</button>
+    <button class="poll-submit-btn" id="pollSubmitBtn">📊 Post Poll</button>
   </div>
 
   <div class="gif-picker" id="gifPicker">
