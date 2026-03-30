@@ -582,9 +582,18 @@ async function pollVote(docId, optionIndex) {
     const uid = auth.currentUser?.uid;
     if (!uid) return showToast('Sign in to vote', 'error');
     try {
-        await answersRef.doc(docId).update({
-            ['pollVotes.' + uid]: optionIndex
-        });
+        const doc = await answersRef.doc(docId).get();
+        const votes = doc.data()?.pollVotes || {};
+        if (votes[uid] === optionIndex) {
+            // Cancel vote
+            await answersRef.doc(docId).update({
+                ['pollVotes.' + uid]: firebase.firestore.FieldValue.delete()
+            });
+        } else {
+            await answersRef.doc(docId).update({
+                ['pollVotes.' + uid]: optionIndex
+            });
+        }
     } catch {
         showToast('Vote failed', 'error');
     }
