@@ -46,13 +46,23 @@ googleLoginBtn.addEventListener('click', async () => {
 });
 
 let _lastSeenInterval = null;
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
     loginOverlay.classList.remove('loading');
     if (user) {
     loginOverlay.classList.add('hidden');
     appContent.classList.add('visible');
     // Sync displayName to rooms collection so chess invite list shows correct name
-    const customName = localStorage.getItem('flappy_custom_name_' + user.uid);
+    let customName = localStorage.getItem('flappy_custom_name_' + user.uid);
+    // If no local custom name, try fetching from Firestore (cross-device sync)
+    if (!customName) {
+        try {
+            const roomDoc = await db.collection('rooms').doc(user.uid).get();
+            if (roomDoc.exists && roomDoc.data().displayName) {
+                customName = roomDoc.data().displayName;
+                localStorage.setItem('flappy_custom_name_' + user.uid, customName);
+            }
+        } catch (e) {}
+    }
     const displayName = customName || user.displayName || user.email?.split('@')[0] || 'Anonymous';
     localStorage.setItem('flappy_name', displayName);
     db.collection('rooms').doc(user.uid).set({ displayName: displayName, lastSeen: Date.now() }, { merge: true }).catch(() => {});
