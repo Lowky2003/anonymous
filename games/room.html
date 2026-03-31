@@ -658,6 +658,22 @@
     .gacha-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
     #gachaPrizeOverlay .gacha-box::-webkit-scrollbar{display:none}
 
+    /* ── Pet Swap modal ── */
+    .swap-overlay{position:fixed;inset:0;z-index:9350;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+    .swap-overlay.hidden{display:none}
+    .swap-box{width:90%;max-width:380px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
+    .swap-box h3{font-size:18px;font-weight:800;margin-bottom:6px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .swap-desc{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:16px}
+    .swap-pet-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .swap-pet-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .2s}
+    .swap-pet-card:hover{background:rgba(255,255,255,.1);transform:translateX(4px);border-color:rgba(247,201,126,.3)}
+    .swap-pet-emoji{font-size:32px}
+    .swap-pet-info{flex:1;text-align:left}
+    .swap-pet-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.9)}
+    .swap-pet-stats{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+    .swap-pet-arrow{color:rgba(255,255,255,.25);font-size:18px}
+    .swap-close{margin-top:8px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
+
     /* ── Leaderboard ── */
     .lb-overlay{position:fixed;inset:0;z-index:9100;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .lb-overlay.hidden{display:none}
@@ -966,6 +982,16 @@
       <div class="lb-tabs" id="lbTabs"></div>
       <div class="lb-list" id="lbList"></div>
       <button class="lb-close" id="lbCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Pet Swap modal -->
+  <div class="swap-overlay hidden" id="swapOverlay">
+    <div class="swap-box">
+      <h3>🔄 Swap Pet</h3>
+      <div class="swap-desc" id="swapDesc">Choose which pet to replace:</div>
+      <div class="swap-pet-list" id="swapPetList"></div>
+      <button class="swap-close" id="swapCloseBtn">Cancel</button>
     </div>
   </div>
 
@@ -1680,11 +1706,12 @@
           roomData.displayName = getPlayerName();
           saveRoom();
         }
-        // Hide loading overlay
+        // Hide loading overlay and always render on first snapshot
         const _loadOv = document.getElementById('roomLoadingOverlay');
+        const _wasFirstLoad = _loadOv && _loadOv.style.display !== 'none';
         if (_loadOv) _loadOv.style.display = 'none';
-        // Skip renderAll if a local save just happened (prevents jump)
-        if (Date.now() - _lastLocalSaveTime < 2000) return;
+        // Always render on first load; skip only if a local save just triggered this snapshot
+        if (!_wasFirstLoad && Date.now() - _lastLocalSaveTime < 2000) return;
         renderAllDebounced();
       }, (err) => {
         console.error('Room onSnapshot error:', err);
@@ -1883,7 +1910,12 @@
           '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
           '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
             (canAfford && !roomFull ? '' : 'disabled') + '>🐾 Adopt</button>' +
-          (roomFull ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Room full (max 2)</div>' : '') +
+          (roomFull
+            ? '<button class="shop-btn" style="margin-top:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)" ' +
+              (canAfford ? '' : 'disabled') +
+              ' onclick="swapPet(\''+item.id+'\')">\uD83D\uDD04 Swap</button>' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Room full (max 2)</div>'
+            : '') +
           '</div>';
       }).join('');
     }
@@ -2930,6 +2962,80 @@
       renderAll();
       showToast('Removed from room!', 'success');
     }
+
+    /* ── Pet Swap — pick which active pet to replace with a new one ── */
+    let _swapNewTypeId = null;
+
+    function swapPet(newTypeId) {
+      if (viewingUid !== currentUid) return;
+      const petDef = PETS.find(p => p.id === newTypeId);
+      if (!petDef) return;
+      if (roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
+
+      _swapNewTypeId = newTypeId;
+      const overlay = document.getElementById('swapOverlay');
+      const listEl = document.getElementById('swapPetList');
+      document.getElementById('swapDesc').textContent =
+        'Replace a pet with ' + petDef.emoji + ' ' + petDef.name + ' (' + petDef.cost + ' coins):';
+
+      // Build list of current pets to choose which one to replace
+      listEl.innerHTML = roomData.pets.map(p => {
+        const def = PETS.find(d => d.id === p.type);
+        const emoji = def ? def.emoji : '❓';
+        const affTitle = getAffectionTitle(p.affection ?? 0).title;
+        return '<div class="swap-pet-card" onclick="confirmSwap(\'' + p.id + '\')">'
+          + '<span class="swap-pet-emoji">' + emoji + '</span>'
+          + '<div class="swap-pet-info">'
+          + '<div class="swap-pet-name">' + (p.name || def?.name || p.type) + '</div>'
+          + '<div class="swap-pet-stats">♥ ' + (p.affection ?? 0) + ' (' + affTitle + ') · 🍖 ' + (p.hunger ?? 100) + '%</div>'
+          + '</div>'
+          + '<span class="swap-pet-arrow">→</span>'
+          + '</div>';
+      }).join('');
+
+      overlay.classList.remove('hidden');
+    }
+
+    async function confirmSwap(replacePetId) {
+      if (!_swapNewTypeId) return;
+      const petDef = PETS.find(p => p.id === _swapNewTypeId);
+      if (!petDef || roomData.coins < petDef.cost) {
+        document.getElementById('swapOverlay').classList.add('hidden');
+        return showToast('Not enough coins!', 'error');
+      }
+
+      // Remove the old pet instance
+      roomData.pets = roomData.pets.filter(p => p.id !== replacePetId);
+
+      // Deduct cost and create new pet instance
+      roomData.coins -= petDef.cost;
+      const newPet = {
+        id: makePetId(), type: _swapNewTypeId, name: petDef.name,
+        hunger: 100, thirst: 100, affection: 0,
+        color: PET_COLORS[_swapNewTypeId] ? PET_COLORS[_swapNewTypeId][0].key : null,
+        active: true, accessory: null
+      };
+      roomData.pets.push(newPet);
+
+      _swapNewTypeId = null;
+      document.getElementById('swapOverlay').classList.add('hidden');
+      _lastPetKey = ''; // Force pet canvas redraw
+      await saveRoom();
+      renderAll();
+      showToast('Swapped to ' + petDef.emoji + ' ' + petDef.name + '!', 'success');
+    }
+
+    // Close swap modal
+    document.getElementById('swapCloseBtn').addEventListener('click', () => {
+      document.getElementById('swapOverlay').classList.add('hidden');
+      _swapNewTypeId = null;
+    });
+    document.getElementById('swapOverlay').addEventListener('click', (e) => {
+      if (e.target.id === 'swapOverlay') {
+        document.getElementById('swapOverlay').classList.add('hidden');
+        _swapNewTypeId = null;
+      }
+    });
 
     async function setPetColor(petInstanceId, colorKey) {
       if (viewingUid !== currentUid) return;
