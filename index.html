@@ -108,9 +108,60 @@
     }
     body.light-theme .daily-quote-label { color: rgba(168,85,247,0.5); }
     body.light-theme .daily-quote-text { color: rgba(0,0,0,0.55); }
+
+    /* ── Access Code Gate ── */
+    .access-gate {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #16213e 100%);
+    }
+    .access-gate.hidden { display: none; }
+    .access-gate-box {
+      text-align: center;
+      padding: 40px 32px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      max-width: 360px;
+      width: 90%;
+    }
+    .access-gate-icon { font-size: 48px; margin-bottom: 12px; }
+    .access-gate-box h2 { color: #fff; font-size: 20px; margin: 0 0 8px; }
+    .access-gate-box p { color: rgba(255,255,255,0.5); font-size: 13px; margin: 0 0 20px; }
+    .access-code-input {
+      width: 100%; box-sizing: border-box;
+      padding: 12px 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #fff; font-size: 15px; text-align: center;
+      outline: none; transition: border-color 0.2s;
+    }
+    .access-code-input:focus { border-color: rgba(168,85,247,0.5); }
+    .access-code-input::placeholder { color: rgba(255,255,255,0.3); }
+    .access-enter-btn {
+      margin-top: 14px; width: 100%; padding: 12px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: #fff; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .access-enter-btn:hover { opacity: 0.85; }
+    .access-error { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 18px; }
   </style>
 </head>
 <body>
+
+  <!-- Access code gate — must enter correct code to proceed -->
+  <div class="access-gate" id="accessGate">
+    <div class="access-gate-box">
+      <div class="access-gate-icon">🔑</div>
+      <h2>Enter Access Code</h2>
+      <p>This site requires an access code to enter.</p>
+      <input type="password" class="access-code-input" id="accessCodeInput" placeholder="Enter code…" autocomplete="off">
+      <button class="access-enter-btn" id="accessEnterBtn">Enter</button>
+      <div class="access-error" id="accessError"></div>
+    </div>
+  </div>
 
   <!-- Login gate -->
   <div class="login-overlay loading" id="loginOverlay">
@@ -464,6 +515,39 @@
       if (el && typeof getDailyQuote === 'function') {
         el.textContent = getDailyQuote();
       }
+    })();
+
+    // ── Access Code Gate ──
+    (function() {
+      var ACCESS_CODE_KEY = 'access_code_verified';
+      var gate = document.getElementById('accessGate');
+      var input = document.getElementById('accessCodeInput');
+      var btn = document.getElementById('accessEnterBtn');
+      var errorEl = document.getElementById('accessError');
+
+      // If already verified, hide the gate immediately
+      if (localStorage.getItem(ACCESS_CODE_KEY) === 'true') {
+        gate.classList.add('hidden');
+        return;
+      }
+
+      function verifyCode() {
+        var code = (input.value || '').trim();
+        if (code === 'PbgoldMisTouchFishWeb') {
+          localStorage.setItem(ACCESS_CODE_KEY, 'true');
+          gate.classList.add('hidden');
+          errorEl.textContent = '';
+        } else {
+          errorEl.textContent = 'Incorrect code. Try again.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      btn.addEventListener('click', verifyCode);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') verifyCode();
+      });
     })();
   </script>
 </body>
