@@ -2,41 +2,183 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Room documents — each user owns their room (doc ID = uid)
-    match /rooms/{uid} {
-      // Anyone can read (for visiting rooms)
-      allow read: if request.auth != null;
-
-      // Only the document owner can write
-      allow create, update: if request.auth != null
-                            && request.auth.uid == uid
-                            && validateRoomData(request.resource.data);
-
-      allow delete: if false; // Prevent accidental deletion
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    // Add developer UIDs here to grant dev access
+    function isDeveloper(uid) {
+      return uid in [
+        'HClZmAeuEaUVjHqUaFLFFMTMQnd2'
+      ];
     }
 
-    function validateRoomData(data) {
-      return data.coins is number
-          && data.coins >= 0
-          // pets: array of pet instances
-          && data.pets is list
-          && data.pets.size() <= 20  // reasonable pet limit
-          // plant fields
-          && (data.plant == null || data.plant is string)
-          && data.plantLevels is map
-          && data.ownedPlants is list
-          // decor fields
-          && data.ownedDecors is list
-          && data.placedDecors is list
-          && data.ownedWalls is list
-          && data.wallPattern is string
-          && data.ownedWindows is list
-          && data.windowStyle is string
-          // misc
-          && data.ownedAccessories is list
-          && data.displayName is string
-          && data.displayName.size() <= 30
-          && data.updatedAt is number;
+    // ═══════════════════════════════════════
+    // 1. ROOMS — user profiles / virtual rooms
+    // ═══════════════════════════════════════
+    match /rooms/{uid} {
+      allow read: if isAuth();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid)
+                    || (isAuth()
+                        && request.resource.data.diff(resource.data)
+                           .affectedKeys()
+                           .hasOnly(['coins', 'giftsReceived']));
+      allow delete: if false;
+
+      match /guestbook/{msgId} {
+        allow read: if isAuth();
+        allow create: if isAuth()
+                      && request.resource.data.fromUid == request.auth.uid;
+        allow update, delete: if isAuth()
+                              && resource.data.fromUid == request.auth.uid;
+
+        match /replies/{replyId} {
+          allow read: if isAuth();
+          allow create: if isAuth()
+                        && request.resource.data.fromUid == request.auth.uid;
+          allow update, delete: if isAuth()
+                                && resource.data.fromUid == request.auth.uid;
+        }
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // 2. ANSWERS — bubble board / polls
+    // ═══════════════════════════════════════
+    match /answers/{docId} {
+      allow read, write: if isAuth();
+    }
+
+    // ═══════════════════════════════════════
+    // 3. FOOD SUGGESTIONS
+    // ═══════════════════════════════════════
+    match /food_suggestions/{docId} {
+      allow read, write: if isAuth();
+    }
+
+    // ═══════════════════════════════════════
+    // 4. LEADERBOARDS — UID-keyed (2048, snake, blockblast)
+    // ═══════════════════════════════════════
+    match /leaderboard_2048/{uid} {
+      allow read: if isAuth();
+      allow write: if isOwner(uid);
+    }
+    match /leaderboard_snake/{uid} {
+      allow read: if isAuth();
+      allow write: if isOwner(uid);
+    }
+    match /leaderboard_blockblast/{uid} {
+      allow read: if isAuth();
+      allow write: if isOwner(uid);
+    }
+
+    // ═══════════════════════════════════════
+    // 5. LEADERBOARDS — name-keyed (flappy, tetris)
+    //    Doc ID = player name, not UID
+    // ═══════════════════════════════════════
+    match /leaderboard_flappy/{nameId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+    match /leaderboard_tetris/{nameId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+
+    // ═══════════════════════════════════════
+    // 6. APP STATE — spin result, countdown
+    // ═══════════════════════════════════════
+    match /app_state/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+
+    // ═══════════════════════════════════════
+    // 7. MOOD CHECK-INS
+    // ═══════════════════════════════════════
+    match /mood_checkins/{dateId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+
+      match /voters/{odaUid} {
+        allow read: if isAuth();
+        allow write: if isOwner(odaUid);
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // 8. CHESS INVITES
+    // ═══════════════════════════════════════
+    match /chess_invites/{inviteId} {
+      allow read: if isAuth();
+      allow create: if isAuth()
+                    && request.resource.data.fromUid == request.auth.uid;
+      allow update: if isAuth()
+                    && (resource.data.toUid == request.auth.uid
+                        || resource.data.fromUid == request.auth.uid);
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════
+    // 9. CHESS GAMES
+    // ═══════════════════════════════════════
+    match /chess_games/{gameId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update: if isAuth();
+      allow delete: if isAuth()
+                    && resource.data.hostUid == request.auth.uid;
+    }
+
+    // ═══════════════════════════════════════
+    // 10. CHESS PRESENCE
+    // ═══════════════════════════════════════
+    match /chess_presence/{uid} {
+      allow read: if isAuth();
+      allow write: if isOwner(uid);
+    }
+
+    // ═══════════════════════════════════════
+    // 11. DAILY RESET META
+    // ═══════════════════════════════════════
+    match /_meta/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+
+    // ═══════════════════════════════════════
+    // 12. FEEDBACK CORNER
+    // ═══════════════════════════════════════
+    match /feedback/{feedbackId} {
+      allow read: if isAuth();
+
+      // Any authenticated user can create feedback
+      allow create: if isAuth()
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() <= 1000
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.createdAt is number;
+
+      // Developers can update status/comments; any user can toggle votes
+      allow update: if isAuth()
+                    && (
+                      isDeveloper(request.auth.uid)
+                      || request.resource.data.diff(resource.data)
+                           .affectedKeys().hasOnly(['votes'])
+                    );
+
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════
+    // DEFAULT — deny everything else
+    // ═══════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

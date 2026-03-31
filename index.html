@@ -40,6 +40,29 @@
     body.light-theme .poll-creator { background: rgba(245,243,250,0.97) !important; border-color: rgba(0,0,0,0.1) !important; }
     body.light-theme .poll-creator-header { color: #333 !important; border-bottom-color: rgba(0,0,0,0.06) !important; }
     body.light-theme .poll-question-input, body.light-theme .poll-option-input { background: rgba(0,0,0,0.04) !important; color: #333 !important; border-color: rgba(0,0,0,0.1) !important; }
+
+    /* ── Feedback FAB ── */
+    .feedback-fab {
+      position: fixed;
+      bottom: 148px;
+      right: 18px;
+      z-index: 310;
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+    .feedback-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(59,130,246,0.5); }
   </style>
 </head>
 <body>
@@ -323,6 +346,9 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Feedback Corner FAB -->
+  <a class="feedback-fab" id="feedbackFab" href="./games/feedback.html" title="Feedback Corner">💬</a>
 
   <!-- Mood Check-in Widget -->
   <button class="mood-fab" id="moodFab" title="How are you feeling today?">😊</button>
