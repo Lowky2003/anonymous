@@ -670,7 +670,8 @@
     /* ── Leaderboard ── */
     .lb-overlay{position:fixed;inset:0;z-index:9100;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .lb-overlay.hidden{display:none}
-    .lb-box{width:90%;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px}
+
+    /* ── Leaderboard ── */;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px}
     .lb-box h3{font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;background:linear-gradient(90deg,#f7c97e,#f2a154);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .lb-tabs{display:flex;gap:4px;margin:12px 0;flex-wrap:wrap;justify-content:center}
     .lb-tab{padding:6px 12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}

@@ -30,6 +30,7 @@
         if (target === 'decorShopWrap') renderDecorShop();
         // Refresh the Layer/Floors tab so coin totals and current-layer indicator are up-to-date
         if (target === 'feedLayerWrap') renderUpgrade();
+
       });
     });
 

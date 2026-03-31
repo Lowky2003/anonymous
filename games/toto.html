@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>TOTO Lottery — Daily 4-Digit Draw</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; overflow-x: hidden; }
+
+    /* ── Back & settings buttons ── */
+    .back-btn { position: fixed; top: 14px; left: 14px; z-index: 100; padding: 8px 14px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.15); }
+    .settings-btn { position: fixed; top: 14px; right: 14px; z-index: 100; width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); font-size: 18px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+    .settings-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── Settings overlay ── */
+    .settings-overlay { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: rgba(15,12,41,0.85); backdrop-filter: blur(8px); }
+    .settings-overlay.hidden { display: none; }
+    .settings-box { background: rgba(30,25,65,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px 20px; max-width: 320px; width: 90%; text-align: center; }
+    .settings-box h3 { font-size: 18px; margin-bottom: 16px; }
+    .settings-logout-btn { width: 100%; padding: 12px; margin-bottom: 8px; border: 1px solid rgba(248,113,113,0.3); border-radius: 14px; background: rgba(248,113,113,0.08); color: #f87171; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .settings-logout-btn:hover { background: rgba(248,113,113,0.15); }
+    .settings-close-btn { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .settings-close-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── Login overlay ── */
+    .login-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    .login-overlay.hidden { display: none; }
+    .login-box { text-align: center; padding: 40px 28px; }
+    .login-icon { font-size: 64px; margin-bottom: 16px; }
+    .login-box h2 { font-size: 22px; margin-bottom: 8px; background: linear-gradient(90deg, #6366f1, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .login-box p { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 24px; line-height: 1.5; }
+    .google-login-btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; background: rgba(255,255,255,0.08); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .google-login-btn:hover { background: rgba(255,255,255,0.15); }
+    .google-login-btn svg { width: 20px; height: 20px; }
+    .login-error { margin-top: 12px; font-size: 12px; color: #ff6b6b; min-height: 18px; }
+
+    /* ── Toast ── */
+    .toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+    .toast { padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(-10px); transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: rgba(78,205,196,0.2); color: #4ecdc4; border: 1px solid rgba(78,205,196,0.3); }
+    .toast.error { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+
+    /* ── Game header ── */
+    .game-header { text-align: center; padding: 60px 20px 12px; }
+    .game-header h1 { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #6366f1, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .game-header p { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+    /* ── Coin display ── */
+    .coin-bar { text-align: center; margin-bottom: 16px; }
+    .coin-bar .coin-val { font-size: 22px; font-weight: 800; color: #f7c97e; }
+    .coin-bar .coin-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    /* ── Countdown ── */
+    .countdown-bar { text-align: center; margin-bottom: 18px; padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .countdown-bar .cd-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .countdown-bar .cd-time { font-size: 20px; font-weight: 700; color: #a5b4fc; font-variant-numeric: tabular-nums; }
+    .countdown-bar.draw-ready .cd-time { color: #34d399; }
+
+    /* ── Main card ── */
+    .toto-card { max-width: 420px; margin: 0 auto; padding: 0 16px 32px; }
+
+    /* ── Status badge ── */
+    .status-badge { text-align: center; margin-bottom: 14px; }
+    .status-badge span { display: inline-block; padding: 6px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+    .status-badge .badge-open { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+    .status-badge .badge-waiting { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .status-badge .badge-done { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+
+    /* ── Prize table ── */
+    .prize-table { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; }
+    .prize-header { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .prize-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+    .prize-emoji { font-size: 16px; width: 24px; text-align: center; }
+    .prize-tier { flex: 1; color: rgba(255,255,255,0.7); }
+    .prize-mult { font-weight: 700; color: #f7c97e; font-size: 14px; }
+
+    /* ── 4-digit input ── */
+    .input-section { margin-bottom: 16px; }
+    .input-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+    .number-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .digit-inputs { display: flex; gap: 6px; }
+    .digit-input { width: 48px; height: 54px; border: 2px solid rgba(255,255,255,0.15); border-radius: 12px; background: rgba(255,255,255,0.06); color: #fff; font-size: 24px; font-weight: 700; text-align: center; outline: none; transition: border-color 0.2s; }
+    .digit-input:focus { border-color: #a5b4fc; }
+    .digit-input:disabled { opacity: 0.4; cursor: not-allowed; }
+    .random-btn { width: 48px; height: 54px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(99,102,241,0.15); font-size: 22px; cursor: pointer; transition: background 0.2s; }
+    .random-btn:hover { background: rgba(99,102,241,0.3); }
+    .random-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Bet controls ── */
+    .bet-row { margin-bottom: 18px; }
+    .bet-controls { display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .bet-btn { padding: 6px 14px; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .bet-btn:hover { background: rgba(255,255,255,0.12); }
+    .bet-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .bet-display { padding: 8px 18px; border: 2px solid rgba(247,201,126,0.25); border-radius: 10px; background: rgba(247,201,126,0.08); font-size: 18px; font-weight: 700; color: #f7c97e; min-width: 90px; text-align: center; }
+
+    /* ── Submit / Check button ── */
+    .main-btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+    .main-btn:hover:not([disabled]) { opacity: 0.9; }
+    .main-btn:active:not([disabled]) { transform: scale(0.97); }
+    .main-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .btn-submit { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+    .btn-check  { background: linear-gradient(135deg, #34d399, #10b981); color: #1a1a2e; }
+    .btn-info   { font-size: 11px; color: rgba(255,255,255,0.35); text-align: center; margin-top: 6px; }
+
+    /* ── Today's pick summary ── */
+    .pick-summary { text-align: center; padding: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; margin-bottom: 16px; }
+    .pick-summary .ps-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .pick-summary .ps-number { display: flex; justify-content: center; gap: 6px; margin-bottom: 6px; }
+    .pick-summary .ps-digit { width: 42px; height: 48px; line-height: 48px; border: 2px solid rgba(99,102,241,0.3); border-radius: 10px; background: rgba(99,102,241,0.1); font-size: 22px; font-weight: 700; color: #a5b4fc; }
+    .pick-summary .ps-bet { font-size: 14px; font-weight: 700; color: #f7c97e; }
+
+    /* ── Result overlay ── */
+    .result-overlay { position: fixed; inset: 0; z-index: 9200; background: rgba(15,12,41,0.92); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; }
+    .result-overlay.hidden { display: none; }
+    .result-box { background: rgba(30,27,75,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px 24px; max-width: 420px; width: 90%; max-height: 85vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; text-align: center; animation: fadeSlideIn 0.4s ease; }
+    .result-box::-webkit-scrollbar { display: none; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .result-box h3 { font-size: 22px; margin-bottom: 18px; color: #fff; }
+
+    /* ── Result: player number ── */
+    .res-player { margin-bottom: 18px; }
+    .res-label-sm { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+    .res-number { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
+    .res-number.winner { animation: glowPulse 1s ease infinite alternate; }
+    @keyframes glowPulse { from { filter: drop-shadow(0 0 6px rgba(255,215,0,0.3)); } to { filter: drop-shadow(0 0 18px rgba(255,215,0,0.6)); } }
+    .res-digit { width: 44px; height: 50px; line-height: 50px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 24px; font-weight: 700; color: #fff; }
+
+    /* ── Result: tier sections ── */
+    .tier-section { margin-bottom: 14px; }
+    .tier-header { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .tier-nums { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .draw-num { padding: 5px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.04); font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.6); font-family: monospace; transition: all 0.3s; opacity: 0; animation: numReveal 0.5s ease forwards; }
+    .draw-num.match { border-color: #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; animation: numReveal 0.5s ease forwards, matchBounce 0.6s ease 0.5s; }
+    @keyframes numReveal { from { opacity: 0; transform: rotateX(90deg); } to { opacity: 1; transform: rotateX(0); } }
+    @keyframes matchBounce { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+    /* ── Result: outcome message ── */
+    .outcome { margin: 20px 0 16px; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.03); opacity: 0; animation: outcomeFade 0.5s ease forwards; }
+    @keyframes outcomeFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .win-msg { font-size: 18px; font-weight: 700; color: #ffd700; margin-bottom: 6px; }
+    .win-amount { font-size: 22px; font-weight: 800; color: #34d399; margin-bottom: 4px; }
+    .win-detail { font-size: 11px; color: rgba(255,255,255,0.4); }
+    .lose-msg { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+    .lose-amount { font-size: 13px; color: #f87171; }
+
+    /* ── Close button ── */
+    .close-btn { margin-top: 12px; padding: 12px 28px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .close-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── History ── */
+    .history-btn-wrap { text-align: center; margin: 16px auto; max-width: 420px; padding: 0 16px; }
+    .history-btn { padding: 10px 24px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .history-btn:hover { background: rgba(255,255,255,0.12); }
+
+    .history-overlay { position: fixed; inset: 0; z-index: 9100; background: rgba(15,12,41,0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
+    .history-overlay.hidden { display: none; }
+    .history-box { background: rgba(30,27,75,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px 20px; max-width: 440px; width: 90%; max-height: 85vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; animation: fadeSlideIn 0.3s ease; }
+    .history-box::-webkit-scrollbar { display: none; }
+    .history-box h3 { font-size: 18px; text-align: center; margin-bottom: 16px; color: #fff; }
+
+    .history-day { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .history-day .hd-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .history-day .hd-date { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8); }
+    .history-day .hd-result { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 8px; }
+    .history-day .hd-result.win { background: rgba(52,211,153,0.15); color: #34d399; }
+    .history-day .hd-result.lose { background: rgba(248,113,113,0.1); color: #f87171; }
+    .history-day .hd-result.no-bet { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+
+    .history-day .hd-pick { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.5); }
+    .history-day .hd-pick-num { font-weight: 700; color: #a5b4fc; font-family: monospace; letter-spacing: 2px; font-size: 14px; }
+    .history-day .hd-pick-bet { color: #f7c97e; }
+
+    .history-day .hd-tier { margin-bottom: 6px; }
+    .history-day .hd-tier-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .history-day .hd-tier-nums { display: flex; flex-wrap: wrap; gap: 4px; }
+    .history-day .hd-num { padding: 2px 8px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; background: rgba(255,255,255,0.03); font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); font-family: monospace; }
+    .history-day .hd-num.hd-match { border-color: #ffd700; background: rgba(255,215,0,0.12); color: #ffd700; }
+
+    /* ── Responsive ── */
+    @media (max-width: 400px) {
+      .digit-input { width: 42px; height: 48px; font-size: 20px; }
+      .random-btn { width: 42px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login gate -->
+  <div class="login-overlay loading" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-icon">🎱</div>
+      <h2>TOTO Lottery</h2>
+      <p>Sign in with Google to play the daily 4-digit lottery.</p>
+      <button class="google-login-btn" id="googleLoginBtn">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+      </button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <a href="../index.html" class="back-btn">← Back</a>
+  <button class="settings-btn" id="settingsBtn">⚙️</button>
+
+  <!-- Settings modal -->
+  <div class="settings-overlay hidden" id="settingsOverlay">
+    <div class="settings-box">
+      <h3>⚙️ Settings</h3>
+      <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
+      <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main content (hidden until logged in) -->
+  <div id="mainContent" style="display:none">
+    <div class="game-header">
+      <h1>🎱 TOTO Lottery</h1>
+      <p>Bet 9 AM – 12 AM · Draw at 8 AM · Pick 4 digits and win!</p>
+    </div>
+
+    <!-- Coin display -->
+    <div class="coin-bar">
+      <div class="coin-val" id="coinDisplay">0</div>
+      <div class="coin-label">Coins</div>
+    </div>
+
+    <!-- Countdown to next draw -->
+    <div class="countdown-bar" id="countdownBar">
+      <div class="cd-label">Next draw in</div>
+      <div class="cd-time" id="countdownTime">--:--:--</div>
+    </div>
+
+    <!-- Main card (dynamically rendered) -->
+    <div class="toto-card" id="totoCard"></div>
+
+
+    <!-- Past results history -->
+    <div class="history-btn-wrap">
+      <button class="history-btn" onclick="openHistory()">📜 Last 3 Days History</button>
+    </div>
+  </div>
+
+  <!-- History overlay -->
+  <div class="history-overlay hidden" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
+  </div>
+
+  <!-- Result overlay (for draw animation) -->
+  <div class="result-overlay hidden" id="resultOverlay" onclick="if(event.target===this)closeResults()">
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="../src/js/firebase-config.js"></script>
+
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    const rtdb = firebase.database();
+
+    /* ═══════════════════════════════
+       Server Time (anti-cheat)
+       ═══════════════════════════════
+       Uses Firebase RTDB's server time offset so the game clock
+       cannot be manipulated by changing the device clock. */
+    let serverTimeOffset = 0;
+    rtdb.ref('.info/serverTimeOffset').on('value', snap => {
+      serverTimeOffset = snap.val() || 0;
+    });
+
+    /** Get the current server-adjusted Date object. */
+    function getServerNow() {
+      return new Date(Date.now() + serverTimeOffset);
+    }
+
+    /* ═══════════════════════════════
+       Constants
+       ═══════════════════════════════ */
+
+    // Prize tier configuration — centralised so nothing is hardcoded inline
+    const TOTO_PRIZES = [
+      { tier: '1st',         count: 1,  multiplier: 500, emoji: '🥇', color: '#ffd700' },
+      { tier: '2nd',         count: 1,  multiplier: 200, emoji: '🥈', color: '#c0c0c0' },
+      { tier: '3rd',         count: 1,  multiplier: 100, emoji: '🥉', color: '#cd7f32' },
+      { tier: 'Consolation', count: 12, multiplier: 5,   emoji: '🎫', color: '#a5b4fc' }
+    ];
+
+    // Bet amount limits
+    const MIN_BET = 10;
+
+
+    // Schedule: betting 9 AM–midnight, draw at 8 AM next morning, results 8–9 AM
+    const DRAW_HOUR     = 8;   // 8 AM — results are generated
+    const BET_OPEN_HOUR = 9;   // 9 AM — betting opens
+    // Betting closes at midnight (hour 0 of the next day)
+
+    // Stagger delay between revealing each number in animation (ms)
+    const REVEAL_DELAY_MS = 200;
+
+    // Maximum history entries to display
+    const MAX_HISTORY_DISPLAY = 7;
+
+    /* ═══════════════════════════════
+       State
+       ═══════════════════════════════ */
+    let currentUid = null;
+    let playerCoins = 0;
+    let currentBet = MIN_BET;
+    // todayPick: { number: '1234', bet: 50, checked: false } or null
+    let todayPick = null;
+    // pickHistory: [{ date, number, bet, result, winnings }]
+    let pickHistory = [];
+    let countdownTimer = null;
+
+    /* ═══════════════════════════════
+       Auth
+       ═══════════════════════════════ */
+    const loginOverlay   = document.getElementById('loginOverlay');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError     = document.getElementById('loginError');
+
+    auth.getRedirectResult().catch(err => {
+      if (err.code) loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+    });
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    googleLoginBtn.addEventListener('click', async () => {
+      googleLoginBtn.disabled = true;
+      loginError.textContent = '';
+      try { await auth.signInWithPopup(provider); }
+      catch (err) {
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+          try { await auth.signInWithRedirect(provider); } catch (e) { loginError.textContent = 'Login failed: ' + (e.message || 'Unknown error'); }
+        } else if (err.code !== 'auth/popup-closed-by-user') {
+          loginError.textContent = 'Login failed: ' + (err.message || 'Unknown error');
+        }
+      } finally { googleLoginBtn.disabled = false; }
+    });
+
+    /* Settings modal */
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    document.getElementById('settingsBtn').addEventListener('click', () => settingsOverlay.classList.remove('hidden'));
+    document.getElementById('settingsCloseBtn').addEventListener('click', () => settingsOverlay.classList.add('hidden'));
+    settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) settingsOverlay.classList.add('hidden'); });
+    document.getElementById('settingsLogoutBtn').addEventListener('click', async () => {
+      settingsOverlay.classList.add('hidden');
+      try { await auth.signOut(); } catch (e) { console.error('Logout error:', e); }
+    });
+
+    /* Auth state listener
+       Loads user data when signed in, resets on sign out. */
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        currentUid = user.uid;
+        loginOverlay.classList.add('hidden');
+        document.getElementById('mainContent').style.display = '';
+        await loadPlayerData();
+        startCountdownTimer();
+        renderUI();
+      } else {
+        currentUid = null;
+        loginOverlay.classList.remove('hidden');
+        loginOverlay.classList.remove('loading');
+        document.getElementById('mainContent').style.display = 'none';
+        if (countdownTimer) clearInterval(countdownTimer);
+      }
+    });
+
+    /* ═══════════════════════════════
+       Date / Time Helpers
+       ═══════════════════════════════
+       Schedule (local time):
+         9:00 AM – 11:59 PM  →  Betting open (for TOMORROW's draw)
+         12:00 AM – 7:59 AM  →  Bets closed, waiting for draw
+         8:00 AM – 8:59 AM   →  Draw results available; can check yesterday's bet
+       The "draw date" is always the NEXT morning after a bet is placed. */
+
+    /** Format a Date as YYYY-MM-DD. */
+    function formatDateStr(d) {
+      return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    }
+
+    /** Get today's date string. */
+    function getTodayDateStr() {
+      return formatDateStr(getServerNow());
+    }
+
+    /**
+     * Determine the current phase of the TOTO cycle.
+     * @returns {'betting'|'waiting'|'results'}
+     */
+    function getCurrentPhase() {
+      const hour = getServerNow().getHours();
+      if (hour >= BET_OPEN_HOUR) return 'betting';   // 9 AM – midnight
+      if (hour >= DRAW_HOUR) return 'results';        // 8 AM – 8:59 AM
+      return 'waiting';                                // 12 AM – 7:59 AM
+    }
+
+    /**
+     * Get the draw date that a bet placed NOW would target.
+     * Bets placed between 9 AM and midnight target TOMORROW's draw.
+     * @returns {string} YYYY-MM-DD
+     */
+    function getTargetDrawDate() {
+      const now = getServerNow();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return formatDateStr(tomorrow);
+    }
+
+    /**
+     * Get the draw date whose results are currently available (during 'results' phase).
+     * That's TODAY (results come out at 8 AM today for bets placed yesterday).
+     * @returns {string} YYYY-MM-DD
+     */
+    function getCurrentResultDate() {
+      return getTodayDateStr();
+    }
+
+    /** Get a Date object for the next upcoming draw. */
+    function getNextDrawDate() {
+      const now = getServerNow();
+      const draw = new Date(now);
+      draw.setHours(DRAW_HOUR, 0, 0, 0);
+      if (now >= draw) {
+        draw.setDate(draw.getDate() + 1);
+      }
+      return draw;
+    }
+
+    /** Get a Date object for when betting opens next. */
+    function getNextBetOpenDate() {
+      const now = getServerNow();
+      const open = new Date(now);
+      open.setHours(BET_OPEN_HOUR, 0, 0, 0);
+      if (now >= open) {
+        open.setDate(open.getDate() + 1);
+      }
+      return open;
+    }
+
+    /** Format remaining time as HH:MM:SS. */
+    function formatCountdown(ms) {
+      if (ms <= 0) return '00:00:00';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      return String(h).padStart(2, '0') + ':' +
+        String(m).padStart(2, '0') + ':' +
+        String(s).padStart(2, '0');
+    }
+
+    /* ═══════════════════════════════
+       Seeded PRNG (deterministic per day)
+       ═══════════════════════════════
+       Uses a simple mulberry32 PRNG seeded from a hash of the date string.
+       All players get the same draw results for the same day. */
+
+    /** Hash a string into a 32-bit integer seed. */
+    function hashString(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+      }
+      return h >>> 0;
+    }
+
+    /** Mulberry32 PRNG — returns a function that yields 0-1 floats. */
+    function mulberry32(seed) {
+      let s = seed | 0;
+      return function () {
+        s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    /**
+     * Generate all winning numbers for a specific date.
+     * Deterministic — same date always produces the same results.
+     * @param {string} dateStr — format YYYY-MM-DD
+     * @returns {{ tier: string, number: string, multiplier: number, emoji: string, color: string }[]}
+     */
+    function generateDrawForDate(dateStr) {
+      // Create a PRNG seeded with the date + a salt
+      const seed = hashString('TOTO_DRAW_' + dateStr);
+      const rng = mulberry32(seed);
+
+      const usedNumbers = new Set();
+      const results = [];
+
+      for (const prize of TOTO_PRIZES) {
+        for (let i = 0; i < prize.count; i++) {
+          let num;
+          // Ensure uniqueness across all winning numbers
+          do {
+            num = String(Math.floor(rng() * 10000)).padStart(4, '0');
+          } while (usedNumbers.has(num));
+          usedNumbers.add(num);
+          results.push({
+            tier:       prize.tier,
+            number:     num,
+            multiplier: prize.multiplier,
+            emoji:      prize.emoji,
+            color:      prize.color
+          });
+        }
+      }
+      return results;
+    }
+
+    /**
+     * Check a player's number against draw results.
+     * @param {string} playerNumber — 4-digit string
+     * @param {Array} drawResults — from generateDrawForDate
+     * @returns {{ matched: boolean, tier: string|null, multiplier: number }}
+     */
+    function checkResult(playerNumber, drawResults) {
+      for (const r of drawResults) {
+        if (r.number === playerNumber) {
+          return { matched: true, tier: r.tier, multiplier: r.multiplier };
+        }
+      }
+      return { matched: false, tier: null, multiplier: 0 };
+    }
+
+    /* ═══════════════════════════════
+       Firestore — Load / Save
+       ═══════════════════════════════ */
+
+    /** Load player coins and today's TOTO pick from Firestore. */
+    async function loadPlayerData() {
+      if (!currentUid) return;
+      try {
+        const roomDoc = await db.collection('rooms').doc(currentUid).get();
+        if (roomDoc.exists) {
+          const data = roomDoc.data();
+          playerCoins = data.coins || 0;
+          const savedPick = data.totoPick || null;
+          const phase = getCurrentPhase();
+
+          if (savedPick) {
+            if (phase === 'betting') {
+              // During betting phase, show pick only if it targets tomorrow's draw
+              const targetDate = getTargetDrawDate();
+              todayPick = (savedPick.drawDate === targetDate) ? savedPick : null;
+            } else if (phase === 'results') {
+              // During results phase, show pick if it targets today's draw (placed yesterday)
+              const resultDate = getCurrentResultDate();
+              todayPick = (savedPick.drawDate === resultDate) ? savedPick : null;
+            } else {
+              // Waiting phase (midnight–8 AM): show pick if it targets today's draw (placed yesterday before midnight)
+              const resultDate = getTodayDateStr();
+              todayPick = (savedPick.drawDate === resultDate) ? savedPick : null;
+            }
+          } else {
+            todayPick = null;
+          }
+          pickHistory = data.totoHistory || [];
+        }
+      } catch (err) {
+        console.error('Failed to load player data:', err);
+      }
+    }
+
+    /** Save the player's TOTO pick and coins to Firestore. */
+    async function savePlayerData() {
+      if (!currentUid) return;
+      try {
+        await db.collection('rooms').doc(currentUid).set({
+          coins: playerCoins,
+          totoPick: todayPick,
+          totoHistory: pickHistory
+        }, { merge: true });
+      } catch (err) {
+        console.error('Failed to save player data:', err);
+        showToast('Save failed — try again', 'error');
+      }
+    }
+
+    /* ═══════════════════════════════
+       Countdown Timer
+       ═══════════════════════════════ */
+
+    function startCountdownTimer() {
+      updateCountdown();
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+      const bar = document.getElementById('countdownBar');
+      const timeEl = document.getElementById('countdownTime');
+      const cdLabel = bar.querySelector('.cd-label');
+      const phase = getCurrentPhase();
+
+      if (phase === 'betting') {
+        // Show time until bets close (midnight)
+        const midnight = getServerNow();
+        midnight.setDate(midnight.getDate() + 1);
+        midnight.setHours(0, 0, 0, 0);
+        const diff = midnight.getTime() - getServerNow().getTime();
+        timeEl.textContent = formatCountdown(diff);
+        bar.classList.remove('draw-ready');
+        if (todayPick) {
+          cdLabel.textContent = 'Bet placed! Bets close in';
+        } else {
+          cdLabel.textContent = '🎱 Bets open (9 AM – 12 AM) · Closing in';
+        }
+      } else if (phase === 'results') {
+        // Show time until bets reopen (9 AM)
+        const betOpen = getNextBetOpenDate();
+        const diff = betOpen.getTime() - getServerNow().getTime();
+        timeEl.textContent = '✨ RESULTS READY';
+        bar.classList.add('draw-ready');
+        cdLabel.textContent = 'Draw complete! Bets reopen at ' + BET_OPEN_HOUR + ':00 AM';
+        renderUI();
+      } else {
+        // Waiting phase (midnight–8 AM) — show time until draw
+        const nextDraw = getNextDrawDate();
+        const diff = nextDraw.getTime() - getServerNow().getTime();
+        if (diff <= 0) {
+          timeEl.textContent = 'DRAWING...';
+          bar.classList.add('draw-ready');
+        } else {
+          timeEl.textContent = formatCountdown(diff);
+          bar.classList.remove('draw-ready');
+        }
+        cdLabel.textContent = 'Draw at ' + DRAW_HOUR + ':00 AM · Countdown';
+      }
+    }
+
+    /* ═══════════════════════════════
+       UI Rendering
+       ═══════════════════════════════ */
+
+    function renderUI() {
+      document.getElementById('coinDisplay').textContent = playerCoins.toLocaleString();
+      renderCard();
+    }
+
+    /**
+     * Render the main TOTO card based on current phase:
+     * - 'betting' (9 AM–midnight): show input form or pick summary
+     * - 'results' (8–9 AM): show results check or already-checked summary
+     * - 'waiting' (midnight–8 AM): show waiting message
+     */
+    function renderCard() {
+      const card = document.getElementById('totoCard');
+      const phase = getCurrentPhase();
+
+      let html = '';
+
+      if (phase === 'betting') {
+        if (!todayPick) {
+          // Betting is open, no pick placed yet
+          html += '<div class="status-badge"><span class="badge-open">🎱 Bets Open (9 AM – 12 AM)</span></div>';
+          html += renderInputForm();
+        } else {
+          // Already placed a bet for tomorrow's draw
+          html += '<div class="status-badge"><span class="badge-waiting">✅ Bet Placed for Tomorrow</span></div>';
+          html += renderPickSummary();
+          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">';
+          html += 'Results at ' + DRAW_HOUR + ':00 AM tomorrow morning';
+          html += '</div>';
+        }
+      } else if (phase === 'results') {
+        if (todayPick && !todayPick.checked) {
+          // Draw happened, results available to check
+          html += '<div class="status-badge"><span class="badge-done">✨ Results Available!</span></div>';
+          html += renderPickSummary();
+          html += '<button class="main-btn btn-check" onclick="checkTodayResults()">🎱 Reveal Results</button>';
+        } else if (todayPick && todayPick.checked) {
+          // Already checked results
+          html += '<div class="status-badge"><span class="badge-done">✅ Checked Today\'s Draw</span></div>';
+          html += renderPickSummary();
+          const resultLabel = todayPick.winnings > 0
+            ? '<span style="color:#34d399;font-weight:700">Won +' + todayPick.winnings.toLocaleString() + ' coins 🎉</span>'
+            : '<span style="color:rgba(255,255,255,0.5)">No match today 😔</span>';
+          html += '<div style="text-align:center;margin-top:8px;font-size:14px">' + resultLabel + '</div>';
+          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">New bets open at ' + BET_OPEN_HOUR + ':00 AM</div>';
+        } else {
+          // No bet was placed yesterday
+          html += '<div class="status-badge"><span class="badge-done">📅 No Bet Yesterday</span></div>';
+          html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
+          html += 'You didn\'t place a bet yesterday.<br>Bets reopen at ' + BET_OPEN_HOUR + ':00 AM!';
+          html += '</div>';
+        }
+      } else {
+        // Waiting phase (midnight–8 AM)
+        if (todayPick && !todayPick.checked) {
+          // Bet placed (yesterday), waiting for draw
+          html += '<div class="status-badge"><span class="badge-waiting">⏳ Waiting for Draw</span></div>';
+          html += renderPickSummary();
+          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">';
+          html += 'Draw at ' + DRAW_HOUR + ':00 AM this morning — hang tight!';
+          html += '</div>';
+        } else {
+          // No bet or already checked
+          html += '<div class="status-badge"><span class="badge-done">🌙 Bets Closed</span></div>';
+          html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
+          html += 'Betting is closed until ' + BET_OPEN_HOUR + ':00 AM.<br>Draw at ' + DRAW_HOUR + ':00 AM!';
+          html += '</div>';
+        }
+      }
+
+      card.innerHTML = html;
+    }
+
+    /** Render the 4-digit input form + bet controls + submit button. */
+    function renderInputForm() {
+      const canPlay = playerCoins >= MIN_BET;
+      let html = '';
+
+      // Prize table
+      html += '<div class="prize-table">';
+      html += '<div class="prize-header">Prize Tiers</div>';
+      for (const p of TOTO_PRIZES) {
+        const countNote = p.count > 1 ? ' (' + p.count + ' numbers)' : '';
+        html += '<div class="prize-row">';
+        html += '<span class="prize-emoji">' + p.emoji + '</span>';
+        html += '<span class="prize-tier">' + p.tier + ' Prize</span>';
+        html += '<span class="prize-mult">×' + p.multiplier + countNote + '</span>';
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // 4-digit input
+      html += '<div class="input-section">';
+      html += '<label class="input-label">Pick Your Number</label>';
+      html += '<div class="number-row">';
+      html += '<div class="digit-inputs">';
+      for (let i = 0; i < 4; i++) {
+        html += '<input type="text" class="digit-input" id="digit' + i + '" maxlength="1" ' +
+          'inputmode="numeric" pattern="[0-9]" placeholder="0" ' +
+          'oninput="onDigitInput(this,' + i + ')" ' +
+          'onkeydown="onDigitKeydown(event,' + i + ')">';
+      }
+      html += '</div>';
+      html += '<button class="random-btn" onclick="randomiseNumber()" title="Random number">🎲</button>';
+      html += '</div>';
+
+      // Bet amount
+      html += '<div class="bet-row">';
+      html += '<label class="input-label">Bet Amount</label>';
+      html += '<div class="bet-controls">';
+      html += '<button class="bet-btn" onclick="adjustBet(-50)">−50</button>';
+      html += '<button class="bet-btn" onclick="adjustBet(-10)">−10</button>';
+      html += '<input type="number" class="bet-display" id="betDisplay" value="' + currentBet + '" min="' + MIN_BET + '" onchange="setBetFromInput(this.value)" style="width:70px;text-align:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:4px 6px;color:inherit;font-size:inherit;font-weight:inherit;-moz-appearance:textfield" />';
+      html += '<button class="bet-btn" onclick="adjustBet(+10)">+10</button>';
+      html += '<button class="bet-btn" onclick="adjustBet(+50)">+50</button>';
+      html += '</div>';
+      html += '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;text-align:center">Min: ' + MIN_BET + '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      // Submit button
+      html += '<button class="main-btn btn-submit" onclick="submitPick()" ' +
+        (canPlay ? '' : 'disabled') + '>🎱 Place Bet</button>';
+      if (!canPlay) {
+        html += '<div class="btn-info" style="color:#f87171">Need at least ' + MIN_BET + ' coins to play</div>';
+      }
+
+      return html;
+    }
+
+    /** Render the summary of today's placed pick. */
+    function renderPickSummary() {
+      if (!todayPick) return '';
+      let html = '<div class="pick-summary">';
+      html += '<div class="ps-label">Your Pick for Today</div>';
+      html += '<div class="ps-number">';
+      for (let i = 0; i < 4; i++) {
+        html += '<span class="ps-digit">' + todayPick.number[i] + '</span>';
+      }
+      html += '</div>';
+      html += '<div class="ps-bet">Bet: ' + todayPick.bet + ' coins</div>';
+      html += '</div>';
+      return html;
+    }
+
+    /**
+     * Open the history overlay showing the last 3 days of draws.
+     * For each day, shows whether the player bet, the winning numbers, and the result.
+     */
+    function openHistory() {
+      const overlay = document.getElementById('historyOverlay');
+      if (!overlay) return;
+
+      // Build the last 3 days (most recent first)
+      const HISTORY_DAYS = 3;
+      const days = [];
+      const now = getServerNow();
+      for (let i = 0; i < HISTORY_DAYS; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        days.push(formatDateStr(d));
+      }
+
+      let html = '<div class="history-box">';
+      html += '<h3>📜 Last ' + HISTORY_DAYS + ' Days</h3>';
+
+      for (const dateStr of days) {
+        // Generate that day's draw results (deterministic)
+        const drawResults = generateDrawForDate(dateStr);
+        // Find the player's pick for that date (if any)
+        const pick = pickHistory.find(h => h.date === dateStr);
+
+        html += '<div class="history-day">';
+        html += '<div class="hd-header">';
+        html += '<span class="hd-date">' + dateStr + '</span>';
+
+        if (pick) {
+          if (pick.winnings > 0) {
+            html += '<span class="hd-result win">Won +' + pick.winnings + '</span>';
+          } else {
+            html += '<span class="hd-result lose">Lost -' + pick.bet + '</span>';
+          }
+        } else {
+          html += '<span class="hd-result no-bet">No Bet</span>';
+        }
+        html += '</div>';
+
+        // Player's pick
+        if (pick) {
+          html += '<div class="hd-pick">';
+          html += 'Your pick: <span class="hd-pick-num">' + pick.number + '</span>';
+          html += ' · <span class="hd-pick-bet">' + pick.bet + ' coins</span>';
+          html += '</div>';
+        }
+
+        // Winning numbers grouped by tier
+        for (const prize of TOTO_PRIZES) {
+          const tierResults = drawResults.filter(r => r.tier === prize.tier);
+          html += '<div class="hd-tier">';
+          html += '<div class="hd-tier-label" style="color:' + prize.color + '">';
+          html += prize.emoji + ' ' + prize.tier;
+          html += '</div>';
+          html += '<div class="hd-tier-nums">';
+          for (const r of tierResults) {
+            const isMatch = pick && r.number === pick.number;
+            html += '<span class="hd-num ' + (isMatch ? 'hd-match' : '') + '">' + r.number + '</span>';
+          }
+          html += '</div>';
+          html += '</div>';
+        }
+
+        html += '</div>'; // .history-day
+      }
+
+      html += '<button class="close-btn" style="display:block;margin:8px auto 0" onclick="closeHistory()">Close</button>';
+      html += '</div>'; // .history-box
+
+      overlay.innerHTML = html;
+      overlay.classList.remove('hidden');
+    }
+
+    /** Close the history overlay. */
+    function closeHistory() {
+      const overlay = document.getElementById('historyOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    /* ═══════════════════════════════
+       Input Handlers
+       ═══════════════════════════════ */
+
+    /** Handle single digit input — auto-advance to next box. */
+    function onDigitInput(input, idx) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+      if (input.value.length === 1 && idx < 3) {
+        const next = document.getElementById('digit' + (idx + 1));
+        if (next) next.focus();
+      }
+    }
+
+    /** Handle backspace — move to previous digit box. */
+    function onDigitKeydown(e, idx) {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        const prev = document.getElementById('digit' + (idx - 1));
+        if (prev) prev.focus();
+      }
+    }
+
+    /** Fill all 4 digit inputs with a random number. */
+    function randomiseNumber() {
+      const num = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById('digit' + i);
+        if (el) el.value = num[i];
+      }
+    }
+
+    /** Adjust the bet amount, clamped to min and available coins. */
+    function adjustBet(delta) {
+      currentBet = Math.max(MIN_BET, Math.min(playerCoins, currentBet + delta));
+      const display = document.getElementById('betDisplay');
+      if (display) display.value = currentBet;
+    }
+
+    /** Set bet from the typed input value, clamped to min and available coins. */
+    function setBetFromInput(val) {
+      const parsed = parseInt(val) || MIN_BET;
+      currentBet = Math.max(MIN_BET, Math.min(playerCoins, parsed));
+      const display = document.getElementById('betDisplay');
+      if (display) display.value = currentBet;
+    }
+
+    /** Read the 4 digit inputs and return the player's 4-digit string. */
+    function getPlayerNumber() {
+      let num = '';
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById('digit' + i);
+        const val = el ? el.value : '';
+        num += val.length ? val : '0';
+      }
+      return num.padStart(4, '0');
+    }
+
+    /* ═══════════════════════════════
+       Game Actions
+       ═══════════════════════════════ */
+
+    /** Submit today's pick — deduct coins and save to Firestore. */
+    async function submitPick() {
+      if (!currentUid) return;
+      if (getCurrentPhase() !== 'betting') {
+        return showToast('Bets are closed! Open ' + BET_OPEN_HOUR + ':00 AM – 12:00 AM.', 'error');
+      }
+      if (todayPick) {
+        return showToast('You already placed a bet for tomorrow\'s draw!', 'error');
+      }
+
+      const number = getPlayerNumber();
+      const bet = currentBet;
+
+      // Validate bet
+      if (bet < MIN_BET) {
+        return showToast('Bet must be at least ' + MIN_BET + ' coins!', 'error');
+      }
+      if (playerCoins < bet) {
+        return showToast('Not enough coins!', 'error');
+      }
+
+      // Deduct coins and record pick
+      playerCoins -= bet;
+      todayPick = {
+        drawDate: getTargetDrawDate(),
+        number: number,
+        bet: bet,
+        checked: false,
+        winnings: 0
+      };
+
+      await savePlayerData();
+      renderUI();
+      showToast('Bet placed! Results at ' + DRAW_HOUR + ':00 AM tomorrow 🎱', 'success');
+    }
+
+    /**
+     * Check draw results — runs the seeded PRNG for the pick's draw date,
+     * compares with player's pick, calculates winnings, and shows animation.
+     */
+    async function checkTodayResults() {
+      if (!currentUid || !todayPick || todayPick.checked) return;
+      if (getCurrentPhase() !== 'results') {
+        return showToast('Results aren\'t ready yet! Draw at ' + DRAW_HOUR + ':00 AM.', 'error');
+      }
+
+      const drawDate = todayPick.drawDate;
+      const drawResults = generateDrawForDate(drawDate);
+      const outcome = checkResult(todayPick.number, drawResults);
+
+      // Calculate winnings
+      let winnings = 0;
+      if (outcome.matched) {
+        winnings = todayPick.bet * outcome.multiplier;
+        playerCoins += winnings;
+      }
+
+      // Mark as checked and record result
+      todayPick.checked = true;
+      todayPick.winnings = winnings;
+      todayPick.resultTier = outcome.tier;
+
+      // Add to history (avoid duplicates)
+      const historyExists = pickHistory.some(h => h.date === drawDate);
+      if (!historyExists) {
+        pickHistory.push({
+          date: drawDate,
+          number: todayPick.number,
+          bet: todayPick.bet,
+          winnings: winnings,
+          tier: outcome.tier
+        });
+        // Trim old history to keep Firestore document small
+        if (pickHistory.length > MAX_HISTORY_DISPLAY) {
+          pickHistory = pickHistory
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .slice(0, MAX_HISTORY_DISPLAY);
+        }
+      }
+
+      await savePlayerData();
+
+      // Show animated results overlay
+      showResultsAnimation(todayPick.number, todayPick.bet, drawResults, outcome, winnings);
+    }
+
+    /* ═══════════════════════════════
+       Results Animation
+       ═══════════════════════════════ */
+
+    /**
+     * Render and display the draw results with staggered reveal animation.
+     * Each winning number flips in one at a time, then outcome fades in.
+     */
+    function showResultsAnimation(playerNumber, bet, drawResults, outcome, winnings) {
+      const overlay = document.getElementById('resultOverlay');
+      if (!overlay) return;
+
+      let html = '<div class="result-box">';
+      html += '<h3>🎱 Today\'s Draw Results</h3>';
+
+      // Player's number
+      html += '<div class="res-player">';
+      html += '<span class="res-label-sm">Your Number</span>';
+      html += '<div class="res-number ' + (outcome.matched ? 'winner' : '') + '">';
+      for (let i = 0; i < 4; i++) {
+        html += '<span class="res-digit">' + playerNumber[i] + '</span>';
+      }
+      html += '</div>';
+      html += '</div>';
+
+      // Winning numbers grouped by tier, each with staggered animation delay
+      let delayIdx = 0;
+      for (const prize of TOTO_PRIZES) {
+        const tierResults = drawResults.filter(r => r.tier === prize.tier);
+        html += '<div class="tier-section">';
+        html += '<div class="tier-header" style="color:' + prize.color + '">';
+        html += prize.emoji + ' ' + prize.tier + ' Prize (×' + prize.multiplier + ')';
+        html += '</div>';
+        html += '<div class="tier-nums">';
+        for (const r of tierResults) {
+          const isMatch = r.number === playerNumber;
+          const delay = delayIdx * REVEAL_DELAY_MS;
+          html += '<span class="draw-num ' + (isMatch ? 'match' : '') + '" ' +
+            'style="animation-delay:' + delay + 'ms">' + r.number + '</span>';
+          delayIdx++;
+        }
+        html += '</div>';
+        html += '</div>';
+      }
+
+      // Outcome message — appears after all numbers are revealed
+      const totalNumbers = drawResults.length;
+      const outcomeDelay = totalNumbers * REVEAL_DELAY_MS + 300;
+      html += '<div class="outcome" style="animation-delay:' + outcomeDelay + 'ms">';
+      if (outcome.matched) {
+        html += '<div class="win-msg">🎉 You matched the ' + outcome.tier + ' Prize!</div>';
+        html += '<div class="win-amount">+' + winnings.toLocaleString() + ' coins!</div>';
+        html += '<div class="win-detail">Bet ' + bet + ' × ' + outcome.multiplier + ' = ' + winnings.toLocaleString() + '</div>';
+      } else {
+        html += '<div class="lose-msg">😔 No match today!</div>';
+        html += '<div class="lose-amount">Lost ' + bet + ' coins</div>';
+      }
+      html += '</div>';
+
+      html += '<button class="close-btn" onclick="closeResults()">Close</button>';
+      html += '</div>';
+
+      overlay.innerHTML = html;
+      overlay.classList.remove('hidden');
+    }
+
+    /** Close the results overlay and refresh the card. */
+    function closeResults() {
+      const overlay = document.getElementById('resultOverlay');
+      if (overlay) overlay.classList.add('hidden');
+      renderUI();
+    }
+
+    /* ═══════════════════════════════
+       Toast
+       ═══════════════════════════════ */
+    function showToast(msg, type) {
+      const container = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast ' + (type || 'success');
+      t.textContent = msg;
+      container.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
