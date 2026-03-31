@@ -1,5 +1,5 @@
 ---
-description: everytime do the modification please also consider the firestore rules. Next, the code if can categorize then separate the file to the respective folder to avoid a file with too much code. Lastly, if there is a new feature, please also add the test cases for it.
+description: everytime do the modification please also consider the firestore rules. Next, the code if can categorize then separate the file to the respective folder to avoid a file with too much code. Lastly, if there is a new feature, please also add the test cases for it. Also need make the code maintainable and readable, so please add comments for the code that is not straightforward.
 # applyTo: 'Describe when these instructions should be loaded by the agent based on task context' # when provided, instructions will automatically be added to the request context when the pattern matches an attached file
 ---
 
