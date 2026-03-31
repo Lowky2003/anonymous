@@ -872,7 +872,7 @@
        Input
        ═══════════════════════════════ */
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' || e.key === ' ') {
+      if (e.code === 'Space' || e.key === ' ' || e.key === 'w') {
         e.preventDefault();
         if (gameWaiting) {
           flap();
