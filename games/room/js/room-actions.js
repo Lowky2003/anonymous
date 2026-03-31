@@ -1,10 +1,10 @@
-﻿    /* ═══════════════════════════════
+    /* -------------------------------
        Actions
-       ═══════════════════════════════ */
+       ------------------------------- */
     async function buyItem(type, id) {
       if (viewingUid !== currentUid) return;
       if (type === 'pet') {
-        // Adopt a new pet instance (inactive — not placed in room yet)
+        // Adopt a new pet instance (inactive � not placed in room yet)
         const petDef = PETS.find(p => p.id === id);
         if (roomData.pets.length >= 10) return showToast('Max 10 pets! Remove one first.', 'error');
         // Per-type limit: max 2 of each pet type
@@ -90,7 +90,7 @@
       showToast('Removed from room!', 'success');
     }
 
-    /* ── Pet Swap — swap an owned inactive pet into the room by replacing an active one ── */
+    /* -- Pet Swap � swap an owned inactive pet into the room by replacing an active one -- */
     let _swapNewTypeId = null;
 
     function swapPet(typeId) {
@@ -112,15 +112,15 @@
       const activePets = getActivePets();
       listEl.innerHTML = activePets.map(p => {
         const def = PETS.find(d => d.id === p.type);
-        const emoji = def ? def.emoji : '❓';
+        const emoji = def ? def.emoji : '?';
         const affTitle = getAffectionTitle(p.affection ?? 0).title;
         return '<div class="swap-pet-card" onclick="confirmSwap(\'' + p.id + '\')">' 
           + '<span class="swap-pet-emoji">' + emoji + '</span>'
           + '<div class="swap-pet-info">'
           + '<div class="swap-pet-name">' + (p.name || def?.name || p.type) + '</div>'
-          + '<div class="swap-pet-stats">♥ ' + (p.affection ?? 0) + ' (' + affTitle + ') · 🍖 ' + (p.hunger ?? 100) + '%</div>'
+          + '<div class="swap-pet-stats">? ' + (p.affection ?? 0) + ' (' + affTitle + ') � ?? ' + (p.hunger ?? 100) + '%</div>'
           + '</div>'
-          + '<span class="swap-pet-arrow">↩</span>'
+          + '<span class="swap-pet-arrow">?</span>'
           + '</div>';
       }).join('');
 
@@ -147,7 +147,7 @@
       showToast('Swapped! ' + (inDef ? inDef.emoji + ' ' + inDef.name : 'Pet') + ' is now in room.', 'success');
     }
 
-    /* ── Place / Remove pet from room ── */
+    /* -- Place / Remove pet from room -- */
     async function placePetInRoom(typeId) {
       if (viewingUid !== currentUid) return;
       if (getActivePets().length >= 2) return showToast('Room is full! Remove a pet first or use Swap.', 'error');
@@ -325,9 +325,9 @@
       if (newMilestone.min > oldMilestone.min && newMilestone.reward > 0) {
         roomData.coins += newMilestone.reward;
         await saveRoom();
-        showToast('🎉 ' + pet.name + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
+        showToast('?? ' + pet.name + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
       } else {
-        showToast(toy.emoji + ' Played with ' + pet.name + '! ♥+' + toy.affection, 'success');
+        showToast(toy.emoji + ' Played with ' + pet.name + '! ?+' + toy.affection, 'success');
       }
       updatePetStatusBar();
     }
@@ -351,7 +351,7 @@
       e.dataTransfer.effectAllowed = 'move';
     }
 
-    /* ── Mobile tap-to-feed/toy system ── */
+    /* -- Mobile tap-to-feed/toy system -- */
     let selectedFood = null;
     let selectedToy = null;
     let selectedDrink = null;
@@ -484,7 +484,7 @@
       });
     }
 
-    /* ── Decoration drag-to-reposition ── */
+    /* -- Decoration drag-to-reposition -- */
     // base: true = pos.y is the bottom of the item (hit area extends upward)
     const DECOR_HIT_SIZES = {
       clock: { w: 0.12, h: 0.12 },
@@ -573,7 +573,7 @@
       const halfW = hs.w / 2;
       if (mx < p.x - halfW || mx > p.x + halfW) return false;
       if (hs.base) {
-        // pos.y is bottom — hit area extends upward
+        // pos.y is bottom � hit area extends upward
         return my >= p.y - hs.h && my <= p.y;
       }
       return my >= p.y - hs.h / 2 && my <= p.y + hs.h / 2;
@@ -584,10 +584,13 @@
 
     function initDecorDrag() {
       const cvs = document.getElementById('roomBgCanvas');
-      if (!cvs) return;
+      // Listen on the room container so events aren't blocked by overlapping
+      // elements (e.g. pet canvas sitting on top of the background canvas)
+      const room = document.getElementById('roomView');
+      if (!cvs || !room) return;
       const isOwner = () => viewingUid === currentUid;
 
-      cvs.addEventListener('mousedown', (e) => {
+      room.addEventListener('mousedown', (e) => {
         if (!isOwner()) return;
         const rect = cvs.getBoundingClientRect();
         const mx = (e.clientX - rect.left) / rect.width;
@@ -600,13 +603,14 @@
             decorDrag = { id: p.id, offsetX: mx - p.x, offsetY: my - p.y };
             cvs.style.cursor = 'grabbing';
             e.preventDefault();
+            e.stopPropagation(); // Prevent pet click from firing
             return;
           }
         }
       });
 
-      // Hover cursor on canvas only
-      cvs.addEventListener('mousemove', (e) => {
+      // Hover cursor � listen on room container for same reason
+      room.addEventListener('mousemove', (e) => {
         if (decorDrag) return;
         if (!isOwner()) return;
         const rect = cvs.getBoundingClientRect();
@@ -651,8 +655,8 @@
       };
       document.addEventListener('mouseup', endDrag);
 
-      // Touch support
-      cvs.addEventListener('touchstart', (e) => {
+      // Touch support — listen on room container to avoid being blocked by pet canvas
+      room.addEventListener('touchstart', (e) => {
         if (!isOwner() || e.touches.length !== 1) return;
         const touch = e.touches[0];
         const rect = cvs.getBoundingClientRect();
@@ -663,6 +667,7 @@
           if (decorHitTest(mx, my, p)) {
             decorDrag = { id: p.id, offsetX: mx - p.x, offsetY: my - p.y };
             e.preventDefault();
+            e.stopPropagation();
             return;
           }
         }
@@ -689,7 +694,7 @@
       document.addEventListener('touchcancel', endDrag);
     }
 
-    /* ── Plant drag-to-reposition ── */
+    /* -- Plant drag-to-reposition -- */
     let plantDragState = null; // { startX, startY, origLeft, origBottom }
     let plantSaveTimer = null;
 
@@ -850,6 +855,6 @@
       initRoom();
     }
 
-    /* ═══════════════════════════════
-       Canvas plant drawing — 30 levels
-       ═══════════════════════════════ */
+    /* -------------------------------
+       Canvas plant drawing � 30 levels
+       ------------------------------- */
