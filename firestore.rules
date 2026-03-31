@@ -9,7 +9,10 @@ service cloud.firestore {
       return isAuth() && request.auth.uid == uid;
     }
     function isDeveloper(uid) {
-      return uid == 'HClZmAeuEaUVjHqUaFLFFMTMQnd2';
+      return uid in [
+        'HClZmAeuEaUVjHqUaFLFFMTMQnd2',
+        'eUs3isAgsaRT9VLKEFI4HEFbCnk1'
+      ];
     }
 
     // ═══════════════════════════════════════
