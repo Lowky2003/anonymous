@@ -19,15 +19,42 @@
     }
 
     // Pet instance helpers
+    // Maximum number of pets allowed on a single layer/floor
+    const MAX_PETS_PER_LAYER = 2;
+
     function getPet(id) { return roomData.pets.find(p => p.id === id); }
-    function getActivePets() { return roomData.pets.filter(p => p.active); }
+    /** Returns pets assigned to the current active layer. */
+    function getActivePets() { return roomData.pets.filter(p => p.layer === currentLayer); }
+    /** Returns pets assigned to a specific layer. */
+    function getPetsOnLayer(n) { return roomData.pets.filter(p => p.layer === n); }
+    /** Returns all pets placed on any layer (across all floors). */
+    function getAllPlacedPets() { return roomData.pets.filter(p => p.layer != null && p.layer > 0); }
+    /** Checks if a specific pet is already placed on a different layer than the given one. */
+    function isPetOnOtherLayer(petId, layerNum) {
+      const pet = getPet(petId);
+      return pet && pet.layer != null && pet.layer > 0 && pet.layer !== layerNum;
+    }
     function makePetId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
 
-    // Migrate old pet format (pet/pet2 + ownedPets) to new pets array
+    /**
+     * Migrate old pet format to new layer-based pets array.
+     * Old formats:
+     *   - pet/pet2 + ownedPets (very old)
+     *   - pets[].active (boolean) → convert to pets[].layer (number|null)
+     */
     function migratePets(d) {
-      if (d.pets && d.pets.length) return d.pets;
+      if (d.pets && d.pets.length) {
+        // Migrate from active (boolean) to layer (number) if needed
+        return d.pets.map(p => {
+          if (p.layer === undefined) {
+            // Old format: active boolean → assign to layer 1 if active, null if not
+            return { ...p, layer: p.active ? 1 : null };
+          }
+          return p;
+        });
+      }
       const pets = [];
-      const addPet = (type, active) => {
+      const addPet = (type, layer) => {
         const def = PETS.find(p => p.id === type);
         pets.push({
           id: makePetId(),
@@ -37,15 +64,15 @@
           thirst: 100,
           affection: (d.petAffection && d.petAffection[type]) ?? 0,
           color: (d.petColors && d.petColors[type]) || null,
-          active: active,
+          layer: layer,
           accessory: (d.petAccessories && d.petAccessories[type]) || null
         });
       };
-      if (d.pet) addPet(d.pet, true);
-      if (d.pet2 && d.pet2 !== d.pet) addPet(d.pet2, true);
+      if (d.pet) addPet(d.pet, 1);
+      if (d.pet2 && d.pet2 !== d.pet) addPet(d.pet2, 1);
       const equipped = [d.pet, d.pet2].filter(Boolean);
       for (const type of (d.ownedPets || [])) {
-        if (!equipped.includes(type)) addPet(type, false);
+        if (!equipped.includes(type)) addPet(type, null);
       }
       return pets;
     }

@@ -130,27 +130,58 @@
       const el = document.getElementById('petShop');
       const titleEl = el.previousElementSibling;
       const petCount = roomData.pets.length;
-      const activeCount = getActivePets().length;
+      const layerPetCount = getPetsOnLayer(currentLayer).length;
       if (titleEl) titleEl.innerHTML = '🐾 Pets <span class="slot-badge">' + petCount + ' adopted</span>';
       el.innerHTML = PETS.map(item => {
         const ownedCount = roomData.pets.filter(p => p.type === item.id).length;
         const typeMaxed = ownedCount >= 2; // Max 2 of each type
         const canAfford = roomData.coins >= item.cost;
-        const roomDisplayFull = activeCount >= 2; // Room can only show 2 active pets
+        const floorFull = layerPetCount >= MAX_PETS_PER_LAYER;
+
+        // Build per-pet placement info: show which floor each owned pet is on
+        const ownedPetsOfType = roomData.pets.filter(p => p.type === item.id);
+        let placementInfo = '';
+        if (ownedPetsOfType.length > 0) {
+          placementInfo = ownedPetsOfType.map(p => {
+            if (p.layer && p.layer > 0) return '🏠 Floor ' + p.layer;
+            return '📦 Unplaced';
+          }).join(', ');
+        }
+
+        // Check if there's an unplaced pet of this type available
+        const hasUnplaced = ownedPetsOfType.some(p => !p.layer || p.layer === 0);
+
         return '<div class="shop-card' + (ownedCount > 0 ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
           (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + ' / 2</div>' : '') +
+          (placementInfo ? '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px">' + placementInfo + '</div>' : '') +
           '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
           '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
             (canAfford && !typeMaxed ? '' : 'disabled') + '>🐾 Adopt</button>' +
           (typeMaxed
             ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Max 2 ' + item.name + 's adopted</div>'
             : '') +
-          (roomDisplayFull && ownedCount > 0
-            ? '<button class="shop-btn" style="margin-top:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)" ' +
-              ' onclick="swapPet(\''+item.id+'\')">\uD83D\uDD04 Swap into Room</button>'
+          // Show "Place on Floor X" if there's an unplaced pet and current floor has space
+          (hasUnplaced && !floorFull
+            ? '<button class="shop-btn" style="margin-top:4px;background:rgba(52,211,153,0.2);color:#34d399;border:1px solid rgba(52,211,153,0.3)" ' +
+              ' onclick="placePetInRoom(\'' + item.id + '\')">📥 Place on Floor ' + currentLayer + '</button>'
             : '') +
+          // Show "Swap" if current floor is full and there's an unplaced pet
+          (floorFull && hasUnplaced
+            ? '<button class="shop-btn" style="margin-top:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)" ' +
+              ' onclick="swapPet(\''+item.id+'\')">\uD83D\uDD04 Swap on Floor ' + currentLayer + '</button>'
+            : '') +
+          // Show individual "Remove" buttons for each pet of this type on the current floor
+          ownedPetsOfType.filter(p => p.layer === currentLayer).map((p, i) => {
+            const petLabel = p.name || item.name;
+            // Show index label only when multiple same-type pets are on this floor
+            const label = ownedPetsOfType.filter(q => q.layer === currentLayer).length > 1
+              ? '📤 Remove ' + petLabel + ' #' + (i + 1)
+              : '📤 Remove from Floor ' + currentLayer;
+            return '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3)" ' +
+              ' onclick="removePetById(\'' + p.id + '\')">' + label + '</button>';
+          }).join('') +
           '</div>';
       }).join('');
     }
@@ -1142,7 +1173,8 @@
           return;
         }
         el.innerHTML = rooms.map(r => {
-          const petEmojis = (r.pets || []).filter(p => p.active).map(p => PETS.find(x => x.id === p.type)?.emoji || '🐾');
+          // Support both old (active boolean) and new (layer number) pet formats
+          const petEmojis = (r.pets || []).filter(p => (p.layer != null && p.layer > 0) || p.active).map(p => PETS.find(x => x.id === p.type)?.emoji || '🐾');
           // Fallback for old format
           if (!petEmojis.length) {
             if (r.pet) petEmojis.push(PETS.find(p => p.id === r.pet)?.emoji || '🐾');

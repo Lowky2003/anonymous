@@ -12,18 +12,18 @@
         if (typeCount >= 2) return showToast('Already adopted 2 ' + (petDef ? petDef.name : id) + 's!', 'error');
         if (!petDef || roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
         roomData.coins -= petDef.cost;
-        const activeCount = getActivePets().length;
+        const layerPetCount = getPetsOnLayer(currentLayer).length;
         const newPet = {
           id: makePetId(), type: id, name: petDef.name,
           hunger: 100, thirst: 100, affection: 0,
           color: PET_COLORS[id] ? PET_COLORS[id][0].key : null,
-          active: activeCount < 2, // Auto-place if room has space, otherwise keep inactive
+          layer: layerPetCount < MAX_PETS_PER_LAYER ? currentLayer : null, // Auto-place on current floor if space
           accessory: null
         };
         roomData.pets.push(newPet);
         await saveRoom();
         renderAll();
-        showToast('Adopted ' + petDef.emoji + ' ' + petDef.name + '!' + (newPet.active ? '' : ' Place it from the shop.'), 'success');
+        showToast('Adopted ' + petDef.emoji + ' ' + petDef.name + '!' + (newPet.layer ? '' : ' Place it from the shop.'), 'success');
         return;
       }
       // Plant buying logic
@@ -90,7 +90,7 @@
       showToast('Removed from room!', 'success');
     }
 
-    /* -- Pet Swap � swap an owned inactive pet into the room by replacing an active one -- */
+    /* -- Pet Swap — swap an owned unplaced pet into the current floor by replacing one -- */
     let _swapNewTypeId = null;
 
     function swapPet(typeId) {
@@ -98,19 +98,19 @@
       const petDef = PETS.find(p => p.id === typeId);
       if (!petDef) return;
 
-      // Make sure user owns an inactive pet of this type
-      const inactivePet = roomData.pets.find(p => p.type === typeId && !p.active);
-      if (!inactivePet) return showToast('No inactive ' + petDef.name + ' to swap in!', 'error');
+      // Find an unplaced pet of this type (not on any layer)
+      const unplacedPet = roomData.pets.find(p => p.type === typeId && (!p.layer || p.layer === 0));
+      if (!unplacedPet) return showToast('No unplaced ' + petDef.name + ' to swap in!', 'error');
 
       _swapNewTypeId = typeId;
       const overlay = document.getElementById('swapOverlay');
       const listEl = document.getElementById('swapPetList');
       document.getElementById('swapDesc').textContent =
-        'Move ' + petDef.emoji + ' ' + petDef.name + ' into room. Pick which active pet to take out:';
+        'Move ' + petDef.emoji + ' ' + petDef.name + ' into Floor ' + currentLayer + '. Pick which pet to take out:';
 
-      // Show only ACTIVE pets (in the room) to choose which to deactivate
-      const activePets = getActivePets();
-      listEl.innerHTML = activePets.map(p => {
+      // Show pets on the CURRENT layer to choose which to remove
+      const layerPets = getPetsOnLayer(currentLayer);
+      listEl.innerHTML = layerPets.map(p => {
         const def = PETS.find(d => d.id === p.type);
         const emoji = def ? def.emoji : '?';
         const affTitle = getAffectionTitle(p.affection ?? 0).title;
@@ -118,9 +118,9 @@
           + '<span class="swap-pet-emoji">' + emoji + '</span>'
           + '<div class="swap-pet-info">'
           + '<div class="swap-pet-name">' + (p.name || def?.name || p.type) + '</div>'
-          + '<div class="swap-pet-stats">? ' + (p.affection ?? 0) + ' (' + affTitle + ') � ?? ' + (p.hunger ?? 100) + '%</div>'
+          + '<div class="swap-pet-stats">❤ ' + (p.affection ?? 0) + ' (' + affTitle + ') · 🍖 ' + (p.hunger ?? 100) + '%</div>'
           + '</div>'
-          + '<span class="swap-pet-arrow">?</span>'
+          + '<span class="swap-pet-arrow">➡</span>'
           + '</div>';
       }).join('');
 
@@ -130,13 +130,13 @@
     async function confirmSwap(deactivatePetId) {
       if (!_swapNewTypeId) return;
 
-      // Deactivate the chosen active pet
+      // Remove the chosen pet from the current layer
       const petOut = getPet(deactivatePetId);
-      if (petOut) petOut.active = false;
+      if (petOut) petOut.layer = null;
 
-      // Activate the first inactive pet of the swap type
-      const petIn = roomData.pets.find(p => p.type === _swapNewTypeId && !p.active);
-      if (petIn) petIn.active = true;
+      // Place the first unplaced pet of the swap type onto current layer
+      const petIn = roomData.pets.find(p => p.type === _swapNewTypeId && (!p.layer || p.layer === 0));
+      if (petIn) petIn.layer = currentLayer;
 
       _swapNewTypeId = null;
       document.getElementById('swapOverlay').classList.add('hidden');
@@ -144,33 +144,51 @@
       await saveRoom();
       renderAll();
       const inDef = PETS.find(d => d.id === petIn?.type);
-      showToast('Swapped! ' + (inDef ? inDef.emoji + ' ' + inDef.name : 'Pet') + ' is now in room.', 'success');
+      showToast('Swapped! ' + (inDef ? inDef.emoji + ' ' + inDef.name : 'Pet') + ' is now on Floor ' + currentLayer + '.', 'success');
     }
 
-    /* -- Place / Remove pet from room -- */
+    /* -- Place / Remove pet from current floor -- */
     async function placePetInRoom(typeId) {
       if (viewingUid !== currentUid) return;
-      if (getActivePets().length >= 2) return showToast('Room is full! Remove a pet first or use Swap.', 'error');
-      const pet = roomData.pets.find(p => p.type === typeId && !p.active);
-      if (!pet) return showToast('No inactive pet of this type!', 'error');
-      pet.active = true;
+      if (getPetsOnLayer(currentLayer).length >= MAX_PETS_PER_LAYER) {
+        return showToast('Floor ' + currentLayer + ' is full! Remove a pet first or use Swap.', 'error');
+      }
+      // Find an unplaced pet of this type that is NOT on any layer
+      const pet = roomData.pets.find(p => p.type === typeId && (!p.layer || p.layer === 0));
+      if (!pet) return showToast('No unplaced pet of this type!', 'error');
+      pet.layer = currentLayer;
       _lastPetKey = ''; // Force pet canvas redraw
       await saveRoom();
       renderAll();
       const def = PETS.find(d => d.id === typeId);
-      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' placed in room!', 'success');
+      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' placed on Floor ' + currentLayer + '!', 'success');
     }
 
     async function removePetFromRoom(typeId) {
       if (viewingUid !== currentUid) return;
-      const pet = roomData.pets.find(p => p.type === typeId && p.active);
+      // Remove a pet of this type from the current layer
+      const pet = roomData.pets.find(p => p.type === typeId && p.layer === currentLayer);
       if (!pet) return;
-      pet.active = false;
+      pet.layer = null;
       _lastPetKey = ''; // Force pet canvas redraw
       await saveRoom();
       renderAll();
       const def = PETS.find(d => d.id === typeId);
-      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' removed from room.', 'success');
+      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' removed from Floor ' + currentLayer + '.', 'success');
+    }
+
+    /** Remove a specific pet instance by its unique ID (for when multiple same-type pets are on a floor). */
+    async function removePetById(petId) {
+      if (viewingUid !== currentUid) return;
+      const pet = getPet(petId);
+      if (!pet || !pet.layer) return;
+      const prevLayer = pet.layer;
+      pet.layer = null;
+      _lastPetKey = ''; // Force pet canvas redraw
+      await saveRoom();
+      renderAll();
+      const def = PETS.find(d => d.id === pet.type);
+      showToast((def ? def.emoji : '🐾') + ' ' + (pet.name || def?.name || pet.type) + ' removed from Floor ' + prevLayer + '.', 'success');
     }
 
     // Close swap modal

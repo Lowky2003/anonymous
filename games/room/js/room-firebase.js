@@ -5,7 +5,7 @@
       flushLayerData();
       const data = {
         coins: roomData.coins,
-        pets: roomData.pets.map(p => ({ id: p.id, type: p.type, name: p.name, hunger: p.hunger, thirst: p.thirst, affection: p.affection, color: p.color, active: p.active, accessory: p.accessory || null })),
+        pets: roomData.pets.map(p => ({ id: p.id, type: p.type, name: p.name, hunger: p.hunger, thirst: p.thirst, affection: p.affection, color: p.color, layer: p.layer ?? null, accessory: p.accessory || null })),
         plant: roomData.plant,
         plantLevels: roomData.plantLevels,
         ownedPlants: roomData.ownedPlants,
