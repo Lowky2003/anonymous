@@ -345,7 +345,10 @@ gifBtnEl.addEventListener('click', () => {
     if (!gifGridEl.querySelector('img')) loadTrendingGifs();
     }
 });
-gifCloseBtn.addEventListener('click', () => gifPickerEl.classList.remove('show'));
+gifCloseBtn.addEventListener('click', () => {
+    gifPickerEl.classList.remove('show');
+    _gifSelectCallback = null; // Clear reply context when picker is closed
+});
 
 let gifSearchTimer = null;
 gifSearchInput.addEventListener('input', () => {
@@ -397,10 +400,20 @@ function renderGifs(results) {
     });
 }
 
+// Callback for context-aware GIF selection (reply vs main input)
+let _gifSelectCallback = null;
+
 function selectGif(url) {
-    pendingImage = url; // Store Tenor URL directly (not base64)
-    imgPreviewThumb.src = url;
-    imgPreviewStrip.classList.add('show');
+    if (_gifSelectCallback) {
+        // GIF selected from a reply context
+        _gifSelectCallback(url);
+        _gifSelectCallback = null;
+    } else {
+        // Default: main input
+        pendingImage = url;
+        imgPreviewThumb.src = url;
+        imgPreviewStrip.classList.add('show');
+    }
     gifPickerEl.classList.remove('show');
     gifSearchInput.value = '';
 }
@@ -1031,6 +1044,27 @@ function buildReplyInput(docId) {
     fileInput.value = '';
     });
 
+    // GIF button for reply
+    const gifReplyBtn = document.createElement('button');
+    gifReplyBtn.className = 'reply-attach';
+    gifReplyBtn.textContent = 'GIF';
+    gifReplyBtn.title = 'Search GIFs';
+    gifReplyBtn.style.fontSize = '10px';
+    gifReplyBtn.style.fontWeight = '800';
+    gifReplyBtn.style.letterSpacing = '-0.5px';
+    gifReplyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Set callback so the global GIF picker sends the result to this reply
+        _gifSelectCallback = (url) => {
+            replyPendingImage = url;
+            previewImg.src = url;
+            preview.style.display = 'flex';
+        };
+        gifPickerEl.classList.add('show');
+        gifSearchInput.focus();
+        if (!gifGridEl.querySelector('img')) loadTrendingGifs();
+    });
+
     const inp = document.createElement('input');
     inp.type = 'text';
     inp.placeholder = 'Write a reply…';
@@ -1089,6 +1123,7 @@ function buildReplyInput(docId) {
     inp.addEventListener('click', (e) => e.stopPropagation());
     row.appendChild(fileInput);
     row.appendChild(attachBtn);
+    row.appendChild(gifReplyBtn);
     row.appendChild(inp);
     row.appendChild(btn);
     wrapper.appendChild(row);
