@@ -17,6 +17,13 @@ service cloud.firestore {
 
     // ═══════════════════════════════════════
     // 1. ROOMS — user profiles / virtual rooms
+    //    Key fields: coins, pets[], plant, plantLevels, ownedPlants,
+    //    ownedDecors, placedDecors, ownedWalls, wallPattern,
+    //    ownedWindows, windowStyle, ownedAccessories, plantPosition,
+    //    displayName, lastCoinCollect, loginStreak, lastLoginDay,
+    //    achievements, gachaPulls, giftsGiven, giftsReceived,
+    //    jukeboxTrack, jukeboxVol, lastSeen, updatedAt,
+    //    unlockedLayers (int 1–3), layerData (map: floor→{wallPattern,windowStyle,placedDecors,plantPosition})
     // ═══════════════════════════════════════
     match /rooms/{uid} {
       allow read: if isAuth();
