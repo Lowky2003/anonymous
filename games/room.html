@@ -705,6 +705,19 @@
     .chess-invite-box .ci-accept{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#3ab0a2,#2d8f83);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
     .chess-invite-box .ci-reject{flex:1;padding:12px;border:1px solid rgba(255,80,80,.3);border-radius:12px;background:transparent;color:#ff6b6b;font-size:15px;font-weight:600;cursor:pointer}
     @keyframes chessInvFade{from{opacity:0}to{opacity:1}}
+
+    /* ── Multi-layer / Outside View ── */
+    /* Floor badge inside the room — click to peek outside */
+    .layer-badge{position:absolute;top:8px;right:8px;z-index:25;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;background:rgba(20,20,35,.75);color:rgba(255,255,255,.8);cursor:pointer;transition:all .2s;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);user-select:none}
+    .layer-badge:hover{background:rgba(40,40,60,.9);border-color:rgba(247,201,126,.3);color:#f7c97e}
+    /* Outside view — canvas-based full-room overlay */
+    .outside-view{position:absolute;inset:0;z-index:45;border-radius:18px;display:none;overflow:hidden}
+    .outside-view.visible{display:block}
+    /* Overlaid text controls (z-index above canvas) */
+    .outside-back-btn{position:absolute;top:10px;left:10px;padding:5px 12px;border:1px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(0,0,0,.35);color:rgba(255,255,255,.9);font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px);z-index:5}
+    .outside-back-btn:hover{background:rgba(0,0,0,.55)}
+    .outside-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.7);pointer-events:none;white-space:nowrap;z-index:5}
+    .outside-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,.45);pointer-events:none;z-index:5;white-space:nowrap}
   </style>
 </head>
 <body>
@@ -777,6 +790,17 @@
             </div>
           </div>
           <div id="petStatusColors" style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
+        </div>
+        <!-- Floor badge: click to view building exterior -->
+        <div id="layerBadge" class="layer-badge" onclick="goOutside()" title="Outside View">🏠 My Room</div>
+        <!-- Outside building view — full canvas + thin HTML header -->
+        <div class="outside-view" id="outsideView">
+          <!-- Canvas draws the entire scene (sky, building, trees, etc.) -->
+          <canvas id="outsideCanvas" style="position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border-radius:18px"></canvas>
+          <!-- Overlaid controls -->
+          <div class="outside-title">🌳 Outside View</div>
+          <button class="outside-back-btn" onclick="enterLayer(currentLayer)">← Inside</button>
+          <div class="outside-hint">Tap a floor to enter it</div>
         </div>
       </div>
     </div>
@@ -856,12 +880,12 @@
     </div>
   </div>
 
-  <!-- Upgrade panel -->
   <div class="tab-panel" id="panel-upgrade">
     <div class="sub-tabs">
       <button class="sub-tab active" data-sub="feedPetWrap">🍖 Pet Food</button>
       <button class="sub-tab" data-sub="feedToyWrap">🧸 Pet Toy</button>
       <button class="sub-tab" data-sub="feedPlantWrap">🌱 Plant</button>
+      <button class="sub-tab" data-sub="feedLayerWrap">🏠 Floors</button>
     </div>
     <div class="sub-panel active" id="feedPetWrap">
       <div id="feedPetContent"></div>
@@ -871,6 +895,10 @@
     </div>
     <div class="sub-panel" id="feedPlantWrap">
       <div id="feedPlantContent"></div>
+    </div>
+    <!-- New: floor / layer management sub-panel -->
+    <div class="sub-panel" id="feedLayerWrap">
+      <div id="feedLayerContent"></div>
     </div>
   </div>
 
@@ -1505,7 +1533,10 @@
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
+    let roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5, unlockedLayers: 1, layerData: {} };
+    // Active layer (1–3) and view mode — local UI state, NOT saved to Firestore
+    let currentLayer = 1;
+    let isOutsideView = false;
 
     /* ═══════════════════════════════
        Helpers
@@ -1553,6 +1584,413 @@
 
     function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
 
+    /* ═══════════════════════════════
+       Multi-Layer Helpers
+       ═══════════════════════════════ */
+
+    /** Returns the default wall pattern applied when a new layer is unlocked. */
+    function getLayerDefaultWall(n) {
+      const defaults = { 1: 'wall_default', 2: 'wall_brick', 3: 'wall_galaxy' };
+      return defaults[n] || 'wall_default';
+    }
+
+    /** Returns the default window style applied when a new layer is unlocked. */
+    function getLayerDefaultWindow(n) {
+      const defaults = { 1: 'win_classic', 2: 'win_round', 3: 'win_arch' };
+      return defaults[n] || 'win_classic';
+    }
+
+    /**
+     * Writes the current in-memory wall/window/decors/plantPosition back into
+     * roomData.layerData[currentLayer] so the data is always consistent before saving.
+     */
+    function flushLayerData() {
+      if (!roomData.layerData) roomData.layerData = {};
+      roomData.layerData[currentLayer] = {
+        wallPattern:   roomData.wallPattern,
+        windowStyle:   roomData.windowStyle,
+        placedDecors:  roomData.placedDecors,
+        plantPosition: roomData.plantPosition || null
+      };
+    }
+
+    /**
+     * Switches the active view layer, loading the new layer's decor/wall data,
+     * and re-renders the room. Optionally saves after switching.
+     */
+    function enterLayer(n, doSave) {
+      if (n < 1 || n > 3) return;
+      const total = roomData.unlockedLayers || 1;
+      if (n > total) {
+        showToast('Floor ' + n + ' is locked! Unlock it from ⬆ Feed > 🏠 Floors.', 'error');
+        return;
+      }
+      // Persist current layer before switching
+      flushLayerData();
+      currentLayer = n;
+      // Load the new layer's data into the active roomData slots
+      const ld = (roomData.layerData || {})[n] || {};
+      roomData.wallPattern   = ld.wallPattern  || getLayerDefaultWall(n);
+      roomData.windowStyle   = ld.windowStyle  || getLayerDefaultWindow(n);
+      roomData.placedDecors  = Array.isArray(ld.placedDecors) ? ld.placedDecors : [];
+      roomData.plantPosition = ld.plantPosition || null;
+      // Hide outside view
+      isOutsideView = false;
+      document.getElementById('outsideView')?.classList.remove('visible');
+      // Force full bg redraw (wall pattern may have changed)
+      const bgc = document.getElementById('roomBgCanvas');
+      if (bgc) bgc.dataset.init = '';
+      _lastPetKey   = '';
+      _lastPlantKey = '';
+      renderAll();
+      if (doSave) saveRoom();
+    }
+
+    /** Shows the outside view overlay and renders the building on canvas. */
+    function goOutside() {
+      flushLayerData();
+      isOutsideView = true;
+      document.getElementById('outsideView')?.classList.add('visible');
+      drawOutsideCanvas();
+      updateLayerBadge();
+    }
+
+    /** Updates the layer badge text inside the room. */
+    function updateLayerBadge() {
+      const badge = document.getElementById('layerBadge');
+      if (!badge) return;
+      const total = roomData.unlockedLayers || 1;
+      if (isOutsideView) {
+        badge.textContent = '🌳 Outside';
+      } else if (total > 1) {
+        badge.textContent = '🏠 Floor ' + currentLayer + ' / ' + total;
+      } else {
+        badge.textContent = '🏠 My Room';
+      }
+    }
+
+    // Stores floor hit-rects for canvas click handling: { floorNum: {x,y,w,h,unlocked} }
+    let _outsideFloorRects = {};
+    // Pre-computed stable star positions (avoids flickering on re-render)
+    let _outsideStars = null;
+
+    /**
+     * Draws the full building exterior scene on the #outsideCanvas canvas element.
+     * Called whenever the outside view is opened or needs refreshing.
+     */
+    function drawOutsideCanvas() {
+      const cvs = document.getElementById('outsideCanvas');
+      if (!cvs) return;
+      const par = cvs.parentElement;
+      cvs.width  = par.clientWidth;
+      cvs.height = par.clientHeight;
+      const W = cvs.width, H = cvs.height;
+      const ctx = cvs.getContext('2d');
+      _outsideFloorRects = {};
+
+      // ── Pre-compute stable star positions using deterministic seeding ──
+      if (!_outsideStars) {
+        _outsideStars = Array.from({length: 28}, (_, i) => ({
+          x: (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5),
+          y: (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.4,
+          r: 0.8 + (i % 3) * 0.4
+        }));
+      }
+
+      // ── 1. Night sky gradient ──
+      const sky = ctx.createLinearGradient(0, 0, 0, H * 0.7);
+      sky.addColorStop(0,   '#060d1f');
+      sky.addColorStop(0.4, '#0d1f40');
+      sky.addColorStop(0.7, '#14304f');
+      sky.addColorStop(1,   '#1e4a38');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, W, H);
+
+      // ── 2. Ground ──
+      const grd = ctx.createLinearGradient(0, H * 0.7, 0, H);
+      grd.addColorStop(0,   '#2a5a1a');
+      grd.addColorStop(0.4, '#1e4410');
+      grd.addColorStop(1,   '#0e2a06');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, H * 0.7, W, H * 0.3);
+
+      // ── 3. Cobblestone path to door ──
+      const pathW = 38, pathX = W / 2 - 19;
+      ctx.fillStyle = '#8a7a60';
+      ctx.fillRect(pathX, H * 0.68, pathW, H * 0.32);
+      ctx.strokeStyle = 'rgba(60,50,35,0.35)';
+      ctx.lineWidth = 0.8;
+      for (let py = H * 0.7; py < H; py += 14) {
+        ctx.beginPath(); ctx.moveTo(pathX, py); ctx.lineTo(pathX + pathW, py); ctx.stroke();
+      }
+
+      // ── 4. Stars ──
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      _outsideStars.forEach(s => {
+        ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // ── 5. Crescent moon ──
+      const moonX = W * 0.84, moonY = H * 0.10, moonR = Math.min(W, H) * 0.055;
+      ctx.fillStyle = '#fff9c4';
+      ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0d1f40';
+      ctx.beginPath(); ctx.arc(moonX + moonR * 0.4, moonY - moonR * 0.1, moonR * 0.82, 0, Math.PI * 2); ctx.fill();
+
+      // ── 6. Draw trees (left & right) ──
+      function drawTree(tx, ty, tH) {
+        ctx.fillStyle = '#4a2e10';
+        ctx.fillRect(tx - 5, ty - tH * 0.32, 10, tH * 0.32);
+        for (let t = 0; t < 3; t++) {
+          const tw  = tH * (0.22 - t * 0.055);
+          const tyy = ty - tH * 0.32 - t * tH * 0.26;
+          const g   = ctx.createLinearGradient(tx - tw, tyy - tH * 0.26, tx + tw, tyy);
+          g.addColorStop(0, '#1a5a10'); g.addColorStop(0.5, '#2a7a20'); g.addColorStop(1, '#1a5a10');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.moveTo(tx, tyy - tH * 0.30);
+          ctx.lineTo(tx - tw, tyy); ctx.lineTo(tx + tw, tyy);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      const tH = H * 0.25;
+      drawTree(W * 0.12, H * 0.68, tH);
+      drawTree(W * 0.88, H * 0.68, tH * 0.88);
+
+      // ── 7. Building layout ──
+      const MAX_FLOORS = 3;
+      const bW     = Math.min(W * 0.52, 260);
+      const bX     = (W - bW) / 2;
+      const floorH = Math.min((H * 0.42) / MAX_FLOORS, 72);
+      const bH     = floorH * MAX_FLOORS;
+      const bTop   = H * 0.68 - bH;
+      const total  = roomData.unlockedLayers || 1;
+
+      // ── 8. Building drop-shadow ──
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur  = 20;
+      ctx.fillStyle   = '#2a1e10';
+      ctx.fillRect(bX - 4, bTop - 2, bW + 8, bH + 6);
+      ctx.shadowBlur  = 0; ctx.shadowColor = 'transparent';
+
+      // ── 9. Draw each floor ──
+      for (let i = 1; i <= MAX_FLOORS; i++) {
+        // Floor 1 sits at the bottom; floor 3 is at the top of the building
+        const fi  = MAX_FLOORS - i;        // 0 = topmost slot
+        const fy  = bTop + fi * floorH;
+        const unlocked  = i <= total;
+        const isCurrent = i === currentLayer;
+        const ld        = (roomData.layerData || {})[i] || {};
+        const wallColor = getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i));
+
+        // Panel fill
+        if (unlocked) {
+          ctx.fillStyle = wallColor;
+          ctx.fillRect(bX, fy, bW, floorH);
+          // Subtle sheen
+          const tex = ctx.createLinearGradient(bX, fy, bX + bW, fy + floorH);
+          tex.addColorStop(0,   'rgba(255,255,255,0.07)');
+          tex.addColorStop(0.5, 'rgba(255,255,255,0.0)');
+          tex.addColorStop(1,   'rgba(0,0,0,0.06)');
+          ctx.fillStyle = tex;
+          ctx.fillRect(bX, fy, bW, floorH);
+        } else {
+          // Locked — dark hatched background
+          ctx.fillStyle = '#1a1525';
+          ctx.fillRect(bX, fy, bW, floorH);
+          ctx.strokeStyle = 'rgba(100,80,160,0.12)';
+          ctx.lineWidth = 0.7;
+          for (let lx = -floorH; lx < bW + floorH; lx += 14) {
+            ctx.beginPath();
+            ctx.moveTo(bX + lx, fy);
+            ctx.lineTo(bX + lx + floorH, fy + floorH);
+            ctx.stroke();
+          }
+        }
+
+        // Border (gold highlight for current floor)
+        ctx.strokeStyle = (isCurrent && unlocked) ? '#f7c97e' : 'rgba(0,0,0,0.35)';
+        ctx.lineWidth   = (isCurrent && unlocked) ? 2.5 : 1;
+        ctx.strokeRect(bX + (isCurrent ? 1.25 : 0), fy + (isCurrent ? 1.25 : 0),
+                       bW - (isCurrent ? 2.5 : 0),  floorH - (isCurrent ? 2.5 : 0));
+
+        // Windows (two per floor)
+        const winW = bW * 0.16, winH = floorH * 0.5;
+        const winY = fy + (floorH - winH) / 2;
+        [bX + bW * 0.18, bX + bW * 0.62].forEach(wx => {
+          if (unlocked) {
+            // Glass gradient
+            const wg = ctx.createLinearGradient(wx, winY, wx + winW, winY + winH);
+            wg.addColorStop(0, 'rgba(200,230,255,0.65)');
+            wg.addColorStop(1, 'rgba(160,210,255,0.45)');
+            ctx.fillStyle = wg;
+            ctx.fillRect(wx, winY, winW, winH);
+            // Warm interior glow
+            ctx.fillStyle = 'rgba(255,245,200,0.20)';
+            ctx.fillRect(wx + 2, winY + 2, winW - 4, winH - 4);
+            // Frame
+            ctx.strokeStyle = 'rgba(60,90,130,0.7)';  ctx.lineWidth = 1.5;
+            ctx.strokeRect(wx, winY, winW, winH);
+            // Pane cross
+            ctx.strokeStyle = 'rgba(60,90,130,0.5)';  ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.moveTo(wx + winW/2, winY); ctx.lineTo(wx + winW/2, winY + winH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(wx, winY + winH/2); ctx.lineTo(wx + winW, winY + winH/2); ctx.stroke();
+          } else {
+            // Boarded X
+            ctx.fillStyle = 'rgba(30,20,10,0.8)';
+            ctx.fillRect(wx, winY, winW, winH);
+            ctx.strokeStyle = 'rgba(100,70,40,0.55)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(wx, winY); ctx.lineTo(wx + winW, winY + winH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(wx + winW, winY); ctx.lineTo(wx, winY + winH); ctx.stroke();
+          }
+        });
+
+        // Floor label
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        if (unlocked) {
+          ctx.fillStyle = 'rgba(0,0,0,0.65)';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.fillText(isCurrent ? '★ Floor ' + i : 'Floor ' + i, bX + bW / 2, fy + floorH - 16);
+        } else {
+          ctx.fillStyle = 'rgba(180,150,220,0.75)';
+          ctx.font = '10px sans-serif';
+          const UNLOCK_COST = { 2: 10000, 3: 20000 };
+          ctx.fillText('🔒 ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW / 2, fy + floorH - 16);
+        }
+        ctx.textBaseline = 'alphabetic';
+
+        // Store rect for click detection
+        _outsideFloorRects[i] = { x: bX, y: fy, w: bW, h: floorH, unlocked };
+      }
+
+      // ── 10. Peaked roof ──
+      const roofPeakX = W / 2;
+      const roofPeakY = bTop - bW * 0.28;
+      const roofG = ctx.createLinearGradient(bX, bTop, roofPeakX, roofPeakY);
+      roofG.addColorStop(0, '#c8a060'); roofG.addColorStop(0.5, '#a07840'); roofG.addColorStop(1, '#7a5820');
+      ctx.fillStyle = roofG;
+      ctx.beginPath();
+      ctx.moveTo(bX - 12, bTop); ctx.lineTo(roofPeakX, roofPeakY); ctx.lineTo(bX + bW + 12, bTop);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+
+      // ── 11. Chimney ──
+      const chimX = bX + bW * 0.68;
+      const chimY = roofPeakY + (bTop - roofPeakY) * 0.32;
+      ctx.fillStyle = '#8a6520';
+      ctx.fillRect(chimX, chimY - 22, 14, 26);
+      ctx.fillStyle = '#6a4a10';
+      ctx.fillRect(chimX - 2, chimY - 24, 18, 4);
+      for (let sp = 0; sp < 3; sp++) {
+        ctx.fillStyle = `rgba(200,200,200,${0.25 - sp * 0.07})`;
+        ctx.beginPath();
+        ctx.arc(chimX + 7 + sp * 2, chimY - 28 - sp * 7, 4 + sp * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ── 12. Front door ──
+      const doorW = bW * 0.13, doorH = floorH * 0.82;
+      const doorX = W / 2 - doorW / 2;
+      const doorY = H * 0.68 - doorH;
+      ctx.fillStyle = '#5a3a18';
+      ctx.fillRect(doorX - 4, doorY + doorH * 0.08, doorW + 8, doorH * 0.92 + 3);
+      const dg = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY + doorH);
+      dg.addColorStop(0, '#8a5030'); dg.addColorStop(1, '#5a3018');
+      ctx.fillStyle = dg;
+      ctx.fillRect(doorX, doorY + doorH * 0.08, doorW, doorH * 0.92);
+      ctx.fillStyle = '#6a4020';
+      ctx.beginPath();
+      ctx.arc(doorX + doorW / 2, doorY + doorH * 0.08, doorW / 2, Math.PI, 0);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(40,20,5,0.5)'; ctx.lineWidth = 1;
+      ctx.strokeRect(doorX + 3, doorY + doorH * 0.15, doorW - 6, doorH * 0.32);
+      ctx.strokeRect(doorX + 3, doorY + doorH * 0.52, doorW - 6, doorH * 0.34);
+      ctx.fillStyle = '#e0b850';
+      ctx.beginPath(); ctx.arc(doorX + doorW * 0.72, doorY + doorH * 0.54, 3.5, 0, Math.PI * 2); ctx.fill();
+
+      // ── 13. Attach click handler ──
+      _attachOutsideClickHandler();
+    }
+
+    /** Attaches a click handler on #outsideCanvas for floor entry/navigation. */
+    function _attachOutsideClickHandler() {
+      const cvs = document.getElementById('outsideCanvas');
+      if (!cvs) return;
+      // Replace onclick each time to avoid stale closures
+      cvs.onclick = (e) => {
+        const rect = cvs.getBoundingClientRect();
+        const cx = (e.clientX - rect.left) * (cvs.width  / rect.width);
+        const cy = (e.clientY - rect.top)  * (cvs.height / rect.height);
+        for (const [fi, r] of Object.entries(_outsideFloorRects)) {
+          if (cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h) {
+            if (r.unlocked) {
+              enterLayer(Number(fi));
+            } else {
+              const ownRoom = viewingUid === currentUid;
+              showToast(ownRoom ? 'Unlock from ⬆ Feed → 🏠 Floors' : 'Floor is locked.', 'error');
+            }
+            return;
+          }
+        }
+      };
+    }
+
+    /**
+     * @deprecated - HTML floor tiles replaced by canvas.
+     * Kept as a thin wrapper so existing callers (upgrade tab, etc.) still work.
+     */
+    function renderOutsideView() {
+      if (isOutsideView) drawOutsideCanvas();
+    }
+
+    /**
+     * Returns a representative CSS background colour for a wall pattern
+     * used in the outside-view floor preview tiles.
+     */
+    function getWallPreviewColor(wallId) {
+      const map = {
+        wall_default: '#d4c4a0', wall_brick:   '#b5745a', wall_wood:    '#a08060',
+        wall_stripe:  '#e0d8cc', wall_dots:    '#e8e0d8', wall_diamond: '#d8d0c4',
+        wall_pastel:  '#ffd1dc', wall_mint:    '#b8e8d0', wall_navy:    '#2c3e6b',
+        wall_sunset:  '#ff7b54', wall_marble:  '#e8e4e0', wall_galaxy:  '#1a1035',
+        wall_lavender:'#d4bcf0', wall_forest:  '#2d5a27', wall_bamboo:  '#a8c878',
+        wall_cherry:  '#f5d0d8'
+      };
+      return map[wallId] || '#d4c4a0';
+    }
+
+    /**
+     * Unlocks a new floor layer, deducting coins and initialising the layer's
+     * default wall/window settings. Called from the 🏠 Floors upgrade sub-tab.
+     */
+    async function unlockLayer(n) {
+      if (viewingUid !== currentUid) return;
+      const UNLOCK_COST = { 2: 10000, 3: 20000 };
+      const cost = UNLOCK_COST[n];
+      if (!cost) return;
+      if ((roomData.unlockedLayers || 1) >= n) return showToast('Floor ' + n + ' already unlocked!', 'error');
+      if ((roomData.unlockedLayers || 1) < n - 1)
+        return showToast('Unlock Floor ' + (n - 1) + ' first!', 'error');
+      if (roomData.coins < cost)
+        return showToast('Not enough coins! Need ' + cost + ' 🪙', 'error');
+      roomData.coins -= cost;
+      roomData.unlockedLayers = n;
+      // Initialise the new floor with its default wall/window and empty decors
+      if (!roomData.layerData) roomData.layerData = {};
+      roomData.layerData[n] = {
+        wallPattern:   getLayerDefaultWall(n),
+        windowStyle:   getLayerDefaultWindow(n),
+        placedDecors:  [],
+        plantPosition: null
+      };
+      // Ensure the default window style is in the owned list
+      const defWin = getLayerDefaultWindow(n);
+      if (!roomData.ownedWindows.includes(defWin)) roomData.ownedWindows.push(defWin);
+      await saveRoom();
+      renderAll();
+      showToast('🏠 Floor ' + n + ' unlocked! Tap it to enter.', 'success');
+    }
+
     function getPlayerName() {
       const custom = currentUid ? localStorage.getItem('flappy_custom_name_' + currentUid) : null;
       if (custom) return custom;
@@ -1564,6 +2002,8 @@
     async function saveRoom() {
       if (viewingUid !== currentUid) return;
       if (!_roomLoaded) return; // Don't save defaults before Firestore data loads
+      // Sync active layer's mutable state (wall/window/decors/plantPos) into layerData
+      flushLayerData();
       const data = {
         coins: roomData.coins,
         pets: roomData.pets.map(p => ({ id: p.id, type: p.type, name: p.name, hunger: p.hunger, thirst: p.thirst, affection: p.affection, color: p.color, active: p.active, accessory: p.accessory || null })),
@@ -1571,13 +2011,14 @@
         plantLevels: roomData.plantLevels,
         ownedPlants: roomData.ownedPlants,
         ownedDecors: roomData.ownedDecors,
-        placedDecors: roomData.placedDecors,
+        // Top-level layer-1 fields kept for backward compatibility with older clients
+        placedDecors: (roomData.layerData[1] || {}).placedDecors || roomData.placedDecors,
         ownedWalls: roomData.ownedWalls,
-        wallPattern: roomData.wallPattern,
+        wallPattern: (roomData.layerData[1] || {}).wallPattern || roomData.wallPattern,
         ownedWindows: roomData.ownedWindows,
-        windowStyle: roomData.windowStyle,
+        windowStyle: (roomData.layerData[1] || {}).windowStyle || roomData.windowStyle,
         ownedAccessories: roomData.ownedAccessories || [],
-        plantPosition: roomData.plantPosition || null,
+        plantPosition: (roomData.layerData[1] || {}).plantPosition || null,
         displayName: getPlayerName(),
         lastCoinCollect: roomData.lastCoinCollect || Date.now(),
         lastSeen: Date.now(),
@@ -1589,7 +2030,10 @@
         giftsGiven: roomData.giftsGiven || 0,
         giftsReceived: roomData.giftsReceived || 0,
         jukeboxTrack: roomData.jukeboxTrack || null,
-        jukeboxVol: roomData.jukeboxVol ?? 0.5
+        jukeboxVol: roomData.jukeboxVol ?? 0.5,
+        // Multi-layer fields
+        unlockedLayers: roomData.unlockedLayers || 1,
+        layerData: roomData.layerData || {}
       };
       _lastLocalSaveTime = Date.now();
       await userDocRef().set(data, { merge: true });
@@ -1610,7 +2054,11 @@
       if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
       if (unsubVisitList) { unsubVisitList(); unsubVisitList = null; }
       // Reset roomData to defaults for clean account switch
-      roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
+      roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5, unlockedLayers: 1, layerData: {} };
+      // Reset to floor 1 when re-initialising (e.g. account switch)
+      currentLayer = 1;
+      isOutsideView = false;
+      document.getElementById('outsideView')?.classList.remove('visible');
       renderAll(); // Immediately show current user before Firestore loads
       initRoomDropZone();
       initDecorDrag();
@@ -1639,19 +2087,47 @@
           roomData.ownedPlants = d.ownedPlants ?? [];
           roomData.ownedDecors = d.ownedDecors ?? [];
           roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
-          roomData.wallPattern = d.wallPattern ?? 'wall_default';
           roomData.ownedWindows = d.ownedWindows ?? ['win_none','win_classic'];
-          roomData.windowStyle = d.windowStyle ?? 'win_classic';
-          roomData.plantPosition = d.plantPosition ?? null;
-          // Migrate old string[] placedDecors to {id,x,y}[] format
-          const rawPlaced = d.placedDecors ?? [];
-          roomData.placedDecors = rawPlaced.map(d => {
-            if (typeof d === 'string') {
-              const def = DECORATIONS.find(x => x.id === d);
-              return { id: d, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+          // ── Multi-layer: load unlockedLayers + layerData ──
+          roomData.unlockedLayers = d.unlockedLayers ?? 1;
+          // Build layerData from Firestore; fall back to top-level fields for backward compat
+          const rawLayerData = d.layerData ? JSON.parse(JSON.stringify(d.layerData)) : {};
+          if (!rawLayerData[1]) {
+            // Migrate existing single-layer Firestore data into layerData[1]
+            const rawPlaced = d.placedDecors ?? [];
+            rawLayerData[1] = {
+              wallPattern: d.wallPattern ?? 'wall_default',
+              windowStyle: d.windowStyle ?? 'win_classic',
+              placedDecors: rawPlaced.map(p => {
+                if (typeof p === 'string') {
+                  const def = DECORATIONS.find(x => x.id === p);
+                  return { id: p, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+                }
+                return p;
+              }),
+              plantPosition: d.plantPosition ?? null
+            };
+          }
+          // Migrate any layer-specific placedDecors still in old string format
+          for (const k of Object.keys(rawLayerData)) {
+            const ld = rawLayerData[k];
+            if (ld && Array.isArray(ld.placedDecors)) {
+              ld.placedDecors = ld.placedDecors.map(p => {
+                if (typeof p === 'string') {
+                  const def = DECORATIONS.find(x => x.id === p);
+                  return { id: p, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+                }
+                return p;
+              });
             }
-            return d;
-          });
+          }
+          roomData.layerData = rawLayerData;
+          // Load the currently active layer's data into the main roomData slots
+          const activeLD = roomData.layerData[currentLayer] || {};
+          roomData.wallPattern = activeLD.wallPattern || 'wall_default';
+          roomData.windowStyle = activeLD.windowStyle || 'win_classic';
+          roomData.placedDecors = Array.isArray(activeLD.placedDecors) ? activeLD.placedDecors : [];
+          roomData.plantPosition = activeLD.plantPosition || null;
           roomData.displayName = d.displayName ?? '';
           roomData.lastCoinCollect = d.lastCoinCollect ?? d.updatedAt ?? Date.now();
           roomData.ownedAccessories = d.ownedAccessories ?? [];
@@ -1802,6 +2278,8 @@
       }
       if (!isOwner || tabId === 'extras') renderGuestbook();
       renderVisitList();
+      // Keep the floor badge in sync with the current layer / view state
+      updateLayerBadge();
     }
 
     function renderActiveTab(tabId) {
@@ -2827,6 +3305,64 @@
         plantHtml = '<div class="visit-empty">Buy a plant first to upgrade it!</div>';
       }
       plantEl.innerHTML = plantHtml;
+
+      // ── 🏠 Floors / Layers sub-tab ──
+      const layerEl = document.getElementById('feedLayerContent');
+      if (!layerEl) return;
+      const UNLOCK_COST = { 2: 10000, 3: 20000 };
+      const unlockedLayers = roomData.unlockedLayers || 1;
+      let layerHtml = '<div class="shop-section">';
+      layerHtml += '<div class="shop-section-title">🏠 Floors &amp; Layers</div>';
+      layerHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 12px;text-align:center">' +
+        'Unlock new floors for your home! Each floor has its own wall, window, and decor layout.</div>';
+      // Render cards for floors 1–3
+      for (let i = 1; i <= 3; i++) {
+        const unlocked  = i <= unlockedLayers;
+        const isCurrent = i === currentLayer;
+        const cost      = UNLOCK_COST[i];
+        const label     = i === 1 ? '🏡 Base Floor' : i === 2 ? '🏢 2nd Floor' : '🌟 Top Floor';
+        const defWall   = getLayerDefaultWall(i).replace('wall_', '');
+        layerHtml += '<div class="shop-card" style="text-align:center;' +
+          (unlocked ? 'border-color:rgba(247,201,126,0.35)' : '') + '">';
+        layerHtml += '<span class="shop-emoji">' + (i === 1 ? '🏡' : i === 2 ? '🏢' : '🌟') + '</span>';
+        layerHtml += '<div class="shop-name">' + label + '</div>';
+        if (i === 1) {
+          // Base floor is always free and unlocked
+          layerHtml += '<div style="font-size:11px;color:#34d399;margin-bottom:6px">✓ Free — always unlocked</div>';
+          if (isCurrent) {
+            layerHtml += '<button class="shop-btn equipped-btn" disabled>✓ Here now</button>';
+          } else {
+            layerHtml += '<button class="shop-btn equip" onclick="enterLayer(1)">Go to Floor 1</button>';
+          }
+        } else if (unlocked) {
+          layerHtml += '<div style="font-size:11px;color:#34d399;margin-bottom:6px">' +
+            '✓ Unlocked' + (isCurrent ? ' <span style="color:#f7c97e">(Current)</span>' : '') + '</div>';
+          if (isCurrent) {
+            layerHtml += '<button class="shop-btn equipped-btn" disabled>✓ Here now</button>';
+          } else {
+            layerHtml += '<button class="shop-btn equip" onclick="enterLayer(' + i + ')">Go to Floor ' + i + '</button>';
+          }
+        } else {
+          // Locked — show unlock requirements
+          const prevOk = (i - 1) <= unlockedLayers;
+          layerHtml += '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px">' +
+            'Unlocks with ' + defWall + ' wall</div>';
+          layerHtml += '<div class="shop-price">' + coinSVG(14) + ' ' + cost + '</div>';
+          if (prevOk) {
+            layerHtml += '<button class="shop-btn buy" onclick="unlockLayer(' + i + ')" ' +
+              (roomData.coins >= cost ? '' : 'disabled') + '>🔓 Unlock Floor ' + i + '</button>';
+          } else {
+            layerHtml += '<button class="shop-btn" disabled>Unlock Floor ' + (i - 1) + ' first</button>';
+          }
+        }
+        layerHtml += '</div>';
+      }
+      // Outside view shortcut
+      layerHtml += '<div style="text-align:center;margin-top:4px;padding:0 12px 8px">';
+      layerHtml += '<button class="shop-btn equip" style="width:100%" onclick="goOutside()">🌳 Outside View</button>';
+      layerHtml += '</div>';
+      layerHtml += '</div>';
+      layerEl.innerHTML = layerHtml;
     }
 
     let unsubVisitList = null;
@@ -3675,23 +4211,40 @@
       roomData.pets = migratePets(d);
       roomData.plant = d.plant ?? null;
       roomData.plantLevels = d.plantLevels ?? {};
-      roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
       roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
-      roomData.wallPattern = d.wallPattern ?? 'wall_default';
       roomData.ownedWindows = d.ownedWindows ?? ['win_none','win_classic'];
-      roomData.windowStyle = d.windowStyle ?? 'win_classic';
       roomData.jukeboxTrack = d.jukeboxTrack ?? null;
       roomData.jukeboxVol = d.jukeboxVol ?? 0.5;
       roomData.ownedDecors = d.ownedDecors ?? [];
-      const rawPlaced = d.placedDecors ?? [];
-      roomData.placedDecors = rawPlaced.map(pd => {
-        if (typeof pd === 'string') {
-          const def = DECORATIONS.find(x => x.id === pd);
-          return { id: pd, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
-        }
-        return pd;
-      });
+      // Load multi-layer data for visited room (visitor starts on floor 1)
+      roomData.unlockedLayers = d.unlockedLayers ?? 1;
+      const rawLayerData = d.layerData ? JSON.parse(JSON.stringify(d.layerData)) : {};
+      if (!rawLayerData[1]) {
+        const rawPlaced = d.placedDecors ?? [];
+        rawLayerData[1] = {
+          wallPattern: d.wallPattern ?? 'wall_default',
+          windowStyle: d.windowStyle ?? 'win_classic',
+          placedDecors: rawPlaced.map(pd => {
+            if (typeof pd === 'string') {
+              const def = DECORATIONS.find(x => x.id === pd);
+              return { id: pd, x: def ? def.dx : 0.5, y: def ? def.dy : 0.5 };
+            }
+            return pd;
+          }),
+          plantPosition: d.plantPosition ?? null
+        };
+      }
+      roomData.layerData = rawLayerData;
+      // Visitors always start on floor 1
+      currentLayer = 1;
+      isOutsideView = false;
+      document.getElementById('outsideView')?.classList.remove('visible');
+      const visitLD = roomData.layerData[1] || {};
+      roomData.wallPattern = visitLD.wallPattern || 'wall_default';
+      roomData.windowStyle = visitLD.windowStyle || 'win_classic';
+      roomData.placedDecors = Array.isArray(visitLD.placedDecors) ? visitLD.placedDecors : [];
+      roomData.plantPosition = visitLD.plantPosition || null;
       // Reset render keys so room fully redraws for visited user
       _lastPetKey = '';
       _lastPlantKey = '';
@@ -7558,6 +8111,8 @@
         btn.parentElement.parentElement.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('active', p.id === target));
         // Trigger decor shop render when switching to decor tab
         if (target === 'decorShopWrap') renderDecorShop();
+        // Refresh the Layer/Floors tab so coin totals and current-layer indicator are up-to-date
+        if (target === 'feedLayerWrap') renderUpgrade();
       });
     });
 
