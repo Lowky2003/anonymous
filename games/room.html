@@ -1875,13 +1875,15 @@
       el.innerHTML = PETS.map(item => {
         const ownedCount = roomData.pets.filter(p => p.type === item.id).length;
         const canAfford = roomData.coins >= item.cost;
+        const roomFull = petCount >= 2;
         return '<div class="shop-card' + (ownedCount > 0 ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
           (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + '</div>' : '') +
           '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
           '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
-            (canAfford ? '' : 'disabled') + '>🐾 Adopt</button>' +
+            (canAfford && !roomFull ? '' : 'disabled') + '>🐾 Adopt</button>' +
+          (roomFull ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Room full (max 2)</div>' : '') +
           '</div>';
       }).join('');
     }
@@ -2850,6 +2852,7 @@
       if (type === 'pet') {
         // Adopt a new pet instance
         const petDef = PETS.find(p => p.id === id);
+        if (roomData.pets.length >= 2) return showToast('Room is full! Max 2 pets allowed.', 'error');
         if (!petDef || roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
         roomData.coins -= petDef.cost;
         const newPet = {
