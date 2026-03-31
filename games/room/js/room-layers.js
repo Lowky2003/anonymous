@@ -1,4 +1,4 @@
-﻿    function flushLayerData() {
+    function flushLayerData() {
       if (!roomData.layerData) roomData.layerData = {};
       roomData.layerData[currentLayer] = {
         wallPattern:   roomData.wallPattern,
@@ -85,7 +85,7 @@
     // Currently hovered floor index (null if none)
     let _outsideHoveredFloor = null;
 
-    // Leaf & flower config (not hardcoded inline â€” defined once here)
+    // Leaf & flower config (not hardcoded inline - defined once here)
     const OUTSIDE_LEAF_COUNT = 14;
     const LEAF_COLORS_DAY   = ['#5aaa38', '#78c050', '#a0d060', '#d4a020', '#e0b830'];
     const LEAF_COLORS_NIGHT = ['#1a5a10', '#2a6a20', '#3a7a30', '#6a5010', '#8a6a18'];
@@ -160,7 +160,7 @@
       // Determine day or night based on real-world time
       const night = isNightTime();
 
-      // â”€â”€ Pre-compute stable star positions using deterministic seeding â”€â”€
+      // -- Pre-compute stable star positions using deterministic seeding --
       if (!_outsideStars)      _outsideStars = Array.from({ length: 28 }, (_, i) => ({ x: (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5), y: (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.35, r: 0.8 + (i % 3) * 0.4 }));
       if (!_outsideClouds)     initOutsideClouds();
       if (!_outsideFlowers)    initOutsideFlowers();
@@ -176,44 +176,44 @@
         lastFrame = t;
         ctx.clearRect(0, 0, W, H);
 
-        // Wind sway factor â€” smooth sine wave for tree/bush movement
+        // Wind sway factor - smooth sine wave for tree/bush movement
         const windSway = Math.sin(t / 1400) * 0.012 + Math.sin(t / 900) * 0.006;
 
-        // â”€â”€ Sky â”€â”€
+        // -- Sky --
         _drawHDSky(ctx, W, H, night, t);
 
-        // â”€â”€ Distant rolling hills (behind building) â”€â”€
+        // -- Distant rolling hills (behind building) --
         _drawRollingHills(ctx, W, H, night);
 
-        // â”€â”€ Ground â”€â”€
+        // -- Ground --
         _drawHDGround(ctx, W, H, night);
 
-        // â”€â”€ Grass tufts â”€â”€
+        // -- Grass tufts --
         _drawGrassTufts(ctx, W, H, windSway, night);
 
-        // â”€â”€ Stone stepping-path â”€â”€
+        // -- Stone stepping-path --
         _drawStonePath(ctx, W, H, night);
 
-        // â”€â”€ Flowers scattered on ground â”€â”€
+        // -- Flowers scattered on ground --
         _drawFlowers(ctx, W, H, t, night);
 
-        // â”€â”€ Wooden fences (left and right) â”€â”€
+        // -- Wooden fences (left and right) --
         _drawFence(ctx, W * 0.02, H * 0.72, W * 0.20, night);
         _drawFence(ctx, W * 0.80, H * 0.72, W * 0.18, night);
 
-        // â”€â”€ Trees with wind sway (large foreground + small background) â”€â”€
+        // -- Trees with wind sway (large foreground + small background) --
         _drawHDTree(ctx, W * 0.10, H * 0.68, H * 0.26, windSway, night);
         _drawHDTree(ctx, W * 0.90, H * 0.68, H * 0.22, windSway * 0.7, night);
         _drawHDTree(ctx, W * 0.22, H * 0.70, H * 0.14, windSway * 0.5, night);
         _drawHDTree(ctx, W * 0.78, H * 0.70, H * 0.12, windSway * 0.4, night);
 
-        // â”€â”€ Bushes around building â”€â”€
+        // -- Bushes around building --
         _drawBush(ctx, W * 0.30, H * 0.70, 18, windSway, night);
         _drawBush(ctx, W * 0.70, H * 0.70, 16, windSway * 0.8, night);
         _drawBush(ctx, W * 0.34, H * 0.73, 12, windSway * 0.6, night);
         _drawBush(ctx, W * 0.67, H * 0.73, 14, windSway * 0.5, night);
 
-        // â”€â”€ Building â”€â”€
+        // -- Building --
         const MAX_FLOORS = 3;
         const bW     = Math.min(W * 0.48, 240);
         const bX     = (W - bW) / 2;
@@ -229,7 +229,7 @@
         // -- Falling leaves --
         _drawHDLeaves(ctx, W, H, t, windSway, night);
 
-        // â”€â”€ Fluffy clouds (day only) â”€â”€
+        // -- Fluffy clouds (day only) --
         if (!night) _drawClouds(ctx, W, H, t);
 
         _outsideAnimFrame = requestAnimationFrame(frame);
@@ -239,7 +239,7 @@
       _attachOutsideClickHandler();
     }
 
-    // â”€â”€ Sky with warm Hay Day palette â”€â”€
+    // -- Sky with warm Hay Day palette, sun/moon follow real time --
     function _drawHDSky(ctx, W, H, night, t) {
       const sky = ctx.createLinearGradient(0, 0, 0, H * 0.70);
       if (night) {
@@ -257,6 +257,10 @@
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H);
 
+      // --- Compute current fractional hour for sun/moon positioning ---
+      const now = new Date();
+      const hour = now.getHours() + now.getMinutes() / 60;
+
       if (night) {
         // Twinkling stars
         _outsideStars.forEach(s => {
@@ -264,29 +268,47 @@
           ctx.fillStyle = 'rgba(255,255,240,' + (twinkle * 0.8).toFixed(2) + ')';
           ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill();
         });
-        // Crescent moon
+
+        // Moon arc: rises at 18:00 (left), peaks at midnight, sets at 6:00 (right)
+        const nightHours = hour >= 18 ? hour - 18 : hour + 6; // 0..12
+        const moonProgress = nightHours / 12; // 0 = moonrise, 0.5 = midnight, 1 = moonset
+        const moonX = W * (0.10 + moonProgress * 0.80);
+        const moonArc = Math.sin(moonProgress * Math.PI);
+        const moonY = H * (0.45 - moonArc * 0.38);
         const moonR = Math.min(W, H) * 0.05;
+        // Soft moon glow
+        ctx.fillStyle = 'rgba(200,210,255,0.08)';
+        ctx.beginPath(); ctx.arc(moonX, moonY, moonR * 3, 0, Math.PI * 2); ctx.fill();
+        // Crescent moon
         ctx.fillStyle = '#fff9d0';
-        ctx.beginPath(); ctx.arc(W * 0.84, H * 0.09, moonR, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#101840';
-        ctx.beginPath(); ctx.arc(W * 0.84 + moonR * 0.35, H * 0.09 - moonR * 0.1, moonR * 0.8, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(moonX + moonR * 0.35, moonY - moonR * 0.1, moonR * 0.8, 0, Math.PI * 2); ctx.fill();
       } else {
-        // Sun with warm radial glow
-        const sunX = W * 0.80, sunY = H * 0.10, sunR = Math.min(W, H) * 0.06;
+        // Sun arc: rises at 6:00 (left), peaks at 12:00, sets at 18:00 (right)
+        const dayHours = hour - 6; // 0..12
+        const sunProgress = dayHours / 12; // 0 = sunrise, 0.5 = noon, 1 = sunset
+        const sunX = W * (0.10 + sunProgress * 0.80);
+        const sunArc = Math.sin(sunProgress * Math.PI);
+        const sunY = H * (0.50 - sunArc * 0.42);
+        const sunR = Math.min(W, H) * 0.06;
+        // Warm halo glow
         const glow = ctx.createRadialGradient(sunX, sunY, sunR * 0.2, sunX, sunY, sunR * 3);
         glow.addColorStop(0,   'rgba(255,250,200,0.5)');
         glow.addColorStop(0.5, 'rgba(255,220,140,0.15)');
         glow.addColorStop(1,   'rgba(255,200,100,0)');
         ctx.fillStyle = glow;
         ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 3, 0, Math.PI * 2); ctx.fill();
+        // Sun body
         ctx.fillStyle = '#ffe868';
         ctx.beginPath(); ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2); ctx.fill();
+        // Sun bright center
         ctx.fillStyle = '#fff8d0';
         ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 0.55, 0, Math.PI * 2); ctx.fill();
       }
     }
 
-    // â”€â”€ Soft rolling hills behind the scene â”€â”€
+    // -- Soft rolling hills behind the scene --
     function _drawRollingHills(ctx, W, H, night) {
       // Far hill
       ctx.fillStyle = night ? '#1a3a18' : '#6ab850';
@@ -306,7 +328,7 @@
       ctx.closePath(); ctx.fill();
     }
 
-    // â”€â”€ Lush ground area with gradient â”€â”€
+    // -- Lush ground area with gradient --
     function _drawHDGround(ctx, W, H, night) {
       const g = ctx.createLinearGradient(0, H * 0.70, 0, H);
       if (night) {
@@ -323,7 +345,7 @@
       ctx.fillRect(0, H * 0.70, W, H * 0.30);
     }
 
-    // â”€â”€ Grass tufts swaying in wind â”€â”€
+    // -- Grass tufts swaying in wind --
     function _drawGrassTufts(ctx, W, H, windSway, night) {
       if (!_outsideGrassTufts) return;
       const buildingLeft  = W * 0.28;
@@ -350,7 +372,7 @@
       });
     }
 
-    // â”€â”€ Charming stone stepping-path (Hay Day style) â”€â”€
+    // -- Charming stone stepping-path (Hay Day style) --
     function _drawStonePath(ctx, W, H, night) {
       const cx = W / 2;
       // Irregular stepping stones leading to the door
@@ -384,7 +406,7 @@
       });
     }
 
-    // â”€â”€ Flowers scattered on the ground â”€â”€
+    // -- Flowers scattered on the ground --
     function _drawFlowers(ctx, W, H, t, night) {
       if (!_outsideFlowers) return;
       const buildingLeft  = W * 0.28;
@@ -421,7 +443,7 @@
       });
     }
 
-    // â”€â”€ Wooden fence posts (Hay Day style) â”€â”€
+    // -- Wooden fence posts (Hay Day style) --
     function _drawFence(ctx, startX, y, length, night) {
       const postSpacing = 18;
       const postH = 22;
@@ -449,7 +471,7 @@
       }
     }
 
-    // â”€â”€ Round bush cluster â”€â”€
+    // -- Round bush cluster --
     function _drawBush(ctx, bx, by, size, sway, night) {
       const sx = bx + sway * size * 2;
       // Ground shadow
@@ -489,7 +511,7 @@
       }
     }
 
-    // â”€â”€ Fluffy drifting clouds â”€â”€
+    // -- Fluffy drifting clouds --
     function _drawClouds(ctx, W, H, t) {
       if (!_outsideClouds) return;
       _outsideClouds.forEach(c => {
@@ -517,7 +539,7 @@
       });
     }
 
-    // â”€â”€ Realistic tree with rounded canopy and wind sway â”€â”€
+    // -- Realistic tree with rounded canopy and wind sway --
     function _drawHDTree(ctx, tx, ty, treeH, sway, night) {
       const trunkW = treeH * 0.055;
       const trunkH = treeH * 0.35;
@@ -573,7 +595,7 @@
       ctx.restore();
     }
 
-    // â”€â”€ Falling leaves with wind drift â”€â”€
+    // -- Falling leaves with wind drift --
     function _drawHDLeaves(ctx, W, H, t, windSway, night) {
       if (!_outsideLeaves) return;
       const colors = night ? LEAF_COLORS_NIGHT : LEAF_COLORS_DAY;
@@ -607,7 +629,7 @@
       });
     }
 
-    // â”€â”€ Charming cottage building (Hay Day barn style) â”€â”€
+    // -- Charming cottage building (Hay Day barn style) --
     function _drawHDBuilding(ctx, W, H, bX, bW, bTop, floorH, bH, MAX_FLOORS, total, night) {
       // Drop shadow
       ctx.shadowColor = 'rgba(0,0,0,0.35)';
@@ -616,7 +638,7 @@
       ctx.fillRect(bX - 3, bTop - 1, bW + 6, bH + 4);
       ctx.shadowBlur  = 0; ctx.shadowColor = 'transparent';
 
-      // â”€â”€ Each floor â”€â”€
+      // -- Each floor --
       for (let i = 1; i <= MAX_FLOORS; i++) {
         const fi = MAX_FLOORS - i;
         const fy = bTop + fi * floorH;
@@ -668,7 +690,7 @@
             ctx.fillStyle = night ? '#3a5a50' : '#5a9a78';
             ctx.fillRect(wx - 6, winY, 4, winH);
             ctx.fillRect(wx + winW + 2, winY, 4, winH);
-            // Glass pane â€” warm glow at night, sky-blue by day
+            // Glass pane - warm glow at night, sky-blue by day
             const wg = ctx.createLinearGradient(wx, winY, wx + winW, winY + winH);
             if (night) {
               wg.addColorStop(0, 'rgba(255,240,180,0.55)');
@@ -685,7 +707,7 @@
             ctx.beginPath(); ctx.moveTo(wx + winW / 2, winY); ctx.lineTo(wx + winW / 2, winY + winH); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(wx, winY + winH / 2); ctx.lineTo(wx + winW, winY + winH / 2); ctx.stroke();
           } else {
-            // Locked â€” dark boarded-up windows
+            // Locked - dark boarded-up windows
             ctx.fillStyle = 'rgba(30,20,10,0.7)';
             ctx.fillRect(wx, winY, winW, winH);
             ctx.strokeStyle = 'rgba(80,60,30,0.4)'; ctx.lineWidth = 0.8;
@@ -699,18 +721,18 @@
         if (unlocked) {
           ctx.fillStyle = isCurrent ? '#f7c97e' : 'rgba(0,0,0,0.55)';
           ctx.font = 'bold 11px sans-serif';
-          ctx.fillText(isCurrent ? 'â˜… Floor ' + i : 'Floor ' + i, bX + bW / 2, fy + floorH - 16);
+          ctx.fillText(isCurrent ? '\u2605 Floor ' + i : 'Floor ' + i, bX + bW / 2, fy + floorH - 16);
         } else {
           ctx.fillStyle = 'rgba(180,150,220,0.75)';
           ctx.font = '10px sans-serif';
           const UNLOCK_COST = { 2: 10000, 3: 20000 };
-          ctx.fillText('ðŸ”’ ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW / 2, fy + floorH - 16);
+          ctx.fillText('\uD83D\uDD12 ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW / 2, fy + floorH - 16);
         }
         ctx.textBaseline = 'alphabetic';
         _outsideFloorRects[i] = { x: bX, y: fy, w: bW, h: floorH, unlocked };
       }
 
-      // â”€â”€ Red barn / cottage roof â”€â”€
+      // -- Red barn / cottage roof --
       const roofPeakX = W / 2;
       const roofPeakY = bTop - bW * 0.26;
       const roofOverhang = 14;
@@ -732,7 +754,7 @@
       ctx.lineTo(bX + bW + roofOverhang - 4, bTop);
       ctx.stroke();
 
-      // â”€â”€ Chimney â”€â”€
+      // -- Chimney --
       const chimX = bX + bW * 0.70;
       const chimSlope = (bTop - roofPeakY) / (bW / 2 + roofOverhang);
       const chimTopY = roofPeakY + chimSlope * (chimX - bX + roofOverhang - bW / 2 - roofOverhang) + (bTop - roofPeakY) * 0.15;
@@ -741,7 +763,7 @@
       ctx.fillStyle = night ? '#5a3a10' : '#8a5a30';
       ctx.fillRect(chimX - 2, chimTopY - 22, 18, 4);
 
-      // â”€â”€ Arched front door â”€â”€
+      // -- Arched front door --
       const doorW = bW * 0.12, doorH = floorH * 0.78;
       const doorX = W / 2 - doorW / 2;
       const doorY = H * 0.68 - doorH;
