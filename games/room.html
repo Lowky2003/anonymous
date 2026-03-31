@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>My Room — Virtual Pet & Garden</title>
+  <title>My Room â€” Virtual Pet & Garden</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -14,7 +14,7 @@
       overflow-x: hidden;
     }
 
-    /* ── Back button ── */
+    /* â”€â”€ Back button â”€â”€ */
     .back-btn {
       position: fixed; top: 14px; left: 14px; z-index: 50;
       padding: 8px 16px; border: 1px solid rgba(255,255,255,0.15);
@@ -24,7 +24,7 @@
     }
     .back-btn:hover { background: rgba(255,255,255,0.1); }
 
-    /* ── Coin display ── */
+    /* â”€â”€ Coin display â”€â”€ */
     .coin-display {
       position: fixed; top: 14px; right: 14px; z-index: 50;
       padding: 8px 18px; border-radius: 20px;
@@ -38,7 +38,7 @@
     .coin-svg { width: 100%; height: 100%; }
     .price-coin { width: 14px; height: 14px; vertical-align: -2px; }
 
-    /* ── Page header ── */
+    /* â”€â”€ Page header â”€â”€ */
     .page-header {
       text-align: center; padding: 56px 20px 10px;
     }
@@ -58,13 +58,13 @@
       font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px;
     }
 
-    /* ── Main layout ── */
+    /* â”€â”€ Main layout â”€â”€ */
     .main-wrap {
       display: flex; flex-direction: row; min-height: calc(100vh - 60px);
       position: relative;
     }
 
-    /* ── Room canvas ── */
+    /* â”€â”€ Room canvas â”€â”€ */
     .room-container {
       flex: 1; padding: 0; display: flex;
       min-width: 0; height: calc(100vh - 60px);
@@ -79,7 +79,7 @@
       position: absolute; inset: 0; width: 100%; height: 100%;
     }
 
-    /* ── Pet ── */
+    /* â”€â”€ Pet â”€â”€ */
     .pet-slot {
       position: absolute; inset: 0; pointer-events: none;
     }
@@ -87,7 +87,7 @@
       position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: auto; cursor: pointer;
     }
 
-    /* ── Plant ── */
+    /* â”€â”€ Plant â”€â”€ */
     .plant-slot {
       position: absolute;
       text-align: center; cursor: grab;
@@ -106,7 +106,7 @@
       display: block; margin-top: 2px;
     }
 
-    /* ── Empty slot hint ── */
+    /* â”€â”€ Empty slot hint â”€â”€ */
     .empty-slot {
       width: 60px; height: 60px; border: 2px dashed rgba(255,255,255,0.2);
       border-radius: 14px; display: flex; align-items: center; justify-content: center;
@@ -114,7 +114,7 @@
     }
     .empty-slot:hover { opacity: 0.7; border-color: rgba(255,255,255,0.4); }
 
-    /* ── Right panel wrapper (tabs + content) ── */
+    /* â”€â”€ Right panel wrapper (tabs + content) â”€â”€ */
     .panel-wrap {
       position: relative;
       display: flex; flex-direction: column; min-width: 0;
@@ -147,7 +147,7 @@
       background: rgba(48, 43, 99, 1); color: #f7c97e;
     }
 
-    /* ── Tabs ── */
+    /* â”€â”€ Tabs â”€â”€ */
     .tabs {
       margin: 0; padding: 10px 16px 0; width: 100%;
       display: flex; gap: 6px;
@@ -167,14 +167,14 @@
       border-bottom: 2px solid #f7c97e;
     }
 
-    /* ── Tab panels ── */
+    /* â”€â”€ Tab panels â”€â”€ */
     .tab-panel {
       display: none; margin: 0 auto; width: 100%;
       padding: 16px; min-height: 200px;
     }
     .tab-panel.active { display: block; }
 
-    /* ── Sub-tabs (Pet / Plant inside Shop) ── */
+    /* â”€â”€ Sub-tabs (Pet / Plant inside Shop) â”€â”€ */
     .sub-tabs {
       display: flex; gap: 0; margin-bottom: 16px;
       border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -210,7 +210,7 @@
     .decor-panel { display: none; }
     .decor-panel.active { display: block; }
 
-    /* ── Shop items ── */
+    /* â”€â”€ Shop items â”€â”€ */
     .shop-grid {
       display: grid; grid-template-columns: repeat(2, 1fr);
       gap: 10px;
@@ -254,7 +254,7 @@
     }
     .slot-badge.full { color: #f87171; }
 
-    /* ── Feed section ── */
+    /* â”€â”€ Feed section â”€â”€ */
     .feed-pet-header {
       display: flex; align-items: center; gap: 12px;
       background: rgba(255,255,255,0.05); border-radius: 14px;
@@ -296,7 +296,7 @@
     }
     .food-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ── Visit list ── */
+    /* â”€â”€ Visit list â”€â”€ */
     .visit-list { display: flex; flex-direction: column; gap: 10px; }
     .visit-card {
       display: flex; align-items: center; gap: 14px;
@@ -321,7 +321,7 @@
     .online-count-badge .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; animation: pulseDot 1.5s ease-in-out infinite; }
     @keyframes pulseDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
 
-    /* ── Login gate ── */
+    /* â”€â”€ Login gate â”€â”€ */
     .login-overlay {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
@@ -346,7 +346,7 @@
     .google-login-btn:hover { transform: scale(1.03); }
     .login-error { color: #f87171; font-size: 13px; margin-top: 12px; }
 
-    /* ── Settings gear button ── */
+    /* â”€â”€ Settings gear button â”€â”€ */
     .settings-btn {
       position: fixed; top: 14px; right: 140px; z-index: 50;
       width: 40px; height: 40px;
@@ -370,7 +370,7 @@
       .panel-shortcut-btn{font-size:10px;padding:6px 2px}
     }
 
-    /* ── Settings modal ── */
+    /* â”€â”€ Settings modal â”€â”€ */
     .settings-overlay {
       position: fixed; inset: 0; z-index: 9000;
       display: flex; align-items: center; justify-content: center;
@@ -411,7 +411,7 @@
     }
     .settings-close-btn:hover { background: rgba(255,255,255,0.12); }
 
-    /* ── Toast ── */
+    /* â”€â”€ Toast â”€â”€ */
     .toast {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
       z-index: 200; padding: 12px 28px; border-radius: 16px;
@@ -424,7 +424,7 @@
     .toast.success { border-color: rgba(52,211,153,0.4); color: #34d399; }
     .toast.error { border-color: rgba(248,113,113,0.4); color: #f87171; }
 
-    /* ── Mobile responsive ── */
+    /* â”€â”€ Mobile responsive â”€â”€ */
     @media (max-width: 768px) {
       /* Stack layout vertically */
       .main-wrap {
@@ -477,7 +477,7 @@
       .sub-tabs { padding: 6px 10px; gap: 4px; }
       .sub-tab { padding: 6px 10px; font-size: 12px; }
 
-      /* Shop cards — 2 columns still works */
+      /* Shop cards â€” 2 columns still works */
       .shop-grid { gap: 8px; padding: 0 8px; }
       .shop-card { padding: 12px 8px; border-radius: 12px; }
       .shop-emoji { font-size: 30px; }
@@ -486,7 +486,7 @@
       .shop-section { padding: 10px 4px; }
       .shop-section-title { font-size: 14px; padding: 0 4px; }
 
-      /* Food grid — 2 columns on mobile */
+      /* Food grid â€” 2 columns on mobile */
       .food-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 8px; }
       .food-card { padding: 12px 8px; }
       .food-emoji { font-size: 28px; }
@@ -513,7 +513,7 @@
       .food-grid { grid-template-columns: repeat(2, 1fr); }
       .plant-canvas-wrap { transform: scale(1.2); }
     }
-    /* ── Daily Login Reward modal ── */
+    /* â”€â”€ Daily Login Reward modal â”€â”€ */
     .daily-overlay{position:fixed;inset:0;z-index:9500;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;animation:dailyFadeIn .3s}
     .daily-overlay.hidden{display:none}
     .daily-box{width:90%;max-width:400px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
@@ -531,7 +531,7 @@
     .daily-claim-btn:disabled{opacity:.4;cursor:not-allowed}
     .daily-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
 
-    /* ── Achievement/Badge modal ── */
+    /* â”€â”€ Achievement/Badge modal â”€â”€ */
     .achieve-overlay{position:fixed;inset:0;z-index:9400;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .achieve-overlay.hidden{display:none}
     .achieve-box{width:90%;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;scrollbar-width:none;-ms-overflow-style:none}
@@ -552,7 +552,7 @@
     .achieve-item.unlocked .achieve-status{color:#34d399}
     .achieve-close{display:block;margin:16px auto 0;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
 
-    /* ── Guestbook panel ── */
+    /* â”€â”€ Guestbook panel â”€â”€ */
     .guestbook-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:300px;overflow-y:auto}
     .gb-entry{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;position:relative}
     .gb-from{font-size:11px;font-weight:600;color:#f7c97e;margin-bottom:4px}
@@ -580,7 +580,7 @@
     .gb-reply-input::placeholder{color:rgba(255,255,255,.3)}
     .gb-reply-send{padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#7b5ea7,#5b6abf);color:#fff;font-size:11px;font-weight:600;cursor:pointer}
 
-    /* ── Gift System ── */
+    /* â”€â”€ Gift System â”€â”€ */
     .gift-overlay{position:fixed;inset:0;z-index:9300;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .gift-overlay.hidden{display:none}
     .gift-box{width:90%;max-width:380px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
@@ -593,7 +593,7 @@
     .gift-send-btn:disabled{opacity:.4;cursor:not-allowed}
     .gift-close{margin-top:10px;display:block;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;margin-left:auto;margin-right:auto}
 
-    /* ── Pet Accessories ── */
+    /* â”€â”€ Pet Accessories â”€â”€ */
     .acc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
     .acc-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 6px;text-align:center;transition:all .2s;overflow:visible}
     .acc-card:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
@@ -603,7 +603,7 @@
     .acc-name{font-size:11px;font-weight:600;color:rgba(255,255,255,.7)}
     .acc-price{font-size:10px;color:#f7c97e;margin-top:2px}
 
-    /* ── Jukebox ── */
+    /* â”€â”€ Jukebox â”€â”€ */
     .jukebox-wrap{margin-top:10px}
     .jukebox-now{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;margin-bottom:10px}
     .jukebox-title{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
@@ -616,7 +616,7 @@
     .jukebox-track.playing{background:rgba(247,201,126,.1);color:#f7c97e}
     .jukebox-vol{width:80px;accent-color:#f7c97e}
 
-    /* ── Gacha/Lucky Draw ── */
+    /* â”€â”€ Gacha/Lucky Draw â”€â”€ */
     .gacha-overlay{position:fixed;inset:0;z-index:9200;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .gacha-overlay.hidden{display:none}
     .gacha-box{width:90%;max-width:400px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
@@ -658,7 +658,7 @@
     .gacha-close{margin-top:10px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
     #gachaPrizeOverlay .gacha-box::-webkit-scrollbar{display:none}
 
-    /* ── Pet Swap modal ── */
+    /* â”€â”€ Pet Swap modal â”€â”€ */
     .swap-overlay{position:fixed;inset:0;z-index:9350;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .swap-overlay.hidden{display:none}
     .swap-box{width:90%;max-width:380px;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px;text-align:center}
@@ -674,7 +674,7 @@
     .swap-pet-arrow{color:rgba(255,255,255,.25);font-size:18px}
     .swap-close{margin-top:8px;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
 
-    /* ── Leaderboard ── */
+    /* â”€â”€ Leaderboard â”€â”€ */
     .lb-overlay{position:fixed;inset:0;z-index:9100;background:rgba(15,12,41,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
     .lb-overlay.hidden{display:none}
     .lb-box{width:90%;max-width:440px;max-height:80vh;overflow-y:auto;background:rgba(30,25,65,.97);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 20px 20px}
@@ -692,7 +692,7 @@
     .lb-score{font-size:13px;font-weight:700;color:#f7c97e}
     .lb-close{display:block;margin:16px auto 0;padding:10px 24px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer}
 
-    /* ── Weather Effects (rain/snow/leaves on window) ── */
+    /* â”€â”€ Weather Effects (rain/snow/leaves on window) â”€â”€ */
     .weather-badge{position:absolute;top:8px;left:8px;z-index:20;font-size:11px;padding:4px 10px;border-radius:10px;background:rgba(0,0,0,.25);color:rgba(255,255,255,.6);pointer-events:none}
 
     /* Chess invite popup */
@@ -706,11 +706,11 @@
     .chess-invite-box .ci-reject{flex:1;padding:12px;border:1px solid rgba(255,80,80,.3);border-radius:12px;background:transparent;color:#ff6b6b;font-size:15px;font-weight:600;cursor:pointer}
     @keyframes chessInvFade{from{opacity:0}to{opacity:1}}
 
-    /* ── Multi-layer / Outside View ── */
-    /* Floor badge inside the room — click to peek outside */
+    /* â”€â”€ Multi-layer / Outside View â”€â”€ */
+    /* Floor badge inside the room â€” click to peek outside */
     .layer-badge{position:absolute;top:8px;right:8px;z-index:25;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;background:rgba(20,20,35,.75);color:rgba(255,255,255,.8);cursor:pointer;transition:all .2s;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);user-select:none}
     .layer-badge:hover{background:rgba(40,40,60,.9);border-color:rgba(247,201,126,.3);color:#f7c97e}
-    /* Outside view — canvas-based full-room overlay */
+    /* Outside view â€” canvas-based full-room overlay */
     .outside-view{position:absolute;inset:0;z-index:45;border-radius:18px;display:none;overflow:hidden}
     .outside-view.visible{display:block}
     /* Overlaid text controls (z-index above canvas) */
@@ -725,7 +725,7 @@
   <!-- Login gate -->
   <div class="login-overlay loading" id="loginOverlay">
     <div class="login-box">
-      <h2 style="margin-bottom:8px">🏠 My Room</h2>
+      <h2 style="margin-bottom:8px">ðŸ  My Room</h2>
       <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:28px">Sign in to access your room</p>
       <button class="google-login-btn" id="googleLoginBtn">
         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -735,18 +735,18 @@
     </div>
   </div>
 
-  <a class="back-btn" href="../index.html">← Back</a>
-  <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+  <a class="back-btn" href="../index.html">â† Back</a>
+  <button class="settings-btn" id="settingsBtn" title="Settings">âš™ï¸</button>
 
   <!-- Settings modal -->
   <div class="settings-overlay hidden" id="settingsOverlay">
     <div class="settings-box">
-      <h3>⚙️ Settings</h3>
+      <h3>âš™ï¸ Settings</h3>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
-        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showDailyReward()">🎁 Daily Reward</button>
-        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showAchievements()">🏆 Achievements</button>
+        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showDailyReward()">ðŸŽ Daily Reward</button>
+        <button class="settings-close-btn" style="flex:1;min-width:120px;margin:0" onclick="showAchievements()">ðŸ† Achievements</button>
       </div>
-      <button class="settings-logout-btn" id="settingsLogoutBtn">🚶 Sign Out</button>
+      <button class="settings-logout-btn" id="settingsLogoutBtn">ðŸš¶ Sign Out</button>
       <button class="settings-close-btn" id="settingsCloseBtn">Close</button>
     </div>
   </div>
@@ -776,104 +776,104 @@
         <div id="petStatusBar" style="display:none;position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(20,20,35,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 16px;z-index:40;min-width:260px;max-width:340px;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,0.5)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <input id="petStatusName" type="text" maxlength="16" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:4px 8px;width:120px" oninput="onPetNameChange(this.value)">
-            <button onclick="closePetStatus()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:2px 6px">✕</button>
+            <button onclick="closePetStatus()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:2px 6px">âœ•</button>
           </div>
           <div style="display:flex;flex-direction:column;gap:5px;font-size:11px">
             <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
-              <span>🍖</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusHunger" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusHungerVal" style="min-width:32px;text-align:right"></span>
+              <span>ðŸ–</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusHunger" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusHungerVal" style="min-width:32px;text-align:right"></span>
             </div>
             <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
-              <span>💧</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusThirst" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusThirstVal" style="min-width:32px;text-align:right"></span>
+              <span>ðŸ’§</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusThirst" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusThirstVal" style="min-width:32px;text-align:right"></span>
             </div>
             <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
-              <span>♥</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusAffection" style="display:block;height:100%;background:#ff8aab;border-radius:3px;transition:width .3s"></span></span><span id="petStatusAffectionVal" style="min-width:32px;text-align:right;color:#ff8aab"></span>
+              <span>â™¥</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusAffection" style="display:block;height:100%;background:#ff8aab;border-radius:3px;transition:width .3s"></span></span><span id="petStatusAffectionVal" style="min-width:32px;text-align:right;color:#ff8aab"></span>
             </div>
           </div>
           <div id="petStatusColors" style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
         </div>
         <!-- Floor badge: click to view building exterior -->
-        <div id="layerBadge" class="layer-badge" onclick="goOutside()" title="Outside View">🏠 My Room</div>
-        <!-- Outside building view — full canvas + thin HTML header -->
+        <div id="layerBadge" class="layer-badge" onclick="goOutside()" title="Outside View">ðŸ  My Room</div>
+        <!-- Outside building view â€” full canvas + thin HTML header -->
         <div class="outside-view" id="outsideView">
           <!-- Canvas draws the entire scene (sky, building, trees, etc.) -->
           <canvas id="outsideCanvas" style="position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border-radius:18px"></canvas>
           <!-- Overlaid controls -->
-          <div class="outside-title">🌳 Outside View</div>
-          <button class="outside-back-btn" onclick="enterLayer(currentLayer)">← Inside</button>
+          <div class="outside-title">ðŸŒ³ Outside View</div>
+          <button class="outside-back-btn" onclick="enterLayer(currentLayer)">â† Inside</button>
           <div class="outside-hint">Tap a floor to enter it</div>
         </div>
       </div>
     </div>
 
     <div class="panel-wrap" id="panelWrap">
-    <button class="panel-toggle" id="panelToggle" title="Toggle panel">❮</button>
+    <button class="panel-toggle" id="panelToggle" title="Toggle panel">â®</button>
     <div class="panel-inner">
     <!-- Tabs -->
     <div class="tabs" id="tabsBar">
-      <button class="tab-btn active" data-tab="shop">🛒 Shop</button>
-      <button class="tab-btn" data-tab="upgrade">🍖 Feed</button>
-      <button class="tab-btn" data-tab="extras">✨ More</button>
-      <button class="tab-btn" data-tab="visit">👀 Visit</button>
+      <button class="tab-btn active" data-tab="shop">ðŸ›’ Shop</button>
+      <button class="tab-btn" data-tab="upgrade">ðŸ– Feed</button>
+      <button class="tab-btn" data-tab="extras">âœ¨ More</button>
+      <button class="tab-btn" data-tab="visit">ðŸ‘€ Visit</button>
     </div>
 
   <!-- Shop panel -->
   <div class="tab-panel active" id="panel-shop">
     <div class="sub-tabs">
-      <button class="sub-tab active" data-sub="petShopWrap">🐾 Pet</button>
-      <button class="sub-tab" data-sub="plantShopWrap">🌱 Plant</button>
-      <button class="sub-tab" data-sub="decorShopWrap">🪑 Decor</button>
+      <button class="sub-tab active" data-sub="petShopWrap">ðŸ¾ Pet</button>
+      <button class="sub-tab" data-sub="plantShopWrap">ðŸŒ± Plant</button>
+      <button class="sub-tab" data-sub="decorShopWrap">ðŸª‘ Decor</button>
     </div>
     <div class="sub-panel active" id="petShopWrap">
       <div class="shop-section">
-        <div class="shop-section-title">🐾 Pets</div>
+        <div class="shop-section-title">ðŸ¾ Pets</div>
         <div class="shop-grid" id="petShop"></div>
       </div>
     </div>
     <div class="sub-panel" id="plantShopWrap">
       <div class="shop-section">
-        <div class="shop-section-title">🌱 Plants</div>
+        <div class="shop-section-title">ðŸŒ± Plants</div>
         <div class="shop-grid" id="plantShop"></div>
       </div>
     </div>
     <div class="sub-panel" id="decorShopWrap">
       <div class="decor-tabs">
-        <button class="decor-tab active" data-dcategory="wallpaper">🏠 Wall</button>
-        <button class="decor-tab" data-dcategory="window">🪟 Window</button>
-        <button class="decor-tab" data-dcategory="wallart">🖼️ Art</button>
-        <button class="decor-tab" data-dcategory="furniture">🪑 Furniture</button>
-        <button class="decor-tab" data-dcategory="rug">🟣 Rugs</button>
+        <button class="decor-tab active" data-dcategory="wallpaper">ðŸ  Wall</button>
+        <button class="decor-tab" data-dcategory="window">ðŸªŸ Window</button>
+        <button class="decor-tab" data-dcategory="wallart">ðŸ–¼ï¸ Art</button>
+        <button class="decor-tab" data-dcategory="furniture">ðŸª‘ Furniture</button>
+        <button class="decor-tab" data-dcategory="rug">ðŸŸ£ Rugs</button>
       </div>
       <div class="decor-panel active" id="dp-wallpaper">
         <div class="shop-section">
-          <div class="shop-section-title">🏠 Wall Pattern</div>
+          <div class="shop-section-title">ðŸ  Wall Pattern</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Change the look of your walls</div>
           <div class="shop-grid" id="wallShop"></div>
         </div>
       </div>
       <div class="decor-panel" id="dp-window">
         <div class="shop-section">
-          <div class="shop-section-title">🪟 Windows</div>
+          <div class="shop-section-title">ðŸªŸ Windows</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Pick a window style</div>
           <div class="shop-grid" id="windowShop"></div>
         </div>
       </div>
       <div class="decor-panel" id="dp-wallart">
         <div class="shop-section">
-          <div class="shop-section-title">🖼️ Wall Art &amp; Hangings</div>
+          <div class="shop-section-title">ðŸ–¼ï¸ Wall Art &amp; Hangings</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Drag to reposition on the wall</div>
           <div class="shop-grid" id="wallDecorShop"></div>
         </div>
       </div>
       <div class="decor-panel" id="dp-furniture">
         <div class="shop-section">
-          <div class="shop-section-title">🪑 Furniture &amp; Floor Items</div>
+          <div class="shop-section-title">ðŸª‘ Furniture &amp; Floor Items</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Drag to reposition on the floor</div>
           <div class="shop-grid" id="floorDecorShop"></div>
         </div>
       </div>
       <div class="decor-panel" id="dp-rug">
         <div class="shop-section">
-          <div class="shop-section-title">🟣 Rugs (1 at a time)</div>
+          <div class="shop-section-title">ðŸŸ£ Rugs (1 at a time)</div>
           <div class="shop-grid" id="rugDecorShop"></div>
         </div>
       </div>
@@ -882,10 +882,10 @@
 
   <div class="tab-panel" id="panel-upgrade">
     <div class="sub-tabs">
-      <button class="sub-tab active" data-sub="feedPetWrap">🍖 Pet Food</button>
-      <button class="sub-tab" data-sub="feedToyWrap">🧸 Pet Toy</button>
-      <button class="sub-tab" data-sub="feedPlantWrap">🌱 Plant</button>
-      <button class="sub-tab" data-sub="feedLayerWrap">🏠 Floors</button>
+      <button class="sub-tab active" data-sub="feedPetWrap">ðŸ– Pet Food</button>
+      <button class="sub-tab" data-sub="feedToyWrap">ðŸ§¸ Pet Toy</button>
+      <button class="sub-tab" data-sub="feedPlantWrap">ðŸŒ± Plant</button>
+      <button class="sub-tab" data-sub="feedLayerWrap">ðŸ  Floors</button>
     </div>
     <div class="sub-panel active" id="feedPetWrap">
       <div id="feedPetContent"></div>
@@ -905,33 +905,33 @@
   <!-- Extras panel -->
   <div class="tab-panel" id="panel-extras">
     <div class="sub-tabs">
-      <button class="sub-tab active" data-sub="accessoryWrap">🎩 Accessory</button>
-      <button class="sub-tab" data-sub="jukeboxWrap">🎵 Music</button>
-      <button class="sub-tab" data-sub="guestbookWrap">📝 Guestbook</button>
-      <button class="sub-tab" data-sub="gachaWrapTab">🎰 Gacha</button>
+      <button class="sub-tab active" data-sub="accessoryWrap">ðŸŽ© Accessory</button>
+      <button class="sub-tab" data-sub="jukeboxWrap">ðŸŽµ Music</button>
+      <button class="sub-tab" data-sub="guestbookWrap">ðŸ“ Guestbook</button>
+      <button class="sub-tab" data-sub="gachaWrapTab">ðŸŽ° Gacha</button>
     </div>
     <div class="sub-panel active" id="accessoryWrap">
       <div class="shop-section">
-        <div class="shop-section-title">🎩 Pet Accessories</div>
+        <div class="shop-section-title">ðŸŽ© Pet Accessories</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Win accessories from Gacha! Equip them on your pets</div>
         <div id="accShop"></div>
       </div>
     </div>
     <div class="sub-panel" id="jukeboxWrap">
       <div class="shop-section">
-        <div class="shop-section-title">🎵 Jukebox</div>
+        <div class="shop-section-title">ðŸŽµ Jukebox</div>
         <div id="jukeboxContent"></div>
       </div>
     </div>
     <div class="sub-panel" id="guestbookWrap">
       <div class="shop-section">
-        <div class="shop-section-title">📝 Guestbook</div>
+        <div class="shop-section-title">ðŸ“ Guestbook</div>
         <div id="guestbookContent"></div>
       </div>
     </div>
     <div class="sub-panel" id="gachaWrapTab">
       <div class="shop-section">
-        <div class="shop-section-title">🎰 Lucky Draw</div>
+        <div class="shop-section-title">ðŸŽ° Lucky Draw</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 8px;text-align:center">Spend coins for random rare items!</div>
         <div id="gachaTabContent"></div>
       </div>
@@ -941,18 +941,18 @@
   <!-- Visit panel -->
   <div class="tab-panel" id="panel-visit">
     <div class="visit-header">
-      <h4>👀 Visit Rooms</h4>
+      <h4>ðŸ‘€ Visit Rooms</h4>
       <div class="online-count-badge" id="onlineCountBadge"><div class="pulse-dot"></div> <span id="onlineCountNum">0</span> online</div>
     </div>
     <!-- Visitor guestbook (shown when visiting another player) -->
     <div id="visitorGuestbook" style="display:none">
       <div class="shop-section" style="margin-bottom:12px">
-        <div class="shop-section-title">📝 Guestbook</div>
+        <div class="shop-section-title">ðŸ“ Guestbook</div>
         <div id="visitorGbContent"></div>
       </div>
     </div>
     <div class="visit-list" id="visitList">
-      <div class="visit-empty">Loading rooms…</div>
+      <div class="visit-empty">Loading roomsâ€¦</div>
     </div>
   </div>
 
@@ -963,7 +963,7 @@
   <!-- Daily Login Reward modal -->
   <div class="daily-overlay hidden" id="dailyOverlay">
     <div class="daily-box">
-      <h3>🎁 Daily Login Reward</h3>
+      <h3>ðŸŽ Daily Login Reward</h3>
       <div class="daily-streak" id="dailyStreak"></div>
       <div class="daily-days" id="dailyDays"></div>
       <button class="daily-claim-btn" id="dailyClaimBtn">Claim Today's Reward!</button>
@@ -975,8 +975,8 @@
   <div class="achieve-overlay hidden" id="achieveOverlay">
     <div class="achieve-box">
       <div class="achieve-header">
-        <h3>🏆 Achievements</h3>
-        <button class="achieve-x-btn" id="achieveXBtn">✕</button>
+        <h3>ðŸ† Achievements</h3>
+        <button class="achieve-x-btn" id="achieveXBtn">âœ•</button>
       </div>
       <div class="achieve-list" id="achieveList"></div>
     </div>
@@ -985,7 +985,7 @@
   <!-- Gift modal -->
   <div class="gift-overlay hidden" id="giftOverlay">
     <div class="gift-box">
-      <h3>🎁 Send Gift</h3>
+      <h3>ðŸŽ Send Gift</h3>
       <div id="giftTarget" style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px"></div>
       <div class="gift-amounts" id="giftAmounts"></div>
       <button class="gift-send-btn" id="giftSendBtn" disabled>Send Gift</button>
@@ -996,7 +996,7 @@
   <!-- Gacha prize preview modal -->
   <div class="gacha-overlay hidden" id="gachaPrizeOverlay" onclick="if(event.target===this)this.classList.add('hidden')">
     <div class="gacha-box" style="max-height:80vh;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none">
-      <h3>📋 Prize Pool</h3>
+      <h3>ðŸ“‹ Prize Pool</h3>
       <div class="gacha-desc">All possible prizes and their drop rates</div>
       <div id="gachaPrizeModalList" style="text-align:left;margin-bottom:14px"></div>
       <button class="gacha-close" onclick="document.getElementById('gachaPrizeOverlay').classList.add('hidden')">Close</button>
@@ -1006,7 +1006,7 @@
   <!-- Leaderboard modal -->
   <div class="lb-overlay hidden" id="lbOverlay">
     <div class="lb-box">
-      <h3>🏅 Mini-Game Leaderboard</h3>
+      <h3>ðŸ… Mini-Game Leaderboard</h3>
       <div class="lb-tabs" id="lbTabs"></div>
       <div class="lb-list" id="lbList"></div>
       <button class="lb-close" id="lbCloseBtn">Close</button>
@@ -1016,7 +1016,7 @@
   <!-- Pet Swap modal -->
   <div class="swap-overlay hidden" id="swapOverlay">
     <div class="swap-box">
-      <h3>🔄 Swap Pet</h3>
+      <h3>ðŸ”„ Swap Pet</h3>
       <div class="swap-desc" id="swapDesc">Choose which pet to replace:</div>
       <div class="swap-pet-list" id="swapPetList"></div>
       <button class="swap-close" id="swapCloseBtn">Cancel</button>
@@ -1045,10 +1045,10 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    /* ── Auth gate ── */
+    /* â”€â”€ Auth gate â”€â”€ */
     const loginOverlay = document.getElementById('loginOverlay');
 
-    // Handle redirect result (fallback — fires on page load after redirect sign-in)
+    // Handle redirect result (fallback â€” fires on page load after redirect sign-in)
     auth.getRedirectResult().catch((err) => {
       if (err.code) {
         document.getElementById('loginError').textContent = 'Login failed: ' + (err.message || 'Unknown');
@@ -1062,7 +1062,7 @@
       btn.disabled = true;
       document.getElementById('loginError').textContent = '';
       try {
-        // Always try popup first — works on both desktop and mobile (opens new tab).
+        // Always try popup first â€” works on both desktop and mobile (opens new tab).
         // signInWithRedirect is broken on most mobile browsers due to
         // third-party cookie blocking in Safari/Chrome.
         await auth.signInWithPopup(provider);
@@ -1081,7 +1081,7 @@
     let currentUser = null;
     let viewingUid = null; // for visit mode
 
-    /* ── Settings modal ── */
+    /* â”€â”€ Settings modal â”€â”€ */
     const settingsOverlay = document.getElementById('settingsOverlay');
 
     document.getElementById('settingsBtn').addEventListener('click', () => {
@@ -1118,25 +1118,25 @@
       }
     });
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Data definitions
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const PETS = [
-      { id: 'cat',    emoji: '🐱', name: 'Cat',       cost: 500 },
-      { id: 'dog',    emoji: '🐶', name: 'Dog',       cost: 500 },
-      { id: 'bunny',  emoji: '🐰', name: 'Bunny',     cost: 800 },
-      { id: 'hamster',emoji: '🐹', name: 'Hamster',   cost: 800 },
-      { id: 'fox',    emoji: '🦊', name: 'Fox',       cost: 1200 },
-      { id: 'panda',  emoji: '🐼', name: 'Panda',     cost: 2000 },
+      { id: 'cat',    emoji: 'ðŸ±', name: 'Cat',       cost: 500 },
+      { id: 'dog',    emoji: 'ðŸ¶', name: 'Dog',       cost: 500 },
+      { id: 'bunny',  emoji: 'ðŸ°', name: 'Bunny',     cost: 800 },
+      { id: 'hamster',emoji: 'ðŸ¹', name: 'Hamster',   cost: 800 },
+      { id: 'fox',    emoji: 'ðŸ¦Š', name: 'Fox',       cost: 1200 },
+      { id: 'panda',  emoji: 'ðŸ¼', name: 'Panda',     cost: 2000 },
     ];
 
     const PLANTS = [
-      { id: 'seedling', emoji: '🌱', name: 'Seedling',    cost: 200,  coinRate: 1 },
-      { id: 'cactus',   emoji: '🌵', name: 'Cactus',      cost: 300,  coinRate: 2 },
-      { id: 'tulip',    emoji: '🌷', name: 'Tulip',       cost: 400,  coinRate: 3 },
-      { id: 'sunflower',emoji: '🌻', name: 'Sunflower',   cost: 600,  coinRate: 4 },
-      { id: 'tree',     emoji: '🌳', name: 'Tree',        cost: 1000, coinRate: 6 },
-      { id: 'cherry',   emoji: '🌸', name: 'Cherry Tree', cost: 1500, coinRate: 10 },
+      { id: 'seedling', emoji: 'ðŸŒ±', name: 'Seedling',    cost: 200,  coinRate: 1 },
+      { id: 'cactus',   emoji: 'ðŸŒµ', name: 'Cactus',      cost: 300,  coinRate: 2 },
+      { id: 'tulip',    emoji: 'ðŸŒ·', name: 'Tulip',       cost: 400,  coinRate: 3 },
+      { id: 'sunflower',emoji: 'ðŸŒ»', name: 'Sunflower',   cost: 600,  coinRate: 4 },
+      { id: 'tree',     emoji: 'ðŸŒ³', name: 'Tree',        cost: 1000, coinRate: 6 },
+      { id: 'cherry',   emoji: 'ðŸŒ¸', name: 'Cherry Tree', cost: 1500, coinRate: 10 },
     ];
 
     const PET_SIZES = {
@@ -1181,30 +1181,30 @@
     }
 
     const FOODS = [
-      { id: 'cookie',   emoji: '🍪', name: 'Cookie',   cost: 30,  restore: 10 },
-      { id: 'apple',    emoji: '🍎', name: 'Apple',     cost: 50,  restore: 20 },
-      { id: 'fish',     emoji: '🐟', name: 'Fish',      cost: 80,  restore: 30 },
-      { id: 'meat',     emoji: '🍖', name: 'Meat',      cost: 120, restore: 45 },
-      { id: 'cake',     emoji: '🎂', name: 'Cake',      cost: 200, restore: 70 },
-      { id: 'feast',    emoji: '🍱', name: 'Feast Box', cost: 300, restore: 100 },
+      { id: 'cookie',   emoji: 'ðŸª', name: 'Cookie',   cost: 30,  restore: 10 },
+      { id: 'apple',    emoji: 'ðŸŽ', name: 'Apple',     cost: 50,  restore: 20 },
+      { id: 'fish',     emoji: 'ðŸŸ', name: 'Fish',      cost: 80,  restore: 30 },
+      { id: 'meat',     emoji: 'ðŸ–', name: 'Meat',      cost: 120, restore: 45 },
+      { id: 'cake',     emoji: 'ðŸŽ‚', name: 'Cake',      cost: 200, restore: 70 },
+      { id: 'feast',    emoji: 'ðŸ±', name: 'Feast Box', cost: 300, restore: 100 },
     ];
 
     const TOYS = [
-      { id: 'ball',    emoji: '⚽', name: 'Ball',       cost: 40,  affection: 10 },
-      { id: 'doll',    emoji: '🧸', name: 'Doll',       cost: 80,  affection: 20 },
-      { id: 'stick',   emoji: '🪵', name: 'Stick',      cost: 60,  affection: 15 },
-      { id: 'feather', emoji: '🪶', name: 'Feather',    cost: 100, affection: 25 },
-      { id: 'yarn',    emoji: '🧶', name: 'Yarn Ball',  cost: 150, affection: 35 },
-      { id: 'frisbee', emoji: '🥏', name: 'Frisbee',    cost: 250, affection: 50 },
+      { id: 'ball',    emoji: 'âš½', name: 'Ball',       cost: 40,  affection: 10 },
+      { id: 'doll',    emoji: 'ðŸ§¸', name: 'Doll',       cost: 80,  affection: 20 },
+      { id: 'stick',   emoji: 'ðŸªµ', name: 'Stick',      cost: 60,  affection: 15 },
+      { id: 'feather', emoji: 'ðŸª¶', name: 'Feather',    cost: 100, affection: 25 },
+      { id: 'yarn',    emoji: 'ðŸ§¶', name: 'Yarn Ball',  cost: 150, affection: 35 },
+      { id: 'frisbee', emoji: 'ðŸ¥', name: 'Frisbee',    cost: 250, affection: 50 },
     ];
 
     const DRINKS = [
-      { id: 'water',  emoji: '💧', name: 'Water',  cost: 20,  restore: 15 },
-      { id: 'milk',   emoji: '🥛', name: 'Milk',   cost: 50,  restore: 25 },
-      { id: 'cola',   emoji: '🥤', name: 'Cola',   cost: 80,  restore: 35 },
-      { id: 'juice',  emoji: '🧃', name: 'Juice',  cost: 120, restore: 50 },
-      { id: 'tea',    emoji: '🍵', name: 'Tea',     cost: 180, restore: 70 },
-      { id: 'boba',   emoji: '🧋', name: 'Boba',   cost: 280, restore: 100 },
+      { id: 'water',  emoji: 'ðŸ’§', name: 'Water',  cost: 20,  restore: 15 },
+      { id: 'milk',   emoji: 'ðŸ¥›', name: 'Milk',   cost: 50,  restore: 25 },
+      { id: 'cola',   emoji: 'ðŸ¥¤', name: 'Cola',   cost: 80,  restore: 35 },
+      { id: 'juice',  emoji: 'ðŸ§ƒ', name: 'Juice',  cost: 120, restore: 50 },
+      { id: 'tea',    emoji: 'ðŸµ', name: 'Tea',     cost: 180, restore: 70 },
+      { id: 'boba',   emoji: 'ðŸ§‹', name: 'Boba',   cost: 280, restore: 100 },
     ];
 
     const AFFECTION_MILESTONES = [
@@ -1227,114 +1227,114 @@
 
     const DECORATIONS = [
       // Wall decorations  (defaultX/Y are normalized 0-1)
-      { id: 'clock',        emoji: '🕐', name: 'Wall Clock',     cost: 150,  category: 'wall',  dx: 0.09,  dy: 0.15 },
-      { id: 'shelf',        emoji: '📚', name: 'Book Shelf',     cost: 300,  category: 'wall',  dx: 0.82,  dy: 0.28 },
-      { id: 'hangplant',    emoji: '🌿', name: 'Hanging Plant',  cost: 200,  category: 'wall',  dx: 0.32,  dy: 0.05 },
-      { id: 'stringlights', emoji: '💡', name: 'String Lights',  cost: 400,  category: 'wall',  dx: 0.50,  dy: 0.02 },
-      { id: 'banner',       emoji: '🎏', name: 'Wall Banner',    cost: 250,  category: 'wall',  dx: 0.64,  dy: 0.06 },
-      { id: 'photo',        emoji: '🖼️', name: 'Photo Frame',    cost: 180,  category: 'wall',  dx: 0.40,  dy: 0.20 },
-      { id: 'mirror',       emoji: '🪞', name: 'Wall Mirror',    cost: 350,  category: 'wall',  dx: 0.70,  dy: 0.18 },
-      { id: 'antlers',      emoji: '🦌', name: 'Antler Mount',   cost: 500,  category: 'wall',  dx: 0.50,  dy: 0.12 },
-      { id: 'neon',         emoji: '✨', name: 'Neon Sign',      cost: 600,  category: 'wall',  dx: 0.50,  dy: 0.25 },
-      { id: 'poster',       emoji: '🎨', name: 'Art Poster',     cost: 120,  category: 'wall',  dx: 0.25,  dy: 0.22 },
-      { id: 'dartboard',    emoji: '🎯', name: 'Dart Board',     cost: 280,  category: 'wall',  dx: 0.88,  dy: 0.20 },
-      { id: 'wreath',       emoji: '💐', name: 'Flower Wreath',  cost: 220,  category: 'wall',  dx: 0.15,  dy: 0.10 },
-      { id: 'tapestry',     emoji: '🧶', name: 'Tapestry',       cost: 450,  category: 'wall',  dx: 0.50,  dy: 0.16 },
-      { id: 'sconce',       emoji: '🕯️', name: 'Wall Sconce',    cost: 380,  category: 'wall',  dx: 0.86,  dy: 0.14 },
-      { id: 'map',          emoji: '🗺️', name: 'World Map',      cost: 320,  category: 'wall',  dx: 0.35,  dy: 0.14 },
-      { id: 'cuckoo',       emoji: '🐦', name: 'Cuckoo Clock',   cost: 450,  category: 'wall',  dx: 0.12,  dy: 0.18 },
-      { id: 'macrame',      emoji: '🪢', name: 'Macramé',         cost: 280,  category: 'wall',  dx: 0.28,  dy: 0.08 },
-      { id: 'thermometer',  emoji: '🌡️', name: 'Thermometer',    cost: 100,  category: 'wall',  dx: 0.92,  dy: 0.15 },
-      { id: 'plate',        emoji: '🍽️', name: 'Decor Plate',    cost: 160,  category: 'wall',  dx: 0.78,  dy: 0.12 },
-      { id: 'butterfly',    emoji: '🦋', name: 'Butterfly Frame', cost: 240,  category: 'wall',  dx: 0.55,  dy: 0.18 },
-      { id: 'medal',        emoji: '🏅', name: 'Medal Display',  cost: 320,  category: 'wall',  dx: 0.42,  dy: 0.10 },
-      { id: 'lantern',      emoji: '🏮', name: 'Paper Lantern',  cost: 280,  category: 'wall',  dx: 0.68,  dy: 0.05 },
-      { id: 'dreamcatcher', emoji: '🪶', name: 'Dreamcatcher',   cost: 360,  category: 'wall',  dx: 0.20,  dy: 0.06 },
-      { id: 'speaker',      emoji: '🔊', name: 'Wall Speaker',   cost: 420,  category: 'wall',  dx: 0.90,  dy: 0.08 },
-      { id: 'mask',         emoji: '🎭', name: 'Theater Masks',  cost: 380,  category: 'wall',  dx: 0.60,  dy: 0.14 },
-      { id: 'calendar',     emoji: '📅', name: 'Wall Calendar',  cost: 100,  category: 'wall',  dx: 0.05,  dy: 0.22 },
-      { id: 'katana',       emoji: '⚔️', name: 'Crossed Swords', cost: 650,  category: 'wall',  dx: 0.50,  dy: 0.08 },
-      { id: 'diploma',      emoji: '📜', name: 'Diploma',        cost: 200,  category: 'wall',  dx: 0.35,  dy: 0.25 },
+      { id: 'clock',        emoji: 'ðŸ•', name: 'Wall Clock',     cost: 150,  category: 'wall',  dx: 0.09,  dy: 0.15 },
+      { id: 'shelf',        emoji: 'ðŸ“š', name: 'Book Shelf',     cost: 300,  category: 'wall',  dx: 0.82,  dy: 0.28 },
+      { id: 'hangplant',    emoji: 'ðŸŒ¿', name: 'Hanging Plant',  cost: 200,  category: 'wall',  dx: 0.32,  dy: 0.05 },
+      { id: 'stringlights', emoji: 'ðŸ’¡', name: 'String Lights',  cost: 400,  category: 'wall',  dx: 0.50,  dy: 0.02 },
+      { id: 'banner',       emoji: 'ðŸŽ', name: 'Wall Banner',    cost: 250,  category: 'wall',  dx: 0.64,  dy: 0.06 },
+      { id: 'photo',        emoji: 'ðŸ–¼ï¸', name: 'Photo Frame',    cost: 180,  category: 'wall',  dx: 0.40,  dy: 0.20 },
+      { id: 'mirror',       emoji: 'ðŸªž', name: 'Wall Mirror',    cost: 350,  category: 'wall',  dx: 0.70,  dy: 0.18 },
+      { id: 'antlers',      emoji: 'ðŸ¦Œ', name: 'Antler Mount',   cost: 500,  category: 'wall',  dx: 0.50,  dy: 0.12 },
+      { id: 'neon',         emoji: 'âœ¨', name: 'Neon Sign',      cost: 600,  category: 'wall',  dx: 0.50,  dy: 0.25 },
+      { id: 'poster',       emoji: 'ðŸŽ¨', name: 'Art Poster',     cost: 120,  category: 'wall',  dx: 0.25,  dy: 0.22 },
+      { id: 'dartboard',    emoji: 'ðŸŽ¯', name: 'Dart Board',     cost: 280,  category: 'wall',  dx: 0.88,  dy: 0.20 },
+      { id: 'wreath',       emoji: 'ðŸ’', name: 'Flower Wreath',  cost: 220,  category: 'wall',  dx: 0.15,  dy: 0.10 },
+      { id: 'tapestry',     emoji: 'ðŸ§¶', name: 'Tapestry',       cost: 450,  category: 'wall',  dx: 0.50,  dy: 0.16 },
+      { id: 'sconce',       emoji: 'ðŸ•¯ï¸', name: 'Wall Sconce',    cost: 380,  category: 'wall',  dx: 0.86,  dy: 0.14 },
+      { id: 'map',          emoji: 'ðŸ—ºï¸', name: 'World Map',      cost: 320,  category: 'wall',  dx: 0.35,  dy: 0.14 },
+      { id: 'cuckoo',       emoji: 'ðŸ¦', name: 'Cuckoo Clock',   cost: 450,  category: 'wall',  dx: 0.12,  dy: 0.18 },
+      { id: 'macrame',      emoji: 'ðŸª¢', name: 'MacramÃ©',         cost: 280,  category: 'wall',  dx: 0.28,  dy: 0.08 },
+      { id: 'thermometer',  emoji: 'ðŸŒ¡ï¸', name: 'Thermometer',    cost: 100,  category: 'wall',  dx: 0.92,  dy: 0.15 },
+      { id: 'plate',        emoji: 'ðŸ½ï¸', name: 'Decor Plate',    cost: 160,  category: 'wall',  dx: 0.78,  dy: 0.12 },
+      { id: 'butterfly',    emoji: 'ðŸ¦‹', name: 'Butterfly Frame', cost: 240,  category: 'wall',  dx: 0.55,  dy: 0.18 },
+      { id: 'medal',        emoji: 'ðŸ…', name: 'Medal Display',  cost: 320,  category: 'wall',  dx: 0.42,  dy: 0.10 },
+      { id: 'lantern',      emoji: 'ðŸ®', name: 'Paper Lantern',  cost: 280,  category: 'wall',  dx: 0.68,  dy: 0.05 },
+      { id: 'dreamcatcher', emoji: 'ðŸª¶', name: 'Dreamcatcher',   cost: 360,  category: 'wall',  dx: 0.20,  dy: 0.06 },
+      { id: 'speaker',      emoji: 'ðŸ”Š', name: 'Wall Speaker',   cost: 420,  category: 'wall',  dx: 0.90,  dy: 0.08 },
+      { id: 'mask',         emoji: 'ðŸŽ­', name: 'Theater Masks',  cost: 380,  category: 'wall',  dx: 0.60,  dy: 0.14 },
+      { id: 'calendar',     emoji: 'ðŸ“…', name: 'Wall Calendar',  cost: 100,  category: 'wall',  dx: 0.05,  dy: 0.22 },
+      { id: 'katana',       emoji: 'âš”ï¸', name: 'Crossed Swords', cost: 650,  category: 'wall',  dx: 0.50,  dy: 0.08 },
+      { id: 'diploma',      emoji: 'ðŸ“œ', name: 'Diploma',        cost: 200,  category: 'wall',  dx: 0.35,  dy: 0.25 },
       // Floor decorations
-      { id: 'floorlamp',    emoji: '🪔', name: 'Floor Lamp',     cost: 350,  category: 'floor', dx: 0.78,  dy: 0.88 },
-      { id: 'sidetable',    emoji: '🪑', name: 'Side Table',     cost: 200,  category: 'floor', dx: 0.08,  dy: 0.80 },
-      { id: 'cushion',      emoji: '🛋️', name: 'Floor Cushion',  cost: 100,  category: 'floor', dx: 0.58,  dy: 0.86 },
-      { id: 'toybox',       emoji: '🧸', name: 'Toy Box',        cost: 250,  category: 'floor', dx: 0.22,  dy: 0.84 },
-      { id: 'bookcase',     emoji: '📖', name: 'Bookcase',       cost: 500,  category: 'floor', dx: 0.88,  dy: 0.88 },
-      { id: 'aquarium',     emoji: '🐠', name: 'Fish Tank',      cost: 800,  category: 'floor', dx: 0.92,  dy: 0.80 },
-      { id: 'guitar',       emoji: '🎸', name: 'Guitar Stand',   cost: 400,  category: 'floor', dx: 0.05,  dy: 0.88 },
-      { id: 'globe',        emoji: '🌍', name: 'Globe',          cost: 350,  category: 'floor', dx: 0.15,  dy: 0.78 },
-      { id: 'trashcan',     emoji: '🗑️', name: 'Trash Can',      cost: 80,   category: 'floor', dx: 0.95,  dy: 0.92 },
-      { id: 'fan',          emoji: '🌀', name: 'Standing Fan',   cost: 300,  category: 'floor', dx: 0.72,  dy: 0.85 },
-      { id: 'beanpillow',   emoji: '🫘', name: 'Bean Bag',       cost: 450,  category: 'floor', dx: 0.42,  dy: 0.90 },
-      { id: 'tv',           emoji: '📺', name: 'Retro TV',       cost: 600,  category: 'floor', dx: 0.50,  dy: 0.80 },
-      { id: 'piano',        emoji: '🎹', name: 'Upright Piano',  cost: 700,  category: 'floor', dx: 0.30,  dy: 0.82 },
-      { id: 'telescope',    emoji: '🔭', name: 'Telescope',      cost: 550,  category: 'floor', dx: 0.60,  dy: 0.85 },
-      { id: 'cactus',       emoji: '🌵', name: 'Potted Cactus',  cost: 180,  category: 'floor', dx: 0.18,  dy: 0.88 },
-      { id: 'candles',      emoji: '🕯️', name: 'Candle Set',     cost: 220,  category: 'floor', dx: 0.14,  dy: 0.76 },
-      { id: 'skateboard',   emoji: '🛹', name: 'Skateboard',     cost: 260,  category: 'floor', dx: 0.35,  dy: 0.94 },
-      { id: 'vinylplayer',  emoji: '💿', name: 'Vinyl Player',   cost: 550,  category: 'floor', dx: 0.10,  dy: 0.84 },
-      { id: 'umbrella',     emoji: '☂️', name: 'Umbrella Stand',  cost: 190,  category: 'floor', dx: 0.94,  dy: 0.86 },
-      { id: 'terrarium',    emoji: '🪴', name: 'Terrarium',      cost: 420,  category: 'floor', dx: 0.48,  dy: 0.78 },
-      { id: 'coffeemaker',  emoji: '☕', name: 'Coffee Maker',   cost: 350,  category: 'floor', dx: 0.82,  dy: 0.76 },
-      { id: 'gaming',       emoji: '🎮', name: 'Game Console',   cost: 600,  category: 'floor', dx: 0.55,  dy: 0.82 },
-      { id: 'camera',       emoji: '📷', name: 'Camera Tripod',  cost: 480,  category: 'floor', dx: 0.68,  dy: 0.88 },
-      { id: 'fountain',     emoji: '⛲', name: 'Mini Fountain',  cost: 750,  category: 'floor', dx: 0.40,  dy: 0.84 },
-      { id: 'chessset',     emoji: '♟️', name: 'Chess Set',       cost: 320,  category: 'floor', dx: 0.25,  dy: 0.90 },
-      { id: 'bonsai',       emoji: '🌳', name: 'Bonsai Tree',    cost: 500,  category: 'floor', dx: 0.75,  dy: 0.78 },
-      { id: 'speaker2',     emoji: '🎵', name: 'Bluetooth Speaker', cost: 380, category: 'floor', dx: 0.62, dy: 0.92 },
-      { id: 'shoe_rack',    emoji: '👟', name: 'Shoe Rack',      cost: 200,  category: 'floor', dx: 0.02,  dy: 0.92 },
-      { id: 'xmastree',     emoji: '🎄', name: 'Christmas Tree', cost: 800,  category: 'floor', dx: 0.20,  dy: 0.78 },
-      { id: 'rocket',       emoji: '🚀', name: 'Model Rocket',   cost: 450,  category: 'floor', dx: 0.88,  dy: 0.82 },
-      { id: 'minifridge',   emoji: '🧊', name: 'Mini Fridge',    cost: 500,  category: 'floor', dx: 0.96,  dy: 0.78 },
+      { id: 'floorlamp',    emoji: 'ðŸª”', name: 'Floor Lamp',     cost: 350,  category: 'floor', dx: 0.78,  dy: 0.88 },
+      { id: 'sidetable',    emoji: 'ðŸª‘', name: 'Side Table',     cost: 200,  category: 'floor', dx: 0.08,  dy: 0.80 },
+      { id: 'cushion',      emoji: 'ðŸ›‹ï¸', name: 'Floor Cushion',  cost: 100,  category: 'floor', dx: 0.58,  dy: 0.86 },
+      { id: 'toybox',       emoji: 'ðŸ§¸', name: 'Toy Box',        cost: 250,  category: 'floor', dx: 0.22,  dy: 0.84 },
+      { id: 'bookcase',     emoji: 'ðŸ“–', name: 'Bookcase',       cost: 500,  category: 'floor', dx: 0.88,  dy: 0.88 },
+      { id: 'aquarium',     emoji: 'ðŸ ', name: 'Fish Tank',      cost: 800,  category: 'floor', dx: 0.92,  dy: 0.80 },
+      { id: 'guitar',       emoji: 'ðŸŽ¸', name: 'Guitar Stand',   cost: 400,  category: 'floor', dx: 0.05,  dy: 0.88 },
+      { id: 'globe',        emoji: 'ðŸŒ', name: 'Globe',          cost: 350,  category: 'floor', dx: 0.15,  dy: 0.78 },
+      { id: 'trashcan',     emoji: 'ðŸ—‘ï¸', name: 'Trash Can',      cost: 80,   category: 'floor', dx: 0.95,  dy: 0.92 },
+      { id: 'fan',          emoji: 'ðŸŒ€', name: 'Standing Fan',   cost: 300,  category: 'floor', dx: 0.72,  dy: 0.85 },
+      { id: 'beanpillow',   emoji: 'ðŸ«˜', name: 'Bean Bag',       cost: 450,  category: 'floor', dx: 0.42,  dy: 0.90 },
+      { id: 'tv',           emoji: 'ðŸ“º', name: 'Retro TV',       cost: 600,  category: 'floor', dx: 0.50,  dy: 0.80 },
+      { id: 'piano',        emoji: 'ðŸŽ¹', name: 'Upright Piano',  cost: 700,  category: 'floor', dx: 0.30,  dy: 0.82 },
+      { id: 'telescope',    emoji: 'ðŸ”­', name: 'Telescope',      cost: 550,  category: 'floor', dx: 0.60,  dy: 0.85 },
+      { id: 'cactus',       emoji: 'ðŸŒµ', name: 'Potted Cactus',  cost: 180,  category: 'floor', dx: 0.18,  dy: 0.88 },
+      { id: 'candles',      emoji: 'ðŸ•¯ï¸', name: 'Candle Set',     cost: 220,  category: 'floor', dx: 0.14,  dy: 0.76 },
+      { id: 'skateboard',   emoji: 'ðŸ›¹', name: 'Skateboard',     cost: 260,  category: 'floor', dx: 0.35,  dy: 0.94 },
+      { id: 'vinylplayer',  emoji: 'ðŸ’¿', name: 'Vinyl Player',   cost: 550,  category: 'floor', dx: 0.10,  dy: 0.84 },
+      { id: 'umbrella',     emoji: 'â˜‚ï¸', name: 'Umbrella Stand',  cost: 190,  category: 'floor', dx: 0.94,  dy: 0.86 },
+      { id: 'terrarium',    emoji: 'ðŸª´', name: 'Terrarium',      cost: 420,  category: 'floor', dx: 0.48,  dy: 0.78 },
+      { id: 'coffeemaker',  emoji: 'â˜•', name: 'Coffee Maker',   cost: 350,  category: 'floor', dx: 0.82,  dy: 0.76 },
+      { id: 'gaming',       emoji: 'ðŸŽ®', name: 'Game Console',   cost: 600,  category: 'floor', dx: 0.55,  dy: 0.82 },
+      { id: 'camera',       emoji: 'ðŸ“·', name: 'Camera Tripod',  cost: 480,  category: 'floor', dx: 0.68,  dy: 0.88 },
+      { id: 'fountain',     emoji: 'â›²', name: 'Mini Fountain',  cost: 750,  category: 'floor', dx: 0.40,  dy: 0.84 },
+      { id: 'chessset',     emoji: 'â™Ÿï¸', name: 'Chess Set',       cost: 320,  category: 'floor', dx: 0.25,  dy: 0.90 },
+      { id: 'bonsai',       emoji: 'ðŸŒ³', name: 'Bonsai Tree',    cost: 500,  category: 'floor', dx: 0.75,  dy: 0.78 },
+      { id: 'speaker2',     emoji: 'ðŸŽµ', name: 'Bluetooth Speaker', cost: 380, category: 'floor', dx: 0.62, dy: 0.92 },
+      { id: 'shoe_rack',    emoji: 'ðŸ‘Ÿ', name: 'Shoe Rack',      cost: 200,  category: 'floor', dx: 0.02,  dy: 0.92 },
+      { id: 'xmastree',     emoji: 'ðŸŽ„', name: 'Christmas Tree', cost: 800,  category: 'floor', dx: 0.20,  dy: 0.78 },
+      { id: 'rocket',       emoji: 'ðŸš€', name: 'Model Rocket',   cost: 450,  category: 'floor', dx: 0.88,  dy: 0.82 },
+      { id: 'minifridge',   emoji: 'ðŸ§Š', name: 'Mini Fridge',    cost: 500,  category: 'floor', dx: 0.96,  dy: 0.78 },
       // Rug styles (only one active at a time)
-      { id: 'rug_blue',     emoji: '🔵', name: 'Blue Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_green',    emoji: '🟢', name: 'Green Rug',      cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_pink',     emoji: '🩷', name: 'Pink Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_star',     emoji: '⭐', name: 'Star Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_rainbow',  emoji: '🌈', name: 'Rainbow Rug',    cost: 400,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_cream',    emoji: '🤍', name: 'Cream Rug',      cost: 250,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_persian',  emoji: '🟤', name: 'Persian Rug',    cost: 500,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_zebra',    emoji: '🦓', name: 'Zebra Rug',      cost: 450,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_red',      emoji: '🔴', name: 'Red Rug',        cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_purple',   emoji: '🟣', name: 'Purple Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_checker',  emoji: '🏁', name: 'Checker Rug',    cost: 450,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_ocean',    emoji: '🌊', name: 'Ocean Rug',      cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_forest',   emoji: '🌲', name: 'Forest Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_gold',     emoji: '🟡', name: 'Gold Rug',       cost: 500,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_galaxy',   emoji: '🌌', name: 'Galaxy Rug',     cost: 600,  category: 'rug',   dx: 0.38,  dy: 0.82 },
-      { id: 'rug_heart',    emoji: '❤️', name: 'Heart Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_blue',     emoji: 'ðŸ”µ', name: 'Blue Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_green',    emoji: 'ðŸŸ¢', name: 'Green Rug',      cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_pink',     emoji: 'ðŸ©·', name: 'Pink Rug',       cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_star',     emoji: 'â­', name: 'Star Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_rainbow',  emoji: 'ðŸŒˆ', name: 'Rainbow Rug',    cost: 400,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_cream',    emoji: 'ðŸ¤', name: 'Cream Rug',      cost: 250,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_persian',  emoji: 'ðŸŸ¤', name: 'Persian Rug',    cost: 500,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_zebra',    emoji: 'ðŸ¦“', name: 'Zebra Rug',      cost: 450,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_red',      emoji: 'ðŸ”´', name: 'Red Rug',        cost: 200,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_purple',   emoji: 'ðŸŸ£', name: 'Purple Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_checker',  emoji: 'ðŸ', name: 'Checker Rug',    cost: 450,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_ocean',    emoji: 'ðŸŒŠ', name: 'Ocean Rug',      cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_forest',   emoji: 'ðŸŒ²', name: 'Forest Rug',     cost: 300,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_gold',     emoji: 'ðŸŸ¡', name: 'Gold Rug',       cost: 500,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_galaxy',   emoji: 'ðŸŒŒ', name: 'Galaxy Rug',     cost: 600,  category: 'rug',   dx: 0.38,  dy: 0.82 },
+      { id: 'rug_heart',    emoji: 'â¤ï¸', name: 'Heart Rug',       cost: 350,  category: 'rug',   dx: 0.38,  dy: 0.82 },
     ];
 
     const WALL_PATTERNS = [
-      { id: 'wall_default',  emoji: '🏠', name: 'Default (Plain)',  cost: 0 },
-      { id: 'wall_brick',    emoji: '🧱', name: 'Brick Wall',       cost: 300 },
-      { id: 'wall_wood',     emoji: '🪵', name: 'Wood Panel',       cost: 400 },
-      { id: 'wall_stripe',   emoji: '📏', name: 'Striped',          cost: 350 },
-      { id: 'wall_dots',     emoji: '⚪', name: 'Polka Dots',       cost: 300 },
-      { id: 'wall_diamond',  emoji: '💠', name: 'Diamond',          cost: 500 },
-      { id: 'wall_pastel',   emoji: '🌸', name: 'Pastel Pink',      cost: 400 },
-      { id: 'wall_mint',     emoji: '🍃', name: 'Mint Green',       cost: 400 },
-      { id: 'wall_navy',     emoji: '🌊', name: 'Navy Blue',        cost: 450 },
-      { id: 'wall_sunset',   emoji: '🌅', name: 'Sunset Gradient',  cost: 600 },
-      { id: 'wall_marble',   emoji: '🪨', name: 'Marble',           cost: 700 },
-      { id: 'wall_lavender', emoji: '💜', name: 'Lavender',         cost: 400 },
-      { id: 'wall_forest',   emoji: '🌲', name: 'Forest Green',     cost: 450 },
-      { id: 'wall_galaxy',   emoji: '🌌', name: 'Galaxy',           cost: 800 },
-      { id: 'wall_bamboo',   emoji: '🎋', name: 'Bamboo',           cost: 500 },
-      { id: 'wall_cherry',   emoji: '🌸', name: 'Cherry Blossom',   cost: 550 },
+      { id: 'wall_default',  emoji: 'ðŸ ', name: 'Default (Plain)',  cost: 0 },
+      { id: 'wall_brick',    emoji: 'ðŸ§±', name: 'Brick Wall',       cost: 300 },
+      { id: 'wall_wood',     emoji: 'ðŸªµ', name: 'Wood Panel',       cost: 400 },
+      { id: 'wall_stripe',   emoji: 'ðŸ“', name: 'Striped',          cost: 350 },
+      { id: 'wall_dots',     emoji: 'âšª', name: 'Polka Dots',       cost: 300 },
+      { id: 'wall_diamond',  emoji: 'ðŸ’ ', name: 'Diamond',          cost: 500 },
+      { id: 'wall_pastel',   emoji: 'ðŸŒ¸', name: 'Pastel Pink',      cost: 400 },
+      { id: 'wall_mint',     emoji: 'ðŸƒ', name: 'Mint Green',       cost: 400 },
+      { id: 'wall_navy',     emoji: 'ðŸŒŠ', name: 'Navy Blue',        cost: 450 },
+      { id: 'wall_sunset',   emoji: 'ðŸŒ…', name: 'Sunset Gradient',  cost: 600 },
+      { id: 'wall_marble',   emoji: 'ðŸª¨', name: 'Marble',           cost: 700 },
+      { id: 'wall_lavender', emoji: 'ðŸ’œ', name: 'Lavender',         cost: 400 },
+      { id: 'wall_forest',   emoji: 'ðŸŒ²', name: 'Forest Green',     cost: 450 },
+      { id: 'wall_galaxy',   emoji: 'ðŸŒŒ', name: 'Galaxy',           cost: 800 },
+      { id: 'wall_bamboo',   emoji: 'ðŸŽ‹', name: 'Bamboo',           cost: 500 },
+      { id: 'wall_cherry',   emoji: 'ðŸŒ¸', name: 'Cherry Blossom',   cost: 550 },
     ];
 
     const WINDOWS = [
-      { id: 'win_none',      emoji: '❌', name: 'No Window',       cost: 0 },
-      { id: 'win_classic',   emoji: '🪟', name: 'Classic Window',  cost: 0 },
-      { id: 'win_large',     emoji: '🏔️', name: 'Large Window',    cost: 500 },
-      { id: 'win_round',     emoji: '⭕', name: 'Round Window',    cost: 400 },
-      { id: 'win_arch',      emoji: '🕌', name: 'Arch Window',     cost: 600 },
-      { id: 'win_double',    emoji: '🪟🪟', name: 'Double Window', cost: 800 },
-      { id: 'win_skylight',  emoji: '☀️', name: 'Skylight',        cost: 700 },
-      { id: 'win_stained',   emoji: '🎨', name: 'Stained Glass',   cost: 900 },
-      { id: 'win_porthole',  emoji: '🚢', name: 'Porthole',        cost: 350 },
+      { id: 'win_none',      emoji: 'âŒ', name: 'No Window',       cost: 0 },
+      { id: 'win_classic',   emoji: 'ðŸªŸ', name: 'Classic Window',  cost: 0 },
+      { id: 'win_large',     emoji: 'ðŸ”ï¸', name: 'Large Window',    cost: 500 },
+      { id: 'win_round',     emoji: 'â­•', name: 'Round Window',    cost: 400 },
+      { id: 'win_arch',      emoji: 'ðŸ•Œ', name: 'Arch Window',     cost: 600 },
+      { id: 'win_double',    emoji: 'ðŸªŸðŸªŸ', name: 'Double Window', cost: 800 },
+      { id: 'win_skylight',  emoji: 'â˜€ï¸', name: 'Skylight',        cost: 700 },
+      { id: 'win_stained',   emoji: 'ðŸŽ¨', name: 'Stained Glass',   cost: 900 },
+      { id: 'win_porthole',  emoji: 'ðŸš¢', name: 'Porthole',        cost: 350 },
     ];
 
     const PLANT_LEVELS = [
@@ -1367,7 +1367,7 @@
       { level: 27, label: 'Fruitful',    cost: 1800 },
       { level: 28, label: 'Golden',      cost: 2000 },
       { level: 29, label: 'Majestic',    cost: 2200 },
-      { level: 30, label: 'Max ★',       cost: 2500 },
+      { level: 30, label: 'Max â˜…',       cost: 2500 },
     ];
 
     // Cheapest plant cost used as base for scaling
@@ -1402,34 +1402,34 @@
       return PLANT_LEVELS.length;
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Pet Accessories
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const PET_ACCESSORIES = [
-      { id: 'acc_tophat',    emoji: '🎩', name: 'Top Hat',       draw: 'tophat' },
-      { id: 'acc_crown',     emoji: '👑', name: 'Crown',         draw: 'crown' },
-      { id: 'acc_glasses',   emoji: '🕶️', name: 'Sunglasses',    draw: 'glasses' },
-      { id: 'acc_bow',       emoji: '🎀', name: 'Bow',           draw: 'bow' },
-      { id: 'acc_scarf',     emoji: '🧣', name: 'Scarf',         draw: 'scarf' },
-      { id: 'acc_flower',    emoji: '🌸', name: 'Flower',        draw: 'flower' },
-      { id: 'acc_bandana',   emoji: '🏴', name: 'Bandana',       draw: 'bandana' },
-      { id: 'acc_monocle',   emoji: '🧐', name: 'Monocle',       draw: 'monocle' },
-      { id: 'acc_halo',      emoji: '😇', name: 'Halo',          draw: 'halo' },
-      { id: 'acc_wizard',    emoji: '🧙', name: 'Wizard Hat',    draw: 'wizard',    gachaOnly: true },
-      { id: 'acc_partyhat',  emoji: '🥳', name: 'Party Hat',     draw: 'partyhat',  gachaOnly: true },
-      { id: 'acc_heartglass',emoji: '💕', name: 'Heart Glasses', draw: 'heartglass',gachaOnly: true },
-      { id: 'acc_devil',     emoji: '😈', name: 'Devil Horns',   draw: 'devil',     gachaOnly: true },
-      { id: 'acc_wings',     emoji: '🕊️', name: 'Angel Wings',   draw: 'wings',     gachaOnly: true },
-      { id: 'acc_cape',      emoji: '🦸', name: 'Cape',          draw: 'cape',      gachaOnly: true },
-      { id: 'acc_ninja',     emoji: '👤', name: 'Ninja Mask',    draw: 'ninja',     gachaOnly: true },
-      { id: 'acc_pirate',    emoji: '🏴‍☠️', name: 'Pirate Patch',  draw: 'pirate',    gachaOnly: true },
-      { id: 'acc_tiara',     emoji: '👸', name: 'Tiara',         draw: 'tiara',     gachaOnly: true },
-      { id: 'acc_starbadge', emoji: '⭐', name: 'Star Badge',    draw: 'starbadge', gachaOnly: true },
+      { id: 'acc_tophat',    emoji: 'ðŸŽ©', name: 'Top Hat',       draw: 'tophat' },
+      { id: 'acc_crown',     emoji: 'ðŸ‘‘', name: 'Crown',         draw: 'crown' },
+      { id: 'acc_glasses',   emoji: 'ðŸ•¶ï¸', name: 'Sunglasses',    draw: 'glasses' },
+      { id: 'acc_bow',       emoji: 'ðŸŽ€', name: 'Bow',           draw: 'bow' },
+      { id: 'acc_scarf',     emoji: 'ðŸ§£', name: 'Scarf',         draw: 'scarf' },
+      { id: 'acc_flower',    emoji: 'ðŸŒ¸', name: 'Flower',        draw: 'flower' },
+      { id: 'acc_bandana',   emoji: 'ðŸ´', name: 'Bandana',       draw: 'bandana' },
+      { id: 'acc_monocle',   emoji: 'ðŸ§', name: 'Monocle',       draw: 'monocle' },
+      { id: 'acc_halo',      emoji: 'ðŸ˜‡', name: 'Halo',          draw: 'halo' },
+      { id: 'acc_wizard',    emoji: 'ðŸ§™', name: 'Wizard Hat',    draw: 'wizard',    gachaOnly: true },
+      { id: 'acc_partyhat',  emoji: 'ðŸ¥³', name: 'Party Hat',     draw: 'partyhat',  gachaOnly: true },
+      { id: 'acc_heartglass',emoji: 'ðŸ’•', name: 'Heart Glasses', draw: 'heartglass',gachaOnly: true },
+      { id: 'acc_devil',     emoji: 'ðŸ˜ˆ', name: 'Devil Horns',   draw: 'devil',     gachaOnly: true },
+      { id: 'acc_wings',     emoji: 'ðŸ•Šï¸', name: 'Angel Wings',   draw: 'wings',     gachaOnly: true },
+      { id: 'acc_cape',      emoji: 'ðŸ¦¸', name: 'Cape',          draw: 'cape',      gachaOnly: true },
+      { id: 'acc_ninja',     emoji: 'ðŸ‘¤', name: 'Ninja Mask',    draw: 'ninja',     gachaOnly: true },
+      { id: 'acc_pirate',    emoji: 'ðŸ´â€â˜ ï¸', name: 'Pirate Patch',  draw: 'pirate',    gachaOnly: true },
+      { id: 'acc_tiara',     emoji: 'ðŸ‘¸', name: 'Tiara',         draw: 'tiara',     gachaOnly: true },
+      { id: 'acc_starbadge', emoji: 'â­', name: 'Star Badge',    draw: 'starbadge', gachaOnly: true },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Daily Login Rewards
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const DAILY_REWARDS = [
       { day: 1, coins: 10,  label: 'Day 1' },
       { day: 2, coins: 20,  label: 'Day 2' },
@@ -1437,110 +1437,110 @@
       { day: 4, coins: 50,  label: 'Day 4' },
       { day: 5, coins: 75,  label: 'Day 5' },
       { day: 6, coins: 100, label: 'Day 6' },
-      { day: 7, coins: 200, label: 'Day 7 🎉' },
+      { day: 7, coins: 200, label: 'Day 7 ðŸŽ‰' },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Achievements
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const ACHIEVEMENTS = [
-      { id: 'ach_first_pet',     icon: '🐾', name: 'First Friend',       desc: 'Buy your first pet',          check: (d) => (d.pets || []).length >= 1 },
-      { id: 'ach_two_pets',      icon: '🐾🐾', name: 'Dynamic Duo',     desc: 'Own 2 pets',                  check: (d) => (d.pets || []).length >= 2 },
-      { id: 'ach_all_pets',      icon: '🏆', name: 'Pet Collector',      desc: 'Own all 6 types',             check: (d) => new Set((d.pets || []).map(p => p.type)).size >= 6 },
-      { id: 'ach_first_plant',   icon: '🌱', name: 'Green Thumb',        desc: 'Buy your first plant',        check: (d) => d.ownedPlants.length >= 1 },
-      { id: 'ach_plant_max',     icon: '🌳', name: 'Master Gardener',    desc: 'Reach plant level 30',        check: (d) => Object.values(d.plantLevels).some(l => l >= 30) },
-      { id: 'ach_coins_1k',      icon: '💰', name: 'Piggy Bank',         desc: 'Accumulate 1,000 coins',      check: (d) => d.coins >= 1000 },
-      { id: 'ach_coins_10k',     icon: '💎', name: 'Rich Room',          desc: 'Accumulate 10,000 coins',     check: (d) => d.coins >= 10000 },
-      { id: 'ach_decor_5',       icon: '🎨', name: 'Decorator',          desc: 'Own 5 decorations',           check: (d) => d.ownedDecors.length >= 5 },
-      { id: 'ach_decor_15',      icon: '🏡', name: 'Interior Designer',  desc: 'Own 15 decorations',          check: (d) => d.ownedDecors.length >= 15 },
-      { id: 'ach_streak_7',      icon: '🔥', name: 'Dedicated',          desc: '7-day login streak',          check: (d) => (d.loginStreak || 0) >= 7 },
-      { id: 'ach_best_friend',   icon: '❤️', name: 'Best Friend',        desc: 'Reach Best Friend with a pet',check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 500) },
-      { id: 'ach_legendary',     icon: '⭐', name: 'Legendary Bond',     desc: 'Reach Legendary Bond (2000)', check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 2000) },
-      { id: 'ach_acc_3',         icon: '🎩', name: 'Fashionista',        desc: 'Own 3 accessories',           check: (d) => (d.ownedAccessories || []).length >= 3 },
-      { id: 'ach_gacha_5',       icon: '🎰', name: 'Lucky Player',       desc: 'Pull gacha 5 times',          check: (d) => (d.gachaPulls || 0) >= 5 },
-      { id: 'ach_gift_given',    icon: '🎁', name: 'Generous',           desc: 'Send a gift to someone',      check: (d) => (d.giftsGiven || 0) >= 1 },
+      { id: 'ach_first_pet',     icon: 'ðŸ¾', name: 'First Friend',       desc: 'Buy your first pet',          check: (d) => (d.pets || []).length >= 1 },
+      { id: 'ach_two_pets',      icon: 'ðŸ¾ðŸ¾', name: 'Dynamic Duo',     desc: 'Own 2 pets',                  check: (d) => (d.pets || []).length >= 2 },
+      { id: 'ach_all_pets',      icon: 'ðŸ†', name: 'Pet Collector',      desc: 'Own all 6 types',             check: (d) => new Set((d.pets || []).map(p => p.type)).size >= 6 },
+      { id: 'ach_first_plant',   icon: 'ðŸŒ±', name: 'Green Thumb',        desc: 'Buy your first plant',        check: (d) => d.ownedPlants.length >= 1 },
+      { id: 'ach_plant_max',     icon: 'ðŸŒ³', name: 'Master Gardener',    desc: 'Reach plant level 30',        check: (d) => Object.values(d.plantLevels).some(l => l >= 30) },
+      { id: 'ach_coins_1k',      icon: 'ðŸ’°', name: 'Piggy Bank',         desc: 'Accumulate 1,000 coins',      check: (d) => d.coins >= 1000 },
+      { id: 'ach_coins_10k',     icon: 'ðŸ’Ž', name: 'Rich Room',          desc: 'Accumulate 10,000 coins',     check: (d) => d.coins >= 10000 },
+      { id: 'ach_decor_5',       icon: 'ðŸŽ¨', name: 'Decorator',          desc: 'Own 5 decorations',           check: (d) => d.ownedDecors.length >= 5 },
+      { id: 'ach_decor_15',      icon: 'ðŸ¡', name: 'Interior Designer',  desc: 'Own 15 decorations',          check: (d) => d.ownedDecors.length >= 15 },
+      { id: 'ach_streak_7',      icon: 'ðŸ”¥', name: 'Dedicated',          desc: '7-day login streak',          check: (d) => (d.loginStreak || 0) >= 7 },
+      { id: 'ach_best_friend',   icon: 'â¤ï¸', name: 'Best Friend',        desc: 'Reach Best Friend with a pet',check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 500) },
+      { id: 'ach_legendary',     icon: 'â­', name: 'Legendary Bond',     desc: 'Reach Legendary Bond (2000)', check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 2000) },
+      { id: 'ach_acc_3',         icon: 'ðŸŽ©', name: 'Fashionista',        desc: 'Own 3 accessories',           check: (d) => (d.ownedAccessories || []).length >= 3 },
+      { id: 'ach_gacha_5',       icon: 'ðŸŽ°', name: 'Lucky Player',       desc: 'Pull gacha 5 times',          check: (d) => (d.gachaPulls || 0) >= 5 },
+      { id: 'ach_gift_given',    icon: 'ðŸŽ', name: 'Generous',           desc: 'Send a gift to someone',      check: (d) => (d.giftsGiven || 0) >= 1 },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Gacha Pool
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const GACHA_COST = 200;
     const GACHA_POOL = [
       // Coin prizes
-      { id: 'gacha_50coins',  emoji: '💰', name: '50 Coins',       rarity: 'common',    weight: 25, type: 'coins', amount: 50 },
-      { id: 'gacha_100coins', emoji: '💰', name: '100 Coins',      rarity: 'uncommon',  weight: 12, type: 'coins', amount: 100 },
-      { id: 'gacha_200coins', emoji: '💰', name: '200 Coins',      rarity: 'rare',      weight: 5,  type: 'coins', amount: 200 },
-      { id: 'gacha_500coins', emoji: '💰', name: '500 Coins',      rarity: 'epic',      weight: 2,  type: 'coins', amount: 500 },
+      { id: 'gacha_50coins',  emoji: 'ðŸ’°', name: '50 Coins',       rarity: 'common',    weight: 25, type: 'coins', amount: 50 },
+      { id: 'gacha_100coins', emoji: 'ðŸ’°', name: '100 Coins',      rarity: 'uncommon',  weight: 12, type: 'coins', amount: 100 },
+      { id: 'gacha_200coins', emoji: 'ðŸ’°', name: '200 Coins',      rarity: 'rare',      weight: 5,  type: 'coins', amount: 200 },
+      { id: 'gacha_500coins', emoji: 'ðŸ’°', name: '500 Coins',      rarity: 'epic',      weight: 2,  type: 'coins', amount: 500 },
       // Common Accessories
-      { id: 'acc_bow',        emoji: '🎀', name: 'Bow',            rarity: 'common',    weight: 8,  type: 'accessory' },
-      { id: 'acc_flower',     emoji: '🌸', name: 'Flower',         rarity: 'common',    weight: 8,  type: 'accessory' },
-      { id: 'acc_bandana',    emoji: '🏴', name: 'Bandana',        rarity: 'common',    weight: 8,  type: 'accessory' },
+      { id: 'acc_bow',        emoji: 'ðŸŽ€', name: 'Bow',            rarity: 'common',    weight: 8,  type: 'accessory' },
+      { id: 'acc_flower',     emoji: 'ðŸŒ¸', name: 'Flower',         rarity: 'common',    weight: 8,  type: 'accessory' },
+      { id: 'acc_bandana',    emoji: 'ðŸ´', name: 'Bandana',        rarity: 'common',    weight: 8,  type: 'accessory' },
       // Uncommon Accessories
-      { id: 'acc_glasses',    emoji: '🕶️', name: 'Sunglasses',     rarity: 'uncommon',  weight: 5,  type: 'accessory' },
-      { id: 'acc_scarf',      emoji: '🧣', name: 'Scarf',          rarity: 'uncommon',  weight: 5,  type: 'accessory' },
-      { id: 'acc_tophat',     emoji: '🎩', name: 'Top Hat',        rarity: 'uncommon',  weight: 5,  type: 'accessory' },
-      { id: 'acc_partyhat',   emoji: '🥳', name: 'Party Hat',      rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_glasses',    emoji: 'ðŸ•¶ï¸', name: 'Sunglasses',     rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_scarf',      emoji: 'ðŸ§£', name: 'Scarf',          rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_tophat',     emoji: 'ðŸŽ©', name: 'Top Hat',        rarity: 'uncommon',  weight: 5,  type: 'accessory' },
+      { id: 'acc_partyhat',   emoji: 'ðŸ¥³', name: 'Party Hat',      rarity: 'uncommon',  weight: 5,  type: 'accessory' },
       // Rare Accessories
-      { id: 'acc_halo',       emoji: '😇', name: 'Halo',           rarity: 'rare',      weight: 3,  type: 'accessory' },
-      { id: 'acc_monocle',    emoji: '🧐', name: 'Monocle',        rarity: 'rare',      weight: 3,  type: 'accessory' },
-      { id: 'acc_heartglass', emoji: '💕', name: 'Heart Glasses',  rarity: 'rare',      weight: 3,  type: 'accessory' },
-      { id: 'acc_wizard',     emoji: '🧙', name: 'Wizard Hat',     rarity: 'rare',      weight: 3,  type: 'accessory' },
-      { id: 'acc_devil',      emoji: '😈', name: 'Devil Horns',    rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_halo',       emoji: 'ðŸ˜‡', name: 'Halo',           rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_monocle',    emoji: 'ðŸ§', name: 'Monocle',        rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_heartglass', emoji: 'ðŸ’•', name: 'Heart Glasses',  rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_wizard',     emoji: 'ðŸ§™', name: 'Wizard Hat',     rarity: 'rare',      weight: 3,  type: 'accessory' },
+      { id: 'acc_devil',      emoji: 'ðŸ˜ˆ', name: 'Devil Horns',    rarity: 'rare',      weight: 3,  type: 'accessory' },
       // Epic Accessories
-      { id: 'acc_crown',      emoji: '👑', name: 'Crown',          rarity: 'epic',      weight: 1.5, type: 'accessory' },
-      { id: 'acc_ninja',      emoji: '👤', name: 'Ninja Mask',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
-      { id: 'acc_pirate',     emoji: '🏴‍☠️', name: 'Pirate Patch',   rarity: 'epic',      weight: 1.5, type: 'accessory' },
-      { id: 'acc_cape',       emoji: '🦸', name: 'Cape',           rarity: 'epic',      weight: 1.5, type: 'accessory' },
-      { id: 'acc_starbadge',  emoji: '⭐', name: 'Star Badge',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_crown',      emoji: 'ðŸ‘‘', name: 'Crown',          rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_ninja',      emoji: 'ðŸ‘¤', name: 'Ninja Mask',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_pirate',     emoji: 'ðŸ´â€â˜ ï¸', name: 'Pirate Patch',   rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_cape',       emoji: 'ðŸ¦¸', name: 'Cape',           rarity: 'epic',      weight: 1.5, type: 'accessory' },
+      { id: 'acc_starbadge',  emoji: 'â­', name: 'Star Badge',     rarity: 'epic',      weight: 1.5, type: 'accessory' },
       // Legendary Accessories
-      { id: 'acc_tiara',      emoji: '👸', name: 'Tiara',          rarity: 'legendary', weight: 0.5, type: 'accessory' },
-      { id: 'acc_wings',      emoji: '🕊️', name: 'Angel Wings',    rarity: 'legendary', weight: 0.5, type: 'accessory' },
+      { id: 'acc_tiara',      emoji: 'ðŸ‘¸', name: 'Tiara',          rarity: 'legendary', weight: 0.5, type: 'accessory' },
+      { id: 'acc_wings',      emoji: 'ðŸ•Šï¸', name: 'Angel Wings',    rarity: 'legendary', weight: 0.5, type: 'accessory' },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Jukebox Tracks (Web Audio API tone-generated)
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const JUKEBOX_TRACKS = [
-      { id: 'jb_lofi',     name: '🎵 Lo-fi Chill',     bpm: 75,  key: 'C',  style: 'lofi' },
-      { id: 'jb_jazz',     name: '🎷 Smooth Jazz',      bpm: 105, key: 'Eb', style: 'jazz' },
-      { id: 'jb_rain',     name: '🌧️ Rain Ambience',    bpm: 0,   key: '-',  style: 'rain' },
-      { id: 'jb_retro',    name: '🎮 8-bit Retro',      bpm: 130, key: 'G',  style: 'retro' },
-      { id: 'jb_forest',   name: '🌲 Forest Sounds',    bpm: 0,   key: '-',  style: 'forest' },
-      { id: 'jb_piano',    name: '🎹 Soft Piano',       bpm: 68,  key: 'F',  style: 'piano' },
-      { id: 'jb_ocean',    name: '🌊 Ocean Waves',      bpm: 0,   key: '-',  style: 'ocean' },
-      { id: 'jb_lullaby',  name: '🌙 Lullaby',          bpm: 60,  key: 'D',  style: 'lullaby' },
-      { id: 'jb_cafe',     name: '☕ Café Bossa',        bpm: 115, key: 'A',  style: 'bossa' },
-      { id: 'jb_space',    name: '🚀 Space Ambient',    bpm: 0,   key: '-',  style: 'space' },
-      { id: 'jb_music_box',name: '🎠 Music Box',        bpm: 90,  key: 'G',  style: 'musicbox' },
+      { id: 'jb_lofi',     name: 'ðŸŽµ Lo-fi Chill',     bpm: 75,  key: 'C',  style: 'lofi' },
+      { id: 'jb_jazz',     name: 'ðŸŽ· Smooth Jazz',      bpm: 105, key: 'Eb', style: 'jazz' },
+      { id: 'jb_rain',     name: 'ðŸŒ§ï¸ Rain Ambience',    bpm: 0,   key: '-',  style: 'rain' },
+      { id: 'jb_retro',    name: 'ðŸŽ® 8-bit Retro',      bpm: 130, key: 'G',  style: 'retro' },
+      { id: 'jb_forest',   name: 'ðŸŒ² Forest Sounds',    bpm: 0,   key: '-',  style: 'forest' },
+      { id: 'jb_piano',    name: 'ðŸŽ¹ Soft Piano',       bpm: 68,  key: 'F',  style: 'piano' },
+      { id: 'jb_ocean',    name: 'ðŸŒŠ Ocean Waves',      bpm: 0,   key: '-',  style: 'ocean' },
+      { id: 'jb_lullaby',  name: 'ðŸŒ™ Lullaby',          bpm: 60,  key: 'D',  style: 'lullaby' },
+      { id: 'jb_cafe',     name: 'â˜• CafÃ© Bossa',        bpm: 115, key: 'A',  style: 'bossa' },
+      { id: 'jb_space',    name: 'ðŸš€ Space Ambient',    bpm: 0,   key: '-',  style: 'space' },
+      { id: 'jb_music_box',name: 'ðŸŽ  Music Box',        bpm: 90,  key: 'G',  style: 'musicbox' },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Guestbook Stickers
-       ═══════════════════════════════ */
-    const GB_STICKERS = ['❤️','⭐','🎉','🔥','😊','👋','🌈','🎵','✨','💎','🐾','🌸'];
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    const GB_STICKERS = ['â¤ï¸','â­','ðŸŽ‰','ðŸ”¥','ðŸ˜Š','ðŸ‘‹','ðŸŒˆ','ðŸŽµ','âœ¨','ðŸ’Ž','ðŸ¾','ðŸŒ¸'];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Leaderboard Games
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const LB_GAMES = [
-      { id: 'flappy',   name: '🐦 Flappy',   key: 'flappy_scores' },
-      { id: 'snake',    name: '🐍 Snake',     key: 'snake_scores' },
-      { id: 'tetris',   name: '🧱 Tetris',    key: 'tetris_scores' },
-      { id: '2048',     name: '🔢 2048',      key: '2048_scores' },
-      { id: 'blast',    name: '💥 Block Blast',key: 'blast_scores' },
+      { id: 'flappy',   name: 'ðŸ¦ Flappy',   key: 'flappy_scores' },
+      { id: 'snake',    name: 'ðŸ Snake',     key: 'snake_scores' },
+      { id: 'tetris',   name: 'ðŸ§± Tetris',    key: 'tetris_scores' },
+      { id: '2048',     name: 'ðŸ”¢ 2048',      key: '2048_scores' },
+      { id: 'blast',    name: 'ðŸ’¥ Block Blast',key: 'blast_scores' },
     ];
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        State
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5, unlockedLayers: 1, layerData: {} };
-    // Active layer (1–3) and view mode — local UI state, NOT saved to Firestore
+    // Active layer (1â€“3) and view mode â€” local UI state, NOT saved to Firestore
     let currentLayer = 1;
     let isOutsideView = false;
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Helpers
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const toastEl = document.getElementById('toast');
     let toastTimer = null;
     function showToast(msg, type) {
@@ -1584,9 +1584,9 @@
 
     function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Multi-Layer Helpers
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
     /** Returns the default wall pattern applied when a new layer is unlocked. */
     function getLayerDefaultWall(n) {
@@ -1622,7 +1622,7 @@
       if (n < 1 || n > 3) return;
       const total = roomData.unlockedLayers || 1;
       if (n > total) {
-        showToast('Floor ' + n + ' is locked! Unlock it from ⬆ Feed > 🏠 Floors.', 'error');
+        showToast('Floor ' + n + ' is locked! Unlock it from â¬† Feed > ðŸ  Floors.', 'error');
         return;
       }
       // Persist current layer before switching
@@ -1661,11 +1661,11 @@
       if (!badge) return;
       const total = roomData.unlockedLayers || 1;
       if (isOutsideView) {
-        badge.textContent = '🌳 Outside';
+        badge.textContent = 'ðŸŒ³ Outside';
       } else if (total > 1) {
-        badge.textContent = '🏠 Floor ' + currentLayer + ' / ' + total;
+        badge.textContent = 'ðŸ  Floor ' + currentLayer + ' / ' + total;
       } else {
-        badge.textContent = '🏠 My Room';
+        badge.textContent = 'ðŸ  My Room';
       }
     }
 
@@ -1688,122 +1688,173 @@
       const ctx = cvs.getContext('2d');
       _outsideFloorRects = {};
 
-      // Fewer stars since it's dusk/sunset (only in upper dark band)
-      if (!_outsideStars) {
-        _outsideStars = Array.from({length: 8}, (_, i) => ({
-          x: (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5),
-          y: (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.20,
-          r: 0.6 + (i % 2) * 0.4
-        }));
-      }
+      // â”€â”€ Determine time-of-day theme â”€â”€
+      const hour     = new Date().getHours();
+      const isDawn   = hour >= 5  && hour < 8;
+      const isDay    = hour >= 8  && hour < 17;
+      const isSunset = hour >= 17 && hour < 20;
+      const isNight  = !isDawn && !isDay && !isSunset;
+      const groundY  = H * 0.68;
 
-      const groundY = H * 0.68;
-
-      // ── 1. Warm sunset sky ──
+      // â”€â”€ 1. Sky gradient (themed) â”€â”€
       const sky = ctx.createLinearGradient(0, 0, 0, groundY);
-      sky.addColorStop(0,    '#1a1040');
-      sky.addColorStop(0.30, '#6b3a7d');
-      sky.addColorStop(0.58, '#c95f30');
-      sky.addColorStop(0.78, '#f28b30');
-      sky.addColorStop(0.90, '#f5c842');
-      sky.addColorStop(1,    '#ffe5a0');
+      if (isDay) {
+        sky.addColorStop(0,    '#1250a0');
+        sky.addColorStop(0.40, '#2e8dd8');
+        sky.addColorStop(0.78, '#70c8f8');
+        sky.addColorStop(1,    '#b8e4ff');
+      } else if (isSunset) {
+        sky.addColorStop(0,    '#1a1040');
+        sky.addColorStop(0.30, '#6b3a7d');
+        sky.addColorStop(0.58, '#c95f30');
+        sky.addColorStop(0.78, '#f28b30');
+        sky.addColorStop(0.90, '#f5c842');
+        sky.addColorStop(1,    '#ffe5a0');
+      } else if (isDawn) {
+        sky.addColorStop(0,    '#1a1240');
+        sky.addColorStop(0.25, '#8a2060');
+        sky.addColorStop(0.55, '#d85030');
+        sky.addColorStop(0.75, '#f09028');
+        sky.addColorStop(0.90, '#f8c840');
+        sky.addColorStop(1,    '#ffe8a8');
+      } else { // night
+        sky.addColorStop(0,    '#060d1f');
+        sky.addColorStop(0.40, '#0d1f40');
+        sky.addColorStop(0.70, '#14304f');
+        sky.addColorStop(1,    '#1e4a38');
+      }
       ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
 
-      // ── 2. Setting sun with glow ──
-      const sunX = W * 0.82, sunY = groundY;
-      const sunR = Math.min(W, H) * 0.085;
-      const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 3.8);
-      sunGlow.addColorStop(0,   'rgba(255,240,100,0.55)');
-      sunGlow.addColorStop(0.3, 'rgba(255,180,50,0.35)');
-      sunGlow.addColorStop(0.7, 'rgba(255,100,20,0.10)');
-      sunGlow.addColorStop(1,   'rgba(255,100,20,0)');
-      ctx.fillStyle = sunGlow; ctx.fillRect(0, 0, W, groundY);
-      // Sun disc (half below horizon)
-      ctx.fillStyle = '#ffd020';
-      ctx.beginPath(); ctx.arc(sunX, sunY, sunR, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#fffbe0';
-      ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 0.52, Math.PI, 0); ctx.fill();
+      // â”€â”€ 2. Stars (night: 28 deterministic, dawn: 8 fading, day: none) â”€â”€
+      if (isNight || isDawn) {
+        const starCount = isNight ? 28 : 8;
+        ctx.fillStyle   = isNight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.42)';
+        for (let i = 0; i < starCount; i++) {
+          const sx = (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5) * W;
+          const sy = (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * (isNight ? 0.40 : 0.22) * H;
+          const sr = 0.8 + (i % 3) * 0.4;
+          ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      // Few stars in dark upper band for sunset
+      if (isSunset) {
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        for (let i = 0; i < 8; i++) {
+          const sx = (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5) * W;
+          const sy = (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.18 * H;
+          ctx.beginPath(); ctx.arc(sx, sy, 0.7 + (i % 2) * 0.4, 0, Math.PI * 2); ctx.fill();
+        }
+      }
 
-      // ── 3. Soft sunset clouds ──
+      // â”€â”€ 3. Crescent moon (night only) â”€â”€
+      if (isNight) {
+        const moonX = W * 0.82, moonY = H * 0.10, moonR = Math.min(W, H) * 0.055;
+        ctx.fillStyle = '#fff9c4';
+        ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0d1f40';
+        ctx.beginPath(); ctx.arc(moonX + moonR * 0.40, moonY - moonR * 0.10, moonR * 0.82, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // â”€â”€ 4. Sun (visible in dawn/day/sunset) â”€â”€
+      if (!isNight) {
+        let sunX, sunY, sunR, sunColor1, sunColor2;
+        if (isDay) {
+          sunX = W * 0.72; sunY = H * 0.14; sunR = Math.min(W, H) * 0.065;
+          sunColor1 = '#fffce0'; sunColor2 = '#ffe870';
+        } else if (isSunset) {
+          sunX = W * 0.82; sunY = groundY; sunR = Math.min(W, H) * 0.085;
+          sunColor1 = '#fffbe0'; sunColor2 = '#ffd020';
+        } else { // dawn
+          sunX = W * 0.18; sunY = groundY; sunR = Math.min(W, H) * 0.08;
+          sunColor1 = '#fff0c0'; sunColor2 = '#ffc040';
+        }
+        // Glow halo
+        const glow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 3.8);
+        glow.addColorStop(0,   isDay ? 'rgba(255,255,200,0.5)' : 'rgba(255,240,100,0.55)');
+        glow.addColorStop(0.3, isDay ? 'rgba(255,220,80,0.28)' : 'rgba(255,180,50,0.35)');
+        glow.addColorStop(0.7, 'rgba(255,100,20,0.10)');
+        glow.addColorStop(1,   'rgba(255,100,20,0)');
+        ctx.fillStyle = glow; ctx.fillRect(0, 0, W, groundY);
+        // Sun disc (full for day, half for dawn/sunset at horizon)
+        ctx.fillStyle = sunColor2;
+        ctx.beginPath();
+        if (isDay) ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
+        else        ctx.arc(sunX, sunY, sunR, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = sunColor1;
+        ctx.beginPath();
+        if (isDay) ctx.arc(sunX, sunY, sunR * 0.6, 0, Math.PI * 2);
+        else        ctx.arc(sunX, sunY, sunR * 0.52, Math.PI, 0);
+        ctx.fill();
+      }
+
+      // â”€â”€ 5. Clouds â”€â”€
+      const cloudColor = isDay ? '#f0f0f0' : isDawn ? '#ffc8b8' : isSunset ? '#ffd4a8' : 'rgba(80,100,140,0.45)';
       function drawCloud(cx, cy, size, alpha) {
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#ffd4a8';
+        ctx.fillStyle   = cloudColor;
         [[0,0,1],[-size*.45,size*.12,.7],[size*.45,size*.12,.6],[-size*.2,-size*.15,.75],[size*.2,-size*.18,.65]]
           .forEach(([dx,dy,r]) => {
             ctx.beginPath(); ctx.ellipse(cx+dx, cy+dy, size*r, size*r*.55, 0, 0, Math.PI*2); ctx.fill();
           });
         ctx.globalAlpha = 1;
       }
-      drawCloud(W*.22, H*.16, W*.045, 0.62);
-      drawCloud(W*.52, H*.10, W*.038, 0.45);
-      drawCloud(W*.66, H*.20, W*.03, 0.50);
+      drawCloud(W*.22, H*.16, W*.045, isNight ? 0.22 : 0.62);
+      drawCloud(W*.50, H*.10, W*.038, isNight ? 0.18 : 0.45);
+      drawCloud(W*.66, H*.20, W*.03,  isNight ? 0.20 : 0.50);
 
-      // ── 4. Stars in dark upper sky ──
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      _outsideStars.forEach(s => {
-        ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2); ctx.fill();
-      });
-
-      // ── 5. Ground ──
+      // â”€â”€ 6. Ground â”€â”€
+      const groundTopColor  = isDay    ? '#4a9a1e' : isNight ? '#183a08' : '#4a8a1e';
+      const groundMidColor  = isDay    ? '#3a7814' : isNight ? '#102808' : '#3a6e14';
+      const groundBotColor  = isDay    ? '#246010' : isNight ? '#081808' : '#1e4208';
       const grd = ctx.createLinearGradient(0, groundY, 0, H);
-      grd.addColorStop(0,   '#4a8a1e');
-      grd.addColorStop(0.3, '#3a6e14');
-      grd.addColorStop(1,   '#1e4208');
+      grd.addColorStop(0, groundTopColor); grd.addColorStop(0.3, groundMidColor); grd.addColorStop(1, groundBotColor);
       ctx.fillStyle = grd; ctx.fillRect(0, groundY, W, H - groundY);
-      // Warm horizon glow on grass
+      // Horizon glow
+      const fogColor = isDay ? 'rgba(180,240,200,0.12)' : isNight ? 'rgba(0,10,50,0.20)' : 'rgba(255,210,100,0.25)';
       const fog = ctx.createLinearGradient(0, groundY, 0, groundY + H * 0.07);
-      fog.addColorStop(0, 'rgba(255,210,100,0.25)');
-      fog.addColorStop(1, 'rgba(255,210,100,0)');
+      fog.addColorStop(0, fogColor); fog.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = fog; ctx.fillRect(0, groundY, W, H * 0.07);
 
-      // ── 6. Perspective cobblestone path (warm tone, converges at building) ──
+      // â”€â”€ 7. Perspective cobblestone path â”€â”€
       const pathNarrow = 28, pathWide = 54;
-      const pathFarX  = W/2 - pathNarrow/2;
-      const pathNearX = W/2 - pathWide/2;
-      ctx.fillStyle = '#c4a870';
+      const pathFarX  = W/2 - pathNarrow/2, pathNearX = W/2 - pathWide/2;
+      ctx.fillStyle = isDay ? '#c4b890' : isNight ? '#5a5040' : '#c4a870';
       ctx.beginPath();
-      ctx.moveTo(pathFarX, groundY);
-      ctx.lineTo(pathFarX + pathNarrow, groundY);
-      ctx.lineTo(pathNearX + pathWide, H);
-      ctx.lineTo(pathNearX, H);
+      ctx.moveTo(pathFarX, groundY); ctx.lineTo(pathFarX+pathNarrow, groundY);
+      ctx.lineTo(pathNearX+pathWide, H); ctx.lineTo(pathNearX, H);
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = 'rgba(100,80,50,0.30)'; ctx.lineWidth = 0.8;
       for (let t = 0; t <= 1; t += 0.10) {
-        const py = groundY + (H - groundY) * t;
-        const px = pathFarX + (pathNearX - pathFarX) * t;
-        const pw = pathNarrow + (pathWide - pathNarrow) * t;
-        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + pw, py); ctx.stroke();
+        const py = groundY + (H-groundY)*t, pw = pathNarrow+(pathWide-pathNarrow)*t;
+        const px = pathFarX  + (pathNearX-pathFarX)*t;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px+pw, py); ctx.stroke();
       }
 
-      // ── 7. Building layout ──
+      // â”€â”€ 8. Building layout â”€â”€
       const MAX_FLOORS = 3;
       const bW     = Math.min(W * 0.48, 240);
       const bX     = (W - bW) / 2 - 10;
       const floorH = Math.min((H * 0.42) / MAX_FLOORS, 72);
       const bH     = floorH * MAX_FLOORS;
-      const foundH = 11; // foundation height so building doesn't float
+      const foundH = 11;
       const bTop   = groundY - foundH - bH;
       const total  = roomData.unlockedLayers || 1;
+      const sW     = bW * 0.115;
+      const sOY    = sW  * 0.44;
 
-      // Cabinet-projection offsets (3D depth)
-      const sW  = bW * 0.115;
-      const sOY = sW  * 0.44;
-
-      // ── 8. Drop shadow on ground ──
-      ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 16;
-      ctx.fillStyle   = 'rgba(0,0,0,0.25)';
-      ctx.fillRect(bX + 10, groundY, bW + sW - 20, 10);
+      // Drop shadow
+      ctx.shadowColor = isNight ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur  = 16;
+      ctx.fillStyle   = 'rgba(0,0,0,0.22)';
+      ctx.fillRect(bX+10, groundY, bW+sW-20, 10);
       ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 
-      // ── 9a. Building right side face (3D depth) ──
-      const sTF = { x: bX + bW,      y: bTop };
-      const sTB = { x: bX + bW + sW, y: bTop - sOY };
-      const sBF = { x: bX + bW,      y: bTop + bH };
-      const sBB = { x: bX + bW + sW, y: bTop + bH - sOY };
+      // â”€â”€ 9a. Building right side face â”€â”€
       ctx.fillStyle = 'rgba(80,45,15,0.55)';
       ctx.beginPath();
-      ctx.moveTo(sTF.x, sTF.y); ctx.lineTo(sTB.x, sTB.y);
-      ctx.lineTo(sBB.x, sBB.y); ctx.lineTo(sBF.x, sBF.y);
+      ctx.moveTo(bX+bW, bTop); ctx.lineTo(bX+bW+sW, bTop-sOY);
+      ctx.lineTo(bX+bW+sW, bTop+bH-sOY); ctx.lineTo(bX+bW, bTop+bH);
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = 'rgba(80,40,10,0.5)'; ctx.lineWidth = 1;
       for (let fi = 1; fi < MAX_FLOORS; fi++) {
@@ -1811,25 +1862,27 @@
         ctx.beginPath(); ctx.moveTo(bX+bW, fy); ctx.lineTo(bX+bW+sW, fy-sOY); ctx.stroke();
       }
 
-      // ── 9b. Front face — each floor ──
+      // â”€â”€ 9b. Front face â€” each floor â”€â”€
+      // Window glass color changes with time of day
+      const winLight1 = isNight ? 'rgba(255,235,170,0.90)' : isDay ? 'rgba(200,230,255,0.60)' : 'rgba(255,240,180,0.80)';
+      const winLight2 = isNight ? 'rgba(255,195,80,0.70)'  : isDay ? 'rgba(160,210,255,0.40)' : 'rgba(255,200,100,0.60)';
+
       for (let i = 1; i <= MAX_FLOORS; i++) {
         const fi        = MAX_FLOORS - i;
         const fy        = bTop + fi * floorH;
         const unlocked  = i <= total;
         const isCurrent = i === currentLayer;
         const ld        = (roomData.layerData || {})[i] || {};
-        const wallColor = unlocked
-          ? getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i))
-          : '#5a4060';
+        const wallColor = unlocked ? getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i)) : '#5a4060';
 
         ctx.fillStyle = wallColor; ctx.fillRect(bX, fy, bW, floorH);
         if (!unlocked) {
           ctx.strokeStyle = 'rgba(200,160,255,0.08)'; ctx.lineWidth = 0.7;
-          for (let lx = -floorH; lx < bW + floorH; lx += 14) {
+          for (let lx = -floorH; lx < bW+floorH; lx += 14) {
             ctx.beginPath(); ctx.moveTo(bX+lx, fy); ctx.lineTo(bX+lx+floorH, fy+floorH); ctx.stroke();
           }
         } else {
-          const tex = ctx.createLinearGradient(bX, fy, bX + bW, fy + floorH);
+          const tex = ctx.createLinearGradient(bX, fy, bX+bW, fy+floorH);
           tex.addColorStop(0,   'rgba(255,255,255,0.13)');
           tex.addColorStop(0.5, 'rgba(255,255,255,0)');
           tex.addColorStop(1,   'rgba(0,0,0,0.07)');
@@ -1837,24 +1890,17 @@
         }
         ctx.strokeStyle = (isCurrent && unlocked) ? '#f7c97e' : 'rgba(130,80,30,0.5)';
         ctx.lineWidth   = (isCurrent && unlocked) ? 2.5 : 1;
-        ctx.strokeRect(
-          bX + (isCurrent ? 1.25 : 0), fy + (isCurrent ? 1.25 : 0),
-          bW - (isCurrent ? 2.5  : 0), floorH - (isCurrent ? 2.5 : 0)
-        );
+        ctx.strokeRect(bX+(isCurrent?1.25:0), fy+(isCurrent?1.25:0), bW-(isCurrent?2.5:0), floorH-(isCurrent?2.5:0));
 
-        // Windows with warm glow
         const winW = bW * 0.15, winH = floorH * 0.52;
         const winY = fy + (floorH - winH) * 0.40;
         [bX + bW * 0.16, bX + bW * 0.60].forEach(wx => {
           if (unlocked) {
-            // Sill
             ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(wx-2, winY+winH, winW+4, 4);
-            // Warm light glass
             const wg = ctx.createLinearGradient(wx, winY, wx+winW, winY+winH);
-            wg.addColorStop(0, 'rgba(255,240,180,0.80)');
-            wg.addColorStop(1, 'rgba(255,200,100,0.60)');
+            wg.addColorStop(0, winLight1); wg.addColorStop(1, winLight2);
             ctx.fillStyle = wg; ctx.fillRect(wx, winY, winW, winH);
-            ctx.fillStyle = 'rgba(255,245,200,0.22)';
+            ctx.fillStyle = 'rgba(255,245,200,0.20)';
             ctx.fillRect(wx+2, winY+2, winW-4, winH-4);
             ctx.strokeStyle = '#7a5830'; ctx.lineWidth = 1.5;
             ctx.strokeRect(wx, winY, winW, winH);
@@ -1863,16 +1909,16 @@
             ctx.beginPath(); ctx.moveTo(wx, winY+winH/2); ctx.lineTo(wx+winW, winY+winH/2); ctx.stroke();
             ctx.fillStyle = 'rgba(255,255,255,0.22)';
             ctx.fillRect(wx+2, winY+2, winW*0.36, winH*0.36);
-            // Flower box below window
-            ctx.fillStyle = '#6a3a18';
-            ctx.fillRect(wx-3, winY+winH+4, winW+6, 6);
-            const fc = ['#ff5050','#ff9020','#ffd020','#ff50b0','#9060ff'];
-            for (let f = 0; f < 4; f++) {
-              ctx.fillStyle = fc[(i * 3 + f) % fc.length];
-              ctx.beginPath(); ctx.arc(wx + 2 + f*(winW/3.3), winY+winH+4, 3, 0, Math.PI*2); ctx.fill();
+            // Flower boxes (only in non-night)
+            if (!isNight) {
+              ctx.fillStyle = '#6a3a18'; ctx.fillRect(wx-3, winY+winH+4, winW+6, 6);
+              const fc = ['#ff5050','#ff9020','#ffd020','#ff50b0','#9060ff'];
+              for (let f = 0; f < 4; f++) {
+                ctx.fillStyle = fc[(i * 3 + f) % fc.length];
+                ctx.beginPath(); ctx.arc(wx+2+f*(winW/3.3), winY+winH+4, 3, 0, Math.PI*2); ctx.fill();
+              }
+              ctx.fillStyle = '#2a6a10'; ctx.fillRect(wx-1, winY+winH+3, winW+2, 2);
             }
-            ctx.fillStyle = '#2a6a10';
-            ctx.fillRect(wx-1, winY+winH+3, winW+2, 2);
           } else {
             ctx.fillStyle = 'rgba(40,25,50,0.75)'; ctx.fillRect(wx, winY, winW, winH);
             ctx.strokeStyle = 'rgba(160,110,200,0.4)'; ctx.lineWidth = 1;
@@ -1884,164 +1930,168 @@
         ctx.textAlign = 'center'; ctx.textBaseline = 'top';
         if (unlocked) {
           ctx.fillStyle = 'rgba(80,40,10,0.80)'; ctx.font = 'bold 11px sans-serif';
-          ctx.fillText(isCurrent ? '★ Floor ' + i : 'Floor ' + i, bX + bW/2, fy + floorH - 15);
+          ctx.fillText(isCurrent ? 'â˜… Floor ' + i : 'Floor ' + i, bX+bW/2, fy+floorH-15);
         } else {
           ctx.fillStyle = 'rgba(220,180,240,0.85)'; ctx.font = '10px sans-serif';
           const UNLOCK_COST = { 2: 10000, 3: 20000 };
-          ctx.fillText('🔒 ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW/2, fy + floorH - 15);
+          ctx.fillText('ðŸ”’ ' + (UNLOCK_COST[i] || '') + ' coins', bX+bW/2, fy+floorH-15);
         }
         ctx.textBaseline = 'alphabetic';
         _outsideFloorRects[i] = { x: bX, y: fy, w: bW, h: floorH, unlocked };
       }
 
-      // ── 10. Stone foundation (anchors building to ground) ──
-      const foundGrad = ctx.createLinearGradient(0, groundY - foundH, 0, groundY + 2);
-      foundGrad.addColorStop(0, '#a09070'); foundGrad.addColorStop(1, '#6a5840');
-      ctx.fillStyle = foundGrad;
-      ctx.fillRect(bX - 4, groundY - foundH, bW + 8, foundH + 3);
-      // Foundation side
-      ctx.fillStyle = '#5a4830';
+      // â”€â”€ 10. Stone foundation â”€â”€
+      const foundGrad = ctx.createLinearGradient(0, groundY-foundH, 0, groundY+2);
+      foundGrad.addColorStop(0, isNight ? '#6a6050' : '#a09070');
+      foundGrad.addColorStop(1, isNight ? '#3a3020' : '#6a5840');
+      ctx.fillStyle = foundGrad; ctx.fillRect(bX-4, groundY-foundH, bW+8, foundH+3);
+      ctx.fillStyle = isNight ? '#2a2018' : '#5a4830';
       ctx.beginPath();
       ctx.moveTo(bX+bW+4, groundY-foundH); ctx.lineTo(bX+bW+sW+4, groundY-foundH-sOY);
       ctx.lineTo(bX+bW+sW+4, groundY+3-sOY); ctx.lineTo(bX+bW+4, groundY+3);
       ctx.closePath(); ctx.fill();
-      // Stone joint lines
       ctx.strokeStyle = 'rgba(80,60,35,0.40)'; ctx.lineWidth = 0.7;
-      for (let fx = bX + 20; fx < bX + bW; fx += 26) {
+      for (let fx = bX+20; fx < bX+bW; fx += 26) {
         ctx.beginPath(); ctx.moveTo(fx, groundY-foundH); ctx.lineTo(fx, groundY+3); ctx.stroke();
       }
 
-      // ── 11. 3D terracotta hipped roof ──
-      const roofBaseL = bX - 14,  roofBaseR = bX + bW + 14;
-      const roofPeakX = bX + bW/2, roofPeakY = bTop - bW * 0.24;
-      const bkPeakX   = roofPeakX + sW, bkPeakY  = roofPeakY - sOY;
-      const bkBaseRX  = roofBaseR + sW, bkBaseRY  = bTop - sOY;
-      // Right face (darker)
-      ctx.fillStyle = '#7a4010';
+      // â”€â”€ 11. 3D terracotta hipped roof â”€â”€
+      const roofBaseL = bX-14, roofBaseR = bX+bW+14;
+      const roofPeakX = bX + bW/2, roofPeakY = bTop - bW*0.24;
+      const bkPeakX   = roofPeakX+sW, bkPeakY  = roofPeakY-sOY;
+      const bkBaseRX  = roofBaseR+sW,  bkBaseRY = bTop-sOY;
+      ctx.fillStyle = isNight ? '#4a2808' : '#7a4010';
       ctx.beginPath();
       ctx.moveTo(roofBaseR, bTop); ctx.lineTo(bkBaseRX, bkBaseRY);
       ctx.lineTo(bkPeakX, bkPeakY); ctx.lineTo(roofPeakX, roofPeakY);
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1; ctx.stroke();
-      // Front face
       const roofG = ctx.createLinearGradient(bX, bTop, roofPeakX, roofPeakY);
-      roofG.addColorStop(0, '#d46030'); roofG.addColorStop(0.5, '#b04820'); roofG.addColorStop(1, '#8a3010');
+      roofG.addColorStop(0, isNight ? '#6a3018' : '#d46030');
+      roofG.addColorStop(0.5, isNight ? '#4a1e0c' : '#b04820');
+      roofG.addColorStop(1, isNight ? '#2e1008' : '#8a3010');
       ctx.fillStyle = roofG;
       ctx.beginPath();
       ctx.moveTo(roofBaseL, bTop); ctx.lineTo(roofPeakX, roofPeakY); ctx.lineTo(roofBaseR, bTop);
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1; ctx.stroke();
-      // Tile shadow lines
+      // Tile lines
       ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.8;
       for (let t = 0.15; t < 0.9; t += 0.18) {
-        const ty = roofPeakY + (bTop - roofPeakY) * t;
-        const tl = roofBaseL + (roofPeakX - roofBaseL) * t;
-        const tr = roofBaseR - (roofBaseR  - roofPeakX) * t;
-        ctx.beginPath(); ctx.moveTo(tl, ty); ctx.lineTo(tr, ty); ctx.stroke();
+        const ty = roofPeakY + (bTop-roofPeakY)*t;
+        ctx.beginPath();
+        ctx.moveTo(roofBaseL+(roofPeakX-roofBaseL)*t, ty);
+        ctx.lineTo(roofBaseR-(roofBaseR-roofPeakX)*t, ty); ctx.stroke();
       }
-      // Ridge
       ctx.strokeStyle = '#6a2808'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(roofPeakX, roofPeakY); ctx.lineTo(bkPeakX, bkPeakY); ctx.stroke();
 
-      // ── 12. 3D Chimney ──
-      const chimFX = bX + bW * 0.72, chimFY = bTop - bH * 0.04;
-      const chimBX = chimFX + sW * 0.5, chimBY = chimFY - sOY * 0.5;
-      ctx.fillStyle = '#c87840';
-      ctx.fillRect(chimFX, chimFY - 20, 12, 24);
-      ctx.fillStyle = '#a05828';
+      // â”€â”€ 12. 3D Chimney â”€â”€
+      const chimFX = bX + bW*0.72, chimFY = bTop - bH*0.04;
+      const chimBX = chimFX + sW*0.5, chimBY = chimFY - sOY*0.5;
+      ctx.fillStyle = isNight ? '#7a5028' : '#c87840';
+      ctx.fillRect(chimFX, chimFY-20, 12, 24);
+      ctx.fillStyle = isNight ? '#5a3818' : '#a05828';
       ctx.beginPath();
       ctx.moveTo(chimFX+12, chimFY-20); ctx.lineTo(chimBX+12, chimBY-20);
       ctx.lineTo(chimBX+12, chimBY+4);  ctx.lineTo(chimFX+12, chimFY+4);
       ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#7a3e18';
+      ctx.fillStyle = isNight ? '#3a2010' : '#7a3e18';
       ctx.fillRect(chimFX-2, chimFY-22, 16, 4);
       for (let sp = 0; sp < 3; sp++) {
-        ctx.fillStyle = `rgba(255,210,170,${0.28 - sp*0.08})`;
+        ctx.fillStyle = `rgba(220,210,200,${0.28 - sp*0.08})`;
         ctx.beginPath(); ctx.arc(chimFX+6+sp*2, chimFY-26-sp*7, 4+sp*2, 0, Math.PI*2); ctx.fill();
       }
 
-      // ── 13. Deciduous trees (round canopy, warm autumn colors) ──
+      // â”€â”€ 13. Trees â€” round canopy, warm autumn vs green by time â”€â”€
       function drawCottageTree(tx, ty, size, leafColor) {
         ctx.fillStyle = 'rgba(0,0,0,0.15)';
         ctx.beginPath(); ctx.ellipse(tx+5, ty, size*.5, size*.12, 0, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#5c3a14';
+        ctx.fillStyle = isNight ? '#2e1a08' : '#5c3a14';
         ctx.fillRect(tx-6, ty-size*.38, 12, size*.38);
         const cg = ctx.createRadialGradient(tx, ty-size*.55, 0, tx, ty-size*.4, size*.55);
         cg.addColorStop(0, leafColor); cg.addColorStop(0.6, leafColor); cg.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = cg;
         ctx.beginPath(); ctx.arc(tx, ty-size*.45, size*.55, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,200,0.12)';
-        ctx.beginPath(); ctx.arc(tx-size*.18, ty-size*.62, size*.28, 0, Math.PI*2); ctx.fill();
+        if (!isNight) {
+          ctx.fillStyle = 'rgba(255,255,200,0.12)';
+          ctx.beginPath(); ctx.arc(tx-size*.18, ty-size*.62, size*.28, 0, Math.PI*2); ctx.fill();
+        }
       }
+      const leaf1 = isDay ? '#408020' : isNight ? '#1a3008' : '#c8801e';
+      const leaf2 = isDay ? '#308018' : isNight ? '#162806' : '#8ab820';
       const treeH = H * 0.22;
-      drawCottageTree(W*.10, groundY, treeH, '#c8801e');   // warm autumn orange
-      drawCottageTree(W*.90, groundY, treeH*.88, '#8ab820'); // fresh green
+      drawCottageTree(W*.10, groundY, treeH, leaf1);
+      drawCottageTree(W*.90, groundY, treeH*.88, leaf2);
 
-      // ── 14. Picket fence flanking the path ──
+      // â”€â”€ 14. Picket fence â”€â”€
       function drawFence(fx, fy, fW) {
         if (fW < 16) return;
-        ctx.fillStyle = '#f5f0e0';
+        ctx.fillStyle = isNight ? '#bfb898' : '#f5f0e0';
         const posts = Math.max(2, Math.floor(fW / 14));
         for (let p = 0; p < posts; p++) {
           const px = fx + p * (fW / (posts - 1 || 1));
-          ctx.fillRect(px - 1.5, fy - 22, 3, 26);
-          ctx.beginPath(); ctx.moveTo(px - 1.5, fy - 22);
-          ctx.lineTo(px, fy - 26); ctx.lineTo(px + 1.5, fy - 22);
+          ctx.fillRect(px-1.5, fy-22, 3, 26);
+          ctx.beginPath(); ctx.moveTo(px-1.5, fy-22);
+          ctx.lineTo(px, fy-26); ctx.lineTo(px+1.5, fy-22);
           ctx.closePath(); ctx.fill();
         }
-        ctx.fillRect(fx, fy - 16, fW, 2.5);
-        ctx.fillRect(fx, fy - 8,  fW, 2.5);
+        ctx.fillRect(fx, fy-16, fW, 2.5); ctx.fillRect(fx, fy-8, fW, 2.5);
       }
-      const fenceY   = groundY - foundH;
-      const fenceWL  = pathFarX - bX - 8;
-      const fenceWR  = (bX + bW) - (pathFarX + pathNarrow) - 8;
-      drawFence(bX + 4,                    fenceY, fenceWL);
-      drawFence(pathFarX + pathNarrow + 4, fenceY, fenceWR);
+      const fenceY  = groundY - foundH;
+      const fenceWL = pathFarX - bX - 8;
+      const fenceWR = (bX+bW) - (pathFarX+pathNarrow) - 8;
+      drawFence(bX+4,                    fenceY, fenceWL);
+      drawFence(pathFarX+pathNarrow+4,   fenceY, fenceWR);
 
-      // ── 15. Colorful flower bed at building base ──
-      const flowerY = groundY - foundH - 1;
-      const fColors  = ['#ff5060','#ff8020','#ffe020','#e040fb','#40c0ff','#80ff80'];
-      for (let f = 0; f < 16; f++) {
-        const fx = bX + 6 + f * (bW / 16);
-        ctx.fillStyle = '#3a8a10'; ctx.fillRect(fx+1, flowerY - 10, 2, 10);
-        ctx.fillStyle = fColors[f % fColors.length];
-        ctx.beginPath(); ctx.arc(fx+2, flowerY - 11, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ffff80';
-        ctx.beginPath(); ctx.arc(fx+2, flowerY - 11, 1.5, 0, Math.PI*2); ctx.fill();
+      // â”€â”€ 15. Flower bed (suppress at night) â”€â”€
+      if (!isNight) {
+        const flowerY  = groundY - foundH - 1;
+        const fColors  = ['#ff5060','#ff8020','#ffe020','#e040fb','#40c0ff','#80ff80'];
+        for (let f = 0; f < 16; f++) {
+          const fx = bX + 6 + f * (bW / 16);
+          ctx.fillStyle = '#3a8a10'; ctx.fillRect(fx+1, flowerY-10, 2, 10);
+          ctx.fillStyle = fColors[f % fColors.length];
+          ctx.beginPath(); ctx.arc(fx+2, flowerY-11, 4, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#ffff80';
+          ctx.beginPath(); ctx.arc(fx+2, flowerY-11, 1.5, 0, Math.PI*2); ctx.fill();
+        }
       }
 
-      // ── 16. Lamp post near path ──
-      const lampX = pathFarX - 22;
+      // â”€â”€ 16. Lamp post (always on, glows brighter at night) â”€â”€
+      const lampX    = pathFarX - 22;
+      const lampGlow = isNight ? 0.55 : isDay ? 0.12 : 0.32;
       ctx.strokeStyle = '#c8c0a0'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(lampX, groundY); ctx.lineTo(lampX, groundY - 58); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lampX, groundY); ctx.lineTo(lampX, groundY-58); ctx.stroke();
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(lampX, groundY - 58);
-      ctx.quadraticCurveTo(lampX, groundY - 70, lampX + 16, groundY - 70); ctx.stroke();
+      ctx.moveTo(lampX, groundY-58);
+      ctx.quadraticCurveTo(lampX, groundY-70, lampX+16, groundY-70); ctx.stroke();
       ctx.fillStyle = '#e0d080';
       ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 6, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#fff8a0';
       ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 3.5, 0, Math.PI*2); ctx.fill();
-      const glowRad = ctx.createRadialGradient(lampX+16, groundY-70, 0, lampX+16, groundY-70, 32);
-      glowRad.addColorStop(0,   'rgba(255,240,150,0.32)');
-      glowRad.addColorStop(1,   'rgba(255,240,150,0)');
+      const glowRad = ctx.createRadialGradient(lampX+16, groundY-70, 0, lampX+16, groundY-70, isNight ? 45 : 28);
+      glowRad.addColorStop(0, `rgba(255,240,150,${lampGlow})`);
+      glowRad.addColorStop(1,  'rgba(255,240,150,0)');
       ctx.fillStyle = glowRad;
-      ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 32, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(lampX+16, groundY-70, isNight ? 45 : 28, 0, Math.PI*2); ctx.fill();
 
-      // ── 17. Front door ──
-      const doorW = bW * 0.13, doorH = floorH * 0.82;
+      // â”€â”€ 17. Front door â”€â”€
+      const doorW = bW*0.13, doorH = floorH*0.82;
       const doorX = bX + bW/2 - doorW/2;
       const doorY = groundY - foundH - doorH;
-      ctx.fillStyle = '#5a3a14';
-      ctx.fillRect(doorX-4, doorY+doorH*0.08, doorW+8, doorH*0.92 + foundH);
-      ctx.fillStyle = '#3a2208';
+      ctx.fillStyle = isNight ? '#2e1808' : '#5a3a14';
+      ctx.fillRect(doorX-4, doorY+doorH*0.08, doorW+8, doorH*0.92+foundH);
+      ctx.fillStyle = isNight ? '#1a0e04' : '#3a2208';
       ctx.fillRect(doorX+doorW+4, doorY+doorH*0.08, 5, doorH*0.92);
       const dg = ctx.createLinearGradient(doorX, doorY, doorX+doorW, doorY+doorH);
-      dg.addColorStop(0, '#a06040'); dg.addColorStop(1, '#6a3820');
+      dg.addColorStop(0, isNight ? '#604030' : '#a06040');
+      dg.addColorStop(1, isNight ? '#3a2010' : '#6a3820');
       ctx.fillStyle = dg; ctx.fillRect(doorX, doorY+doorH*0.08, doorW, doorH*0.92);
-      ctx.fillStyle = '#804020';
+      ctx.fillStyle = isNight ? '#4a2810' : '#804020';
       ctx.beginPath(); ctx.arc(doorX+doorW/2, doorY+doorH*0.08, doorW/2, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#4a2810';
+      ctx.fillStyle = isNight ? '#2a1608' : '#4a2810';
       ctx.beginPath(); ctx.arc(doorX+doorW/2+4, doorY+doorH*0.08, doorW/2, Math.PI, 0); ctx.fill();
       ctx.strokeStyle = 'rgba(200,120,60,0.5)'; ctx.lineWidth = 1;
       ctx.strokeRect(doorX+3, doorY+doorH*0.15, doorW-6, doorH*0.30);
@@ -2049,7 +2099,24 @@
       ctx.fillStyle = '#f0c040';
       ctx.beginPath(); ctx.arc(doorX+doorW*0.72, doorY+doorH*0.54, 3.5, 0, Math.PI*2); ctx.fill();
 
-      // ── 18. Attach click handler ──
+      // â”€â”€ 18. Night-time window glow halos â”€â”€
+      if (isNight) {
+        for (let i = 1; i <= total; i++) {
+          const fi  = MAX_FLOORS - i;
+          const fy  = bTop + fi * floorH;
+          const winW = bW * 0.15, winH = floorH * 0.52;
+          const winY = fy + (floorH - winH) * 0.40;
+          [bX + bW * 0.16, bX + bW * 0.60].forEach(wx => {
+            const halo = ctx.createRadialGradient(wx+winW/2, winY+winH/2, 0, wx+winW/2, winY+winH/2, winW*1.6);
+            halo.addColorStop(0,   'rgba(255,230,150,0.30)');
+            halo.addColorStop(1,   'rgba(255,200,100,0)');
+            ctx.fillStyle = halo;
+            ctx.beginPath(); ctx.arc(wx+winW/2, winY+winH/2, winW*1.6, 0, Math.PI*2); ctx.fill();
+          });
+        }
+      }
+
+      // â”€â”€ 19. Attach click handler â”€â”€
       _attachOutsideClickHandler();
     }
 
@@ -2068,7 +2135,7 @@
               enterLayer(Number(fi));
             } else {
               const ownRoom = viewingUid === currentUid;
-              showToast(ownRoom ? 'Unlock from ⬆ Feed → 🏠 Floors' : 'Floor is locked.', 'error');
+              showToast(ownRoom ? 'Unlock from â¬† Feed â†’ ðŸ  Floors' : 'Floor is locked.', 'error');
             }
             return;
           }
@@ -2102,7 +2169,7 @@
 
     /**
      * Unlocks a new floor layer, deducting coins and initialising the layer's
-     * default wall/window settings. Called from the 🏠 Floors upgrade sub-tab.
+     * default wall/window settings. Called from the ðŸ  Floors upgrade sub-tab.
      */
     async function unlockLayer(n) {
       if (viewingUid !== currentUid) return;
@@ -2113,7 +2180,7 @@
       if ((roomData.unlockedLayers || 1) < n - 1)
         return showToast('Unlock Floor ' + (n - 1) + ' first!', 'error');
       if (roomData.coins < cost)
-        return showToast('Not enough coins! Need ' + cost + ' 🪙', 'error');
+        return showToast('Not enough coins! Need ' + cost + ' ðŸª™', 'error');
       roomData.coins -= cost;
       roomData.unlockedLayers = n;
       // Initialise the new floor with its default wall/window and empty decors
@@ -2129,7 +2196,7 @@
       if (!roomData.ownedWindows.includes(defWin)) roomData.ownedWindows.push(defWin);
       await saveRoom();
       renderAll();
-      showToast('🏠 Floor ' + n + ' unlocked! Tap it to enter.', 'success');
+      showToast('ðŸ  Floor ' + n + ' unlocked! Tap it to enter.', 'success');
     }
 
     function getPlayerName() {
@@ -2180,9 +2247,9 @@
       await userDocRef().set(data, { merge: true });
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Init
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _offlineCoinsCollected = false;
     let _plantCoinInterval = null;
     let _lastLocalSaveTime = 0;
@@ -2205,7 +2272,7 @@
       initDecorDrag();
       initMobileFoodTap();
       // Listen to own room data
-      // Ensure room doc exists and displayName is current — use onSnapshot for reads,
+      // Ensure room doc exists and displayName is current â€” use onSnapshot for reads,
       // only write if needed (avoids redundant .get())
       _unsubRoomSnap = userDocRef().onSnapshot((snap) => {
         // Guard: if currentUid changed mid-flight, ignore stale snapshot
@@ -2229,7 +2296,7 @@
           roomData.ownedDecors = d.ownedDecors ?? [];
           roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
           roomData.ownedWindows = d.ownedWindows ?? ['win_none','win_classic'];
-          // ── Multi-layer: load unlockedLayers + layerData ──
+          // â”€â”€ Multi-layer: load unlockedLayers + layerData â”€â”€
           roomData.unlockedLayers = d.unlockedLayers ?? 1;
           // Build layerData from Firestore; fall back to top-level fields for backward compat
           const rawLayerData = d.layerData ? JSON.parse(JSON.stringify(d.layerData)) : {};
@@ -2312,13 +2379,13 @@
               roomData.lastCoinCollect = Date.now();
               saveRoom();
               setTimeout(() => {
-                showToast('🌱 Your Lv.' + plantLvl + ' ' + (plantDef ? plantDef.name : 'plant') + ' earned ' + earned + ' coins while you were away!', 'success');
+                showToast('ðŸŒ± Your Lv.' + plantLvl + ' ' + (plantDef ? plantDef.name : 'plant') + ' earned ' + earned + ' coins while you were away!', 'success');
               }, 800);
             }
           }
           _roomLoaded = true;
         } else {
-          // New user — create room document
+          // New user â€” create room document
           _roomLoaded = true;
           roomData.displayName = getPlayerName();
           saveRoom();
@@ -2378,16 +2445,16 @@
         roomData.lastCoinCollect = Date.now();
         await saveRoom();
         renderAllDebounced();
-        showToast('🌱 ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins!', 'success');
+        showToast('ðŸŒ± ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins!', 'success');
       }, 5 * 60 * 1000);
 
       // Check daily login reward & achievements on load
       setTimeout(() => { checkDailyOnLogin(); checkAchievements(); }, 1500);
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Render
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _renderAllTimer = null;
     function renderAllDebounced() {
       if (_renderAllTimer) return;
@@ -2451,7 +2518,7 @@
         if (bgc) bgc.dataset.init = '1';
       }
 
-      // Pet — canvas drawn, walks in 2D wander path
+      // Pet â€” canvas drawn, walks in 2D wander path
       const activePets = getActivePets();
       const petKey = activePets.map(p => p.id + ':' + (p.color || '') + ':' + p.type).join(',');
       if (activePets.length) {
@@ -2472,7 +2539,7 @@
         petSlot.innerHTML = '';
       }
 
-      // Plant — canvas drawn, grows per level
+      // Plant â€” canvas drawn, grows per level
       const plantKey = roomData.plant ? (roomData.plant + ':' + (roomData.plantLevels[roomData.plant] || 1)) : '';
       if (roomData.plant) {
         if (plantKey !== _lastPlantKey) {
@@ -2504,10 +2571,10 @@
     }
 
     function renderShop() {
-      // Pet shop — adopt only, no color/equip
+      // Pet shop â€” adopt only, no color/equip
       renderPetShop();
       renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant',
-        '<span style="display:block;font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px">🌱 Only 1 plant at a time — buy a pricier plant to inherit upgrade progress!</span>');
+        '<span style="display:block;font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px">ðŸŒ± Only 1 plant at a time â€” buy a pricier plant to inherit upgrade progress!</span>');
       // Only render decor shop if its sub-panel is visible (avoids 99 canvas preview draws)
       const decorPanel = document.getElementById('decorShopWrap');
       if (decorPanel && decorPanel.classList.contains('active')) renderDecorShop();
@@ -2518,7 +2585,7 @@
       const titleEl = el.previousElementSibling;
       const petCount = roomData.pets.length;
       const activeCount = getActivePets().length;
-      if (titleEl) titleEl.innerHTML = '🐾 Pets <span class="slot-badge">' + petCount + ' adopted</span>';
+      if (titleEl) titleEl.innerHTML = 'ðŸ¾ Pets <span class="slot-badge">' + petCount + ' adopted</span>';
       el.innerHTML = PETS.map(item => {
         const ownedCount = roomData.pets.filter(p => p.type === item.id).length;
         const typeMaxed = ownedCount >= 2; // Max 2 of each type
@@ -2530,7 +2597,7 @@
           (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + ' / 2</div>' : '') +
           '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
           '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
-            (canAfford && !typeMaxed ? '' : 'disabled') + '>🐾 Adopt</button>' +
+            (canAfford && !typeMaxed ? '' : 'disabled') + '>ðŸ¾ Adopt</button>' +
           (typeMaxed
             ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Max 2 ' + item.name + 's adopted</div>'
             : '') +
@@ -2546,7 +2613,7 @@
       const el = document.getElementById(containerId);
       const titleEl = el.previousElementSibling;
       if (titleEl && slotHtml) {
-        titleEl.innerHTML = '🌱 Plants' + slotHtml;
+        titleEl.innerHTML = 'ðŸŒ± Plants' + slotHtml;
       }
       el.innerHTML = items.map(item => {
         const isOwned = owned.includes(item.id);
@@ -2554,7 +2621,7 @@
         const canAfford = roomData.coins >= item.cost;
         let btnHtml = '';
         if (isEquipped) {
-          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>âœ“ In Room</button>' +
             '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="unequipItem(\'' + type + '\',\'' + item.id + '\')">Remove</button>';
         } else if (isOwned) {
           btnHtml = '<button class="shop-btn equip" onclick="equipItem(\'' + type + '\',\'' + item.id + '\')">Place in Room</button>';
@@ -2565,14 +2632,14 @@
         return '<div class="shop-card' + (isEquipped ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          (item.coinRate ? '<div style="font-size:10px;color:#f7c97e;margin:2px 0">' + coinSVG(10) + ' ' + item.coinRate + '/5min × Lv</div>' : '') +
-          (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+          (item.coinRate ? '<div style="font-size:10px;color:#f7c97e;margin:2px 0">' + coinSVG(10) + ' ' + item.coinRate + '/5min Ã— Lv</div>' : '') +
+          (isOwned ? '<div style="font-size:11px;color:#34d399">Owned âœ“</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
     }
 
-    /* ── Shop Preview Drawing ── */
+    /* â”€â”€ Shop Preview Drawing â”€â”€ */
     function drawWallPreview(cvs, wallId) {
       const w = cvs.width = 64, h = cvs.height = 52;
       const ctx = cvs.getContext('2d');
@@ -2662,7 +2729,7 @@
         g.addColorStop(0, '#fce4ec'); g.addColorStop(1, '#f8bbd0');
         ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(240,150,180,0.3)'; ctx.font = '8px sans-serif';
-        for (let i = 0; i < 6; i++) ctx.fillText('🌸', Math.random()*w, Math.random()*h);
+        for (let i = 0; i < 6; i++) ctx.fillText('ðŸŒ¸', Math.random()*w, Math.random()*h);
       } else {
         const g = ctx.createLinearGradient(0, 0, 0, h);
         g.addColorStop(0, '#c8dff0'); g.addColorStop(0.5, '#d6e5ee'); g.addColorStop(1, '#e8ddd0');
@@ -2682,7 +2749,7 @@
       if (winId === 'win_none') {
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
         ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('✕', w / 2, h / 2);
+        ctx.fillText('âœ•', w / 2, h / 2);
         return;
       }
       const cx = w / 2, cy = h / 2;
@@ -2790,7 +2857,7 @@
         ctx.fillStyle = fg; ctx.fillRect(0, h * 0.3, w, h * 0.7);
       }
 
-      // Each decor — mini version
+      // Each decor â€” mini version
       if (decorId === 'clock') {
         const cr = 14;
         ctx.fillStyle = '#f5efe6'; ctx.strokeStyle = '#8B7355'; ctx.lineWidth = 2;
@@ -2936,7 +3003,7 @@
         ctx.fillStyle = '#c8a040'; ctx.beginPath(); ctx.arc(cx, cy + 18, 3, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#8B7355'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(cx, cy + 16); ctx.lineTo(cx, cy + 18); ctx.stroke();
       } else if (decorId === 'macrame') {
-        // Macramé miniature
+        // MacramÃ© miniature
         ctx.fillStyle = '#a08060'; ctx.fillRect(cx - 12, cy - 14, 24, 2);
         ctx.strokeStyle = '#e8dcc8'; ctx.lineWidth = 1.2;
         for (let i = 0; i < 5; i++) {
@@ -2988,7 +3055,7 @@
         const bw = 24, bh = 18, bx = cx - bw / 2, by = cy - bh / 2 + 4;
         ctx.fillStyle = '#d4a06a'; roundRectPath(ctx, bx, by, bw, bh, 2); ctx.fill();
         ctx.fillStyle = '#c49058'; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-        ctx.fillStyle = '#f7c97e'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('★', cx, by + bh / 2 + 3);
+        ctx.fillStyle = '#f7c97e'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('â˜…', cx, by + bh / 2 + 3);
         ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(bx + 6, by - 2, 4, 0, Math.PI * 2); ctx.fill();
       } else if (decorId === 'bookcase') {
         const bw = 28, bh = 36, bx = cx - bw / 2, by = h - 8 - bh;
@@ -3242,7 +3309,7 @@
 
     function _renderDecorCategory(cat) {
       if (cat === 'wallpaper') {
-      // ── Wall Patterns ──
+      // â”€â”€ Wall Patterns â”€â”€
       const wallEl = document.getElementById('wallShop');
       wallEl.innerHTML = WALL_PATTERNS.map(item => {
         const isOwned = roomData.ownedWalls.includes(item.id);
@@ -3250,7 +3317,7 @@
         const canAfford = roomData.coins >= item.cost;
         let btnHtml = '';
         if (isActive) {
-          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ Active</button>';
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>âœ“ Active</button>';
         } else if (isOwned || item.cost === 0) {
           btnHtml = '<button class="shop-btn equip" onclick="equipWall(\'' + item.id + '\')">Use</button>';
         } else {
@@ -3260,14 +3327,14 @@
         return '<div class="shop-card' + (isActive ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<canvas class="shop-preview" data-preview="wall" data-pid="' + item.id + '"></canvas>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned âœ“</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
       wallEl.querySelectorAll('canvas[data-preview="wall"]').forEach(c => _lazyDrawPreview(c, 'wall'));
 
       } else if (cat === 'window') {
-      // ── Windows ──
+      // â”€â”€ Windows â”€â”€
       const winEl = document.getElementById('windowShop');
       winEl.innerHTML = WINDOWS.map(item => {
         const isOwned = roomData.ownedWindows.includes(item.id);
@@ -3275,7 +3342,7 @@
         const canAfford = roomData.coins >= item.cost;
         let btnHtml = '';
         if (isActive) {
-          btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ Active</button>';
+          btnHtml = '<button class="shop-btn equipped-btn" disabled>âœ“ Active</button>';
         } else if (isOwned || item.cost === 0) {
           btnHtml = '<button class="shop-btn equip" onclick="equipWindow(\'' + item.id + '\')">Use</button>';
         } else {
@@ -3285,7 +3352,7 @@
         return '<div class="shop-card' + (isActive ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<canvas class="shop-preview" data-preview="window" data-pid="' + item.id + '"></canvas>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+          (isOwned || item.cost === 0 ? '<div style="font-size:11px;color:#34d399">Owned âœ“</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
           btnHtml + '</div>';
       }).join('');
@@ -3310,7 +3377,7 @@
           const canAfford = roomData.coins >= item.cost;
           let btnHtml = '';
           if (isPlaced) {
-            btnHtml = '<button class="shop-btn equipped-btn" disabled>✓ In Room</button>' +
+            btnHtml = '<button class="shop-btn equipped-btn" disabled>âœ“ In Room</button>' +
               '<button class="shop-btn" style="margin-top:4px;background:rgba(239,68,68,0.2);color:#f87171" onclick="removeDecor(\'' + item.id + '\')">Remove</button>';
           } else if (isOwned) {
             btnHtml = '<button class="shop-btn equip" onclick="placeDecor(\'' + item.id + '\')">Place</button>';
@@ -3321,7 +3388,7 @@
           return '<div class="shop-card' + (isPlaced ? ' equipped' : isOwned ? ' owned' : '') + '">' +
             '<canvas class="shop-preview" data-preview="decor" data-pid="' + item.id + '" data-cat="' + item.category + '"></canvas>' +
             '<div class="shop-name">' + item.name + '</div>' +
-            (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
+            (isOwned ? '<div style="font-size:11px;color:#34d399">Owned âœ“</div>' :
               '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
             btnHtml + '</div>';
         }).join('');
@@ -3344,12 +3411,12 @@
           const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
           const tColor = thirst > 50 ? '#60a5fa' : thirst > 20 ? '#fbbf24' : '#f87171';
           petHtml += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
-            (petDef?.emoji || '🐾') + ' ' + pet.name +
-            ' <span style="color:' + hColor + '">🍖' + Math.round(hunger) + '%</span>' +
-            ' <span style="color:' + tColor + '">💧' + Math.round(thirst) + '%</span></div>';
+            (petDef?.emoji || 'ðŸ¾') + ' ' + pet.name +
+            ' <span style="color:' + hColor + '">ðŸ–' + Math.round(hunger) + '%</span>' +
+            ' <span style="color:' + tColor + '">ðŸ’§' + Math.round(thirst) + '%</span></div>';
         });
         petHtml += '</div>';
-        petHtml += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
+        petHtml += '<div class="shop-section-title">ðŸ– Drag food to your pet!</div>';
         petHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Drag food to pet, or tap food then tap your pet</div>';
         petHtml += '<div class="food-grid">';
         petHtml += FOODS.map(f => {
@@ -3364,7 +3431,7 @@
         petHtml += '</div>';
 
         // Drinks section (restores thirst)
-        petHtml += '<div class="shop-section-title" style="margin-top:12px">💧 Drinks — restore thirst!</div>';
+        petHtml += '<div class="shop-section-title" style="margin-top:12px">ðŸ’§ Drinks â€” restore thirst!</div>';
         petHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Tap drink then tap your pet to hydrate</div>';
         petHtml += '<div class="food-grid">';
         petHtml += DRINKS.map(d => {
@@ -3393,12 +3460,12 @@
           const aff = pet.affection ?? 0;
           const ms = getAffectionTitle(aff);
           toyHtml += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
-            (petDef?.emoji || '🐾') + ' ' + pet.name +
-            ' <span style="color:#ff8aab">♥ ' + aff + '</span>' +
+            (petDef?.emoji || 'ðŸ¾') + ' ' + pet.name +
+            ' <span style="color:#ff8aab">â™¥ ' + aff + '</span>' +
             ' <span style="color:#fbbf24;font-size:10px">' + ms.title + '</span></div>';
         });
         toyHtml += '</div>';
-        toyHtml += '<div class="shop-section-title">🧸 Tap toy then tap your pet!</div>';
+        toyHtml += '<div class="shop-section-title">ðŸ§¸ Tap toy then tap your pet!</div>';
         toyHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Toys increase your pet\'s affection</div>';
         toyHtml += '<div class="food-grid">';
         toyHtml += TOYS.map(t => {
@@ -3406,7 +3473,7 @@
           return '<div class="food-card' + (canAfford ? '' : ' disabled') + '" data-toy="' + t.id + '">' +
             '<span class="food-emoji">' + t.emoji + '</span>' +
             '<div class="food-name">' + t.name + '</div>' +
-            '<div class="food-restore" style="color:#ff8aab">♥+' + t.affection + '</div>' +
+            '<div class="food-restore" style="color:#ff8aab">â™¥+' + t.affection + '</div>' +
             '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + t.cost + '</div>' +
             '</div>';
         }).join('');
@@ -3426,20 +3493,20 @@
         const nextDef = PLANT_LEVELS[lvl];
         const scaledCost = getPlantUpgradeCost(roomData.plant, lvl);
         const coinsPerCycle = lvl * (plantDef ? plantDef.coinRate : 1);
-        plantHtml += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
+        plantHtml += '<div class="shop-section"><div class="shop-section-title">ðŸŒ± ' + (plantDef?.name || 'Plant') + ' â€” Lv.' + lvl + '</div>';
         plantHtml += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
-          '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
+          'ðŸ’° Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
         if (nextDef && scaledCost !== null) {
           const nextCoins = nextDef.level * (plantDef ? plantDef.coinRate : 1);
           plantHtml += '<div class="shop-card" style="text-align:center">' +
-            '<span class="shop-emoji">' + (plantDef?.emoji || '🌱') + '</span>' +
+            '<span class="shop-emoji">' + (plantDef?.emoji || 'ðŸŒ±') + '</span>' +
             '<div class="shop-name">Upgrade to Lv.' + nextDef.level + ' (' + nextDef.label + ')</div>' +
             '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px">Earns ' + nextCoins + ' coins / 5 min</div>' +
             '<div class="shop-price">' + coinSVG(14) + ' ' + scaledCost + '</div>' +
             '<button class="shop-btn upgrade" onclick="upgradePlant()" ' +
             (roomData.coins >= scaledCost ? '' : 'disabled') + '>Upgrade</button></div>';
         } else {
-          plantHtml += '<div style="text-align:center;color:#98e4b0;padding:20px">★ Max Level! ★</div>';
+          plantHtml += '<div style="text-align:center;color:#98e4b0;padding:20px">â˜… Max Level! â˜…</div>';
         }
         plantHtml += '</div>';
       } else {
@@ -3447,51 +3514,51 @@
       }
       plantEl.innerHTML = plantHtml;
 
-      // ── 🏠 Floors / Layers sub-tab ──
+      // â”€â”€ ðŸ  Floors / Layers sub-tab â”€â”€
       const layerEl = document.getElementById('feedLayerContent');
       if (!layerEl) return;
       const UNLOCK_COST = { 2: 10000, 3: 20000 };
       const unlockedLayers = roomData.unlockedLayers || 1;
       let layerHtml = '<div class="shop-section">';
-      layerHtml += '<div class="shop-section-title">🏠 Floors &amp; Layers</div>';
+      layerHtml += '<div class="shop-section-title">ðŸ  Floors &amp; Layers</div>';
       layerHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 12px 12px;text-align:center">' +
         'Unlock new floors for your home! Each floor has its own wall, window, and decor layout.</div>';
-      // Render cards for floors 1–3
+      // Render cards for floors 1â€“3
       for (let i = 1; i <= 3; i++) {
         const unlocked  = i <= unlockedLayers;
         const isCurrent = i === currentLayer;
         const cost      = UNLOCK_COST[i];
-        const label     = i === 1 ? '🏡 Base Floor' : i === 2 ? '🏢 2nd Floor' : '🌟 Top Floor';
+        const label     = i === 1 ? 'ðŸ¡ Base Floor' : i === 2 ? 'ðŸ¢ 2nd Floor' : 'ðŸŒŸ Top Floor';
         const defWall   = getLayerDefaultWall(i).replace('wall_', '');
         layerHtml += '<div class="shop-card" style="text-align:center;' +
           (unlocked ? 'border-color:rgba(247,201,126,0.35)' : '') + '">';
-        layerHtml += '<span class="shop-emoji">' + (i === 1 ? '🏡' : i === 2 ? '🏢' : '🌟') + '</span>';
+        layerHtml += '<span class="shop-emoji">' + (i === 1 ? 'ðŸ¡' : i === 2 ? 'ðŸ¢' : 'ðŸŒŸ') + '</span>';
         layerHtml += '<div class="shop-name">' + label + '</div>';
         if (i === 1) {
           // Base floor is always free and unlocked
-          layerHtml += '<div style="font-size:11px;color:#34d399;margin-bottom:6px">✓ Free — always unlocked</div>';
+          layerHtml += '<div style="font-size:11px;color:#34d399;margin-bottom:6px">âœ“ Free â€” always unlocked</div>';
           if (isCurrent) {
-            layerHtml += '<button class="shop-btn equipped-btn" disabled>✓ Here now</button>';
+            layerHtml += '<button class="shop-btn equipped-btn" disabled>âœ“ Here now</button>';
           } else {
             layerHtml += '<button class="shop-btn equip" onclick="enterLayer(1)">Go to Floor 1</button>';
           }
         } else if (unlocked) {
           layerHtml += '<div style="font-size:11px;color:#34d399;margin-bottom:6px">' +
-            '✓ Unlocked' + (isCurrent ? ' <span style="color:#f7c97e">(Current)</span>' : '') + '</div>';
+            'âœ“ Unlocked' + (isCurrent ? ' <span style="color:#f7c97e">(Current)</span>' : '') + '</div>';
           if (isCurrent) {
-            layerHtml += '<button class="shop-btn equipped-btn" disabled>✓ Here now</button>';
+            layerHtml += '<button class="shop-btn equipped-btn" disabled>âœ“ Here now</button>';
           } else {
             layerHtml += '<button class="shop-btn equip" onclick="enterLayer(' + i + ')">Go to Floor ' + i + '</button>';
           }
         } else {
-          // Locked — show unlock requirements
+          // Locked â€” show unlock requirements
           const prevOk = (i - 1) <= unlockedLayers;
           layerHtml += '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px">' +
             'Unlocks with ' + defWall + ' wall</div>';
           layerHtml += '<div class="shop-price">' + coinSVG(14) + ' ' + cost + '</div>';
           if (prevOk) {
             layerHtml += '<button class="shop-btn buy" onclick="unlockLayer(' + i + ')" ' +
-              (roomData.coins >= cost ? '' : 'disabled') + '>🔓 Unlock Floor ' + i + '</button>';
+              (roomData.coins >= cost ? '' : 'disabled') + '>ðŸ”“ Unlock Floor ' + i + '</button>';
           } else {
             layerHtml += '<button class="shop-btn" disabled>Unlock Floor ' + (i - 1) + ' first</button>';
           }
@@ -3500,7 +3567,7 @@
       }
       // Outside view shortcut
       layerHtml += '<div style="text-align:center;margin-top:4px;padding:0 12px 8px">';
-      layerHtml += '<button class="shop-btn equip" style="width:100%" onclick="goOutside()">🌳 Outside View</button>';
+      layerHtml += '<button class="shop-btn equip" style="width:100%" onclick="goOutside()">ðŸŒ³ Outside View</button>';
       layerHtml += '</div>';
       layerHtml += '</div>';
       layerEl.innerHTML = layerHtml;
@@ -3529,23 +3596,23 @@
           return;
         }
         el.innerHTML = rooms.map(r => {
-          const petEmojis = (r.pets || []).filter(p => p.active).map(p => PETS.find(x => x.id === p.type)?.emoji || '🐾');
+          const petEmojis = (r.pets || []).filter(p => p.active).map(p => PETS.find(x => x.id === p.type)?.emoji || 'ðŸ¾');
           // Fallback for old format
           if (!petEmojis.length) {
-            if (r.pet) petEmojis.push(PETS.find(p => p.id === r.pet)?.emoji || '🐾');
+            if (r.pet) petEmojis.push(PETS.find(p => p.id === r.pet)?.emoji || 'ðŸ¾');
             if (r.pet2) petEmojis.push(PETS.find(p => p.id === r.pet2)?.emoji || '');
           }
-          const plantEmoji = r.plant ? (PLANTS.find(p => p.id === r.plant)?.emoji || '🌱') : '';
+          const plantEmoji = r.plant ? (PLANTS.find(p => p.id === r.plant)?.emoji || 'ðŸŒ±') : '';
           const peekItems = [...petEmojis, plantEmoji].filter(Boolean);
           const dot = r.isOnline ? '<span class="visit-online-dot"></span>' : '<span class="visit-offline-dot"></span>';
           return '<div class="visit-card" onclick="visitRoom(\'' + r.uid + '\')">' +
-            '<span class="visit-avatar">🏠</span>' +
+            '<span class="visit-avatar">ðŸ </span>' +
             '<div class="visit-info">' +
             '<div class="visit-name">' + dot + escapeHtml(r.displayName || 'Anonymous') + '</div>' +
             '<span class="visit-peek">' + (peekItems.length ? peekItems.join(' ') : '<span style="font-size:12px;opacity:0.4">Empty room</span>') + '</span>' +
             '</div>' +
-            '<button class="food-btn" style="font-size:10px;padding:6px 10px;margin-right:6px" onclick="event.stopPropagation();showGiftModal(\'' + r.uid + '\',\'' + escapeHtml(r.displayName || 'Anonymous').replace(/'/g, "\\'") + '\')">🎁</button>' +
-            '<span class="visit-arrow">›</span></div>';
+            '<button class="food-btn" style="font-size:10px;padding:6px 10px;margin-right:6px" onclick="event.stopPropagation();showGiftModal(\'' + r.uid + '\',\'' + escapeHtml(r.displayName || 'Anonymous').replace(/'/g, "\\'") + '\')">ðŸŽ</button>' +
+            '<span class="visit-arrow">â€º</span></div>';
         }).join('');
       }, () => {
         el.innerHTML = '<div class="visit-empty">Failed to load rooms</div>';
@@ -3556,13 +3623,13 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Actions
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     async function buyItem(type, id) {
       if (viewingUid !== currentUid) return;
       if (type === 'pet') {
-        // Adopt a new pet instance (inactive — not placed in room yet)
+        // Adopt a new pet instance (inactive â€” not placed in room yet)
         const petDef = PETS.find(p => p.id === id);
         if (roomData.pets.length >= 10) return showToast('Max 10 pets! Remove one first.', 'error');
         // Per-type limit: max 2 of each pet type
@@ -3648,7 +3715,7 @@
       showToast('Removed from room!', 'success');
     }
 
-    /* ── Pet Swap — swap an owned inactive pet into the room by replacing an active one ── */
+    /* â”€â”€ Pet Swap â€” swap an owned inactive pet into the room by replacing an active one â”€â”€ */
     let _swapNewTypeId = null;
 
     function swapPet(typeId) {
@@ -3670,15 +3737,15 @@
       const activePets = getActivePets();
       listEl.innerHTML = activePets.map(p => {
         const def = PETS.find(d => d.id === p.type);
-        const emoji = def ? def.emoji : '❓';
+        const emoji = def ? def.emoji : 'â“';
         const affTitle = getAffectionTitle(p.affection ?? 0).title;
         return '<div class="swap-pet-card" onclick="confirmSwap(\'' + p.id + '\')">' 
           + '<span class="swap-pet-emoji">' + emoji + '</span>'
           + '<div class="swap-pet-info">'
           + '<div class="swap-pet-name">' + (p.name || def?.name || p.type) + '</div>'
-          + '<div class="swap-pet-stats">♥ ' + (p.affection ?? 0) + ' (' + affTitle + ') · 🍖 ' + (p.hunger ?? 100) + '%</div>'
+          + '<div class="swap-pet-stats">â™¥ ' + (p.affection ?? 0) + ' (' + affTitle + ') Â· ðŸ– ' + (p.hunger ?? 100) + '%</div>'
           + '</div>'
-          + '<span class="swap-pet-arrow">↩</span>'
+          + '<span class="swap-pet-arrow">â†©</span>'
           + '</div>';
       }).join('');
 
@@ -3705,7 +3772,7 @@
       showToast('Swapped! ' + (inDef ? inDef.emoji + ' ' + inDef.name : 'Pet') + ' is now in room.', 'success');
     }
 
-    /* ── Place / Remove pet from room ── */
+    /* â”€â”€ Place / Remove pet from room â”€â”€ */
     async function placePetInRoom(typeId) {
       if (viewingUid !== currentUid) return;
       if (getActivePets().length >= 2) return showToast('Room is full! Remove a pet first or use Swap.', 'error');
@@ -3883,9 +3950,9 @@
       if (newMilestone.min > oldMilestone.min && newMilestone.reward > 0) {
         roomData.coins += newMilestone.reward;
         await saveRoom();
-        showToast('🎉 ' + pet.name + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
+        showToast('ðŸŽ‰ ' + pet.name + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
       } else {
-        showToast(toy.emoji + ' Played with ' + pet.name + '! ♥+' + toy.affection, 'success');
+        showToast(toy.emoji + ' Played with ' + pet.name + '! â™¥+' + toy.affection, 'success');
       }
       updatePetStatusBar();
     }
@@ -3909,7 +3976,7 @@
       e.dataTransfer.effectAllowed = 'move';
     }
 
-    /* ── Mobile tap-to-feed/toy system ── */
+    /* â”€â”€ Mobile tap-to-feed/toy system â”€â”€ */
     let selectedFood = null;
     let selectedToy = null;
     let selectedDrink = null;
@@ -4042,7 +4109,7 @@
       });
     }
 
-    /* ── Decoration drag-to-reposition ── */
+    /* â”€â”€ Decoration drag-to-reposition â”€â”€ */
     // base: true = pos.y is the bottom of the item (hit area extends upward)
     const DECOR_HIT_SIZES = {
       clock: { w: 0.12, h: 0.12 },
@@ -4131,7 +4198,7 @@
       const halfW = hs.w / 2;
       if (mx < p.x - halfW || mx > p.x + halfW) return false;
       if (hs.base) {
-        // pos.y is bottom — hit area extends upward
+        // pos.y is bottom â€” hit area extends upward
         return my >= p.y - hs.h && my <= p.y;
       }
       return my >= p.y - hs.h / 2 && my <= p.y + hs.h / 2;
@@ -4247,7 +4314,7 @@
       document.addEventListener('touchcancel', endDrag);
     }
 
-    /* ── Plant drag-to-reposition ── */
+    /* â”€â”€ Plant drag-to-reposition â”€â”€ */
     let plantDragState = null; // { startX, startY, origLeft, origBottom }
     let plantSaveTimer = null;
 
@@ -4408,9 +4475,9 @@
       initRoom();
     }
 
-    /* ═══════════════════════════════
-       Canvas plant drawing — 30 levels
-       ═══════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       Canvas plant drawing â€” 30 levels
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let plantAnimFrame = null;
     function drawPlant(type, level) {
       cancelAnimationFrame(plantAnimFrame);
@@ -4442,7 +4509,7 @@
       }
     }
 
-    /* ── Helpers ── */
+    /* â”€â”€ Helpers â”€â”€ */
     function _mp(lv,a,b,c,d){return c+(d-c)*Math.max(0,Math.min(1,(lv-a)/(b-a)))}
     function _drawPot(ctx,cx,by){
       ctx.fillStyle='#8B6347';ctx.beginPath();
@@ -4512,11 +4579,11 @@
       r=Math.max(0,Math.min(255,r+Math.round(r*p/100)));g=Math.max(0,Math.min(255,g+Math.round(g*p/100)));
       b=Math.max(0,Math.min(255,b+Math.round(b*p/100)));return'#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');}
 
-    /* ── Seedling 30 levels ── */
+    /* â”€â”€ Seedling 30 levels â”€â”€ */
     function _drawSeedling(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
       if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#7a5a3a');ctx.restore();return;}
-      // ═══ LEVEL 30: ETERNAL GARDEN ═══
+      // â•â•â• LEVEL 30: ETERNAL GARDEN â•â•â•
       if(lv>=30){
         // Ornate emerald pot with gold trim
         ctx.fillStyle='#2a8a4a';ctx.beginPath();ctx.moveTo(cx-15,by-16);ctx.lineTo(cx+15,by-16);ctx.lineTo(cx+12,by);ctx.lineTo(cx-12,by);ctx.closePath();ctx.fill();
@@ -4608,11 +4675,11 @@
       if(lv>=30)_dBird(ctx,cx+8,bY-sH-8,'#8a6a4a');
     }
 
-    /* ── Tulip 30 levels ── */
+    /* â”€â”€ Tulip 30 levels â”€â”€ */
     function _drawTulip(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
       if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#8a6a40');ctx.restore();return;}
-      // ═══ LEVEL 30: ROYAL BOUQUET ═══
+      // â•â•â• LEVEL 30: ROYAL BOUQUET â•â•â•
       if(lv>=30){
         // Crystal silver pot with diamond pattern
         ctx.fillStyle='#a0a8b8';ctx.beginPath();ctx.moveTo(cx-15,by-16);ctx.lineTo(cx+15,by-16);ctx.lineTo(cx+12,by);ctx.lineTo(cx-12,by);ctx.closePath();ctx.fill();
@@ -4696,11 +4763,11 @@
       if(lv>=30)_dBird(ctx,cx-12,12,'#c08040');
     }
 
-    /* ── Sunflower 30 levels ── */
+    /* â”€â”€ Sunflower 30 levels â”€â”€ */
     function _drawSunflower(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
       if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#4a4a4a');ctx.restore();return;}
-      // ═══ LEVEL 30: SOLAR TITAN ═══
+      // â•â•â• LEVEL 30: SOLAR TITAN â•â•â•
       if(lv>=30){
         // Bronze ornate pot
         ctx.fillStyle='#a07840';ctx.beginPath();ctx.moveTo(cx-15,by-16);ctx.lineTo(cx+15,by-16);ctx.lineTo(cx+12,by);ctx.lineTo(cx-12,by);ctx.closePath();ctx.fill();
@@ -4788,11 +4855,11 @@
       if(lv>=30)_dBird(ctx,cx-10,10,'#7a8a5a');
     }
 
-    /* ── Oak Tree 30 levels ── */
+    /* â”€â”€ Oak Tree 30 levels â”€â”€ */
     function _drawTree(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;
       if(lv<=4){_drawPot(ctx,cx,by);ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#6b4226');ctx.restore();return;}
-      // ═══ LEVEL 30: GOLDEN WORLD TREE (completely different) ═══
+      // â•â•â• LEVEL 30: GOLDEN WORLD TREE (completely different) â•â•â•
       if(lv>=30){
         // Golden ornate pot
         ctx.fillStyle='#B8860B';ctx.beginPath();
@@ -4806,7 +4873,7 @@
         ctx.fillStyle='#f5d060';ctx.beginPath();ctx.arc(cx,by-10,1.5,0,Math.PI*2);ctx.fill();
 
         const bY=by-16,tH=62,tW=10;
-        // Golden falling leaves — many
+        // Golden falling leaves â€” many
         const lcs=['#f5d060','#e8c040','#daa830','#ffcc44','#ffe880'];
         for(let i=0;i<8;i++){const lx=cx-20+((t/1200+i*0.35)%1)*40,ly=4+((t/1600+i*0.25)%1)*(H*0.55);
           ctx.save();ctx.translate(lx,ly);ctx.rotate(t/350+i*2);ctx.fillStyle=lcs[i%5];
@@ -4881,7 +4948,7 @@
         ctx.fillStyle='#f0e8d8';ctx.beginPath();ctx.ellipse(9,-tH*0.55-1.5,1.5,2,0.1,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.ellipse(11.5,-tH*0.55-1,1.3,1.8,-0.1,0,Math.PI*2);ctx.fill();
         ctx.restore();
-        // Crown star at tree top — large and pulsing
+        // Crown star at tree top â€” large and pulsing
         ctx.save();ctx.translate(cx,bY-tH-28);
         ctx.fillStyle='rgba(255,220,80,0.15)';ctx.beginPath();ctx.arc(0,0,16,0,Math.PI*2);ctx.fill();
         const sp=0.65+Math.sin(t/500)*0.2;
@@ -4894,7 +4961,7 @@
         ctx.strokeStyle='rgba(255,220,80,'+(sp*0.3)+')';ctx.lineWidth=0.8;
         for(let i=0;i<8;i++){const ra=(i/8)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(ra)*8,Math.sin(ra)*8);ctx.lineTo(Math.cos(ra)*14,Math.sin(ra)*14);ctx.stroke();}
         ctx.restore();
-        // Enhanced owl — large, detailed
+        // Enhanced owl â€” large, detailed
         ctx.save();ctx.translate(cx-12,bY-tH-8);
         // Body
         ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(0,3,6.5,8,0,0,Math.PI*2);ctx.fill();
@@ -4909,7 +4976,7 @@
         // Facial disc
         ctx.fillStyle='#c8b888';ctx.beginPath();ctx.arc(-2.5,-3,2.8,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.arc(2.5,-3,2.8,0,Math.PI*2);ctx.fill();
-        // Eyes — big golden with animated glow
+        // Eyes â€” big golden with animated glow
         ctx.fillStyle='#f0e060';ctx.beginPath();ctx.arc(-2.5,-3,2,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.arc(2.5,-3,2,0,Math.PI*2);ctx.fill();
         const eg=0.35+Math.sin(t/400)*0.2;
@@ -4920,7 +4987,7 @@
         ctx.beginPath();ctx.arc(2.5,-3,0.7,0,Math.PI*2);ctx.fill();
         // Beak
         ctx.fillStyle='#c8a050';ctx.beginPath();ctx.moveTo(-1.2,-0.5);ctx.lineTo(0,2.5);ctx.lineTo(1.2,-0.5);ctx.closePath();ctx.fill();
-        // Ear tufts — tall
+        // Ear tufts â€” tall
         ctx.fillStyle='#7a6a4a';ctx.beginPath();ctx.moveTo(-4,-6);ctx.lineTo(-3.5,-11);ctx.lineTo(-1.5,-6);ctx.closePath();ctx.fill();
         ctx.beginPath();ctx.moveTo(1.5,-6);ctx.lineTo(3.5,-11);ctx.lineTo(4,-6);ctx.closePath();ctx.fill();
         // Chest pattern
@@ -4964,7 +5031,7 @@
           ctx.fillStyle='rgba(255,230,100,'+(fa*0.25)+')';ctx.beginPath();ctx.arc(fx,fy,5,0,Math.PI*2);ctx.fill();}
         return;
       }
-      // ═══ LEVELS 5-29: normal tree ═══
+      // â•â•â• LEVELS 5-29: normal tree â•â•â•
       _drawPot(ctx,cx,by);
       const bY=by-16,tH=_mp(lv,5,30,6,48),tW=_mp(lv,5,30,2,7.5);
       if(lv>=26){const lcs=['#c8a030','#cc6644','#aa4030','#88aa40'];
@@ -4997,11 +5064,11 @@
       if(lv>=24)_dBird(ctx,cx+9,bY-tH*0.73,'#6a5a4a');
     }
 
-    /* ── Cherry Blossom 30 levels ── */
+    /* â”€â”€ Cherry Blossom 30 levels â”€â”€ */
     function _drawCherry(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
       if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#8a4020');ctx.restore();return;}
-      // ═══ LEVEL 30: SAKURA SPIRIT ═══
+      // â•â•â• LEVEL 30: SAKURA SPIRIT â•â•â•
       if(lv>=30){
         // Red lacquer pot with gold trim
         ctx.fillStyle='#8a2020';ctx.beginPath();ctx.moveTo(cx-15,by-16);ctx.lineTo(cx+15,by-16);ctx.lineTo(cx+12,by);ctx.lineTo(cx-12,by);ctx.closePath();ctx.fill();
@@ -5107,11 +5174,11 @@
       if(lv>=29)_dBird(ctx,cx+11,bY-tH*0.5,'#e08040');
     }
 
-    /* ── Cactus 30 levels ── */
+    /* â”€â”€ Cactus 30 levels â”€â”€ */
     function _drawCactus(ctx,lv,t){
       const W=80,H=100,cx=W/2,by=H-4;_drawPot(ctx,cx,by);
       if(lv<=4){ctx.save();ctx.translate(cx,by-16);_drawSeedPhase(ctx,lv,'#2a5a30');ctx.restore();return;}
-      // ═══ LEVEL 30: DESERT EMPEROR ═══
+      // â•â•â• LEVEL 30: DESERT EMPEROR â•â•â•
       if(lv>=30){
         // Turquoise tile pot
         ctx.fillStyle='#308888';ctx.beginPath();ctx.moveTo(cx-15,by-16);ctx.lineTo(cx+15,by-16);ctx.lineTo(cx+12,by);ctx.lineTo(cx-12,by);ctx.closePath();ctx.fill();
@@ -5210,9 +5277,9 @@
       if(lv>=28)_dBird(ctx,cx-cW/2-5,bY-cH*0.55-11,'#c89060');
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Canvas Room Background
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let bgAnimFrame = null;
     const bgClouds = [];
     const bgDust = [];
@@ -5238,9 +5305,9 @@
       ctx.fill();
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Decoration Drawing
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function hasDecor(id) {
       return roomData.placedDecors && roomData.placedDecors.some(d => d.id === id);
     }
@@ -5399,7 +5466,7 @@
     }
 
     function drawWallDecorations(ctx, rw, rh, floorY, t) {
-      // String lights — spans full width, y-position from stored pos
+      // String lights â€” spans full width, y-position from stored pos
       if (hasDecor('stringlights')) {
         ctx.save();
         const pos = getDecorPos('stringlights');
@@ -5875,7 +5942,7 @@
         ctx.restore();
       }
 
-      // Macramé wall hanging
+      // MacramÃ© wall hanging
       if (hasDecor('macrame')) {
         ctx.save();
         const pos = getDecorPos('macrame');
@@ -5993,7 +6060,7 @@
     }
 
     function drawFloorDecorations(ctx, rw, rh, floorY, t) {
-      // Floor lamp — pos.y is base (feet), draws upward
+      // Floor lamp â€” pos.y is base (feet), draws upward
       if (hasDecor('floorlamp')) {
         ctx.save();
         const pos = getDecorPos('floorlamp');
@@ -6090,7 +6157,7 @@
         ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
         ctx.fillStyle = '#f7c97e';
         ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('★', bx + bw / 2, by + bh / 2 + 3);
+        ctx.fillText('â˜…', bx + bw / 2, by + bh / 2 + 3);
         ctx.fillStyle = '#ff6b6b';
         ctx.beginPath(); ctx.arc(bx + 8, by - 2, 5, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#5b9bd5';
@@ -6100,7 +6167,7 @@
         ctx.restore();
       }
 
-      // Bookcase — pos.y is base (bottom), draws upward
+      // Bookcase â€” pos.y is base (bottom), draws upward
       if (hasDecor('bookcase')) {
         ctx.save();
         const pos = getDecorPos('bookcase');
@@ -6714,9 +6781,9 @@
       });
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Canvas Room Background
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function isNightTime() {
       const h = new Date().getHours();
       return h >= 18 || h < 6;
@@ -6959,7 +7026,7 @@
         const skyMid = nightMode ? '#141435' : '#a8d8ea';
         const skyBot = nightMode ? '#0d1a28' : '#c5e8c5';
 
-        /* ── Wall ── */
+        /* â”€â”€ Wall â”€â”€ */
         const wp = roomData.wallPattern || 'wall_default';
         const _wallCK = wp + ':' + rw + ':' + Math.round(floorY);
         if (_wallCK === _bgWallCacheKey && _bgWallCanvas) {
@@ -7077,7 +7144,7 @@
           cg.addColorStop(0, '#fce4ec'); cg.addColorStop(1, '#f8bbd0');
           ctx.fillStyle = cg; ctx.fillRect(0, 0, rw, floorY);
           ctx.font = '14px sans-serif'; ctx.globalAlpha = 0.25;
-          _cherryBlossoms.forEach(b => ctx.fillText('🌸', b.x, b.y));
+          _cherryBlossoms.forEach(b => ctx.fillText('ðŸŒ¸', b.x, b.y));
           ctx.globalAlpha = 1;
         } else {
           // Default wall
@@ -7101,7 +7168,7 @@
         _bgWallCacheKey = _wallCK;
         } // end wall cache miss
 
-        /* ── Window (conditional on style) ── */
+        /* â”€â”€ Window (conditional on style) â”€â”€ */
         const winStyle = roomData.windowStyle || 'win_classic';
         if (winStyle !== 'win_none') {
         let winW, winH, winX, winY;
@@ -7249,7 +7316,7 @@
           ctx.beginPath(); ctx.moveTo(px - pr, py); ctx.lineTo(px + pr, py);
           ctx.moveTo(px, py - pr); ctx.lineTo(px, py + pr); ctx.stroke();
         } else {
-          // Classic / Large / Double — rectangular window
+          // Classic / Large / Double â€” rectangular window
           ctx.fillStyle = 'rgba(0,0,0,0.08)';
           ctx.fillRect(winX - 2, winY + 4, winW + 4, winH + 4);
           ctx.fillStyle = '#8B7355';
@@ -7292,7 +7359,7 @@
           ctx.fillRect(winX - 6, winY + winH, winW + 12, 2);
         }
 
-        /* ── Sunlight / Moonlight beam from window ── */
+        /* â”€â”€ Sunlight / Moonlight beam from window â”€â”€ */
         ctx.save();
         if (nightMode) {
           ctx.globalAlpha = 0.025 + Math.sin(t / 4000) * 0.008;
@@ -7308,16 +7375,16 @@
         ctx.lineTo(winX - rw * 0.05, rh);
         ctx.fill();
         ctx.restore();
-        // ── Weather effects on window ──
+        // â”€â”€ Weather effects on window â”€â”€
         if (weatherParticles.length && typeof winX !== 'undefined') {
           drawWeatherEffects(ctx, rw, rh, winX, winY, winW, winH, t);
         }
         } // end if winStyle !== 'win_none'
 
-        /* ── Wall Decorations (drawn over wall, before baseboard) ── */
+        /* â”€â”€ Wall Decorations (drawn over wall, before baseboard) â”€â”€ */
         drawWallDecorations(ctx, rw, rh, floorY, t);
 
-        /* ── Baseboard + Floor (cached) ── */
+        /* â”€â”€ Baseboard + Floor (cached) â”€â”€ */
         if (!_bgFloorCanvas) {
           _bgFloorCanvas = document.createElement('canvas');
           _bgFloorCanvas.width = rw;
@@ -7361,13 +7428,13 @@
         }
         ctx.drawImage(_bgFloorCanvas, 0, 0);
 
-        /* ── Oval rug (dynamic based on placed rug decor) ── */
+        /* â”€â”€ Oval rug (dynamic based on placed rug decor) â”€â”€ */
         drawRug(ctx, rw, rh, floorY);
 
-        /* ── Floor Decorations ── */
+        /* â”€â”€ Floor Decorations â”€â”€ */
         drawFloorDecorations(ctx, rw, rh, floorY, t);
 
-        /* ── Floating dust motes ── */
+        /* â”€â”€ Floating dust motes â”€â”€ */
         bgDust.forEach(p => {
           const px = p.x * rw + Math.sin(t / 2500 + p.ph) * 18;
           const py = p.y * rh + Math.cos(t / 3500 + p.ph) * 12;
@@ -7376,7 +7443,7 @@
           ctx.beginPath(); ctx.arc(px, py, p.sz, 0, Math.PI * 2); ctx.fill();
         });
 
-        /* ── Night ambient overlay ── */
+        /* â”€â”€ Night ambient overlay â”€â”€ */
         if (nightMode) {
           ctx.save();
           ctx.globalAlpha = 0.18;
@@ -7390,9 +7457,9 @@
       bgAnimFrame = requestAnimationFrame(frame);
     }
 
-    /* ═══════════════════════════════
-       Canvas Pet — 2D wander + drawing
-       ═══════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       Canvas Pet â€” 2D wander + drawing
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let petAnimFrame = null;
     let petStates = {};
     let _selectedPetId = null; // Currently selected pet for status bar
@@ -7445,7 +7512,7 @@
       // Ensure each pet has a state (keyed by instance ID)
       pets.forEach((p, i) => getPetState(p.id, i));
 
-      // Pet click handler — feed/play if item selected, otherwise show status bar
+      // Pet click handler â€” feed/play if item selected, otherwise show status bar
       cvs.onclick = function(e) {
         const rect = cvs.getBoundingClientRect();
         const clickX = (e.clientX - rect.left) / rect.width;
@@ -7486,7 +7553,7 @@
             e.stopPropagation();
             return;
           }
-          // No item selected — toggle status bar
+          // No item selected â€” toggle status bar
           if (_selectedPetId === closestPet.id) {
             closePetStatus();
           } else {
@@ -7668,7 +7735,7 @@
           const affTitle = getAffectionTitle(aff);
           ctx.fillStyle = 'rgba(255,150,180,0.9)';
           ctx.font = Math.round(7 * depthScale) + 'px sans-serif';
-          ctx.fillText('♥ ' + aff + '  ' + affTitle.title, px, barY - 2 * depthScale);
+          ctx.fillText('â™¥ ' + aff + '  ' + affTitle.title, px, barY - 2 * depthScale);
 
           // Selection highlight
           if (_selectedPetId === p.id) {
@@ -7687,7 +7754,7 @@
       petAnimFrame = requestAnimationFrame(frame);
     }
 
-    /* ── Pet Status Bar ── */
+    /* â”€â”€ Pet Status Bar â”€â”€ */
     function showPetStatus(petId) {
       _selectedPetId = petId;
       const bar = document.getElementById('petStatusBar');
@@ -7726,7 +7793,7 @@
       const ms = getAffectionTitle(aff);
       const maxAff = AFFECTION_MILESTONES[AFFECTION_MILESTONES.length - 1].min * 1.5 || 500;
       document.getElementById('petStatusAffection').style.width = Math.min(100, (aff / maxAff) * 100) + '%';
-      document.getElementById('petStatusAffectionVal').textContent = '♥' + aff + ' ' + ms.title;
+      document.getElementById('petStatusAffectionVal').textContent = 'â™¥' + aff + ' ' + ms.title;
 
       // Color dots
       const colorsEl = document.getElementById('petStatusColors');
@@ -7771,11 +7838,11 @@
       ctx.closePath();
     }
 
-    /* ── Action body transforms ── */
+    /* â”€â”€ Action body transforms â”€â”€ */
     function applyActionTransform(ctx, type, action, ap, s, t) {
-      const ease = Math.sin(ap * Math.PI); // 0→1→0 bell curve
+      const ease = Math.sin(ap * Math.PI); // 0â†’1â†’0 bell curve
       switch (action) {
-        // ── Shared-ish poses ──
+        // â”€â”€ Shared-ish poses â”€â”€
         case 'nap': case 'sleep': {
           // Lie down: tilt sideways, squish flat, gentle breathing
           const settle = Math.min(1, ap * 5); // quick settle into pose (first 20%)
@@ -7843,7 +7910,7 @@
         case 'eat':
           ctx.translate(Math.sin(t / 200) * s * 0.01, 0);
           break;
-        // ── New natural actions ──
+        // â”€â”€ New natural actions â”€â”€
         case 'pawlick': {
           const lick = Math.sin(ap * Math.PI * 4) * 0.04;
           ctx.rotate(-0.12 * ease);
@@ -7921,18 +7988,18 @@
       }
     }
 
-    /* ── Action floating effects ── */
+    /* â”€â”€ Action floating effects â”€â”€ */
     function drawActionEffect(ctx, px, py, size, ds, type, action, ap, t) {
       const ease = Math.sin(ap * Math.PI);
       ctx.save();
 
       switch (action) {
         case 'nap': case 'sleep': {
-          // Floating Z's — continuously visible, close to pet head
+          // Floating Z's â€” continuously visible, close to pet head
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           const zCount = 3;
-          const cycle = (t % 3000) / 3000; // 0→1 loop every 3s
+          const cycle = (t % 3000) / 3000; // 0â†’1 loop every 3s
           for (let i = 0; i < zCount; i++) {
             const phase = (cycle + i / zCount) % 1; // staggered
             const zy = py - size * 0.4 - phase * 30 * ds;
@@ -8053,7 +8120,7 @@
           break;
         }
         case 'flop': case 'peek': case 'nosewiggle':
-          break; // Subtle — no extra effect needed
+          break; // Subtle â€” no extra effect needed
         case 'stretch': {
           // Stretch lines
           ctx.strokeStyle = 'rgba(255,220,150,0.3)';
@@ -8103,7 +8170,7 @@
             ctx.fillStyle = '#ff6b8a';
             ctx.font = Math.round(11 * ds) + 'px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('♥', px + 15 * ds, py - size * 1.4 - (ap - 0.3) * 25 * ds);
+            ctx.fillText('â™¥', px + 15 * ds, py - size * 1.4 - (ap - 0.3) * 25 * ds);
           }
           break;
         }
@@ -8206,7 +8273,7 @@
       ctx.fill();
     }
 
-    /* ── Draw pet by type ── */
+    /* â”€â”€ Draw pet by type â”€â”€ */
     function drawPetCanvas(ctx, type, size, legPhase, moving, hunger, t, action, ap, colorKey) {
       const pal = getPetPalette(type, colorKey);
       switch (type) {
@@ -8222,9 +8289,9 @@
 
     /* Pet drawing functions loaded from pets/*.js */
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        Tabs
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
@@ -8285,9 +8352,9 @@
     panelToggle.addEventListener('click', () => {
       const collapsed = panelWrap.classList.toggle('collapsed');
       if (isMobile()) {
-        panelToggle.textContent = collapsed ? '▲' : '▼';
+        panelToggle.textContent = collapsed ? 'â–²' : 'â–¼';
       } else {
-        panelToggle.textContent = collapsed ? '❯' : '❮';
+        panelToggle.textContent = collapsed ? 'â¯' : 'â®';
       }
       // Re-render room canvas after transition completes
       setTimeout(() => {
@@ -8305,11 +8372,11 @@
       }, 320);
     });
     // Set initial toggle icon based on viewport
-    if (isMobile()) panelToggle.textContent = '▼';
+    if (isMobile()) panelToggle.textContent = 'â–¼';
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        1. DAILY LOGIN REWARDS
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function getTodayStr() {
       const d = new Date();
       return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -8322,7 +8389,7 @@
       const today = getTodayStr();
       const alreadyClaimed = roomData.lastLoginDay === today;
       const streak = roomData.loginStreak || 0;
-      document.getElementById('dailyStreak').textContent = '🔥 Current streak: ' + streak + ' day' + (streak !== 1 ? 's' : '');
+      document.getElementById('dailyStreak').textContent = 'ðŸ”¥ Current streak: ' + streak + ' day' + (streak !== 1 ? 's' : '');
       let daysHtml = '';
       DAILY_REWARDS.forEach((r, i) => {
         const dayNum = i + 1;
@@ -8330,12 +8397,12 @@
         if (dayNum <= streak && alreadyClaimed) cls = 'claimed';
         else if (dayNum === streak + 1 && !alreadyClaimed) cls = 'today';
         else if (dayNum <= streak) cls = 'claimed';
-        daysHtml += '<div class="daily-day ' + cls + '"><span class="dd-num">' + r.label + '</span><span class="dd-coins">💰' + r.coins + '</span></div>';
+        daysHtml += '<div class="daily-day ' + cls + '"><span class="dd-num">' + r.label + '</span><span class="dd-coins">ðŸ’°' + r.coins + '</span></div>';
       });
       document.getElementById('dailyDays').innerHTML = daysHtml;
       const btn = document.getElementById('dailyClaimBtn');
       btn.disabled = alreadyClaimed;
-      btn.textContent = alreadyClaimed ? '✓ Claimed Today' : 'Claim Today\'s Reward!';
+      btn.textContent = alreadyClaimed ? 'âœ“ Claimed Today' : 'Claim Today\'s Reward!';
     }
 
     document.getElementById('dailyClaimBtn').addEventListener('click', async () => {
@@ -8351,7 +8418,7 @@
       roomData.lastLoginDay = today;
       roomData.coins += reward.coins;
       await saveRoom();
-      showToast('🎁 Claimed ' + reward.coins + ' coins! Streak: ' + newStreak, 'success');
+      showToast('ðŸŽ Claimed ' + reward.coins + ' coins! Streak: ' + newStreak, 'success');
       checkAchievements();
       showDailyReward();
     });
@@ -8368,9 +8435,9 @@
       }
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        2. ACHIEVEMENTS
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function showAchievements() {
       document.getElementById('settingsOverlay').classList.add('hidden');
       const ov = document.getElementById('achieveOverlay');
@@ -8382,7 +8449,7 @@
         html += '<div class="achieve-item ' + (isUnlocked ? 'unlocked' : '') + '">' +
           '<div class="achieve-icon">' + a.icon + '</div>' +
           '<div class="achieve-info"><div class="achieve-name">' + a.name + '</div><div class="achieve-desc">' + a.desc + '</div></div>' +
-          '<div class="achieve-status">' + (isUnlocked ? '✓ Unlocked' : '🔒') + '</div></div>';
+          '<div class="achieve-status">' + (isUnlocked ? 'âœ“ Unlocked' : 'ðŸ”’') + '</div></div>';
       });
       document.getElementById('achieveList').innerHTML = html;
     }
@@ -8410,14 +8477,14 @@
         await saveRoom();
         newUnlocks.forEach(id => {
           const a = ACHIEVEMENTS.find(x => x.id === id);
-          if (a) showToast('🏆 Achievement: ' + a.name + '!', 'success');
+          if (a) showToast('ðŸ† Achievement: ' + a.name + '!', 'success');
         });
       }
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        3. GUESTBOOK
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _gbSelectedSticker = null;
 
     function renderGuestbook() {
@@ -8430,7 +8497,7 @@
         '<div class="gb-sticker-row">' +
         GB_STICKERS.map(s => '<button class="gb-sticker-btn" onclick="selectGbSticker(this,\'' + s + '\')">' + s + '</button>').join('') +
         '</div>' +
-        '<button class="gb-send-btn" onclick="sendGuestbookMsg()">📝 Post</button></div>';
+        '<button class="gb-send-btn" onclick="sendGuestbookMsg()">ðŸ“ Post</button></div>';
       html += '<div class="guestbook-list gb-list-target"><div style="text-align:center;color:rgba(255,255,255,.3);font-size:12px;padding:20px">Loading...</div></div>';
 
       // Owner sees guestbook in Extras tab
@@ -8480,7 +8547,7 @@
       if (gbText) gbText.value = '';
       _gbSelectedSticker = null;
       document.querySelectorAll('.gb-sticker-btn').forEach(b => b.classList.remove('selected'));
-      showToast('📝 Message posted!', 'success');
+      showToast('ðŸ“ Message posted!', 'success');
       loadGuestbookEntries(targetUid);
     }
 
@@ -8527,7 +8594,7 @@
             }
 
             // Reply button
-            html += '<button class="gb-reply-btn" onclick="toggleGbReply(this,\'' + e.id + '\')">💬 Reply</button>';
+            html += '<button class="gb-reply-btn" onclick="toggleGbReply(this,\'' + e.id + '\')">ðŸ’¬ Reply</button>';
             html += '</div>';
           });
         }
@@ -8565,7 +8632,7 @@
           text: text,
           createdAt: Date.now()
         });
-      showToast('💬 Reply sent!', 'success');
+      showToast('ðŸ’¬ Reply sent!', 'success');
       loadGuestbookEntries(targetUid);
     }
 
@@ -8580,9 +8647,9 @@
       return days + 'd ago';
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        4. GIFT SYSTEM
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _giftTargetUid = null;
     let _giftAmount = 0;
     const GIFT_AMOUNTS = [10, 50, 100, 250, 500];
@@ -8593,7 +8660,7 @@
       document.getElementById('giftTarget').textContent = 'To: ' + (name || 'Anonymous');
       const el = document.getElementById('giftAmounts');
       el.innerHTML = GIFT_AMOUNTS.map(a =>
-        '<div class="gift-amt" onclick="selectGiftAmount(this,' + a + ')">💰 ' + a + '</div>'
+        '<div class="gift-amt" onclick="selectGiftAmount(this,' + a + ')">ðŸ’° ' + a + '</div>'
       ).join('');
       document.getElementById('giftSendBtn').disabled = true;
       document.getElementById('giftOverlay').classList.remove('hidden');
@@ -8637,11 +8704,11 @@
       await db.collection('rooms').doc(_giftTargetUid).collection('guestbook').add({
         fromUid: currentUid,
         fromName: getPlayerName(),
-        text: 'Sent a gift of ' + _giftAmount + ' coins! 🎁',
-        sticker: '🎁',
+        text: 'Sent a gift of ' + _giftAmount + ' coins! ðŸŽ',
+        sticker: 'ðŸŽ',
         createdAt: Date.now()
       });
-      showToast('🎁 Sent ' + _giftAmount + ' coins!', 'success');
+      showToast('ðŸŽ Sent ' + _giftAmount + ' coins!', 'success');
       checkAchievements();
       document.getElementById('giftOverlay').classList.add('hidden');
     });
@@ -8650,9 +8717,9 @@
       document.getElementById('giftOverlay').classList.add('hidden');
     });
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        5. PET TRICKS (extends PET_ACTIONS)
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const PET_TRICKS = {
       cat:     [{ id: 'trick_sit', name: 'Sit', minAffection: 100 }, { id: 'trick_spin', name: 'Spin', minAffection: 300 }, { id: 'trick_dance', name: 'Dance', minAffection: 600 }, { id: 'trick_backflip', name: 'Backflip', minAffection: 1200 }],
       dog:     [{ id: 'trick_sit', name: 'Sit', minAffection: 50 },  { id: 'trick_roll', name: 'Roll Over', minAffection: 200 }, { id: 'trick_dance', name: 'Dance', minAffection: 500 }, { id: 'trick_backflip', name: 'Backflip', minAffection: 1000 }],
@@ -8675,12 +8742,12 @@
       st.action = trickActionMap[trickId] || 'sit';
       st.actionDur = 3000;
       st.actionEnd = Date.now() + 3000;
-      showToast('🎪 ' + (PETS.find(p => p.id === petType)?.name || petType) + ' does a trick!', 'success');
+      showToast('ðŸŽª ' + (PETS.find(p => p.id === petType)?.name || petType) + ' does a trick!', 'success');
     }
 
-    /* ═══════════════════════════════
-       6. PET ACCESSORIES — render & shop
-       ═══════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       6. PET ACCESSORIES â€” render & shop
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     function renderAccessoryShop() {
       const el = document.getElementById('accShop');
       if (!el) return;
@@ -8705,7 +8772,7 @@
             activePets.forEach(pet => {
               const equipped = pet.accessory === acc.id;
               if (equipped) {
-                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;background:rgba(239,68,68,.2);color:#f87171;width:100%;position:relative;z-index:5" onclick="window.removePetAcc(\'' + pet.id + '\');return false;">✕ ' + pet.name + '</button>';
+                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;background:rgba(239,68,68,.2);color:#f87171;width:100%;position:relative;z-index:5" onclick="window.removePetAcc(\'' + pet.id + '\');return false;">âœ• ' + pet.name + '</button>';
               } else {
                 html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;width:100%;position:relative;z-index:5" onclick="window.equipPetAcc(\'' + pet.id + '\',\'' + acc.id + '\');return false;">' + pet.name + '</button>';
               }
@@ -8713,7 +8780,7 @@
             html += '</div>';
           }
         } else {
-          html += '<div class="acc-price" style="color:rgba(255,255,255,.35);font-size:11px">🎰 Gacha Only</div>';
+          html += '<div class="acc-price" style="color:rgba(255,255,255,.35);font-size:11px">ðŸŽ° Gacha Only</div>';
         }
         html += '</div>';
       });
@@ -8721,20 +8788,20 @@
 
       // Pet Tricks section
       if (activePets.length) {
-        html += '<div class="shop-section-title" style="margin-top:20px">🎪 Pet Tricks</div>';
+        html += '<div class="shop-section-title" style="margin-top:20px">ðŸŽª Pet Tricks</div>';
         html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-align:center">Pets learn tricks as affection grows!</div>';
         activePets.forEach(pet => {
           const petDef = PETS.find(p => p.id === pet.type);
           const affection = pet.affection || 0;
           const tricks = PET_TRICKS[pet.type] || [];
           if (!tricks.length) return;
-          html += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px">' + (petDef?.emoji || '') + ' ' + pet.name + ' (❤️ ' + affection + ')</div>';
+          html += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px">' + (petDef?.emoji || '') + ' ' + pet.name + ' (â¤ï¸ ' + affection + ')</div>';
           html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
           tricks.forEach(tr => {
             const unlocked = affection >= tr.minAffection;
             html += '<button class="food-btn" style="font-size:10px;' + (unlocked ? '' : 'opacity:.4;cursor:not-allowed') + '" ' +
               (unlocked ? 'onclick="window.triggerPetTrick(\'' + pet.type + '\',\'' + tr.id + '\');return false;"' : 'disabled') +
-              '>' + tr.name + (unlocked ? '' : ' (❤️' + tr.minAffection + ')') + '</button>';
+              '>' + tr.name + (unlocked ? '' : ' (â¤ï¸' + tr.minAffection + ')') + '</button>';
           });
           html += '</div></div>';
         });
@@ -8808,7 +8875,7 @@
     window.buyAccessory = buyAccessory;
     window.triggerPetTrick = triggerPetTrick;
 
-    // Draw accessory on pet canvas — offset to each pet's actual head position
+    // Draw accessory on pet canvas â€” offset to each pet's actual head position
     const PET_HEAD_OFFSETS = {
       cat:     { hx:  0.35, hy: -0.18, r: 0.28 },
       dog:     { hx:  0.35, hy: -0.14, r: 0.28 },
@@ -9059,9 +9126,9 @@
       }
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        7. JUKEBOX (Web Audio API)
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _audioCtx = null;
     let _jukeboxNodes = [];
     let _jukeboxPlaying = null;
@@ -9112,7 +9179,7 @@
             b1 = 0.995 * b1 + white * 0.05;
             data[i] = (b0 * Math.sin(i / (ctx.sampleRate * 6)) + b1 * 0.3) * 1.5;
           } else {
-            // Forest — pink noise with bird chirp modulation
+            // Forest â€” pink noise with bird chirp modulation
             b0 = 0.99886 * b0 + white * 0.0555179;
             b1 = 0.99332 * b1 + white * 0.0750759;
             b2 = 0.969 * b2 + white * 0.153852;
@@ -9140,7 +9207,7 @@
           });
         }
       } else {
-        // Musical tones — unique melodies per style
+        // Musical tones â€” unique melodies per style
         const noteMap = {
           'C':  [261.63,293.66,329.63,349.23,392,440,493.88],
           'Eb': [311.13,349.23,392,415.3,466.16,523.25,587.33],
@@ -9215,18 +9282,18 @@
       if (!el) return;
       const current = JUKEBOX_TRACKS.find(t => t.id === _jukeboxPlaying);
       let html = '<div class="jukebox-now">' +
-        '<div class="jukebox-title">' + (current ? '♫ ' + current.name : 'No track playing') + '</div>' +
+        '<div class="jukebox-title">' + (current ? 'â™« ' + current.name : 'No track playing') + '</div>' +
         '<div class="jukebox-controls">' +
-        '<button class="jukebox-btn" onclick="' + (_jukeboxPlaying ? 'stopJukebox();renderJukebox()' : '') + '" title="Stop">⏹</button>' +
+        '<button class="jukebox-btn" onclick="' + (_jukeboxPlaying ? 'stopJukebox();renderJukebox()' : '') + '" title="Stop">â¹</button>' +
         '</div></div>';
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:11px;color:rgba(255,255,255,.5)">🔊</span>' +
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:11px;color:rgba(255,255,255,.5)">ðŸ”Š</span>' +
         '<input type="range" class="jukebox-vol" min="0" max="100" value="' + Math.round((roomData.jukeboxVol ?? 0.5) * 100) + '" oninput="setJukeboxVol(this.value)">' +
         '</div>';
       html += '<div class="jukebox-list">';
       JUKEBOX_TRACKS.forEach(t => {
         const playing = _jukeboxPlaying === t.id;
         html += '<div class="jukebox-track ' + (playing ? 'playing' : '') + '" onclick="playJukeboxTrack(\'' + t.id + '\')">' +
-          (playing ? '▶ ' : '♪ ') + t.name + '</div>';
+          (playing ? 'â–¶ ' : 'â™ª ') + t.name + '</div>';
       });
       html += '</div>';
       el.innerHTML = html;
@@ -9239,9 +9306,9 @@
       saveRoom();
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        8. WEATHER / SEASON EFFECTS
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let weatherParticles = [];
     let currentWeather = 'clear';
 
@@ -9346,9 +9413,9 @@
       ctx.restore();
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        9. GACHA / LUCKY DRAW
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _gachaSpinning = false;
 
     function renderGachaTab() {
@@ -9358,10 +9425,10 @@
       const canAfford = roomData.coins >= GACHA_COST && !_gachaSpinning;
       let html = '<div style="text-align:center;padding:10px 0">' +
         '<div class="gacha-reel-window" id="gachaReelWindow"><div class="gacha-reel-strip" id="gachaReelStrip">' +
-        '<div class="gacha-reel-item" style="opacity:.3">🎲</div></div></div>' +
-        '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: 💰 ' + GACHA_COST + ' per pull</div>' +
-        '<button class="gacha-pull-btn" id="gachaPullTabBtn" onclick="pullGacha()" ' + (canAfford ? '' : 'disabled') + '>🎲 Pull!</button>' +
-        '<button onclick="showGachaPrizeModal()" style="margin-top:10px;padding:8px 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">📋 View Prizes</button>' +
+        '<div class="gacha-reel-item" style="opacity:.3">ðŸŽ²</div></div></div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px">Cost: ðŸ’° ' + GACHA_COST + ' per pull</div>' +
+        '<button class="gacha-pull-btn" id="gachaPullTabBtn" onclick="pullGacha()" ' + (canAfford ? '' : 'disabled') + '>ðŸŽ² Pull!</button>' +
+        '<button onclick="showGachaPrizeModal()" style="margin-top:10px;padding:8px 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">ðŸ“‹ View Prizes</button>' +
         '<div id="gachaTabResult" style="margin-top:16px;min-height:80px"></div></div>';
       el.innerHTML = html;
     }
@@ -9392,7 +9459,7 @@
       const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
       const owned = roomData.ownedAccessories || [];
       const rarityColors = { legendary: '#fbbf24', epic: '#c084fc', rare: '#60a5fa', uncommon: '#34d399', common: 'rgba(255,255,255,.5)' };
-      const rarityLabels = { legendary: '★ Legendary', epic: '✦ Epic', rare: '◆ Rare', uncommon: '● Uncommon', common: '○ Common' };
+      const rarityLabels = { legendary: 'â˜… Legendary', epic: 'âœ¦ Epic', rare: 'â—† Rare', uncommon: 'â— Uncommon', common: 'â—‹ Common' };
       const order = ['legendary','epic','rare','uncommon','common'];
       let html = '';
 
@@ -9420,8 +9487,8 @@
           }
           html += '<div style="font-size:9px;color:#fff;font-weight:600">' + item.name + '</div>';
           html += '<div style="font-size:8px;color:rgba(255,255,255,.3)">' + pct + '%</div>';
-          if (isOwned) html += '<div style="font-size:8px;color:#34d399">✓</div>';
-          if (isExcl) html += '<div style="font-size:8px;color:#c084fc">★</div>';
+          if (isOwned) html += '<div style="font-size:8px;color:#34d399">âœ“</div>';
+          if (isExcl) html += '<div style="font-size:8px;color:#c084fc">â˜…</div>';
           html += '</div>';
         });
         html += '</div></div>';
@@ -9473,7 +9540,7 @@
       // Show coin deduction immediately
       document.getElementById('coinAmount').textContent = roomData.coins;
 
-      // Weighted random — pick a single prize
+      // Weighted random â€” pick a single prize
       const totalWeight = GACHA_POOL.reduce((s, i) => s + i.weight, 0);
       let rand = Math.random() * totalWeight;
       let prize = GACHA_POOL[0];
@@ -9482,7 +9549,7 @@
         if (rand <= 0) { prize = item; break; }
       }
 
-      // ── Spin animation in reel ──
+      // â”€â”€ Spin animation in reel â”€â”€
       const strip = document.getElementById('gachaReelStrip');
       const reelWin = document.getElementById('gachaReelWindow');
       if (strip && reelWin) {
@@ -9523,13 +9590,13 @@
       const showRarity = prize.rarity !== 'common' && prize.rarity !== 'uncommon';
 
       if (prize.type === 'coins') {
-        // Coin prize — add coins
+        // Coin prize â€” add coins
         roomData.coins += prize.amount;
         document.getElementById('coinAmount').textContent = roomData.coins;
         _lastLocalSaveTime = Date.now();
         saveRoom().then(() => checkAchievements());
         revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
-          '<div class="gacha-prize-emoji" style="font-size:48px">💰</div>' +
+          '<div class="gacha-prize-emoji" style="font-size:48px">ðŸ’°</div>' +
           (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
           '<div class="gacha-prize-name">' + prize.name + '</div>' +
           '<div style="font-size:13px;color:#f7c97e;margin-top:6px">+' + prize.amount + ' coins!</div></div>';
@@ -9540,7 +9607,7 @@
         const acc = PET_ACCESSORIES.find(a => a.id === prize.id);
 
         if (owned.includes(prize.id)) {
-          // Already owned — give coin consolation based on rarity
+          // Already owned â€” give coin consolation based on rarity
           const refund = { common: 25, uncommon: 50, rare: 100, epic: 200, legendary: 400 }[prize.rarity] || 25;
           roomData.coins += refund;
           document.getElementById('coinAmount').textContent = roomData.coins;
@@ -9550,16 +9617,16 @@
             '<canvas class="gacha-reveal-cvs" data-acc="' + prize.id + '" width="80" height="80" style="width:80px;height:80px;margin:0 auto 6px;display:block"></canvas>' +
             (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
             '<div class="gacha-prize-name">' + prize.name + '</div>' +
-            '<div style="font-size:12px;color:#f7c97e;margin-top:4px">Already owned — +' + refund + ' coins</div></div>';
+            '<div style="font-size:12px;color:#f7c97e;margin-top:4px">Already owned â€” +' + refund + ' coins</div></div>';
           const rcvs = revealEl.querySelector('.gacha-reveal-cvs');
           if (rcvs) _drawAccPreviewOnCanvas(rcvs, prize.id);
         } else {
-          // New accessory — add to collection
+          // New accessory â€” add to collection
           roomData.ownedAccessories = [...owned, prize.id];
           _lastLocalSaveTime = Date.now();
           await saveRoom();
           checkAchievements();
-          showToast('🎉 Got ' + (acc ? acc.name : prize.id) + '!', 'success');
+          showToast('ðŸŽ‰ Got ' + (acc ? acc.name : prize.id) + '!', 'success');
           revealEl.innerHTML = '<div class="gacha-prize-reveal">' +
             '<canvas class="gacha-reveal-cvs" data-acc="' + prize.id + '" width="80" height="80" style="width:80px;height:80px;margin:0 auto 6px;display:block;animation:gachaFloat 2s ease-in-out infinite"></canvas>' +
             (showRarity ? '<div class="gacha-prize-rarity ' + prize.rarity + '">' + prize.rarity + '</div>' : '') +
@@ -9573,9 +9640,9 @@
       }
     }
 
-    /* ═══════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        10. MINI-GAME LEADERBOARD
-       ═══════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let _lbCurrentGame = 'flappy';
 
     function showLeaderboard() {
@@ -9615,7 +9682,7 @@
         snap.forEach(doc => {
           rank++;
           const d = doc.data();
-          const medals = ['🥇','🥈','🥉'];
+          const medals = ['ðŸ¥‡','ðŸ¥ˆ','ðŸ¥‰'];
           const cls = rank <= 3 ? ' top' + rank : '';
           html += '<div class="lb-row' + cls + '">' +
             '<div class="lb-rank">' + (rank <= 3 ? medals[rank-1] : '#' + rank) + '</div>' +
@@ -9632,7 +9699,7 @@
       document.getElementById('lbOverlay').classList.add('hidden');
     });
 
-    // ═══ Chinese Chess invite listener ═══
+    // â•â•â• Chinese Chess invite listener â•â•â•
     (function() {
       let chessInvUnsub = null;
       const _auth = firebase.auth();
@@ -9654,9 +9721,9 @@
               const ov = document.createElement('div');
               ov.className = 'chess-invite-overlay';
               ov.innerHTML = '<div class="chess-invite-box">' +
-                '<h3>♟️ Chess Challenge!</h3>' +
+                '<h3>â™Ÿï¸ Chess Challenge!</h3>' +
                 '<div class="ci-from">' + (inv.fromName||'Someone') + ' invites you</div>' +
-                '<div class="ci-bet">💰 ' + inv.bet + ' coins</div>' +
+                '<div class="ci-bet">ðŸ’° ' + inv.bet + ' coins</div>' +
                 '<div class="ci-buttons">' +
                   '<button class="ci-reject">Reject</button>' +
                   '<button class="ci-accept">Accept</button>' +
