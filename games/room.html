@@ -84,7 +84,7 @@
       position: absolute; inset: 0; pointer-events: none;
     }
     .pet-slot canvas {
-      position: absolute; inset: 0; width: 100%; height: 100%;
+      position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: auto; cursor: pointer;
     }
 
     /* ── Plant ── */
@@ -743,6 +743,25 @@
         <canvas id="roomBgCanvas"></canvas>
         <div class="pet-slot" id="petSlot"></div>
         <div class="plant-slot" id="plantSlot"></div>
+        <!-- Pet Status Bar Overlay -->
+        <div id="petStatusBar" style="display:none;position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(20,20,35,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 16px;z-index:40;min-width:260px;max-width:340px;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <input id="petStatusName" type="text" maxlength="16" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:4px 8px;width:120px" oninput="onPetNameChange(this.value)">
+            <button onclick="closePetStatus()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:2px 6px">✕</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:11px">
+            <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
+              <span>🍖</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusHunger" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusHungerVal" style="min-width:32px;text-align:right"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
+              <span>💧</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusThirst" style="display:block;height:100%;border-radius:3px;transition:width .3s"></span></span><span id="petStatusThirstVal" style="min-width:32px;text-align:right"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.7)">
+              <span>♥</span><span style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><span id="petStatusAffection" style="display:block;height:100%;background:#ff8aab;border-radius:3px;transition:width .3s"></span></span><span id="petStatusAffectionVal" style="min-width:32px;text-align:right;color:#ff8aab"></span>
+            </div>
+          </div>
+          <div id="petStatusColors" style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
+        </div>
       </div>
     </div>
 
@@ -825,10 +844,14 @@
   <div class="tab-panel" id="panel-upgrade">
     <div class="sub-tabs">
       <button class="sub-tab active" data-sub="feedPetWrap">🍖 Pet Food</button>
+      <button class="sub-tab" data-sub="feedToyWrap">🧸 Pet Toy</button>
       <button class="sub-tab" data-sub="feedPlantWrap">🌱 Plant</button>
     </div>
     <div class="sub-panel active" id="feedPetWrap">
       <div id="feedPetContent"></div>
+    </div>
+    <div class="sub-panel" id="feedToyWrap">
+      <div id="feedToyContent"></div>
     </div>
     <div class="sub-panel" id="feedPlantWrap">
       <div id="feedPlantContent"></div>
@@ -1112,6 +1135,24 @@
       { id: 'feast',    emoji: '🍱', name: 'Feast Box', cost: 300, restore: 100 },
     ];
 
+    const TOYS = [
+      { id: 'ball',    emoji: '⚽', name: 'Ball',       cost: 40,  affection: 10 },
+      { id: 'doll',    emoji: '🧸', name: 'Doll',       cost: 80,  affection: 20 },
+      { id: 'stick',   emoji: '🪵', name: 'Stick',      cost: 60,  affection: 15 },
+      { id: 'feather', emoji: '🪶', name: 'Feather',    cost: 100, affection: 25 },
+      { id: 'yarn',    emoji: '🧶', name: 'Yarn Ball',  cost: 150, affection: 35 },
+      { id: 'frisbee', emoji: '🥏', name: 'Frisbee',    cost: 250, affection: 50 },
+    ];
+
+    const DRINKS = [
+      { id: 'water',  emoji: '💧', name: 'Water',  cost: 20,  restore: 15 },
+      { id: 'milk',   emoji: '🥛', name: 'Milk',   cost: 50,  restore: 25 },
+      { id: 'cola',   emoji: '🥤', name: 'Cola',   cost: 80,  restore: 35 },
+      { id: 'juice',  emoji: '🧃', name: 'Juice',  cost: 120, restore: 50 },
+      { id: 'tea',    emoji: '🍵', name: 'Tea',     cost: 180, restore: 70 },
+      { id: 'boba',   emoji: '🧋', name: 'Boba',   cost: 280, restore: 100 },
+    ];
+
     const AFFECTION_MILESTONES = [
       { min: 0,    title: 'Stranger',      reward: 0 },
       { min: 50,   title: 'Acquaintance',  reward: 20 },
@@ -1349,9 +1390,9 @@
        Achievements
        ═══════════════════════════════ */
     const ACHIEVEMENTS = [
-      { id: 'ach_first_pet',     icon: '🐾', name: 'First Friend',       desc: 'Buy your first pet',          check: (d) => d.ownedPets.length >= 1 },
-      { id: 'ach_two_pets',      icon: '🐾🐾', name: 'Dynamic Duo',     desc: 'Own 2 pets',                  check: (d) => d.ownedPets.length >= 2 },
-      { id: 'ach_all_pets',      icon: '🏆', name: 'Pet Collector',      desc: 'Own all 6 pets',              check: (d) => d.ownedPets.length >= 6 },
+      { id: 'ach_first_pet',     icon: '🐾', name: 'First Friend',       desc: 'Buy your first pet',          check: (d) => (d.pets || []).length >= 1 },
+      { id: 'ach_two_pets',      icon: '🐾🐾', name: 'Dynamic Duo',     desc: 'Own 2 pets',                  check: (d) => (d.pets || []).length >= 2 },
+      { id: 'ach_all_pets',      icon: '🏆', name: 'Pet Collector',      desc: 'Own all 6 types',             check: (d) => new Set((d.pets || []).map(p => p.type)).size >= 6 },
       { id: 'ach_first_plant',   icon: '🌱', name: 'Green Thumb',        desc: 'Buy your first plant',        check: (d) => d.ownedPlants.length >= 1 },
       { id: 'ach_plant_max',     icon: '🌳', name: 'Master Gardener',    desc: 'Reach plant level 30',        check: (d) => Object.values(d.plantLevels).some(l => l >= 30) },
       { id: 'ach_coins_1k',      icon: '💰', name: 'Piggy Bank',         desc: 'Accumulate 1,000 coins',      check: (d) => d.coins >= 1000 },
@@ -1359,8 +1400,8 @@
       { id: 'ach_decor_5',       icon: '🎨', name: 'Decorator',          desc: 'Own 5 decorations',           check: (d) => d.ownedDecors.length >= 5 },
       { id: 'ach_decor_15',      icon: '🏡', name: 'Interior Designer',  desc: 'Own 15 decorations',          check: (d) => d.ownedDecors.length >= 15 },
       { id: 'ach_streak_7',      icon: '🔥', name: 'Dedicated',          desc: '7-day login streak',          check: (d) => (d.loginStreak || 0) >= 7 },
-      { id: 'ach_best_friend',   icon: '❤️', name: 'Best Friend',        desc: 'Reach Best Friend with a pet',check: (d) => Object.values(d.petAffection).some(a => a >= 500) },
-      { id: 'ach_legendary',     icon: '⭐', name: 'Legendary Bond',     desc: 'Reach Legendary Bond (2000)', check: (d) => Object.values(d.petAffection).some(a => a >= 2000) },
+      { id: 'ach_best_friend',   icon: '❤️', name: 'Best Friend',        desc: 'Reach Best Friend with a pet',check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 500) },
+      { id: 'ach_legendary',     icon: '⭐', name: 'Legendary Bond',     desc: 'Reach Legendary Bond (2000)', check: (d) => (d.pets || []).some(p => (p.affection || 0) >= 2000) },
       { id: 'ach_acc_3',         icon: '🎩', name: 'Fashionista',        desc: 'Own 3 accessories',           check: (d) => (d.ownedAccessories || []).length >= 3 },
       { id: 'ach_gacha_5',       icon: '🎰', name: 'Lucky Player',       desc: 'Pull gacha 5 times',          check: (d) => (d.gachaPulls || 0) >= 5 },
       { id: 'ach_gift_given',    icon: '🎁', name: 'Generous',           desc: 'Send a gift to someone',      check: (d) => (d.giftsGiven || 0) >= 1 },
@@ -1438,7 +1479,7 @@
     /* ═══════════════════════════════
        State
        ═══════════════════════════════ */
-    let roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, petAccessories: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
+    let roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: '', lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
 
     /* ═══════════════════════════════
        Helpers
@@ -1450,6 +1491,38 @@
       toastEl.className = 'toast ' + (type || '') + ' show';
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+    }
+
+    // Pet instance helpers
+    function getPet(id) { return roomData.pets.find(p => p.id === id); }
+    function getActivePets() { return roomData.pets.filter(p => p.active); }
+    function makePetId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); }
+
+    // Migrate old pet format (pet/pet2 + ownedPets) to new pets array
+    function migratePets(d) {
+      if (d.pets && d.pets.length) return d.pets;
+      const pets = [];
+      const addPet = (type, active) => {
+        const def = PETS.find(p => p.id === type);
+        pets.push({
+          id: makePetId(),
+          type: type,
+          name: def ? def.name : type,
+          hunger: (d.petHunger && d.petHunger[type]) ?? 100,
+          thirst: 100,
+          affection: (d.petAffection && d.petAffection[type]) ?? 0,
+          color: (d.petColors && d.petColors[type]) || null,
+          active: active,
+          accessory: (d.petAccessories && d.petAccessories[type]) || null
+        });
+      };
+      if (d.pet) addPet(d.pet, true);
+      if (d.pet2 && d.pet2 !== d.pet) addPet(d.pet2, true);
+      const equipped = [d.pet, d.pet2].filter(Boolean);
+      for (const type of (d.ownedPets || [])) {
+        if (!equipped.includes(type)) addPet(type, false);
+      }
+      return pets;
     }
 
     function userDocRef(uid) { return db.collection('rooms').doc(uid || currentUid); }
@@ -1467,15 +1540,9 @@
       if (!_roomLoaded) return; // Don't save defaults before Firestore data loads
       const data = {
         coins: roomData.coins,
-        pet: roomData.pet,
-        pet2: roomData.pet2,
+        pets: roomData.pets.map(p => ({ id: p.id, type: p.type, name: p.name, hunger: p.hunger, thirst: p.thirst, affection: p.affection, color: p.color, active: p.active, accessory: p.accessory || null })),
         plant: roomData.plant,
-        petHunger: roomData.petHunger,
-        petAffection: roomData.petAffection,
-        petColors: roomData.petColors,
-        petAccessories: roomData.petAccessories || {},
         plantLevels: roomData.plantLevels,
-        ownedPets: roomData.ownedPets,
         ownedPlants: roomData.ownedPlants,
         ownedDecors: roomData.ownedDecors,
         placedDecors: roomData.placedDecors,
@@ -1517,7 +1584,7 @@
       if (_unsubRoomSnap) { _unsubRoomSnap(); _unsubRoomSnap = null; }
       if (unsubVisitList) { unsubVisitList(); unsubVisitList = null; }
       // Reset roomData to defaults for clean account switch
-      roomData = { coins: 0, pet: null, pet2: null, plant: null, petHunger: {}, petAffection: {}, petColors: {}, petAccessories: {}, plantLevels: {}, plantPosition: null, ownedPets: [], ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
+      roomData = { coins: 0, pets: [], plant: null, plantLevels: {}, plantPosition: null, ownedPlants: [], ownedDecors: [], placedDecors: [], ownedWalls: ['wall_default'], wallPattern: 'wall_default', ownedWindows: ['win_none','win_classic'], windowStyle: 'win_classic', ownedAccessories: [], displayName: getPlayerName(), lastCoinCollect: 0, loginStreak: 0, lastLoginDay: '', achievements: [], gachaPulls: 0, giftsGiven: 0, giftsReceived: 0, jukeboxTrack: null, jukeboxVol: 0.5 };
       renderAll(); // Immediately show current user before Firestore loads
       initRoomDropZone();
       initDecorDrag();
@@ -1539,14 +1606,10 @@
           }
           const d = snap.data();
           roomData.coins = d.coins ?? 0;
-          roomData.pet = d.pet ?? null;
-          roomData.pet2 = d.pet2 ?? null;
+          // Migrate old pet format or load new pets array
+          roomData.pets = migratePets(d);
           roomData.plant = d.plant ?? null;
-          roomData.petHunger = d.petHunger ?? {};
-          roomData.petAffection = d.petAffection ?? {};
-          roomData.petColors = d.petColors ?? {};
           roomData.plantLevels = d.plantLevels ?? {};
-          roomData.ownedPets = d.ownedPets ?? [];
           roomData.ownedPlants = d.ownedPlants ?? [];
           roomData.ownedDecors = d.ownedDecors ?? [];
           roomData.ownedWalls = d.ownedWalls ?? ['wall_default'];
@@ -1565,7 +1628,6 @@
           });
           roomData.displayName = d.displayName ?? '';
           roomData.lastCoinCollect = d.lastCoinCollect ?? d.updatedAt ?? Date.now();
-          roomData.petAccessories = d.petAccessories ?? {};
           roomData.ownedAccessories = d.ownedAccessories ?? [];
           roomData.loginStreak = d.loginStreak ?? 0;
           roomData.lastLoginDay = d.lastLoginDay ?? '';
@@ -1582,10 +1644,12 @@
           const decay = Math.floor(elapsed / (10 * 60 * 1000));
           if (decay > 0) {
             let changed = false;
-            for (const pid of roomData.ownedPets) {
-              const cur = roomData.petHunger[pid] ?? 100;
-              const newVal = Math.max(0, cur - decay);
-              if (newVal !== cur) { roomData.petHunger[pid] = newVal; changed = true; }
+            for (const pet of roomData.pets) {
+              const newH = Math.max(0, pet.hunger - decay);
+              const newT = Math.max(0, (pet.thirst ?? 100) - decay);
+              if (newH !== pet.hunger || newT !== (pet.thirst ?? 100)) {
+                pet.hunger = newH; pet.thirst = newT; changed = true;
+              }
             }
             if (changed) saveRoom();
           }
@@ -1628,13 +1692,13 @@
         if (_loadOv) _loadOv.style.display = 'none';
       });
 
-      // Periodic hunger decay: -1% every 10 min while page is open
+      // Periodic hunger/thirst decay: -1% every 10 min while page is open
       setInterval(async () => {
         if (viewingUid !== currentUid) return;
         let changed = false;
-        for (const pid of roomData.ownedPets) {
-          const cur = roomData.petHunger[pid] ?? 100;
-          if (cur > 0) { roomData.petHunger[pid] = cur - 1; changed = true; }
+        for (const pet of roomData.pets) {
+          if (pet.hunger > 0) { pet.hunger = pet.hunger - 1; changed = true; }
+          if ((pet.thirst ?? 100) > 0) { pet.thirst = (pet.thirst ?? 100) - 1; changed = true; }
         }
         if (changed) { await saveRoom(); renderAllDebounced(); }
       }, 10 * 60 * 1000);
@@ -1742,26 +1806,20 @@
       }
 
       // Pet — canvas drawn, walks in 2D wander path
-      const activePets = [];
-      if (roomData.pet) activePets.push(roomData.pet);
-      if (roomData.pet2 && roomData.pet2 !== roomData.pet) activePets.push(roomData.pet2);
-      const petKey = activePets.map(id => id + ':' + (roomData.petColors[id] || '')).join(',');
+      const activePets = getActivePets();
+      const petKey = activePets.map(p => p.id + ':' + (p.color || '') + ':' + p.type).join(',');
       if (activePets.length) {
-        // Only recreate canvas if pet types changed
+        // Only recreate canvas if pet list changed
         if (petKey !== _lastPetKey) {
           _lastPetKey = petKey;
           petSlot.innerHTML = '<canvas id="petCanvas"></canvas>';
-          const petInfos = activePets.map(id => ({
-            type: PETS.find(p => p.id === id)?.id || 'cat',
-            hunger: roomData.petHunger[id] ?? 100,
-            color: roomData.petColors[id] || null
+          const petInfos = activePets.map(p => ({
+            id: p.id,
+            type: p.type,
+            hunger: p.hunger ?? 100,
+            color: p.color || null
           }));
           startPetAnimation(petInfos);
-        } else {
-          // Update hunger values without re-creating canvas
-          activePets.forEach(id => {
-            if (petStates[id]) petStates[id]._hunger = roomData.petHunger[id] ?? 100;
-          });
         }
       } else {
         _lastPetKey = '';
@@ -1800,9 +1858,8 @@
     }
 
     function renderShop() {
-      const petCount = [roomData.pet, roomData.pet2].filter(Boolean).length;
-      renderShopSection('petShop', PETS, roomData.ownedPets, [roomData.pet, roomData.pet2], 'pet',
-        '<span class="slot-badge' + (petCount >= 2 ? ' full' : '') + '">' + petCount + '/2 in room</span>');
+      // Pet shop — adopt only, no color/equip
+      renderPetShop();
       renderShopSection('plantShop', PLANTS, roomData.ownedPlants, [roomData.plant], 'plant',
         '<span style="display:block;font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px">🌱 Only 1 plant at a time — buy a pricier plant to inherit upgrade progress!</span>');
       // Only render decor shop if its sub-panel is visible (avoids 99 canvas preview draws)
@@ -1810,13 +1867,30 @@
       if (decorPanel && decorPanel.classList.contains('active')) renderDecorShop();
     }
 
+    function renderPetShop() {
+      const el = document.getElementById('petShop');
+      const titleEl = el.previousElementSibling;
+      const petCount = roomData.pets.length;
+      if (titleEl) titleEl.innerHTML = '🐾 Pets <span class="slot-badge">' + petCount + ' adopted</span>';
+      el.innerHTML = PETS.map(item => {
+        const ownedCount = roomData.pets.filter(p => p.type === item.id).length;
+        const canAfford = roomData.coins >= item.cost;
+        return '<div class="shop-card' + (ownedCount > 0 ? ' owned' : '') + '">' +
+          '<span class="shop-emoji">' + item.emoji + '</span>' +
+          '<div class="shop-name">' + item.name + '</div>' +
+          (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + '</div>' : '') +
+          '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
+          '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
+            (canAfford ? '' : 'disabled') + '>🐾 Adopt</button>' +
+          '</div>';
+      }).join('');
+    }
+
     function renderShopSection(containerId, items, owned, equippedArr, type, slotHtml) {
       const el = document.getElementById(containerId);
-      // Update section title with slot badge
       const titleEl = el.previousElementSibling;
       if (titleEl && slotHtml) {
-        const baseTitle = type === 'pet' ? '🐾 Pets' : '🌱 Plants';
-        titleEl.innerHTML = baseTitle + slotHtml;
+        titleEl.innerHTML = '🌱 Plants' + slotHtml;
       }
       el.innerHTML = items.map(item => {
         const isOwned = owned.includes(item.id);
@@ -1832,26 +1906,12 @@
           btnHtml = '<button class="shop-btn buy" onclick="buyItem(\'' + type + '\',\'' + item.id + '\')" ' +
             (canAfford ? '' : 'disabled') + '>Buy</button>';
         }
-        // Color selector for owned pets with color options
-        let colorHtml = '';
-        if (type === 'pet' && isOwned && PET_COLORS[item.id]) {
-          const currentColor = roomData.petColors[item.id] || PET_COLORS[item.id][0].key;
-          colorHtml = '<div style="display:flex;gap:5px;justify-content:center;margin:5px 0 2px">' +
-            PET_COLORS[item.id].map(c =>
-              '<div onclick="setPetColor(\'' + item.id + '\',\'' + c.key + '\')" title="' + c.name + '" style="' +
-              'width:18px;height:18px;border-radius:50%;background:' + c.body + ';cursor:pointer;' +
-              'border:2px solid ' + (c.key === currentColor ? '#fff' : 'rgba(255,255,255,0.2)') + ';' +
-              'box-shadow:' + (c.key === currentColor ? '0 0 6px rgba(255,255,255,0.5)' : 'none') +
-              '"></div>'
-            ).join('') + '</div>';
-        }
         return '<div class="shop-card' + (isEquipped ? ' equipped' : isOwned ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          (type === 'plant' && item.coinRate ? '<div style="font-size:10px;color:#f7c97e;margin:2px 0">' + coinSVG(10) + ' ' + item.coinRate + '/5min × Lv</div>' : '') +
+          (item.coinRate ? '<div style="font-size:10px;color:#f7c97e;margin:2px 0">' + coinSVG(10) + ' ' + item.coinRate + '/5min × Lv</div>' : '') +
           (isOwned ? '<div style="font-size:11px;color:#34d399">Owned ✓</div>' :
             '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>') +
-          colorHtml +
           btnHtml + '</div>';
       }).join('');
     }
@@ -2616,24 +2676,21 @@
       // Pet Food sub-tab
       const petEl = document.getElementById('feedPetContent');
       let petHtml = '';
-      const activePetIds = [roomData.pet, roomData.pet2].filter(Boolean);
+      const activePets = getActivePets();
 
-      if (activePetIds.length) {
+      if (activePets.length) {
         petHtml += '<div class="shop-section">';
         petHtml += '<div style="display:flex;justify-content:center;gap:16px;padding:6px 0 10px;flex-wrap:wrap">';
-        activePetIds.forEach(pid => {
-          const petDef = PETS.find(p => p.id === pid);
-          const aff = roomData.petAffection[pid] ?? 0;
-          const ms = getAffectionTitle(aff);
-          const nextMs = AFFECTION_MILESTONES.find(m => m.min > aff);
-          const nextText = nextMs ? ' (next: ' + nextMs.min + ')' : ' ★ MAX';
-          const hunger = roomData.petHunger[pid] ?? 100;
+        activePets.forEach(pet => {
+          const petDef = PETS.find(p => p.id === pet.type);
+          const hunger = pet.hunger ?? 100;
+          const thirst = pet.thirst ?? 100;
           const hColor = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
+          const tColor = thirst > 50 ? '#60a5fa' : thirst > 20 ? '#fbbf24' : '#f87171';
           petHtml += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
-            (petDef?.emoji || '🐾') + ' <span style="color:' + hColor + '">' + Math.round(hunger) + '%</span> · ' +
-            '<span style="color:#ff8aab">♥ ' + aff + '</span> ' +
-            '<span style="color:#fbbf24;font-size:10px">' + ms.title + '</span>' +
-            '<span style="color:rgba(255,255,255,0.35);font-size:9px">' + nextText + '</span></div>';
+            (petDef?.emoji || '🐾') + ' ' + pet.name +
+            ' <span style="color:' + hColor + '">🍖' + Math.round(hunger) + '%</span>' +
+            ' <span style="color:' + tColor + '">💧' + Math.round(thirst) + '%</span></div>';
         });
         petHtml += '</div>';
         petHtml += '<div class="shop-section-title">🍖 Drag food to your pet!</div>';
@@ -2648,11 +2705,60 @@
             '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + f.cost + '</div>' +
             '</div>';
         }).join('');
+        petHtml += '</div>';
+
+        // Drinks section (restores thirst)
+        petHtml += '<div class="shop-section-title" style="margin-top:12px">💧 Drinks — restore thirst!</div>';
+        petHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Tap drink then tap your pet to hydrate</div>';
+        petHtml += '<div class="food-grid">';
+        petHtml += DRINKS.map(d => {
+          const canAfford = roomData.coins >= d.cost;
+          return '<div class="food-card' + (canAfford ? '' : ' disabled') + '" data-drink="' + d.id + '">' +
+            '<span class="food-emoji">' + d.emoji + '</span>' +
+            '<div class="food-name">' + d.name + '</div>' +
+            '<div class="food-restore" style="color:#60a5fa">+' + d.restore + '%</div>' +
+            '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + d.cost + '</div>' +
+            '</div>';
+        }).join('');
         petHtml += '</div></div>';
       } else {
         petHtml = '<div class="visit-empty">Buy a pet first to feed it!</div>';
       }
       petEl.innerHTML = petHtml;
+
+      // Pet Toy sub-tab
+      const toyEl = document.getElementById('feedToyContent');
+      let toyHtml = '';
+      if (activePets.length) {
+        toyHtml += '<div class="shop-section">';
+        toyHtml += '<div style="display:flex;justify-content:center;gap:16px;padding:6px 0 10px;flex-wrap:wrap">';
+        activePets.forEach(pet => {
+          const petDef = PETS.find(p => p.id === pet.type);
+          const aff = pet.affection ?? 0;
+          const ms = getAffectionTitle(aff);
+          toyHtml += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">' +
+            (petDef?.emoji || '🐾') + ' ' + pet.name +
+            ' <span style="color:#ff8aab">♥ ' + aff + '</span>' +
+            ' <span style="color:#fbbf24;font-size:10px">' + ms.title + '</span></div>';
+        });
+        toyHtml += '</div>';
+        toyHtml += '<div class="shop-section-title">🧸 Tap toy then tap your pet!</div>';
+        toyHtml += '<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 0 8px;text-align:center">Toys increase your pet\'s affection</div>';
+        toyHtml += '<div class="food-grid">';
+        toyHtml += TOYS.map(t => {
+          const canAfford = roomData.coins >= t.cost;
+          return '<div class="food-card' + (canAfford ? '' : ' disabled') + '" data-toy="' + t.id + '">' +
+            '<span class="food-emoji">' + t.emoji + '</span>' +
+            '<div class="food-name">' + t.name + '</div>' +
+            '<div class="food-restore" style="color:#ff8aab">♥+' + t.affection + '</div>' +
+            '<div class="shop-price" style="margin-top:4px">' + coinSVG(11) + ' ' + t.cost + '</div>' +
+            '</div>';
+        }).join('');
+        toyHtml += '</div></div>';
+      } else {
+        toyHtml = '<div class="visit-empty">Buy a pet first to play with it!</div>';
+      }
+      toyEl.innerHTML = toyHtml;
 
       // Plant Upgrade sub-tab
       const plantEl = document.getElementById('feedPlantContent');
@@ -2709,10 +2815,14 @@
           return;
         }
         el.innerHTML = rooms.map(r => {
-          const petEmoji = r.pet ? (PETS.find(p => p.id === r.pet)?.emoji || '🐾') : '';
-          const pet2Emoji = r.pet2 ? (PETS.find(p => p.id === r.pet2)?.emoji || '') : '';
+          const petEmojis = (r.pets || []).filter(p => p.active).map(p => PETS.find(x => x.id === p.type)?.emoji || '🐾');
+          // Fallback for old format
+          if (!petEmojis.length) {
+            if (r.pet) petEmojis.push(PETS.find(p => p.id === r.pet)?.emoji || '🐾');
+            if (r.pet2) petEmojis.push(PETS.find(p => p.id === r.pet2)?.emoji || '');
+          }
           const plantEmoji = r.plant ? (PLANTS.find(p => p.id === r.plant)?.emoji || '🌱') : '';
-          const peekItems = [petEmoji, pet2Emoji, plantEmoji].filter(Boolean);
+          const peekItems = [...petEmojis, plantEmoji].filter(Boolean);
           const dot = r.isOnline ? '<span class="visit-online-dot"></span>' : '<span class="visit-offline-dot"></span>';
           return '<div class="visit-card" onclick="visitRoom(\'' + r.uid + '\')">' +
             '<span class="visit-avatar">🏠</span>' +
@@ -2737,39 +2847,44 @@
        ═══════════════════════════════ */
     async function buyItem(type, id) {
       if (viewingUid !== currentUid) return;
-      const list = type === 'pet' ? PETS : PLANTS;
-      const item = list.find(i => i.id === id);
+      if (type === 'pet') {
+        // Adopt a new pet instance
+        const petDef = PETS.find(p => p.id === id);
+        if (!petDef || roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
+        roomData.coins -= petDef.cost;
+        const newPet = {
+          id: makePetId(), type: id, name: petDef.name,
+          hunger: 100, thirst: 100, affection: 0,
+          color: PET_COLORS[id] ? PET_COLORS[id][0].key : null,
+          active: true, accessory: null
+        };
+        roomData.pets.push(newPet);
+        await saveRoom();
+        renderAll();
+        showToast('Adopted ' + petDef.emoji + ' ' + petDef.name + '!', 'success');
+        return;
+      }
+      // Plant buying logic
+      const item = PLANTS.find(i => i.id === id);
       if (!item || roomData.coins < item.cost) return showToast('Not enough coins!', 'error');
-
-      const ownedKey = type === 'pet' ? 'ownedPets' : 'ownedPlants';
-      if (roomData[ownedKey].includes(id)) return;
+      if (roomData.ownedPlants.includes(id)) return;
 
       roomData.coins -= item.cost;
-      roomData[ownedKey].push(id);
-      // Set initial data for this item
-      if (type === 'pet') roomData.petHunger[id] = 100;
-      if (type === 'plant') {
-        // Inherit only from CHEAPER plants (prevent exploit loop)
-        const newPlantCost = item.cost;
-        let totalInvest = 0;
-        for (const pid of roomData.ownedPlants) {
-          if (pid === id) continue;
-          const oldDef = PLANTS.find(p => p.id === pid);
-          if (!oldDef || oldDef.cost >= newPlantCost) continue;
-          const pLvl = roomData.plantLevels[pid] || 1;
-          totalInvest += getTotalPlantInvestment(pid, pLvl);
-        }
-        const inherited = totalInvest > 0 ? getInheritedLevel(id, totalInvest) : 1;
-        roomData.plantLevels[id] = inherited;
-        if (inherited > 1) showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
+      roomData.ownedPlants.push(id);
+      // Inherit only from CHEAPER plants (prevent exploit loop)
+      const newPlantCost = item.cost;
+      let totalInvest = 0;
+      for (const pid of roomData.ownedPlants) {
+        if (pid === id) continue;
+        const oldDef = PLANTS.find(p => p.id === pid);
+        if (!oldDef || oldDef.cost >= newPlantCost) continue;
+        const pLvl = roomData.plantLevels[pid] || 1;
+        totalInvest += getTotalPlantInvestment(pid, pLvl);
       }
-      // Auto-equip: pets fill 2 slots, plants 1 slot
-      if (type === 'pet') {
-        if (!roomData.pet) roomData.pet = id;
-        else if (!roomData.pet2) roomData.pet2 = id;
-      } else {
-        if (!roomData[type]) roomData[type] = id;
-      }
+      const inherited = totalInvest > 0 ? getInheritedLevel(id, totalInvest) : 1;
+      roomData.plantLevels[id] = inherited;
+      if (inherited > 1) showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
+      if (!roomData.plant) roomData.plant = id;
       await saveRoom();
       renderAll();
       showToast('Bought ' + item.emoji + ' ' + item.name + '!', 'success');
@@ -2777,34 +2892,24 @@
 
     async function equipItem(type, id) {
       if (viewingUid !== currentUid) return;
-      if (type === 'pet') {
-        // Already equipped?
-        if (roomData.pet === id || roomData.pet2 === id) return;
-        // Fill empty slot or replace slot 1
-        if (!roomData.pet) roomData.pet = id;
-        else if (!roomData.pet2) roomData.pet2 = id;
-        else roomData.pet = id;
-      } else {
-        roomData[type] = id;
-        // Recalculate inheritance from CHEAPER plants only (prevent exploit loop)
-        if (type === 'plant') {
-          const targetDef = PLANTS.find(p => p.id === id);
-          const targetCost = targetDef ? targetDef.cost : 0;
-          let totalInvest = 0;
-          for (const pid of roomData.ownedPlants) {
-            if (pid === id) continue;
-            const oldDef = PLANTS.find(p => p.id === pid);
-            if (!oldDef || oldDef.cost >= targetCost) continue;
-            const pLvl = roomData.plantLevels[pid] || 1;
-            totalInvest += getTotalPlantInvestment(pid, pLvl);
-          }
-          if (totalInvest > 0) {
-            const inherited = getInheritedLevel(id, totalInvest);
-            const currentLvl = roomData.plantLevels[id] || 1;
-            if (inherited > currentLvl) {
-              roomData.plantLevels[id] = inherited;
-              showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
-            }
+      if (type === 'plant') {
+        roomData.plant = id;
+        const targetDef = PLANTS.find(p => p.id === id);
+        const targetCost = targetDef ? targetDef.cost : 0;
+        let totalInvest = 0;
+        for (const pid of roomData.ownedPlants) {
+          if (pid === id) continue;
+          const oldDef = PLANTS.find(p => p.id === pid);
+          if (!oldDef || oldDef.cost >= targetCost) continue;
+          const pLvl = roomData.plantLevels[pid] || 1;
+          totalInvest += getTotalPlantInvestment(pid, pLvl);
+        }
+        if (totalInvest > 0) {
+          const inherited = getInheritedLevel(id, totalInvest);
+          const currentLvl = roomData.plantLevels[id] || 1;
+          if (inherited > currentLvl) {
+            roomData.plantLevels[id] = inherited;
+            showToast('Inherited Lv.' + inherited + ' from previous upgrades!', 'success');
           }
         }
       }
@@ -2815,23 +2920,23 @@
 
     async function unequipItem(type, id) {
       if (viewingUid !== currentUid) return;
-      if (type === 'pet') {
-        if (roomData.pet === id) roomData.pet = null;
-        else if (roomData.pet2 === id) roomData.pet2 = null;
-      } else {
-        roomData[type] = null;
+      if (type === 'plant') {
+        roomData.plant = null;
       }
       await saveRoom();
       renderAll();
       showToast('Removed from room!', 'success');
     }
 
-    async function setPetColor(petId, colorKey) {
+    async function setPetColor(petInstanceId, colorKey) {
       if (viewingUid !== currentUid) return;
-      roomData.petColors[petId] = colorKey;
+      const pet = getPet(petInstanceId);
+      if (!pet) return;
+      pet.color = colorKey;
+      _lastPetKey = ''; // Force canvas redraw
       await saveRoom();
       renderRoom();
-      renderShop();
+      updatePetStatusBar();
     }
 
     async function buyDecor(id) {
@@ -2935,28 +3040,52 @@
       if (bgc) bgc.dataset.init = '1';
     }
 
-    async function feedPet(foodId, petId) {
+    async function feedPet(foodId, petInstanceId) {
       if (viewingUid !== currentUid) return;
-      if (!petId) petId = roomData.pet;
-      if (!petId) return;
+      const pet = petInstanceId ? getPet(petInstanceId) : getActivePets()[0];
+      if (!pet) return;
       const food = FOODS.find(f => f.id === foodId);
       if (!food || roomData.coins < food.cost) return showToast('Not enough coins!', 'error');
       roomData.coins -= food.cost;
-      const current = roomData.petHunger[petId] ?? 100;
-      roomData.petHunger[petId] = Math.min(100, current + food.restore);
-      const curAff = roomData.petAffection[petId] ?? 0;
-      const oldMilestone = getAffectionTitle(curAff);
-      roomData.petAffection[petId] = curAff + food.restore;
-      const newMilestone = getAffectionTitle(curAff + food.restore);
+      pet.hunger = Math.min(100, (pet.hunger ?? 100) + food.restore);
       await saveRoom();
-      const petName = PETS.find(p => p.id === petId)?.name || 'Pet';
+      showToast(food.emoji + ' Fed ' + pet.name + '! +' + food.restore + '%', 'success');
+      updatePetStatusBar();
+    }
+
+    async function useToy(toyId, petInstanceId) {
+      if (viewingUid !== currentUid) return;
+      const pet = petInstanceId ? getPet(petInstanceId) : getActivePets()[0];
+      if (!pet) return;
+      const toy = TOYS.find(t => t.id === toyId);
+      if (!toy || roomData.coins < toy.cost) return showToast('Not enough coins!', 'error');
+      roomData.coins -= toy.cost;
+      const curAff = pet.affection ?? 0;
+      const oldMilestone = getAffectionTitle(curAff);
+      pet.affection = curAff + toy.affection;
+      const newMilestone = getAffectionTitle(pet.affection);
+      await saveRoom();
       if (newMilestone.min > oldMilestone.min && newMilestone.reward > 0) {
         roomData.coins += newMilestone.reward;
         await saveRoom();
-        showToast('🎉 ' + petName + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
+        showToast('🎉 ' + pet.name + ' reached "' + newMilestone.title + '"! +' + newMilestone.reward + ' coins!', 'success');
       } else {
-        showToast(food.emoji + ' Fed ' + petName + '! +' + food.restore + '% ♥+' + food.restore, 'success');
+        showToast(toy.emoji + ' Played with ' + pet.name + '! ♥+' + toy.affection, 'success');
       }
+      updatePetStatusBar();
+    }
+
+    async function drinkPet(drinkId, petInstanceId) {
+      if (viewingUid !== currentUid) return;
+      const pet = petInstanceId ? getPet(petInstanceId) : getActivePets()[0];
+      if (!pet) return;
+      const drink = DRINKS.find(d => d.id === drinkId);
+      if (!drink || roomData.coins < drink.cost) return showToast('Not enough coins!', 'error');
+      roomData.coins -= drink.cost;
+      pet.thirst = Math.min(100, (pet.thirst ?? 100) + drink.restore);
+      await saveRoom();
+      showToast(drink.emoji + ' Gave ' + pet.name + ' a drink! +' + drink.restore + '%', 'success');
+      updatePetStatusBar();
     }
 
     // Drag-and-drop food to pet
@@ -2965,23 +3094,24 @@
       e.dataTransfer.effectAllowed = 'move';
     }
 
-    /* ── Mobile tap-to-feed system ── */
+    /* ── Mobile tap-to-feed/toy system ── */
     let selectedFood = null;
+    let selectedToy = null;
+    let selectedDrink = null;
 
     function initMobileFoodTap() {
-      // Tap a food card to select it
       document.addEventListener('click', (e) => {
+        // Tap a food card to select it
         const foodCard = e.target.closest('.food-card[data-food]');
         if (foodCard && !foodCard.classList.contains('disabled')) {
           const foodId = foodCard.dataset.food;
-          // Deselect if already selected
           if (selectedFood === foodId) {
             selectedFood = null;
             document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
             showToast('Deselected food', '');
             return;
           }
-          selectedFood = foodId;
+          selectedFood = foodId; selectedToy = null; selectedDrink = null;
           document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
           foodCard.classList.add('selected');
           const food = FOODS.find(f => f.id === foodId);
@@ -2989,33 +3119,70 @@
           return;
         }
 
-        // Tap anywhere on room to feed (covers plant-slot, decor, bg canvas, pet canvas, etc.)
-        if (!selectedFood) return;
+        // Tap a toy card to select it
+        const toyCard = e.target.closest('.food-card[data-toy]');
+        if (toyCard && !toyCard.classList.contains('disabled')) {
+          const toyId = toyCard.dataset.toy;
+          if (selectedToy === toyId) {
+            selectedToy = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            showToast('Deselected toy', '');
+            return;
+          }
+          selectedToy = toyId; selectedFood = null; selectedDrink = null;
+          document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+          toyCard.classList.add('selected');
+          const toy = TOYS.find(t => t.id === toyId);
+          showToast(toy.emoji + ' Selected! Tap your pet to play', 'success');
+          return;
+        }
+
+        // Tap a drink card to select it
+        const drinkCard = e.target.closest('.food-card[data-drink]');
+        if (drinkCard && !drinkCard.classList.contains('disabled')) {
+          const drinkId = drinkCard.dataset.drink;
+          if (selectedDrink === drinkId) {
+            selectedDrink = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            showToast('Deselected drink', '');
+            return;
+          }
+          selectedDrink = drinkId; selectedFood = null; selectedToy = null;
+          document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+          drinkCard.classList.add('selected');
+          const drink = DRINKS.find(d => d.id === drinkId);
+          showToast(drink.emoji + ' Selected! Tap your pet to hydrate', 'success');
+          return;
+        }
+
+        // Tap anywhere on room to feed/play/drink
+        if (!selectedFood && !selectedToy && !selectedDrink) return;
         const room = document.getElementById('roomView');
         if (!room) return;
         const roomRect = room.getBoundingClientRect();
-        // Check if tap is within room bounds
         const cx = e.clientX, cy = e.clientY;
         if (cx < roomRect.left || cx > roomRect.right || cy < roomRect.top || cy > roomRect.bottom) return;
 
         const tapX = (cx - roomRect.left) / roomRect.width;
         const tapY = (cy - roomRect.top) / roomRect.height;
 
-        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        const activePets = getActivePets();
         if (!activePets.length) return;
 
         let closestPet = activePets[0];
         let closestDist = Infinity;
-        for (const pid of activePets) {
-          const st = petStates[pid];
+        for (const pet of activePets) {
+          const st = petStates[pet.id];
           if (!st) continue;
           const dx = st.x - tapX;
           const dy = st.y - tapY;
           const dist = dx * dx + dy * dy;
-          if (dist < closestDist) { closestDist = dist; closestPet = pid; }
+          if (dist < closestDist) { closestDist = dist; closestPet = pet; }
         }
-        feedPet(selectedFood, closestPet);
-        selectedFood = null;
+        if (selectedFood) feedPet(selectedFood, closestPet.id);
+        else if (selectedToy) useToy(selectedToy, closestPet.id);
+        else if (selectedDrink) drinkPet(selectedDrink, closestPet.id);
+        selectedFood = null; selectedToy = null; selectedDrink = null;
         document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
       });
     }
@@ -3036,28 +3203,27 @@
         const foodId = e.dataTransfer.getData('text/plain');
         if (!foodId) return;
 
-        // Find closest pet to drop point
         const rect = room.getBoundingClientRect();
         const dropX = (e.clientX - rect.left) / rect.width;
         const dropY = (e.clientY - rect.top) / rect.height;
 
-        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        const activePets = getActivePets();
         if (!activePets.length) return;
 
         let closestPet = activePets[0];
         let closestDist = Infinity;
-        for (const pid of activePets) {
-          const st = petStates[pid];
+        for (const pet of activePets) {
+          const st = petStates[pet.id];
           if (!st) continue;
           const dx = st.x - dropX;
           const dy = st.y - dropY;
           const dist = dx * dx + dy * dy;
           if (dist < closestDist) {
             closestDist = dist;
-            closestPet = pid;
+            closestPet = pet;
           }
         }
-        feedPet(foodId, closestPet);
+        feedPet(foodId, closestPet.id);
       });
     }
 
@@ -3367,13 +3533,9 @@
       const snap = await userDocRef(uid).get();
       if (!snap.exists) return showToast('Room not found', 'error');
       const d = snap.data();
-      roomData.pet = d.pet ?? null;
-      roomData.pet2 = d.pet2 ?? null;
+      // Migrate visited room's pet data to new format
+      roomData.pets = migratePets(d);
       roomData.plant = d.plant ?? null;
-      roomData.petHunger = d.petHunger ?? {};
-      roomData.petAffection = d.petAffection ?? {};
-      roomData.petColors = d.petColors ?? {};
-      roomData.petAccessories = d.petAccessories ?? {};
       roomData.plantLevels = d.plantLevels ?? {};
       roomData.plantPosition = d.plantPosition ?? null;
       roomData.displayName = d.displayName ?? 'Anonymous';
@@ -3395,6 +3557,7 @@
       // Reset render keys so room fully redraws for visited user
       _lastPetKey = '';
       _lastPlantKey = '';
+      closePetStatus();
       const bgc = document.getElementById('roomBgCanvas');
       if (bgc) delete bgc.dataset.init;
       // Keep own coins visible
@@ -6400,6 +6563,8 @@
        ═══════════════════════════════ */
     let petAnimFrame = null;
     let petStates = {};
+    let _selectedPetId = null; // Currently selected pet for status bar
+
     function getPetState(id, idx) {
       if (!petStates[id]) {
         petStates[id] = {
@@ -6407,10 +6572,10 @@
           tx: 0.5, ty: 0.78,
           speed: 0.0004, nextWander: 0, facingRight: true,
           action: null, actionEnd: 0, actionCooldown: 0,
-          // Natural movement additions
-          vx: 0, vy: 0,              // velocity for smooth accel/decel
-          pauseUntil: 0,             // occasional pause timestamp
-          idlePhase: Math.random() * Math.PI * 2  // breathing offset
+          vx: 0, vy: 0,
+          pauseUntil: 0,
+          idlePhase: Math.random() * Math.PI * 2,
+          stopped: false // When true, pet stops for status bar
         };
       }
       return petStates[id];
@@ -6445,15 +6610,69 @@
       cvs.width = rw; cvs.height = rh;
       const ctx = cvs.getContext('2d');
 
-      // Ensure each pet has a state
-      pets.forEach((p, i) => getPetState(p.type, i));
+      // Ensure each pet has a state (keyed by instance ID)
+      pets.forEach((p, i) => getPetState(p.id, i));
+
+      // Pet click handler — feed/play if item selected, otherwise show status bar
+      cvs.onclick = function(e) {
+        const rect = cvs.getBoundingClientRect();
+        const clickX = (e.clientX - rect.left) / rect.width;
+        const clickY = (e.clientY - rect.top) / rect.height;
+        let closestPet = null;
+        let closestDist = Infinity;
+        for (const p of pets) {
+          const st = petStates[p.id];
+          if (!st) continue;
+          const dx = st.x - clickX;
+          const dy = st.y - clickY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 0.12 && dist < closestDist) {
+            closestDist = dist;
+            closestPet = p;
+          }
+        }
+        if (closestPet) {
+          // If food or toy is selected, feed/play instead of showing status bar
+          if (selectedFood) {
+            feedPet(selectedFood, closestPet.id);
+            selectedFood = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            e.stopPropagation();
+            return;
+          }
+          if (selectedToy) {
+            useToy(selectedToy, closestPet.id);
+            selectedToy = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            e.stopPropagation();
+            return;
+          }
+          if (selectedDrink) {
+            drinkPet(selectedDrink, closestPet.id);
+            selectedDrink = null;
+            document.querySelectorAll('.food-card').forEach(c => c.classList.remove('selected'));
+            e.stopPropagation();
+            return;
+          }
+          // No item selected — toggle status bar
+          if (_selectedPetId === closestPet.id) {
+            closePetStatus();
+          } else {
+            if (_selectedPetId && petStates[_selectedPetId]) petStates[_selectedPetId].stopped = false;
+            _selectedPetId = closestPet.id;
+            petStates[closestPet.id].stopped = true;
+            showPetStatus(closestPet.id);
+          }
+          e.stopPropagation();
+        } else {
+          closePetStatus();
+        }
+      };
 
       let _lastPetFrame = 0;
       function frame(t) {
-        // Throttle to ~30fps
         if (t - _lastPetFrame < 33) { petAnimFrame = requestAnimationFrame(frame); return; }
         _lastPetFrame = t;
-        // Update canvas size if room resized
         const nw = room.clientWidth, nh = room.clientHeight;
         if (nw && nh && (nw !== rw || nh !== rh)) {
           rw = nw; rh = nh; cvs.width = rw; cvs.height = rh;
@@ -6462,86 +6681,88 @@
         const now = Date.now();
 
         for (const p of pets) { try {
-          const st = petStates[p.type];
-          // Live hunger read
-          const hunger = roomData.petHunger[p.type] ?? p.hunger;
+          const st = petStates[p.id];
+          // Read hunger/affection from pet instance in roomData
+          const petInst = getPet(p.id);
+          const hunger = petInst ? (petInst.hunger ?? 100) : (p.hunger ?? 100);
           let moving = false;
           let actionProgress = -1;
           let currentAction = null;
+          const color = petInst ? petInst.color : p.color;
 
-          // Action system
-          if (st.action && now < st.actionEnd) {
-            currentAction = st.action;
-            const dur = st.actionDur || 2500;
-            actionProgress = (now - (st.actionEnd - dur)) / dur;
-            actionProgress = Math.max(0, Math.min(1, actionProgress));
+          // If pet is stopped (status bar open), don't wander or act
+          if (st.stopped) {
+            moving = false;
+            st.vx = 0; st.vy = 0;
           } else {
-            if (st.action) {
-              st.action = null;
-              st.actionCooldown = now + 4000 + Math.random() * 5000;
-            }
-            if (!st.action && now > st.actionCooldown && Math.random() < 0.008) {
-              st.action = pickAction(p.type);
-              // Varied durations by action type for more natural feel
-              if (st.action === 'sleep' || st.action === 'nap' || st.action === 'flop') {
-                st.actionDur = 5000 + Math.random() * 3000;
-              } else if (st.action === 'yawn' || st.action === 'headtilt' || st.action === 'peek' || st.action === 'nosewiggle') {
-                st.actionDur = 1500 + Math.random() * 1000;
-              } else if (st.action === 'binky' || st.action === 'tumble' || st.action === 'shake') {
-                st.actionDur = 1800 + Math.random() * 800;
-              } else {
-                st.actionDur = 2200 + Math.random() * 1200;
-              }
-              st.actionEnd = now + st.actionDur;
-            }
-
-            // Wander
-            if (now > st.nextWander) {
-              st.tx = 0.06 + Math.random() * 0.60;
-              st.ty = 0.72 + Math.random() * 0.18;
-              st.nextWander = now + 4000 + Math.random() * 6000;
-              // Occasionally pause before moving
-              if (Math.random() < 0.35) {
-                st.pauseUntil = now + 800 + Math.random() * 1500;
-              }
-            }
-
-            // Pausing?
-            if (now < st.pauseUntil) {
-              moving = false;
-              st.vx *= 0.9; st.vy *= 0.9;
+            // Action system
+            if (st.action && now < st.actionEnd) {
+              currentAction = st.action;
+              const dur = st.actionDur || 2500;
+              actionProgress = (now - (st.actionEnd - dur)) / dur;
+              actionProgress = Math.max(0, Math.min(1, actionProgress));
             } else {
-              const dx = st.tx - st.x;
-              const dy = st.ty - st.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              const wantMove = dist > 0.005;
+              if (st.action) {
+                st.action = null;
+                st.actionCooldown = now + 4000 + Math.random() * 5000;
+              }
+              if (!st.action && now > st.actionCooldown && Math.random() < 0.008) {
+                st.action = pickAction(p.type);
+                if (st.action === 'sleep' || st.action === 'nap' || st.action === 'flop') {
+                  st.actionDur = 5000 + Math.random() * 3000;
+                } else if (st.action === 'yawn' || st.action === 'headtilt' || st.action === 'peek' || st.action === 'nosewiggle') {
+                  st.actionDur = 1500 + Math.random() * 1000;
+                } else if (st.action === 'binky' || st.action === 'tumble' || st.action === 'shake') {
+                  st.actionDur = 1800 + Math.random() * 800;
+                } else {
+                  st.actionDur = 2200 + Math.random() * 1200;
+                }
+                st.actionEnd = now + st.actionDur;
+              }
 
-              if (wantMove) {
-                const maxSpeed = st.speed * (hunger > 30 ? 1 : 0.5);
-                // Ease in/out: accelerate smoothly, decelerate near target
-                const easeIn = 0.08;
-                const decelDist = 0.08;
-                const speedMult = dist < decelDist ? (dist / decelDist) * 0.6 + 0.4 : 1;
-                const targetVx = (dx / dist) * maxSpeed * speedMult * 16;
-                const targetVy = (dy / dist) * maxSpeed * speedMult * 16;
-                st.vx += (targetVx - st.vx) * easeIn;
-                st.vy += (targetVy - st.vy) * easeIn;
-                st.x += st.vx;
-                st.y += st.vy;
-                moving = true;
-                if (Math.abs(dx) > 0.01) st.facingRight = dx > 0;
+              // Wander
+              if (now > st.nextWander) {
+                st.tx = 0.06 + Math.random() * 0.60;
+                st.ty = 0.72 + Math.random() * 0.18;
+                st.nextWander = now + 4000 + Math.random() * 6000;
+                if (Math.random() < 0.35) {
+                  st.pauseUntil = now + 800 + Math.random() * 1500;
+                }
+              }
+
+              if (now < st.pauseUntil) {
+                moving = false;
+                st.vx *= 0.9; st.vy *= 0.9;
               } else {
-                // Decelerate to stop
-                st.vx *= 0.85;
-                st.vy *= 0.85;
-                st.x += st.vx;
-                st.y += st.vy;
-                moving = Math.abs(st.vx) > 0.00005 || Math.abs(st.vy) > 0.00005;
+                const dx = st.tx - st.x;
+                const dy = st.ty - st.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const wantMove = dist > 0.005;
+
+                if (wantMove) {
+                  const maxSpeed = st.speed * (hunger > 30 ? 1 : 0.5);
+                  const easeIn = 0.08;
+                  const decelDist = 0.08;
+                  const speedMult = dist < decelDist ? (dist / decelDist) * 0.6 + 0.4 : 1;
+                  const targetVx = (dx / dist) * maxSpeed * speedMult * 16;
+                  const targetVy = (dy / dist) * maxSpeed * speedMult * 16;
+                  st.vx += (targetVx - st.vx) * easeIn;
+                  st.vy += (targetVy - st.vy) * easeIn;
+                  st.x += st.vx;
+                  st.y += st.vy;
+                  moving = true;
+                  if (Math.abs(dx) > 0.01) st.facingRight = dx > 0;
+                } else {
+                  st.vx *= 0.85;
+                  st.vy *= 0.85;
+                  st.x += st.vx;
+                  st.y += st.vy;
+                  moving = Math.abs(st.vx) > 0.00005 || Math.abs(st.vy) > 0.00005;
+                }
               }
             }
           }
 
-          // Clamp pet to floor area (floor starts at 0.65 normalized)
           st.x = Math.max(0.04, Math.min(0.70, st.x));
           st.y = Math.max(0.70, Math.min(0.92, st.y));
 
@@ -6555,7 +6776,6 @@
           ctx.translate(px, py);
           ctx.scale(st.facingRight ? depthScale : -depthScale, depthScale);
 
-          // Natural bob: walking has bounce, idle has gentle breathing
           let bob = 0;
           let legPhase = 0;
           if (moving) {
@@ -6563,9 +6783,7 @@
             bob = Math.sin(t / 100) * (1.5 + walkSpeed * 0.5);
             legPhase = t / 100;
           } else {
-            // Idle breathing sway
             bob = Math.sin(t / 800 + st.idlePhase) * 0.8;
-            // Tiny body sway
             ctx.rotate(Math.sin(t / 1200 + st.idlePhase) * 0.015);
           }
           ctx.translate(0, bob);
@@ -6574,9 +6792,9 @@
             applyActionTransform(ctx, p.type, currentAction, actionProgress, size, t);
           }
 
-          drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress, p.color);
+          drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress, color);
           // Draw accessory on top
-          const accId = (roomData.petAccessories || {})[p.type];
+          const accId = petInst ? petInst.accessory : null;
           if (accId) drawPetAccessory(ctx, p.type, accId, size);
           ctx.restore();
 
@@ -6606,24 +6824,105 @@
           ctx.textAlign = 'center';
           ctx.fillText(Math.round(hunger) + '%', px, barY + barH + 10 * depthScale);
 
-          // Pet name
-          const petDef = PETS.find(x => x.id === p.type);
+          // Pet name (from instance)
+          const petName = petInst ? petInst.name : (PETS.find(x => x.id === p.type)?.name || 'Pet');
           ctx.fillStyle = 'rgba(255,255,255,0.85)';
           ctx.font = 'bold ' + Math.round(10 * depthScale) + 'px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(petDef?.name || 'Pet', px, barY - 12 * depthScale);
+          ctx.fillText(petName, px, barY - 12 * depthScale);
 
-          // Affection (好感度) + title
-          const aff = roomData.petAffection[p.type] ?? 0;
+          // Affection + title
+          const aff = petInst ? (petInst.affection ?? 0) : 0;
           const affTitle = getAffectionTitle(aff);
           ctx.fillStyle = 'rgba(255,150,180,0.9)';
           ctx.font = Math.round(7 * depthScale) + 'px sans-serif';
           ctx.fillText('♥ ' + aff + '  ' + affTitle.title, px, barY - 2 * depthScale);
+
+          // Selection highlight
+          if (_selectedPetId === p.id) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.arc(px, py - size * 0.3, size * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
         } catch(e) { ctx.restore(); } }
 
         petAnimFrame = requestAnimationFrame(frame);
       }
       petAnimFrame = requestAnimationFrame(frame);
+    }
+
+    /* ── Pet Status Bar ── */
+    function showPetStatus(petId) {
+      _selectedPetId = petId;
+      const bar = document.getElementById('petStatusBar');
+      bar.style.display = 'block';
+      updatePetStatusBar();
+    }
+
+    function closePetStatus() {
+      if (_selectedPetId && petStates[_selectedPetId]) {
+        petStates[_selectedPetId].stopped = false;
+      }
+      _selectedPetId = null;
+      document.getElementById('petStatusBar').style.display = 'none';
+    }
+
+    function updatePetStatusBar() {
+      if (!_selectedPetId) return;
+      const pet = getPet(_selectedPetId);
+      if (!pet) { closePetStatus(); return; }
+
+      document.getElementById('petStatusName').value = pet.name || '';
+
+      const hunger = pet.hunger ?? 100;
+      const hBar = document.getElementById('petStatusHunger');
+      hBar.style.width = hunger + '%';
+      hBar.style.background = hunger > 50 ? '#34d399' : hunger > 20 ? '#fbbf24' : '#f87171';
+      document.getElementById('petStatusHungerVal').textContent = Math.round(hunger) + '%';
+
+      const thirst = pet.thirst ?? 100;
+      const tBar = document.getElementById('petStatusThirst');
+      tBar.style.width = thirst + '%';
+      tBar.style.background = thirst > 50 ? '#60a5fa' : thirst > 20 ? '#fbbf24' : '#f87171';
+      document.getElementById('petStatusThirstVal').textContent = Math.round(thirst) + '%';
+
+      const aff = pet.affection ?? 0;
+      const ms = getAffectionTitle(aff);
+      const maxAff = AFFECTION_MILESTONES[AFFECTION_MILESTONES.length - 1].min * 1.5 || 500;
+      document.getElementById('petStatusAffection').style.width = Math.min(100, (aff / maxAff) * 100) + '%';
+      document.getElementById('petStatusAffectionVal').textContent = '♥' + aff + ' ' + ms.title;
+
+      // Color dots
+      const colorsEl = document.getElementById('petStatusColors');
+      const colors = PET_COLORS[pet.type];
+      if (colors && colors.length) {
+        colorsEl.innerHTML = colors.map(c =>
+          '<div onclick="setPetColor(\'' + pet.id + '\',\'' + c.key + '\')" title="' + c.name + '" style="' +
+          'width:20px;height:20px;border-radius:50%;background:' + (c.body || c.key) + ';cursor:pointer;' +
+          'border:2px solid ' + (c.key === pet.color ? '#fff' : 'rgba(255,255,255,0.2)') + ';' +
+          'box-shadow:' + (c.key === pet.color ? '0 0 6px rgba(255,255,255,0.5)' : 'none') +
+          '"></div>'
+        ).join('');
+      } else {
+        colorsEl.innerHTML = '';
+      }
+    }
+
+    let _petNameTimer = null;
+    function onPetNameChange(val) {
+      if (!_selectedPetId) return;
+      const pet = getPet(_selectedPetId);
+      if (!pet) return;
+      pet.name = val.trim() || PETS.find(p => p.id === pet.type)?.name || 'Pet';
+      clearTimeout(_petNameTimer);
+      _petNameTimer = setTimeout(() => {
+        _lastPetKey = ''; // Force canvas to pick up new name
+        saveRoom();
+      }, 600);
     }
 
     function roundRectPath(ctx, x, y, w, h, r) {
@@ -7160,12 +7459,12 @@
       setTimeout(() => {
         startRoomBgAnimation();
         // Also restart pet animation if active
-        const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+        const activePets = getActivePets();
         if (activePets.length) {
-          const petInfos = activePets.map(id => ({
-            type: PETS.find(p => p.id === id)?.id || 'cat',
-            hunger: roomData.petHunger[id] ?? 100,
-            color: roomData.petColors[id] || null
+          const petInfos = activePets.map(p => ({
+            id: p.id, type: p.type,
+            hunger: p.hunger ?? 100,
+            color: p.color || null
           }));
           startPetAnimation(petInfos);
         }
@@ -7551,15 +7850,15 @@
     function renderAccessoryShop() {
       const el = document.getElementById('accShop');
       if (!el) return;
-      const activePets = [roomData.pet, roomData.pet2].filter(Boolean);
+      const activePets = getActivePets();
       let html = '';
 
       // Accessory cards
       html += '<div class="acc-grid">';
       PET_ACCESSORIES.forEach(acc => {
         const isOwned = (roomData.ownedAccessories || []).includes(acc.id);
-        // Check if currently equipped on any pet
-        const equippedOn = activePets.filter(pid => (roomData.petAccessories || {})[pid] === acc.id);
+        // Check if currently equipped on any pet instance
+        const equippedOn = activePets.filter(pet => pet.accessory === acc.id);
         const isEquipped = equippedOn.length > 0;
         let cls = isEquipped ? 'equipped' : isOwned ? 'owned' : '';
         html += '<div class="acc-card ' + cls + '">' +
@@ -7567,16 +7866,14 @@
           '<div class="acc-name">' + acc.name + '</div>';
         if (isOwned) {
           html += '<div class="acc-price" style="color:#34d399">Owned</div>';
-          // Equip/remove buttons for each active pet
           if (activePets.length) {
             html += '<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">';
-            activePets.forEach(pid => {
-              const petName = PETS.find(p => p.id === pid)?.name || pid;
-              const equipped = (roomData.petAccessories || {})[pid] === acc.id;
+            activePets.forEach(pet => {
+              const equipped = pet.accessory === acc.id;
               if (equipped) {
-                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;background:rgba(239,68,68,.2);color:#f87171;width:100%;position:relative;z-index:5" onclick="window.removePetAcc(\'' + pid + '\');return false;">✕ ' + petName + '</button>';
+                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;background:rgba(239,68,68,.2);color:#f87171;width:100%;position:relative;z-index:5" onclick="window.removePetAcc(\'' + pet.id + '\');return false;">✕ ' + pet.name + '</button>';
               } else {
-                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;width:100%;position:relative;z-index:5" onclick="window.equipPetAcc(\'' + pid + '\',\'' + acc.id + '\');return false;">' + petName + '</button>';
+                html += '<button class="food-btn" style="font-size:11px;padding:8px 6px;width:100%;position:relative;z-index:5" onclick="window.equipPetAcc(\'' + pet.id + '\',\'' + acc.id + '\');return false;">' + pet.name + '</button>';
               }
             });
             html += '</div>';
@@ -7592,17 +7889,17 @@
       if (activePets.length) {
         html += '<div class="shop-section-title" style="margin-top:20px">🎪 Pet Tricks</div>';
         html += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-align:center">Pets learn tricks as affection grows!</div>';
-        activePets.forEach(pid => {
-          const petDef = PETS.find(p => p.id === pid);
-          const affection = roomData.petAffection[pid] || 0;
-          const tricks = PET_TRICKS[pid] || [];
+        activePets.forEach(pet => {
+          const petDef = PETS.find(p => p.id === pet.type);
+          const affection = pet.affection || 0;
+          const tricks = PET_TRICKS[pet.type] || [];
           if (!tricks.length) return;
-          html += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px">' + (petDef?.emoji || '') + ' ' + (petDef?.name || pid) + ' (❤️ ' + affection + ')</div>';
+          html += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px">' + (petDef?.emoji || '') + ' ' + pet.name + ' (❤️ ' + affection + ')</div>';
           html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
           tricks.forEach(tr => {
             const unlocked = affection >= tr.minAffection;
             html += '<button class="food-btn" style="font-size:10px;' + (unlocked ? '' : 'opacity:.4;cursor:not-allowed') + '" ' +
-              (unlocked ? 'onclick="window.triggerPetTrick(\'' + pid + '\',\'' + tr.id + '\');return false;"' : 'disabled') +
+              (unlocked ? 'onclick="window.triggerPetTrick(\'' + pet.type + '\',\'' + tr.id + '\');return false;"' : 'disabled') +
               '>' + tr.name + (unlocked ? '' : ' (❤️' + tr.minAffection + ')') + '</button>';
           });
           html += '</div></div>';
@@ -7644,8 +7941,9 @@
 
     async function equipPetAcc(petId, accId) {
       if (viewingUid !== currentUid) return;
-      roomData.petAccessories = roomData.petAccessories || {};
-      roomData.petAccessories[petId] = accId;
+      const pet = getPet(petId);
+      if (!pet) return;
+      pet.accessory = accId;
       _lastPetKey = '';
       _lastLocalSaveTime = Date.now();
       const panelInner = document.querySelector('.panel-inner');
@@ -7657,17 +7955,14 @@
 
     async function removePetAcc(petId) {
       if (viewingUid !== currentUid) return;
-      roomData.petAccessories = roomData.petAccessories || {};
-      delete roomData.petAccessories[petId];
+      const pet = getPet(petId);
+      if (!pet) return;
+      pet.accessory = null;
       _lastPetKey = '';
       _lastLocalSaveTime = Date.now();
       const panelInner = document.querySelector('.panel-inner');
       const scrollTop = panelInner ? panelInner.scrollTop : 0;
-      // Use FieldValue.delete() so Firestore actually removes the key (merge won't do it)
-      await userDocRef().update({
-        ['petAccessories.' + petId]: firebase.firestore.FieldValue.delete(),
-        updatedAt: Date.now()
-      });
+      await saveRoom();
       renderAccessoryShop();
       if (panelInner) panelInner.scrollTop = scrollTop;
       showToast('Accessory removed!', 'success');

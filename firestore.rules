@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Room documents — each user owns their room (doc ID = uid)
+    match /rooms/{uid} {
+      // Anyone can read (for visiting rooms)
+      allow read: if request.auth != null;
+
+      // Only the document owner can write
+      allow create, update: if request.auth != null
+                            && request.auth.uid == uid
+                            && validateRoomData(request.resource.data);
+
+      allow delete: if false; // Prevent accidental deletion
+    }
+
+    function validateRoomData(data) {
+      return data.coins is number
+          && data.coins >= 0
+          // pets: array of pet instances
+          && data.pets is list
+          && data.pets.size() <= 20  // reasonable pet limit
+          // plant fields
+          && (data.plant == null || data.plant is string)
+          && data.plantLevels is map
+          && data.ownedPlants is list
+          // decor fields
+          && data.ownedDecors is list
+          && data.placedDecors is list
+          && data.ownedWalls is list
+          && data.wallPattern is string
+          && data.ownedWindows is list
+          && data.windowStyle is string
+          // misc
+          && data.ownedAccessories is list
+          && data.displayName is string
+          && data.displayName.size() <= 30
+          && data.updatedAt is number;
+    }
+  }
+}
