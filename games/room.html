@@ -1898,23 +1898,26 @@
       const el = document.getElementById('petShop');
       const titleEl = el.previousElementSibling;
       const petCount = roomData.pets.length;
+      const activeCount = getActivePets().length;
       if (titleEl) titleEl.innerHTML = '🐾 Pets <span class="slot-badge">' + petCount + ' adopted</span>';
       el.innerHTML = PETS.map(item => {
         const ownedCount = roomData.pets.filter(p => p.type === item.id).length;
+        const typeMaxed = ownedCount >= 2; // Max 2 of each type
         const canAfford = roomData.coins >= item.cost;
-        const roomFull = petCount >= 2;
+        const roomDisplayFull = activeCount >= 2; // Room can only show 2 active pets
         return '<div class="shop-card' + (ownedCount > 0 ? ' owned' : '') + '">' +
           '<span class="shop-emoji">' + item.emoji + '</span>' +
           '<div class="shop-name">' + item.name + '</div>' +
-          (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + '</div>' : '') +
+          (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + ' / 2</div>' : '') +
           '<div class="shop-price">' + coinSVG(14) + ' ' + item.cost + '</div>' +
           '<button class="shop-btn buy" onclick="buyItem(\'pet\',\'' + item.id + '\')" ' +
-            (canAfford && !roomFull ? '' : 'disabled') + '>🐾 Adopt</button>' +
-          (roomFull
+            (canAfford && !typeMaxed ? '' : 'disabled') + '>🐾 Adopt</button>' +
+          (typeMaxed
+            ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Max 2 ' + item.name + 's adopted</div>'
+            : '') +
+          (roomDisplayFull && ownedCount > 0
             ? '<button class="shop-btn" style="margin-top:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)" ' +
-              (canAfford ? '' : 'disabled') +
-              ' onclick="swapPet(\''+item.id+'\')">\uD83D\uDD04 Swap</button>' +
-              '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">Room full (max 2)</div>'
+              ' onclick="swapPet(\''+item.id+'\')">\uD83D\uDD04 Swap into Room</button>'
             : '') +
           '</div>';
       }).join('');
@@ -2882,21 +2885,26 @@
     async function buyItem(type, id) {
       if (viewingUid !== currentUid) return;
       if (type === 'pet') {
-        // Adopt a new pet instance
+        // Adopt a new pet instance (inactive — not placed in room yet)
         const petDef = PETS.find(p => p.id === id);
-        if (roomData.pets.length >= 2) return showToast('Room is full! Max 2 pets allowed.', 'error');
+        if (roomData.pets.length >= 10) return showToast('Max 10 pets! Remove one first.', 'error');
+        // Per-type limit: max 2 of each pet type
+        const typeCount = roomData.pets.filter(p => p.type === id).length;
+        if (typeCount >= 2) return showToast('Already adopted 2 ' + (petDef ? petDef.name : id) + 's!', 'error');
         if (!petDef || roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
         roomData.coins -= petDef.cost;
+        const activeCount = getActivePets().length;
         const newPet = {
           id: makePetId(), type: id, name: petDef.name,
           hunger: 100, thirst: 100, affection: 0,
           color: PET_COLORS[id] ? PET_COLORS[id][0].key : null,
-          active: true, accessory: null
+          active: activeCount < 2, // Auto-place if room has space, otherwise keep inactive
+          accessory: null
         };
         roomData.pets.push(newPet);
         await saveRoom();
         renderAll();
-        showToast('Adopted ' + petDef.emoji + ' ' + petDef.name + '!', 'success');
+        showToast('Adopted ' + petDef.emoji + ' ' + petDef.name + '!' + (newPet.active ? '' : ' Place it from the shop.'), 'success');
         return;
       }
       // Plant buying logic
@@ -2963,66 +2971,87 @@
       showToast('Removed from room!', 'success');
     }
 
-    /* ── Pet Swap — pick which active pet to replace with a new one ── */
+    /* ── Pet Swap — swap an owned inactive pet into the room by replacing an active one ── */
     let _swapNewTypeId = null;
 
-    function swapPet(newTypeId) {
+    function swapPet(typeId) {
       if (viewingUid !== currentUid) return;
-      const petDef = PETS.find(p => p.id === newTypeId);
+      const petDef = PETS.find(p => p.id === typeId);
       if (!petDef) return;
-      if (roomData.coins < petDef.cost) return showToast('Not enough coins!', 'error');
 
-      _swapNewTypeId = newTypeId;
+      // Make sure user owns an inactive pet of this type
+      const inactivePet = roomData.pets.find(p => p.type === typeId && !p.active);
+      if (!inactivePet) return showToast('No inactive ' + petDef.name + ' to swap in!', 'error');
+
+      _swapNewTypeId = typeId;
       const overlay = document.getElementById('swapOverlay');
       const listEl = document.getElementById('swapPetList');
       document.getElementById('swapDesc').textContent =
-        'Replace a pet with ' + petDef.emoji + ' ' + petDef.name + ' (' + petDef.cost + ' coins):';
+        'Move ' + petDef.emoji + ' ' + petDef.name + ' into room. Pick which active pet to take out:';
 
-      // Build list of current pets to choose which one to replace
-      listEl.innerHTML = roomData.pets.map(p => {
+      // Show only ACTIVE pets (in the room) to choose which to deactivate
+      const activePets = getActivePets();
+      listEl.innerHTML = activePets.map(p => {
         const def = PETS.find(d => d.id === p.type);
         const emoji = def ? def.emoji : '❓';
         const affTitle = getAffectionTitle(p.affection ?? 0).title;
-        return '<div class="swap-pet-card" onclick="confirmSwap(\'' + p.id + '\')">'
+        return '<div class="swap-pet-card" onclick="confirmSwap(\'' + p.id + '\')">' 
           + '<span class="swap-pet-emoji">' + emoji + '</span>'
           + '<div class="swap-pet-info">'
           + '<div class="swap-pet-name">' + (p.name || def?.name || p.type) + '</div>'
           + '<div class="swap-pet-stats">♥ ' + (p.affection ?? 0) + ' (' + affTitle + ') · 🍖 ' + (p.hunger ?? 100) + '%</div>'
           + '</div>'
-          + '<span class="swap-pet-arrow">→</span>'
+          + '<span class="swap-pet-arrow">↩</span>'
           + '</div>';
       }).join('');
 
       overlay.classList.remove('hidden');
     }
 
-    async function confirmSwap(replacePetId) {
+    async function confirmSwap(deactivatePetId) {
       if (!_swapNewTypeId) return;
-      const petDef = PETS.find(p => p.id === _swapNewTypeId);
-      if (!petDef || roomData.coins < petDef.cost) {
-        document.getElementById('swapOverlay').classList.add('hidden');
-        return showToast('Not enough coins!', 'error');
-      }
 
-      // Remove the old pet instance
-      roomData.pets = roomData.pets.filter(p => p.id !== replacePetId);
+      // Deactivate the chosen active pet
+      const petOut = getPet(deactivatePetId);
+      if (petOut) petOut.active = false;
 
-      // Deduct cost and create new pet instance
-      roomData.coins -= petDef.cost;
-      const newPet = {
-        id: makePetId(), type: _swapNewTypeId, name: petDef.name,
-        hunger: 100, thirst: 100, affection: 0,
-        color: PET_COLORS[_swapNewTypeId] ? PET_COLORS[_swapNewTypeId][0].key : null,
-        active: true, accessory: null
-      };
-      roomData.pets.push(newPet);
+      // Activate the first inactive pet of the swap type
+      const petIn = roomData.pets.find(p => p.type === _swapNewTypeId && !p.active);
+      if (petIn) petIn.active = true;
 
       _swapNewTypeId = null;
       document.getElementById('swapOverlay').classList.add('hidden');
       _lastPetKey = ''; // Force pet canvas redraw
       await saveRoom();
       renderAll();
-      showToast('Swapped to ' + petDef.emoji + ' ' + petDef.name + '!', 'success');
+      const inDef = PETS.find(d => d.id === petIn?.type);
+      showToast('Swapped! ' + (inDef ? inDef.emoji + ' ' + inDef.name : 'Pet') + ' is now in room.', 'success');
+    }
+
+    /* ── Place / Remove pet from room ── */
+    async function placePetInRoom(typeId) {
+      if (viewingUid !== currentUid) return;
+      if (getActivePets().length >= 2) return showToast('Room is full! Remove a pet first or use Swap.', 'error');
+      const pet = roomData.pets.find(p => p.type === typeId && !p.active);
+      if (!pet) return showToast('No inactive pet of this type!', 'error');
+      pet.active = true;
+      _lastPetKey = ''; // Force pet canvas redraw
+      await saveRoom();
+      renderAll();
+      const def = PETS.find(d => d.id === typeId);
+      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' placed in room!', 'success');
+    }
+
+    async function removePetFromRoom(typeId) {
+      if (viewingUid !== currentUid) return;
+      const pet = roomData.pets.find(p => p.type === typeId && p.active);
+      if (!pet) return;
+      pet.active = false;
+      _lastPetKey = ''; // Force pet canvas redraw
+      await saveRoom();
+      renderAll();
+      const def = PETS.find(d => d.id === typeId);
+      showToast((def ? def.emoji + ' ' + def.name : 'Pet') + ' removed from room.', 'success');
     }
 
     // Close swap modal
