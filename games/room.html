@@ -1688,325 +1688,368 @@
       const ctx = cvs.getContext('2d');
       _outsideFloorRects = {};
 
-      // ── Pre-compute stable star positions using deterministic seeding ──
+      // Fewer stars since it's dusk/sunset (only in upper dark band)
       if (!_outsideStars) {
-        _outsideStars = Array.from({length: 28}, (_, i) => ({
+        _outsideStars = Array.from({length: 8}, (_, i) => ({
           x: (Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5),
-          y: (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.4,
-          r: 0.8 + (i % 3) * 0.4
+          y: (Math.sin(i * 3.7 + 0.9) * 0.5 + 0.5) * 0.20,
+          r: 0.6 + (i % 2) * 0.4
         }));
       }
 
-      // ── 1. Night sky gradient ──
-      const sky = ctx.createLinearGradient(0, 0, 0, H * 0.7);
-      sky.addColorStop(0,   '#060d1f');
-      sky.addColorStop(0.4, '#0d1f40');
-      sky.addColorStop(0.7, '#14304f');
-      sky.addColorStop(1,   '#1e4a38');
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, W, H);
+      const groundY = H * 0.68;
 
-      // ── 2. Ground ──
-      const grd = ctx.createLinearGradient(0, H * 0.7, 0, H);
-      grd.addColorStop(0,   '#2a5a1a');
-      grd.addColorStop(0.4, '#1e4410');
-      grd.addColorStop(1,   '#0e2a06');
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, H * 0.7, W, H * 0.3);
+      // ── 1. Warm sunset sky ──
+      const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+      sky.addColorStop(0,    '#1a1040');
+      sky.addColorStop(0.30, '#6b3a7d');
+      sky.addColorStop(0.58, '#c95f30');
+      sky.addColorStop(0.78, '#f28b30');
+      sky.addColorStop(0.90, '#f5c842');
+      sky.addColorStop(1,    '#ffe5a0');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
 
-      // ── 3. Perspective cobblestone path (trapezoid, narrows toward building) ──
-      const pathNarrow = 28, pathWide = 48;
-      const pathFarY = H * 0.68, pathNearY = H;
-      const pathFarX = W / 2 - pathNarrow / 2, pathNearX = W / 2 - pathWide / 2;
-      ctx.fillStyle = '#8a7a60';
+      // ── 2. Setting sun with glow ──
+      const sunX = W * 0.82, sunY = groundY;
+      const sunR = Math.min(W, H) * 0.085;
+      const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 3.8);
+      sunGlow.addColorStop(0,   'rgba(255,240,100,0.55)');
+      sunGlow.addColorStop(0.3, 'rgba(255,180,50,0.35)');
+      sunGlow.addColorStop(0.7, 'rgba(255,100,20,0.10)');
+      sunGlow.addColorStop(1,   'rgba(255,100,20,0)');
+      ctx.fillStyle = sunGlow; ctx.fillRect(0, 0, W, groundY);
+      // Sun disc (half below horizon)
+      ctx.fillStyle = '#ffd020';
+      ctx.beginPath(); ctx.arc(sunX, sunY, sunR, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#fffbe0';
+      ctx.beginPath(); ctx.arc(sunX, sunY, sunR * 0.52, Math.PI, 0); ctx.fill();
+
+      // ── 3. Soft sunset clouds ──
+      function drawCloud(cx, cy, size, alpha) {
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#ffd4a8';
+        [[0,0,1],[-size*.45,size*.12,.7],[size*.45,size*.12,.6],[-size*.2,-size*.15,.75],[size*.2,-size*.18,.65]]
+          .forEach(([dx,dy,r]) => {
+            ctx.beginPath(); ctx.ellipse(cx+dx, cy+dy, size*r, size*r*.55, 0, 0, Math.PI*2); ctx.fill();
+          });
+        ctx.globalAlpha = 1;
+      }
+      drawCloud(W*.22, H*.16, W*.045, 0.62);
+      drawCloud(W*.52, H*.10, W*.038, 0.45);
+      drawCloud(W*.66, H*.20, W*.03, 0.50);
+
+      // ── 4. Stars in dark upper sky ──
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      _outsideStars.forEach(s => {
+        ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2); ctx.fill();
+      });
+
+      // ── 5. Ground ──
+      const grd = ctx.createLinearGradient(0, groundY, 0, H);
+      grd.addColorStop(0,   '#4a8a1e');
+      grd.addColorStop(0.3, '#3a6e14');
+      grd.addColorStop(1,   '#1e4208');
+      ctx.fillStyle = grd; ctx.fillRect(0, groundY, W, H - groundY);
+      // Warm horizon glow on grass
+      const fog = ctx.createLinearGradient(0, groundY, 0, groundY + H * 0.07);
+      fog.addColorStop(0, 'rgba(255,210,100,0.25)');
+      fog.addColorStop(1, 'rgba(255,210,100,0)');
+      ctx.fillStyle = fog; ctx.fillRect(0, groundY, W, H * 0.07);
+
+      // ── 6. Perspective cobblestone path (warm tone, converges at building) ──
+      const pathNarrow = 28, pathWide = 54;
+      const pathFarX  = W/2 - pathNarrow/2;
+      const pathNearX = W/2 - pathWide/2;
+      ctx.fillStyle = '#c4a870';
       ctx.beginPath();
-      ctx.moveTo(pathFarX, pathFarY);
-      ctx.lineTo(pathFarX + pathNarrow, pathFarY);
-      ctx.lineTo(pathNearX + pathWide, pathNearY);
-      ctx.lineTo(pathNearX, pathNearY);
+      ctx.moveTo(pathFarX, groundY);
+      ctx.lineTo(pathFarX + pathNarrow, groundY);
+      ctx.lineTo(pathNearX + pathWide, H);
+      ctx.lineTo(pathNearX, H);
       ctx.closePath(); ctx.fill();
-      // Receding horizontal joint lines
-      ctx.strokeStyle = 'rgba(60,50,35,0.35)'; ctx.lineWidth = 0.8;
-      for (let t = 0; t <= 1; t += 0.12) {
-        const py = pathFarY + (pathNearY - pathFarY) * t;
+      ctx.strokeStyle = 'rgba(100,80,50,0.30)'; ctx.lineWidth = 0.8;
+      for (let t = 0; t <= 1; t += 0.10) {
+        const py = groundY + (H - groundY) * t;
         const px = pathFarX + (pathNearX - pathFarX) * t;
         const pw = pathNarrow + (pathWide - pathNarrow) * t;
         ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + pw, py); ctx.stroke();
       }
 
-      // ── 4. Stars ──
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      _outsideStars.forEach(s => {
-        ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill();
-      });
-
-      // ── 5. Crescent moon ──
-      const moonX = W * 0.84, moonY = H * 0.10, moonR = Math.min(W, H) * 0.055;
-      ctx.fillStyle = '#fff9c4';
-      ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#0d1f40';
-      ctx.beginPath(); ctx.arc(moonX + moonR * 0.4, moonY - moonR * 0.1, moonR * 0.82, 0, Math.PI * 2); ctx.fill();
-
-      // ── 6. Trees with ground shadow ──
-      function drawTree(tx, ty, tH) {
-        // Elliptical ground shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.18)';
-        ctx.beginPath(); ctx.ellipse(tx + 6, ty, tH * 0.22, tH * 0.06, 0, 0, Math.PI * 2); ctx.fill();
-        // Trunk with bark lines
-        ctx.fillStyle = '#4a2e10';
-        ctx.fillRect(tx - 5, ty - tH * 0.32, 10, tH * 0.32);
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7;
-        for (let b = 0; b < 3; b++) {
-          const by = ty - tH * 0.1 - b * tH * 0.08;
-          ctx.beginPath(); ctx.moveTo(tx - 3, by); ctx.lineTo(tx + 4, by + 2); ctx.stroke();
-        }
-        // Three canopy tiers
-        for (let t = 0; t < 3; t++) {
-          const tw  = tH * (0.22 - t * 0.055);
-          const tyy = ty - tH * 0.32 - t * tH * 0.26;
-          const g   = ctx.createLinearGradient(tx - tw, tyy - tH * 0.26, tx + tw, tyy);
-          g.addColorStop(0, '#1a5a10'); g.addColorStop(0.5, '#2a7a20'); g.addColorStop(1, '#1a5a10');
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.moveTo(tx, tyy - tH * 0.30);
-          ctx.lineTo(tx - tw, tyy); ctx.lineTo(tx + tw, tyy);
-          ctx.closePath(); ctx.fill();
-          ctx.strokeStyle = 'rgba(80,200,80,0.12)'; ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-      const tH = H * 0.25;
-      drawTree(W * 0.12, H * 0.68, tH);
-      drawTree(W * 0.88, H * 0.68, tH * 0.88);
-
       // ── 7. Building layout ──
       const MAX_FLOORS = 3;
-      const bW     = Math.min(W * 0.48, 240);   // slightly narrower front to make room for side face
-      const bX     = (W - bW) / 2 - 10;          // shift left so side face centres visually
+      const bW     = Math.min(W * 0.48, 240);
+      const bX     = (W - bW) / 2 - 10;
       const floorH = Math.min((H * 0.42) / MAX_FLOORS, 72);
       const bH     = floorH * MAX_FLOORS;
-      const bTop   = H * 0.68 - bH;
+      const foundH = 11; // foundation height so building doesn't float
+      const bTop   = groundY - foundH - bH;
       const total  = roomData.unlockedLayers || 1;
 
-      // Cabinet-projection 3D offsets (right-and-up)
-      const sW  = bW * 0.125;      // side face width
-      const sOY = sW * 0.44;       // side face upward slant
+      // Cabinet-projection offsets (3D depth)
+      const sW  = bW * 0.115;
+      const sOY = sW  * 0.44;
 
-      // ── 8. Ground shadow under building ──
-      ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 20;
-      ctx.fillStyle   = '#2a1e10';
-      ctx.fillRect(bX - 4, bTop - 2, bW + sW + 8, bH + 6);
+      // ── 8. Drop shadow on ground ──
+      ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 16;
+      ctx.fillStyle   = 'rgba(0,0,0,0.25)';
+      ctx.fillRect(bX + 10, groundY, bW + sW - 20, 10);
       ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 
-      // ── 9a. Building right side face (cabinet projection depth) ──
+      // ── 9a. Building right side face (3D depth) ──
       const sTF = { x: bX + bW,      y: bTop };
       const sTB = { x: bX + bW + sW, y: bTop - sOY };
       const sBF = { x: bX + bW,      y: bTop + bH };
       const sBB = { x: bX + bW + sW, y: bTop + bH - sOY };
-      ctx.fillStyle = 'rgba(30,20,10,0.78)';
+      ctx.fillStyle = 'rgba(80,45,15,0.55)';
       ctx.beginPath();
       ctx.moveTo(sTF.x, sTF.y); ctx.lineTo(sTB.x, sTB.y);
       ctx.lineTo(sBB.x, sBB.y); ctx.lineTo(sBF.x, sBF.y);
       ctx.closePath(); ctx.fill();
-      // Horizontal floor-edge lines on the side
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(80,40,10,0.5)'; ctx.lineWidth = 1;
       for (let fi = 1; fi < MAX_FLOORS; fi++) {
-        const fy  = bTop + fi * floorH;
-        ctx.beginPath();
-        ctx.moveTo(bX + bW, fy);
-        ctx.lineTo(bX + bW + sW, fy - sOY);
-        ctx.stroke();
+        const fy = bTop + fi * floorH;
+        ctx.beginPath(); ctx.moveTo(bX+bW, fy); ctx.lineTo(bX+bW+sW, fy-sOY); ctx.stroke();
       }
-      ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(sTF.x, sTF.y); ctx.lineTo(sTB.x, sTB.y);
-      ctx.lineTo(sBB.x, sBB.y); ctx.lineTo(sBF.x, sBF.y);
-      ctx.closePath(); ctx.stroke();
 
-      // ── 9b. Front face — draw each floor ──
+      // ── 9b. Front face — each floor ──
       for (let i = 1; i <= MAX_FLOORS; i++) {
-        const fi  = MAX_FLOORS - i;           // slot index (0 = top of building)
-        const fy  = bTop + fi * floorH;
+        const fi        = MAX_FLOORS - i;
+        const fy        = bTop + fi * floorH;
         const unlocked  = i <= total;
         const isCurrent = i === currentLayer;
         const ld        = (roomData.layerData || {})[i] || {};
-        const wallColor = getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i));
+        const wallColor = unlocked
+          ? getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i))
+          : '#5a4060';
 
-        if (unlocked) {
-          ctx.fillStyle = wallColor;
-          ctx.fillRect(bX, fy, bW, floorH);
-          // Soft sheen overlay
-          const tex = ctx.createLinearGradient(bX, fy, bX + bW, fy + floorH);
-          tex.addColorStop(0,   'rgba(255,255,255,0.09)');
-          tex.addColorStop(0.5, 'rgba(255,255,255,0.0)');
-          tex.addColorStop(1,   'rgba(0,0,0,0.08)');
-          ctx.fillStyle = tex;
-          ctx.fillRect(bX, fy, bW, floorH);
-        } else {
-          // Locked floor — dark hatch pattern
-          ctx.fillStyle = '#1a1525';
-          ctx.fillRect(bX, fy, bW, floorH);
-          ctx.strokeStyle = 'rgba(100,80,160,0.12)'; ctx.lineWidth = 0.7;
+        ctx.fillStyle = wallColor; ctx.fillRect(bX, fy, bW, floorH);
+        if (!unlocked) {
+          ctx.strokeStyle = 'rgba(200,160,255,0.08)'; ctx.lineWidth = 0.7;
           for (let lx = -floorH; lx < bW + floorH; lx += 14) {
-            ctx.beginPath();
-            ctx.moveTo(bX + lx, fy);
-            ctx.lineTo(bX + lx + floorH, fy + floorH);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(bX+lx, fy); ctx.lineTo(bX+lx+floorH, fy+floorH); ctx.stroke();
           }
+        } else {
+          const tex = ctx.createLinearGradient(bX, fy, bX + bW, fy + floorH);
+          tex.addColorStop(0,   'rgba(255,255,255,0.13)');
+          tex.addColorStop(0.5, 'rgba(255,255,255,0)');
+          tex.addColorStop(1,   'rgba(0,0,0,0.07)');
+          ctx.fillStyle = tex; ctx.fillRect(bX, fy, bW, floorH);
         }
-
-        // Gold border on current floor, dark otherwise
-        ctx.strokeStyle = (isCurrent && unlocked) ? '#f7c97e' : 'rgba(0,0,0,0.35)';
+        ctx.strokeStyle = (isCurrent && unlocked) ? '#f7c97e' : 'rgba(130,80,30,0.5)';
         ctx.lineWidth   = (isCurrent && unlocked) ? 2.5 : 1;
         ctx.strokeRect(
           bX + (isCurrent ? 1.25 : 0), fy + (isCurrent ? 1.25 : 0),
-          bW - (isCurrent ? 2.5 : 0),  floorH - (isCurrent ? 2.5 : 0)
+          bW - (isCurrent ? 2.5  : 0), floorH - (isCurrent ? 2.5 : 0)
         );
 
-        // Windows (two per floor)
-        const winW = bW * 0.16, winH = floorH * 0.5;
-        const winY = fy + (floorH - winH) / 2;
-        [bX + bW * 0.17, bX + bW * 0.61].forEach(wx => {
+        // Windows with warm glow
+        const winW = bW * 0.15, winH = floorH * 0.52;
+        const winY = fy + (floorH - winH) * 0.40;
+        [bX + bW * 0.16, bX + bW * 0.60].forEach(wx => {
           if (unlocked) {
-            // Window sill shadow
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillRect(wx - 2, winY + winH, winW + 4, 4);
-            // Glass
-            const wg = ctx.createLinearGradient(wx, winY, wx + winW, winY + winH);
-            wg.addColorStop(0, 'rgba(200,230,255,0.65)');
-            wg.addColorStop(1, 'rgba(160,210,255,0.45)');
+            // Sill
+            ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(wx-2, winY+winH, winW+4, 4);
+            // Warm light glass
+            const wg = ctx.createLinearGradient(wx, winY, wx+winW, winY+winH);
+            wg.addColorStop(0, 'rgba(255,240,180,0.80)');
+            wg.addColorStop(1, 'rgba(255,200,100,0.60)');
             ctx.fillStyle = wg; ctx.fillRect(wx, winY, winW, winH);
-            // Warm glow
-            ctx.fillStyle = 'rgba(255,245,200,0.20)';
-            ctx.fillRect(wx + 2, winY + 2, winW - 4, winH - 4);
-            // Frame + cross panes
-            ctx.strokeStyle = 'rgba(60,90,130,0.7)'; ctx.lineWidth = 1.5;
+            ctx.fillStyle = 'rgba(255,245,200,0.22)';
+            ctx.fillRect(wx+2, winY+2, winW-4, winH-4);
+            ctx.strokeStyle = '#7a5830'; ctx.lineWidth = 1.5;
             ctx.strokeRect(wx, winY, winW, winH);
-            ctx.strokeStyle = 'rgba(60,90,130,0.5)'; ctx.lineWidth = 0.8;
-            ctx.beginPath(); ctx.moveTo(wx + winW/2, winY); ctx.lineTo(wx + winW/2, winY + winH); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(wx, winY + winH/2); ctx.lineTo(wx + winW, winY + winH/2); ctx.stroke();
-            // Highlight
-            ctx.fillStyle = 'rgba(255,255,255,0.18)';
-            ctx.fillRect(wx + 2, winY + 2, winW * 0.38, winH * 0.38);
+            ctx.strokeStyle = 'rgba(120,90,50,0.55)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.moveTo(wx+winW/2, winY); ctx.lineTo(wx+winW/2, winY+winH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(wx, winY+winH/2); ctx.lineTo(wx+winW, winY+winH/2); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+            ctx.fillRect(wx+2, winY+2, winW*0.36, winH*0.36);
+            // Flower box below window
+            ctx.fillStyle = '#6a3a18';
+            ctx.fillRect(wx-3, winY+winH+4, winW+6, 6);
+            const fc = ['#ff5050','#ff9020','#ffd020','#ff50b0','#9060ff'];
+            for (let f = 0; f < 4; f++) {
+              ctx.fillStyle = fc[(i * 3 + f) % fc.length];
+              ctx.beginPath(); ctx.arc(wx + 2 + f*(winW/3.3), winY+winH+4, 3, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = '#2a6a10';
+            ctx.fillRect(wx-1, winY+winH+3, winW+2, 2);
           } else {
-            // Boarded-up X
-            ctx.fillStyle = 'rgba(30,20,10,0.8)';
-            ctx.fillRect(wx, winY, winW, winH);
-            ctx.strokeStyle = 'rgba(100,70,40,0.55)'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(wx, winY); ctx.lineTo(wx + winW, winY + winH); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(wx + winW, winY); ctx.lineTo(wx, winY + winH); ctx.stroke();
+            ctx.fillStyle = 'rgba(40,25,50,0.75)'; ctx.fillRect(wx, winY, winW, winH);
+            ctx.strokeStyle = 'rgba(160,110,200,0.4)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(wx, winY); ctx.lineTo(wx+winW, winY+winH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(wx+winW, winY); ctx.lineTo(wx, winY+winH); ctx.stroke();
           }
         });
 
-        // Floor label
         ctx.textAlign = 'center'; ctx.textBaseline = 'top';
         if (unlocked) {
-          ctx.fillStyle = 'rgba(0,0,0,0.65)';
-          ctx.font = 'bold 11px sans-serif';
-          ctx.fillText(isCurrent ? '★ Floor ' + i : 'Floor ' + i, bX + bW / 2, fy + floorH - 16);
+          ctx.fillStyle = 'rgba(80,40,10,0.80)'; ctx.font = 'bold 11px sans-serif';
+          ctx.fillText(isCurrent ? '★ Floor ' + i : 'Floor ' + i, bX + bW/2, fy + floorH - 15);
         } else {
-          ctx.fillStyle = 'rgba(180,150,220,0.75)';
-          ctx.font = '10px sans-serif';
+          ctx.fillStyle = 'rgba(220,180,240,0.85)'; ctx.font = '10px sans-serif';
           const UNLOCK_COST = { 2: 10000, 3: 20000 };
-          ctx.fillText('🔒 ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW / 2, fy + floorH - 16);
+          ctx.fillText('🔒 ' + (UNLOCK_COST[i] || '') + ' coins', bX + bW/2, fy + floorH - 15);
         }
         ctx.textBaseline = 'alphabetic';
-
-        // Store front-face rect for click detection
         _outsideFloorRects[i] = { x: bX, y: fy, w: bW, h: floorH, unlocked };
       }
 
-      // ── 10. 3D hipped roof (front face + right side face) ──
-      const roofBaseL = bX - 14;
-      const roofBaseR = bX + bW + 14;
-      const roofPeakX = bX + bW / 2;
-      const roofPeakY = bTop - bW * 0.26;
-      const bkPeakX   = roofPeakX + sW;
-      const bkPeakY   = roofPeakY - sOY;
-      const bkBaseRX  = roofBaseR + sW;
-      const bkBaseRY  = bTop - sOY;
-
-      // Right-side face of roof (darker)
-      ctx.fillStyle = '#5a3a08';
+      // ── 10. Stone foundation (anchors building to ground) ──
+      const foundGrad = ctx.createLinearGradient(0, groundY - foundH, 0, groundY + 2);
+      foundGrad.addColorStop(0, '#a09070'); foundGrad.addColorStop(1, '#6a5840');
+      ctx.fillStyle = foundGrad;
+      ctx.fillRect(bX - 4, groundY - foundH, bW + 8, foundH + 3);
+      // Foundation side
+      ctx.fillStyle = '#5a4830';
       ctx.beginPath();
-      ctx.moveTo(roofBaseR, bTop);  ctx.lineTo(bkBaseRX, bkBaseRY);
+      ctx.moveTo(bX+bW+4, groundY-foundH); ctx.lineTo(bX+bW+sW+4, groundY-foundH-sOY);
+      ctx.lineTo(bX+bW+sW+4, groundY+3-sOY); ctx.lineTo(bX+bW+4, groundY+3);
+      ctx.closePath(); ctx.fill();
+      // Stone joint lines
+      ctx.strokeStyle = 'rgba(80,60,35,0.40)'; ctx.lineWidth = 0.7;
+      for (let fx = bX + 20; fx < bX + bW; fx += 26) {
+        ctx.beginPath(); ctx.moveTo(fx, groundY-foundH); ctx.lineTo(fx, groundY+3); ctx.stroke();
+      }
+
+      // ── 11. 3D terracotta hipped roof ──
+      const roofBaseL = bX - 14,  roofBaseR = bX + bW + 14;
+      const roofPeakX = bX + bW/2, roofPeakY = bTop - bW * 0.24;
+      const bkPeakX   = roofPeakX + sW, bkPeakY  = roofPeakY - sOY;
+      const bkBaseRX  = roofBaseR + sW, bkBaseRY  = bTop - sOY;
+      // Right face (darker)
+      ctx.fillStyle = '#7a4010';
+      ctx.beginPath();
+      ctx.moveTo(roofBaseR, bTop); ctx.lineTo(bkBaseRX, bkBaseRY);
       ctx.lineTo(bkPeakX, bkPeakY); ctx.lineTo(roofPeakX, roofPeakY);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1; ctx.stroke();
-
-      // Front face of roof
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1; ctx.stroke();
+      // Front face
       const roofG = ctx.createLinearGradient(bX, bTop, roofPeakX, roofPeakY);
-      roofG.addColorStop(0, '#c8a060'); roofG.addColorStop(0.5, '#a07840'); roofG.addColorStop(1, '#7a5820');
+      roofG.addColorStop(0, '#d46030'); roofG.addColorStop(0.5, '#b04820'); roofG.addColorStop(1, '#8a3010');
       ctx.fillStyle = roofG;
       ctx.beginPath();
       ctx.moveTo(roofBaseL, bTop); ctx.lineTo(roofPeakX, roofPeakY); ctx.lineTo(roofBaseR, bTop);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1; ctx.stroke();
-
-      // Ridge line
-      ctx.strokeStyle = '#7a5820'; ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1; ctx.stroke();
+      // Tile shadow lines
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.8;
+      for (let t = 0.15; t < 0.9; t += 0.18) {
+        const ty = roofPeakY + (bTop - roofPeakY) * t;
+        const tl = roofBaseL + (roofPeakX - roofBaseL) * t;
+        const tr = roofBaseR - (roofBaseR  - roofPeakX) * t;
+        ctx.beginPath(); ctx.moveTo(tl, ty); ctx.lineTo(tr, ty); ctx.stroke();
+      }
+      // Ridge
+      ctx.strokeStyle = '#6a2808'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(roofPeakX, roofPeakY); ctx.lineTo(bkPeakX, bkPeakY); ctx.stroke();
 
-      // ── 11. 3D Chimney ──
-      const chimFX = bX + bW * 0.72, chimFY = bTop - bH * 0.05;
-      const chimBX = chimFX + sW * 0.5;
-      const chimBY = chimFY - sOY * 0.5;
-      // Front face
-      ctx.fillStyle = '#8a6520';
+      // ── 12. 3D Chimney ──
+      const chimFX = bX + bW * 0.72, chimFY = bTop - bH * 0.04;
+      const chimBX = chimFX + sW * 0.5, chimBY = chimFY - sOY * 0.5;
+      ctx.fillStyle = '#c87840';
       ctx.fillRect(chimFX, chimFY - 20, 12, 24);
-      // Side face
-      ctx.fillStyle = '#6a4a10';
+      ctx.fillStyle = '#a05828';
       ctx.beginPath();
-      ctx.moveTo(chimFX + 12, chimFY - 20); ctx.lineTo(chimBX + 12, chimBY - 20);
-      ctx.lineTo(chimBX + 12, chimBY + 4);  ctx.lineTo(chimFX + 12, chimFY + 4);
+      ctx.moveTo(chimFX+12, chimFY-20); ctx.lineTo(chimBX+12, chimBY-20);
+      ctx.lineTo(chimBX+12, chimBY+4);  ctx.lineTo(chimFX+12, chimFY+4);
       ctx.closePath(); ctx.fill();
-      // Top cap (front + side)
-      ctx.fillStyle = '#5a3a08';
-      ctx.fillRect(chimFX - 2, chimFY - 22, 16, 4);
-      ctx.beginPath();
-      ctx.moveTo(chimFX + 14, chimFY - 22); ctx.lineTo(chimBX + 14, chimBY - 22);
-      ctx.lineTo(chimBX + 14, chimBY - 18); ctx.lineTo(chimFX + 14, chimFY - 18);
-      ctx.closePath(); ctx.fill();
-      // Smoke puffs
+      ctx.fillStyle = '#7a3e18';
+      ctx.fillRect(chimFX-2, chimFY-22, 16, 4);
       for (let sp = 0; sp < 3; sp++) {
-        ctx.fillStyle = `rgba(200,200,200,${0.25 - sp * 0.07})`;
-        ctx.beginPath(); ctx.arc(chimFX + 6 + sp * 2, chimFY - 26 - sp * 7, 4 + sp * 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(255,210,170,${0.28 - sp*0.08})`;
+        ctx.beginPath(); ctx.arc(chimFX+6+sp*2, chimFY-26-sp*7, 4+sp*2, 0, Math.PI*2); ctx.fill();
       }
 
-      // ── 12. Front door ──
-      const doorW = bW * 0.13, doorH = floorH * 0.82;
-      const doorX = bX + bW / 2 - doorW / 2;
-      const doorY = H * 0.68 - doorH;
-      // Door frame shadow
-      ctx.fillStyle = '#3a2010';
-      ctx.fillRect(doorX - 4, doorY + doorH * 0.08, doorW + 8, doorH * 0.92 + 3);
-      // Door side (3D depth)
-      ctx.fillStyle = '#2a1808';
-      ctx.fillRect(doorX + doorW + 4, doorY + doorH * 0.08, 5, doorH * 0.92 + 3);
-      // Door panel
-      const dg = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY + doorH);
-      dg.addColorStop(0, '#8a5030'); dg.addColorStop(1, '#5a3018');
-      ctx.fillStyle = dg;
-      ctx.fillRect(doorX, doorY + doorH * 0.08, doorW, doorH * 0.92);
-      // Arch
-      ctx.fillStyle = '#6a4020';
-      ctx.beginPath();
-      ctx.arc(doorX + doorW / 2, doorY + doorH * 0.08, doorW / 2, Math.PI, 0);
-      ctx.fill();
-      // Arch depth side
-      ctx.fillStyle = '#4a2a10';
-      ctx.beginPath();
-      ctx.arc(doorX + doorW / 2 + 4, doorY + doorH * 0.08, doorW / 2, Math.PI, 0);
-      ctx.fill();
-      // Panel details
-      ctx.strokeStyle = 'rgba(40,20,5,0.5)'; ctx.lineWidth = 1;
-      ctx.strokeRect(doorX + 3, doorY + doorH * 0.15, doorW - 6, doorH * 0.32);
-      ctx.strokeRect(doorX + 3, doorY + doorH * 0.52, doorW - 6, doorH * 0.34);
-      // Door knob
-      ctx.fillStyle = '#e0b850';
-      ctx.beginPath(); ctx.arc(doorX + doorW * 0.72, doorY + doorH * 0.54, 3.5, 0, Math.PI * 2); ctx.fill();
+      // ── 13. Deciduous trees (round canopy, warm autumn colors) ──
+      function drawCottageTree(tx, ty, size, leafColor) {
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath(); ctx.ellipse(tx+5, ty, size*.5, size*.12, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#5c3a14';
+        ctx.fillRect(tx-6, ty-size*.38, 12, size*.38);
+        const cg = ctx.createRadialGradient(tx, ty-size*.55, 0, tx, ty-size*.4, size*.55);
+        cg.addColorStop(0, leafColor); cg.addColorStop(0.6, leafColor); cg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = cg;
+        ctx.beginPath(); ctx.arc(tx, ty-size*.45, size*.55, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,200,0.12)';
+        ctx.beginPath(); ctx.arc(tx-size*.18, ty-size*.62, size*.28, 0, Math.PI*2); ctx.fill();
+      }
+      const treeH = H * 0.22;
+      drawCottageTree(W*.10, groundY, treeH, '#c8801e');   // warm autumn orange
+      drawCottageTree(W*.90, groundY, treeH*.88, '#8ab820'); // fresh green
 
-      // ── 13. Attach click handler ──
+      // ── 14. Picket fence flanking the path ──
+      function drawFence(fx, fy, fW) {
+        if (fW < 16) return;
+        ctx.fillStyle = '#f5f0e0';
+        const posts = Math.max(2, Math.floor(fW / 14));
+        for (let p = 0; p < posts; p++) {
+          const px = fx + p * (fW / (posts - 1 || 1));
+          ctx.fillRect(px - 1.5, fy - 22, 3, 26);
+          ctx.beginPath(); ctx.moveTo(px - 1.5, fy - 22);
+          ctx.lineTo(px, fy - 26); ctx.lineTo(px + 1.5, fy - 22);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.fillRect(fx, fy - 16, fW, 2.5);
+        ctx.fillRect(fx, fy - 8,  fW, 2.5);
+      }
+      const fenceY   = groundY - foundH;
+      const fenceWL  = pathFarX - bX - 8;
+      const fenceWR  = (bX + bW) - (pathFarX + pathNarrow) - 8;
+      drawFence(bX + 4,                    fenceY, fenceWL);
+      drawFence(pathFarX + pathNarrow + 4, fenceY, fenceWR);
+
+      // ── 15. Colorful flower bed at building base ──
+      const flowerY = groundY - foundH - 1;
+      const fColors  = ['#ff5060','#ff8020','#ffe020','#e040fb','#40c0ff','#80ff80'];
+      for (let f = 0; f < 16; f++) {
+        const fx = bX + 6 + f * (bW / 16);
+        ctx.fillStyle = '#3a8a10'; ctx.fillRect(fx+1, flowerY - 10, 2, 10);
+        ctx.fillStyle = fColors[f % fColors.length];
+        ctx.beginPath(); ctx.arc(fx+2, flowerY - 11, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffff80';
+        ctx.beginPath(); ctx.arc(fx+2, flowerY - 11, 1.5, 0, Math.PI*2); ctx.fill();
+      }
+
+      // ── 16. Lamp post near path ──
+      const lampX = pathFarX - 22;
+      ctx.strokeStyle = '#c8c0a0'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(lampX, groundY); ctx.lineTo(lampX, groundY - 58); ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lampX, groundY - 58);
+      ctx.quadraticCurveTo(lampX, groundY - 70, lampX + 16, groundY - 70); ctx.stroke();
+      ctx.fillStyle = '#e0d080';
+      ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 6, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff8a0';
+      ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 3.5, 0, Math.PI*2); ctx.fill();
+      const glowRad = ctx.createRadialGradient(lampX+16, groundY-70, 0, lampX+16, groundY-70, 32);
+      glowRad.addColorStop(0,   'rgba(255,240,150,0.32)');
+      glowRad.addColorStop(1,   'rgba(255,240,150,0)');
+      ctx.fillStyle = glowRad;
+      ctx.beginPath(); ctx.arc(lampX+16, groundY-70, 32, 0, Math.PI*2); ctx.fill();
+
+      // ── 17. Front door ──
+      const doorW = bW * 0.13, doorH = floorH * 0.82;
+      const doorX = bX + bW/2 - doorW/2;
+      const doorY = groundY - foundH - doorH;
+      ctx.fillStyle = '#5a3a14';
+      ctx.fillRect(doorX-4, doorY+doorH*0.08, doorW+8, doorH*0.92 + foundH);
+      ctx.fillStyle = '#3a2208';
+      ctx.fillRect(doorX+doorW+4, doorY+doorH*0.08, 5, doorH*0.92);
+      const dg = ctx.createLinearGradient(doorX, doorY, doorX+doorW, doorY+doorH);
+      dg.addColorStop(0, '#a06040'); dg.addColorStop(1, '#6a3820');
+      ctx.fillStyle = dg; ctx.fillRect(doorX, doorY+doorH*0.08, doorW, doorH*0.92);
+      ctx.fillStyle = '#804020';
+      ctx.beginPath(); ctx.arc(doorX+doorW/2, doorY+doorH*0.08, doorW/2, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#4a2810';
+      ctx.beginPath(); ctx.arc(doorX+doorW/2+4, doorY+doorH*0.08, doorW/2, Math.PI, 0); ctx.fill();
+      ctx.strokeStyle = 'rgba(200,120,60,0.5)'; ctx.lineWidth = 1;
+      ctx.strokeRect(doorX+3, doorY+doorH*0.15, doorW-6, doorH*0.30);
+      ctx.strokeRect(doorX+3, doorY+doorH*0.50, doorW-6, doorH*0.33);
+      ctx.fillStyle = '#f0c040';
+      ctx.beginPath(); ctx.arc(doorX+doorW*0.72, doorY+doorH*0.54, 3.5, 0, Math.PI*2); ctx.fill();
+
+      // ── 18. Attach click handler ──
       _attachOutsideClickHandler();
     }
 
