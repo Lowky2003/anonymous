@@ -63,6 +63,51 @@
       text-decoration: none;
     }
     .feedback-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(59,130,246,0.5); }
+
+    /* ── Daily Quote Banner ── */
+    .daily-quote-banner {
+      max-width: 600px;
+      margin: 18px auto 0;
+      padding: 14px 20px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .daily-quote-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(59,130,246,0.06) 100%);
+      pointer-events: none;
+    }
+    .daily-quote-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(168,85,247,0.6);
+      margin-bottom: 6px;
+    }
+    .daily-quote-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.7);
+      font-style: italic;
+      position: relative;
+    }
+    /* Light theme */
+    body.light-theme .daily-quote-banner {
+      background: linear-gradient(135deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 100%);
+      border-color: rgba(0,0,0,0.06);
+    }
+    body.light-theme .daily-quote-banner::before {
+      background: linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(59,130,246,0.04) 100%);
+    }
+    body.light-theme .daily-quote-label { color: rgba(168,85,247,0.5); }
+    body.light-theme .daily-quote-text { color: rgba(0,0,0,0.55); }
   </style>
 </head>
 <body>
@@ -305,6 +350,12 @@
   <h1 class="page-title">Anonymous Bubble Answers</h1>
   <p class="page-subtitle">Answers disappear after 6 hours &#8987;</p>
 
+  <!-- Daily 毒鸡汤 quote banner -->
+  <div class="daily-quote-banner" id="dailyQuoteBanner">
+    <div class="daily-quote-label">🐔 每日毒鸡汤</div>
+    <div class="daily-quote-text" id="dailyQuoteText"></div>
+  </div>
+
   <div class="bubble-wrap" id="bubbleWrap"></div>
 
   <div class="img-preview-strip" id="imgPreviewStrip">
@@ -404,6 +455,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="./src/js/firebase-config.js"></script>
+  <script src="./src/js/daily-quotes.js"></script>
   <script src="./src/js/app.js"></script>
+  <script>
+    // Initialize daily quote banner
+    (function() {
+      var el = document.getElementById('dailyQuoteText');
+      if (el && typeof getDailyQuote === 'function') {
+        el.textContent = getDailyQuote();
+      }
+    })();
+  </script>
 </body>
 </html>
