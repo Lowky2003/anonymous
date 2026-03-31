@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Corner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    body.light-theme {
+      background: linear-gradient(135deg, #f5f3fa, #e8e6f0, #f0eef5);
+      color: #333;
+    }
+
+    /* ── Back button ── */
+    .back-btn {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 50;
+      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(15, 12, 41, 0.9);
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    body.light-theme .back-btn { background: rgba(245,243,250,0.95); color: #555; border-color: rgba(0,0,0,0.1); }
+
+    /* ── Header ── */
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 6px;
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c8b6ff, #7ec8e3);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .page-subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      padding-bottom: 20px;
+    }
+    body.light-theme .page-subtitle { color: rgba(0,0,0,0.4); }
+
+    /* ── Feedback input area ── */
+    .feedback-input-area {
+      max-width: 520px;
+      margin: 0 auto 24px;
+      padding: 0 16px;
+    }
+    .feedback-input-area textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .feedback-input-area textarea::placeholder { color: rgba(255,255,255,0.35); }
+    .feedback-input-area textarea:focus { border-color: rgba(138,120,255,0.5); }
+    body.light-theme .feedback-input-area textarea {
+      background: rgba(0,0,0,0.04); color: #333; border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .feedback-input-area textarea::placeholder { color: rgba(0,0,0,0.35); }
+
+    .feedback-submit-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .feedback-submit-btn {
+      padding: 10px 28px;
+      border: none;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .feedback-submit-btn:hover { opacity: 0.9; }
+    .feedback-submit-btn:active { transform: scale(0.96); }
+
+    /* ── Filter tabs ── */
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 0 16px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 6px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-tab:hover { background: rgba(255,255,255,0.12); }
+    .filter-tab.active {
+      background: rgba(138,120,255,0.25);
+      border-color: rgba(138,120,255,0.4);
+      color: #c8b6ff;
+    }
+    body.light-theme .filter-tab { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.08); }
+    body.light-theme .filter-tab.active { background: rgba(90,70,180,0.1); border-color: rgba(90,70,180,0.3); color: #5a46b4; }
+
+    /* ── Feedback list ── */
+    .feedback-list {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .feedback-empty {
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 14px;
+      padding: 40px 0;
+    }
+    body.light-theme .feedback-empty { color: rgba(0,0,0,0.3); }
+
+    /* ── Feedback card ── */
+    .feedback-card {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      transition: border-color 0.2s;
+    }
+    .feedback-card:hover { border-color: rgba(255,255,255,0.15); }
+    body.light-theme .feedback-card { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.06); }
+    body.light-theme .feedback-card:hover { border-color: rgba(0,0,0,0.12); }
+
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .feedback-time {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+    }
+    body.light-theme .feedback-time { color: rgba(0,0,0,0.35); }
+
+    .feedback-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .feedback-status.pending {
+      background: rgba(251,191,36,0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251,191,36,0.25);
+    }
+    .feedback-status.developing {
+      background: rgba(96,165,250,0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(96,165,250,0.25);
+    }
+    .feedback-status.done {
+      background: rgba(52,211,153,0.15);
+      color: #34d399;
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+    .feedback-status.rejected {
+      background: rgba(248,113,113,0.15);
+      color: #f87171;
+      border: 1px solid rgba(248,113,113,0.25);
+    }
+
+    .feedback-body {
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.85);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    body.light-theme .feedback-body { color: rgba(0,0,0,0.8); }
+
+    /* ── Votes (upvote) ── */
+    .feedback-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .feedback-upvote {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .feedback-upvote:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+    .feedback-upvote.voted {
+      background: rgba(138,120,255,0.15);
+      border-color: rgba(138,120,255,0.3);
+      color: #c8b6ff;
+    }
+    body.light-theme .feedback-upvote { border-color: rgba(0,0,0,0.08); color: rgba(0,0,0,0.4); }
+    body.light-theme .feedback-upvote.voted { background: rgba(90,70,180,0.1); border-color: rgba(90,70,180,0.3); color: #5a46b4; }
+
+    /* ── Dev controls ── */
+    .dev-controls {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light-theme .dev-controls { border-top-color: rgba(0,0,0,0.06); }
+
+    .dev-status-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .dev-status-btn {
+      padding: 4px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.6);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dev-status-btn:hover { background: rgba(255,255,255,0.12); }
+    .dev-status-btn.active { border-color: rgba(138,120,255,0.5); background: rgba(138,120,255,0.2); color: #c8b6ff; }
+    body.light-theme .dev-status-btn { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.08); }
+    body.light-theme .dev-status-btn.active { background: rgba(90,70,180,0.1); border-color: rgba(90,70,180,0.3); color: #5a46b4; }
+
+    .dev-comment-row {
+      display: flex;
+      gap: 8px;
+    }
+    .dev-comment-input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+    .dev-comment-input::placeholder { color: rgba(255,255,255,0.3); }
+    body.light-theme .dev-comment-input { background: rgba(0,0,0,0.04); color: #333; border-color: rgba(0,0,0,0.08); }
+    .dev-comment-send {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7b5ea7, #5b6abf);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .dev-comment-send:hover { opacity: 0.9; }
+
+    /* ── Dev comments list ── */
+    .feedback-comments {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feedback-comment {
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(138,120,255,0.08);
+      border-left: 3px solid rgba(138,120,255,0.4);
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.45;
+    }
+    .feedback-comment .comment-meta {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+    }
+    body.light-theme .feedback-comment { background: rgba(90,70,180,0.06); border-left-color: rgba(90,70,180,0.3); color: rgba(0,0,0,0.65); }
+    body.light-theme .feedback-comment .comment-meta { color: rgba(0,0,0,0.35); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 12px 28px;
+      border-radius: 16px;
+      background: rgba(30,22,69,0.95);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s;
+      white-space: nowrap;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 560px) {
+      .feedback-card { border-radius: 12px; padding: 14px 14px; }
+      .page-title { font-size: 22px; padding-top: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="back-btn" href="../index.html">← Back</a>
+
+  <h1 class="page-title">💬 Feedback Corner</h1>
+  <p class="page-subtitle">Share your ideas & suggestions anonymously</p>
+
+  <!-- Submit feedback -->
+  <div class="feedback-input-area">
+    <textarea id="feedbackInput" placeholder="Write your feedback, suggestion, or bug report…" maxlength="1000"></textarea>
+    <div class="feedback-submit-row">
+      <button class="feedback-submit-btn" id="submitFeedbackBtn">📩 Submit Feedback</button>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="pending">⏳ Pending</button>
+    <button class="filter-tab" data-filter="developing">🔧 Developing</button>
+    <button class="filter-tab" data-filter="done">✅ Done</button>
+    <button class="filter-tab" data-filter="rejected">❌ Rejected</button>
+  </div>
+
+  <!-- Feedback list -->
+  <div class="feedback-list" id="feedbackList">
+    <div class="feedback-empty">Loading…</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="../src/js/firebase-config.js"></script>
+  <script>
+    /* ── Firebase init ── */
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    /* ── Developer user IDs ── */
+    const DEV_UIDS = [
+      'HClZmAeuEaUVjHqUaFLFFMTMQnd2',
+      'eUs3isAgsaRT9VLKEFI4HEFbCnk1'
+    ];
+
+    let currentUid = null;
+    let isDev = false;
+    let currentFilter = 'all';
+
+    /* ── Auth ── */
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+      currentUid = user.uid;
+      isDev = DEV_UIDS.includes(currentUid);
+      loadTheme();
+      listenFeedback();
+    });
+
+    /* ── Theme ── */
+    function loadTheme() {
+      const t = localStorage.getItem('theme');
+      if (t === 'light') document.body.classList.add('light-theme');
+    }
+
+    /* ── Toast ── */
+    let _toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    /* ── Submit feedback ── */
+    document.getElementById('submitFeedbackBtn').addEventListener('click', async () => {
+      const input = document.getElementById('feedbackInput');
+      const text = input.value.trim();
+      if (!text) return showToast('Please write some feedback first!');
+      if (text.length > 1000) return showToast('Feedback is too long (max 1000 chars)');
+
+      try {
+        await db.collection('feedback').add({
+          text: text,
+          status: 'pending',
+          votes: [],
+          comments: [],
+          createdAt: Date.now(),
+          uid: currentUid
+        });
+        input.value = '';
+        showToast('📩 Feedback submitted! Thank you!');
+      } catch (e) {
+        console.error(e);
+        showToast('Failed to submit feedback');
+      }
+    });
+
+    /* ── Filter tabs ── */
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        renderFeedback();
+      });
+    });
+
+    /* ── Real-time listener ── */
+    let feedbackData = [];
+
+    function listenFeedback() {
+      db.collection('feedback')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(snap => {
+          feedbackData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderFeedback();
+        }, err => {
+          console.error('Feedback listen error:', err);
+        });
+    }
+
+    /* ── Render ── */
+    function renderFeedback() {
+      const list = document.getElementById('feedbackList');
+
+      // Apply filter
+      let items = feedbackData;
+      if (currentFilter !== 'all') {
+        items = items.filter(f => f.status === currentFilter);
+      }
+
+      if (!items.length) {
+        list.innerHTML = '<div class="feedback-empty">No feedback yet — be the first!</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(f => {
+        const date = new Date(f.createdAt);
+        const timeStr = date.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) +
+          ' ' + date.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' });
+
+        const statusLabel = {
+          pending: '⏳ Pending',
+          developing: '🔧 Developing',
+          done: '✅ Done',
+          rejected: '❌ Rejected'
+        };
+
+        const voteCount = (f.votes || []).length;
+        const hasVoted = (f.votes || []).includes(currentUid);
+
+        // Comments section
+        let commentsHtml = '';
+        if (f.comments && f.comments.length) {
+          commentsHtml = '<div class="feedback-comments">' +
+            f.comments.map(c => {
+              const cd = new Date(c.at);
+              const ct = cd.toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) +
+                ' ' + cd.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' });
+              return '<div class="feedback-comment">' +
+                '<div>' + escapeHtml(c.text) + '</div>' +
+                '<div class="comment-meta">Developer · ' + ct + '</div>' +
+                '</div>';
+            }).join('') +
+            '</div>';
+        }
+
+        // Dev controls (only for developers)
+        let devHtml = '';
+        if (isDev) {
+          const statuses = ['pending', 'developing', 'done', 'rejected'];
+          devHtml = '<div class="dev-controls">' +
+            '<div class="dev-status-row">' +
+            statuses.map(s =>
+              '<button class="dev-status-btn' + (f.status === s ? ' active' : '') + '" onclick="setStatus(\'' + f.id + '\',\'' + s + '\')">' +
+              statusLabel[s] + '</button>'
+            ).join('') +
+            '</div>' +
+            '<div class="dev-comment-row">' +
+            '<input class="dev-comment-input" id="comment_' + f.id + '" placeholder="Leave a dev comment…" maxlength="500">' +
+            '<button class="dev-comment-send" onclick="addComment(\'' + f.id + '\')">Send</button>' +
+            '</div>' +
+            '</div>';
+        }
+
+        return '<div class="feedback-card" data-id="' + f.id + '">' +
+          '<div class="feedback-header">' +
+          '<span class="feedback-time">' + timeStr + '</span>' +
+          '<span class="feedback-status ' + f.status + '">' + (statusLabel[f.status] || '⏳ Pending') + '</span>' +
+          '</div>' +
+          '<div class="feedback-body">' + escapeHtml(f.text) + '</div>' +
+          '<div class="feedback-footer">' +
+          '<button class="feedback-upvote' + (hasVoted ? ' voted' : '') + '" onclick="toggleVote(\'' + f.id + '\')">' +
+          '👍 ' + voteCount +
+          '</button>' +
+          '</div>' +
+          commentsHtml +
+          devHtml +
+          '</div>';
+      }).join('');
+    }
+
+    /* ── Escape HTML ── */
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /* ── Toggle upvote ── */
+    async function toggleVote(feedbackId) {
+      if (!currentUid) return;
+      const ref = db.collection('feedback').doc(feedbackId);
+      const doc = await ref.get();
+      if (!doc.exists) return;
+      const votes = doc.data().votes || [];
+      if (votes.includes(currentUid)) {
+        // Remove vote
+        await ref.update({
+          votes: firebase.firestore.FieldValue.arrayRemove(currentUid)
+        });
+      } else {
+        // Add vote
+        await ref.update({
+          votes: firebase.firestore.FieldValue.arrayUnion(currentUid)
+        });
+      }
+    }
+
+    /* ── Dev: set feedback status ── */
+    async function setStatus(feedbackId, status) {
+      if (!isDev) return;
+      try {
+        await db.collection('feedback').doc(feedbackId).update({ status: status });
+        showToast('Status updated to ' + status);
+      } catch (e) {
+        console.error(e);
+        showToast('Failed to update status');
+      }
+    }
+
+    /* ── Dev: add comment ── */
+    async function addComment(feedbackId) {
+      if (!isDev) return;
+      const input = document.getElementById('comment_' + feedbackId);
+      const text = input.value.trim();
+      if (!text) return;
+      if (text.length > 500) return showToast('Comment too long');
+
+      try {
+        await db.collection('feedback').doc(feedbackId).update({
+          comments: firebase.firestore.FieldValue.arrayUnion({
+            text: text,
+            by: currentUid,
+            at: Date.now()
+          })
+        });
+        input.value = '';
+        showToast('Comment added');
+      } catch (e) {
+        console.error(e);
+        showToast('Failed to add comment');
+      }
+    }
+  </script>
+</body>
+</html>
