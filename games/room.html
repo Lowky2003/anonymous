@@ -1714,14 +1714,24 @@
       ctx.fillStyle = grd;
       ctx.fillRect(0, H * 0.7, W, H * 0.3);
 
-      // ── 3. Cobblestone path to door ──
-      const pathW = 38, pathX = W / 2 - 19;
+      // ── 3. Perspective cobblestone path (trapezoid, narrows toward building) ──
+      const pathNarrow = 28, pathWide = 48;
+      const pathFarY = H * 0.68, pathNearY = H;
+      const pathFarX = W / 2 - pathNarrow / 2, pathNearX = W / 2 - pathWide / 2;
       ctx.fillStyle = '#8a7a60';
-      ctx.fillRect(pathX, H * 0.68, pathW, H * 0.32);
-      ctx.strokeStyle = 'rgba(60,50,35,0.35)';
-      ctx.lineWidth = 0.8;
-      for (let py = H * 0.7; py < H; py += 14) {
-        ctx.beginPath(); ctx.moveTo(pathX, py); ctx.lineTo(pathX + pathW, py); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pathFarX, pathFarY);
+      ctx.lineTo(pathFarX + pathNarrow, pathFarY);
+      ctx.lineTo(pathNearX + pathWide, pathNearY);
+      ctx.lineTo(pathNearX, pathNearY);
+      ctx.closePath(); ctx.fill();
+      // Receding horizontal joint lines
+      ctx.strokeStyle = 'rgba(60,50,35,0.35)'; ctx.lineWidth = 0.8;
+      for (let t = 0; t <= 1; t += 0.12) {
+        const py = pathFarY + (pathNearY - pathFarY) * t;
+        const px = pathFarX + (pathNearX - pathFarX) * t;
+        const pw = pathNarrow + (pathWide - pathNarrow) * t;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + pw, py); ctx.stroke();
       }
 
       // ── 4. Stars ──
@@ -1737,10 +1747,20 @@
       ctx.fillStyle = '#0d1f40';
       ctx.beginPath(); ctx.arc(moonX + moonR * 0.4, moonY - moonR * 0.1, moonR * 0.82, 0, Math.PI * 2); ctx.fill();
 
-      // ── 6. Draw trees (left & right) ──
+      // ── 6. Trees with ground shadow ──
       function drawTree(tx, ty, tH) {
+        // Elliptical ground shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath(); ctx.ellipse(tx + 6, ty, tH * 0.22, tH * 0.06, 0, 0, Math.PI * 2); ctx.fill();
+        // Trunk with bark lines
         ctx.fillStyle = '#4a2e10';
         ctx.fillRect(tx - 5, ty - tH * 0.32, 10, tH * 0.32);
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7;
+        for (let b = 0; b < 3; b++) {
+          const by = ty - tH * 0.1 - b * tH * 0.08;
+          ctx.beginPath(); ctx.moveTo(tx - 3, by); ctx.lineTo(tx + 4, by + 2); ctx.stroke();
+        }
+        // Three canopy tiers
         for (let t = 0; t < 3; t++) {
           const tw  = tH * (0.22 - t * 0.055);
           const tyy = ty - tH * 0.32 - t * tH * 0.26;
@@ -1751,6 +1771,8 @@
           ctx.moveTo(tx, tyy - tH * 0.30);
           ctx.lineTo(tx - tw, tyy); ctx.lineTo(tx + tw, tyy);
           ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = 'rgba(80,200,80,0.12)'; ctx.lineWidth = 1;
+          ctx.stroke();
         }
       }
       const tH = H * 0.25;
@@ -1759,47 +1781,72 @@
 
       // ── 7. Building layout ──
       const MAX_FLOORS = 3;
-      const bW     = Math.min(W * 0.52, 260);
-      const bX     = (W - bW) / 2;
+      const bW     = Math.min(W * 0.48, 240);   // slightly narrower front to make room for side face
+      const bX     = (W - bW) / 2 - 10;          // shift left so side face centres visually
       const floorH = Math.min((H * 0.42) / MAX_FLOORS, 72);
       const bH     = floorH * MAX_FLOORS;
       const bTop   = H * 0.68 - bH;
       const total  = roomData.unlockedLayers || 1;
 
-      // ── 8. Building drop-shadow ──
-      ctx.shadowColor = 'rgba(0,0,0,0.55)';
-      ctx.shadowBlur  = 20;
-      ctx.fillStyle   = '#2a1e10';
-      ctx.fillRect(bX - 4, bTop - 2, bW + 8, bH + 6);
-      ctx.shadowBlur  = 0; ctx.shadowColor = 'transparent';
+      // Cabinet-projection 3D offsets (right-and-up)
+      const sW  = bW * 0.125;      // side face width
+      const sOY = sW * 0.44;       // side face upward slant
 
-      // ── 9. Draw each floor ──
+      // ── 8. Ground shadow under building ──
+      ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 20;
+      ctx.fillStyle   = '#2a1e10';
+      ctx.fillRect(bX - 4, bTop - 2, bW + sW + 8, bH + 6);
+      ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+
+      // ── 9a. Building right side face (cabinet projection depth) ──
+      const sTF = { x: bX + bW,      y: bTop };
+      const sTB = { x: bX + bW + sW, y: bTop - sOY };
+      const sBF = { x: bX + bW,      y: bTop + bH };
+      const sBB = { x: bX + bW + sW, y: bTop + bH - sOY };
+      ctx.fillStyle = 'rgba(30,20,10,0.78)';
+      ctx.beginPath();
+      ctx.moveTo(sTF.x, sTF.y); ctx.lineTo(sTB.x, sTB.y);
+      ctx.lineTo(sBB.x, sBB.y); ctx.lineTo(sBF.x, sBF.y);
+      ctx.closePath(); ctx.fill();
+      // Horizontal floor-edge lines on the side
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1;
+      for (let fi = 1; fi < MAX_FLOORS; fi++) {
+        const fy  = bTop + fi * floorH;
+        ctx.beginPath();
+        ctx.moveTo(bX + bW, fy);
+        ctx.lineTo(bX + bW + sW, fy - sOY);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sTF.x, sTF.y); ctx.lineTo(sTB.x, sTB.y);
+      ctx.lineTo(sBB.x, sBB.y); ctx.lineTo(sBF.x, sBF.y);
+      ctx.closePath(); ctx.stroke();
+
+      // ── 9b. Front face — draw each floor ──
       for (let i = 1; i <= MAX_FLOORS; i++) {
-        // Floor 1 sits at the bottom; floor 3 is at the top of the building
-        const fi  = MAX_FLOORS - i;        // 0 = topmost slot
+        const fi  = MAX_FLOORS - i;           // slot index (0 = top of building)
         const fy  = bTop + fi * floorH;
         const unlocked  = i <= total;
         const isCurrent = i === currentLayer;
         const ld        = (roomData.layerData || {})[i] || {};
         const wallColor = getWallPreviewColor(ld.wallPattern || getLayerDefaultWall(i));
 
-        // Panel fill
         if (unlocked) {
           ctx.fillStyle = wallColor;
           ctx.fillRect(bX, fy, bW, floorH);
-          // Subtle sheen
+          // Soft sheen overlay
           const tex = ctx.createLinearGradient(bX, fy, bX + bW, fy + floorH);
-          tex.addColorStop(0,   'rgba(255,255,255,0.07)');
+          tex.addColorStop(0,   'rgba(255,255,255,0.09)');
           tex.addColorStop(0.5, 'rgba(255,255,255,0.0)');
-          tex.addColorStop(1,   'rgba(0,0,0,0.06)');
+          tex.addColorStop(1,   'rgba(0,0,0,0.08)');
           ctx.fillStyle = tex;
           ctx.fillRect(bX, fy, bW, floorH);
         } else {
-          // Locked — dark hatched background
+          // Locked floor — dark hatch pattern
           ctx.fillStyle = '#1a1525';
           ctx.fillRect(bX, fy, bW, floorH);
-          ctx.strokeStyle = 'rgba(100,80,160,0.12)';
-          ctx.lineWidth = 0.7;
+          ctx.strokeStyle = 'rgba(100,80,160,0.12)'; ctx.lineWidth = 0.7;
           for (let lx = -floorH; lx < bW + floorH; lx += 14) {
             ctx.beginPath();
             ctx.moveTo(bX + lx, fy);
@@ -1808,35 +1855,41 @@
           }
         }
 
-        // Border (gold highlight for current floor)
+        // Gold border on current floor, dark otherwise
         ctx.strokeStyle = (isCurrent && unlocked) ? '#f7c97e' : 'rgba(0,0,0,0.35)';
         ctx.lineWidth   = (isCurrent && unlocked) ? 2.5 : 1;
-        ctx.strokeRect(bX + (isCurrent ? 1.25 : 0), fy + (isCurrent ? 1.25 : 0),
-                       bW - (isCurrent ? 2.5 : 0),  floorH - (isCurrent ? 2.5 : 0));
+        ctx.strokeRect(
+          bX + (isCurrent ? 1.25 : 0), fy + (isCurrent ? 1.25 : 0),
+          bW - (isCurrent ? 2.5 : 0),  floorH - (isCurrent ? 2.5 : 0)
+        );
 
         // Windows (two per floor)
         const winW = bW * 0.16, winH = floorH * 0.5;
         const winY = fy + (floorH - winH) / 2;
-        [bX + bW * 0.18, bX + bW * 0.62].forEach(wx => {
+        [bX + bW * 0.17, bX + bW * 0.61].forEach(wx => {
           if (unlocked) {
-            // Glass gradient
+            // Window sill shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(wx - 2, winY + winH, winW + 4, 4);
+            // Glass
             const wg = ctx.createLinearGradient(wx, winY, wx + winW, winY + winH);
             wg.addColorStop(0, 'rgba(200,230,255,0.65)');
             wg.addColorStop(1, 'rgba(160,210,255,0.45)');
-            ctx.fillStyle = wg;
-            ctx.fillRect(wx, winY, winW, winH);
-            // Warm interior glow
+            ctx.fillStyle = wg; ctx.fillRect(wx, winY, winW, winH);
+            // Warm glow
             ctx.fillStyle = 'rgba(255,245,200,0.20)';
             ctx.fillRect(wx + 2, winY + 2, winW - 4, winH - 4);
-            // Frame
-            ctx.strokeStyle = 'rgba(60,90,130,0.7)';  ctx.lineWidth = 1.5;
+            // Frame + cross panes
+            ctx.strokeStyle = 'rgba(60,90,130,0.7)'; ctx.lineWidth = 1.5;
             ctx.strokeRect(wx, winY, winW, winH);
-            // Pane cross
-            ctx.strokeStyle = 'rgba(60,90,130,0.5)';  ctx.lineWidth = 0.8;
+            ctx.strokeStyle = 'rgba(60,90,130,0.5)'; ctx.lineWidth = 0.8;
             ctx.beginPath(); ctx.moveTo(wx + winW/2, winY); ctx.lineTo(wx + winW/2, winY + winH); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(wx, winY + winH/2); ctx.lineTo(wx + winW, winY + winH/2); ctx.stroke();
+            // Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.fillRect(wx + 2, winY + 2, winW * 0.38, winH * 0.38);
           } else {
-            // Boarded X
+            // Boarded-up X
             ctx.fillStyle = 'rgba(30,20,10,0.8)';
             ctx.fillRect(wx, winY, winW, winH);
             ctx.strokeStyle = 'rgba(100,70,40,0.55)'; ctx.lineWidth = 1;
@@ -1859,52 +1912,97 @@
         }
         ctx.textBaseline = 'alphabetic';
 
-        // Store rect for click detection
+        // Store front-face rect for click detection
         _outsideFloorRects[i] = { x: bX, y: fy, w: bW, h: floorH, unlocked };
       }
 
-      // ── 10. Peaked roof ──
-      const roofPeakX = W / 2;
-      const roofPeakY = bTop - bW * 0.28;
+      // ── 10. 3D hipped roof (front face + right side face) ──
+      const roofBaseL = bX - 14;
+      const roofBaseR = bX + bW + 14;
+      const roofPeakX = bX + bW / 2;
+      const roofPeakY = bTop - bW * 0.26;
+      const bkPeakX   = roofPeakX + sW;
+      const bkPeakY   = roofPeakY - sOY;
+      const bkBaseRX  = roofBaseR + sW;
+      const bkBaseRY  = bTop - sOY;
+
+      // Right-side face of roof (darker)
+      ctx.fillStyle = '#5a3a08';
+      ctx.beginPath();
+      ctx.moveTo(roofBaseR, bTop);  ctx.lineTo(bkBaseRX, bkBaseRY);
+      ctx.lineTo(bkPeakX, bkPeakY); ctx.lineTo(roofPeakX, roofPeakY);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+
+      // Front face of roof
       const roofG = ctx.createLinearGradient(bX, bTop, roofPeakX, roofPeakY);
       roofG.addColorStop(0, '#c8a060'); roofG.addColorStop(0.5, '#a07840'); roofG.addColorStop(1, '#7a5820');
       ctx.fillStyle = roofG;
       ctx.beginPath();
-      ctx.moveTo(bX - 12, bTop); ctx.lineTo(roofPeakX, roofPeakY); ctx.lineTo(bX + bW + 12, bTop);
+      ctx.moveTo(roofBaseL, bTop); ctx.lineTo(roofPeakX, roofPeakY); ctx.lineTo(roofBaseR, bTop);
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1; ctx.stroke();
 
-      // ── 11. Chimney ──
-      const chimX = bX + bW * 0.68;
-      const chimY = roofPeakY + (bTop - roofPeakY) * 0.32;
+      // Ridge line
+      ctx.strokeStyle = '#7a5820'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(roofPeakX, roofPeakY); ctx.lineTo(bkPeakX, bkPeakY); ctx.stroke();
+
+      // ── 11. 3D Chimney ──
+      const chimFX = bX + bW * 0.72, chimFY = bTop - bH * 0.05;
+      const chimBX = chimFX + sW * 0.5;
+      const chimBY = chimFY - sOY * 0.5;
+      // Front face
       ctx.fillStyle = '#8a6520';
-      ctx.fillRect(chimX, chimY - 22, 14, 26);
+      ctx.fillRect(chimFX, chimFY - 20, 12, 24);
+      // Side face
       ctx.fillStyle = '#6a4a10';
-      ctx.fillRect(chimX - 2, chimY - 24, 18, 4);
+      ctx.beginPath();
+      ctx.moveTo(chimFX + 12, chimFY - 20); ctx.lineTo(chimBX + 12, chimBY - 20);
+      ctx.lineTo(chimBX + 12, chimBY + 4);  ctx.lineTo(chimFX + 12, chimFY + 4);
+      ctx.closePath(); ctx.fill();
+      // Top cap (front + side)
+      ctx.fillStyle = '#5a3a08';
+      ctx.fillRect(chimFX - 2, chimFY - 22, 16, 4);
+      ctx.beginPath();
+      ctx.moveTo(chimFX + 14, chimFY - 22); ctx.lineTo(chimBX + 14, chimBY - 22);
+      ctx.lineTo(chimBX + 14, chimBY - 18); ctx.lineTo(chimFX + 14, chimFY - 18);
+      ctx.closePath(); ctx.fill();
+      // Smoke puffs
       for (let sp = 0; sp < 3; sp++) {
         ctx.fillStyle = `rgba(200,200,200,${0.25 - sp * 0.07})`;
-        ctx.beginPath();
-        ctx.arc(chimX + 7 + sp * 2, chimY - 28 - sp * 7, 4 + sp * 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(chimFX + 6 + sp * 2, chimFY - 26 - sp * 7, 4 + sp * 2, 0, Math.PI * 2); ctx.fill();
       }
 
       // ── 12. Front door ──
       const doorW = bW * 0.13, doorH = floorH * 0.82;
-      const doorX = W / 2 - doorW / 2;
+      const doorX = bX + bW / 2 - doorW / 2;
       const doorY = H * 0.68 - doorH;
-      ctx.fillStyle = '#5a3a18';
+      // Door frame shadow
+      ctx.fillStyle = '#3a2010';
       ctx.fillRect(doorX - 4, doorY + doorH * 0.08, doorW + 8, doorH * 0.92 + 3);
+      // Door side (3D depth)
+      ctx.fillStyle = '#2a1808';
+      ctx.fillRect(doorX + doorW + 4, doorY + doorH * 0.08, 5, doorH * 0.92 + 3);
+      // Door panel
       const dg = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY + doorH);
       dg.addColorStop(0, '#8a5030'); dg.addColorStop(1, '#5a3018');
       ctx.fillStyle = dg;
       ctx.fillRect(doorX, doorY + doorH * 0.08, doorW, doorH * 0.92);
+      // Arch
       ctx.fillStyle = '#6a4020';
       ctx.beginPath();
       ctx.arc(doorX + doorW / 2, doorY + doorH * 0.08, doorW / 2, Math.PI, 0);
       ctx.fill();
+      // Arch depth side
+      ctx.fillStyle = '#4a2a10';
+      ctx.beginPath();
+      ctx.arc(doorX + doorW / 2 + 4, doorY + doorH * 0.08, doorW / 2, Math.PI, 0);
+      ctx.fill();
+      // Panel details
       ctx.strokeStyle = 'rgba(40,20,5,0.5)'; ctx.lineWidth = 1;
       ctx.strokeRect(doorX + 3, doorY + doorH * 0.15, doorW - 6, doorH * 0.32);
       ctx.strokeRect(doorX + 3, doorY + doorH * 0.52, doorW - 6, doorH * 0.34);
+      // Door knob
       ctx.fillStyle = '#e0b850';
       ctx.beginPath(); ctx.arc(doorX + doorW * 0.72, doorY + doorH * 0.54, 3.5, 0, Math.PI * 2); ctx.fill();
 
