@@ -154,7 +154,7 @@
     .close-btn:hover { background: rgba(255,255,255,0.12); }
 
     /* ── History ── */
-    .history-btn-wrap { text-align: center; margin: 16px auto; max-width: 420px; padding: 0 16px; }
+    .history-btn-wrap { text-align: center; margin: 16px auto; max-width: 420px; padding: 0 16px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .history-btn { padding: 10px 24px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     .history-btn:hover { background: rgba(255,255,255,0.12); }
 
@@ -187,6 +187,23 @@
       .digit-input { width: 42px; height: 48px; font-size: 20px; }
       .random-btn { width: 42px; height: 48px; }
     }
+
+    /* ── Purchase list overlay ── */
+    .purchases-overlay { position: fixed; inset: 0; z-index: 9100; background: rgba(15,12,41,0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
+    .purchases-overlay.hidden { display: none; }
+    .purchases-box { background: rgba(30,27,75,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px 20px; max-width: 440px; width: 90%; max-height: 85vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; animation: fadeSlideIn 0.3s ease; }
+    .purchases-box::-webkit-scrollbar { display: none; }
+    .purchases-box h3 { font-size: 18px; text-align: center; margin-bottom: 6px; color: #fff; }
+    .purchases-summary { text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+    .purchases-list { display: flex; flex-direction: column; gap: 8px; }
+    .purchase-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+    .purchase-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .purchase-info { flex: 1; min-width: 0; }
+    .purchase-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .purchase-detail { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .purchase-number { font-family: monospace; font-size: 16px; font-weight: 700; color: #a5b4fc; letter-spacing: 2px; flex-shrink: 0; }
+    .purchase-bet { font-size: 12px; font-weight: 600; color: #f7c97e; flex-shrink: 0; }
+    .purchases-empty { text-align: center; padding: 24px 16px; color: rgba(255,255,255,0.4); font-size: 14px; }
   </style>
 </head>
 <body>
@@ -244,8 +261,13 @@
 
     <!-- Past results history -->
     <div class="history-btn-wrap">
+      <button class="history-btn" onclick="openPurchases()">👥 View Purchases</button>
       <button class="history-btn" onclick="openHistory()">📜 Last 3 Days History</button>
     </div>
+  </div>
+
+  <!-- Purchases overlay -->
+  <div class="purchases-overlay hidden" id="purchasesOverlay" onclick="if(event.target===this)closePurchases()">
   </div>
 
   <!-- History overlay -->
@@ -873,6 +895,119 @@
     /** Close the history overlay. */
     function closeHistory() {
       const overlay = document.getElementById('historyOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    /* ═══════════════════════════════
+       Purchase List — shows who bought what digit
+       ═══════════════════════════════ */
+
+    /**
+     * Determine which draw date to show purchases for based on current phase.
+     * - Betting phase: show purchases for tomorrow's draw (active bets)
+     * - Waiting/results phase: show purchases for today's draw
+     */
+    function getPurchaseDrawDate() {
+      const phase = getCurrentPhase();
+      if (phase === 'betting') return getTargetDrawDate();
+      return getTodayDateStr();
+    }
+
+    /**
+     * Open the purchases overlay — queries all rooms with a totoPick
+     * matching the relevant draw date and lists each player's pick and bet.
+     */
+    async function openPurchases() {
+      const overlay = document.getElementById('purchasesOverlay');
+      if (!overlay) return;
+
+      const drawDate = getPurchaseDrawDate();
+
+      // Show loading state
+      overlay.innerHTML = '<div class="purchases-box"><h3>👥 Purchases</h3><div class="purchases-empty">Loading…</div></div>';
+      overlay.classList.remove('hidden');
+
+      try {
+        // Query all rooms with a totoPick for this draw date
+        const snap = await db.collection('rooms')
+          .where('totoPick.drawDate', '==', drawDate)
+          .get();
+
+        const purchases = [];
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.totoPick && data.totoPick.number) {
+            purchases.push({
+              name: data.displayName || 'Anonymous',
+              number: data.totoPick.number,
+              bet: data.totoPick.bet || 0
+            });
+          }
+        });
+
+        // Sort by bet amount descending
+        purchases.sort((a, b) => b.bet - a.bet);
+
+        renderPurchaseList(overlay, drawDate, purchases);
+      } catch (err) {
+        console.error('Failed to load purchases:', err);
+        overlay.innerHTML = '<div class="purchases-box"><h3>👥 Purchases</h3>'
+          + '<div class="purchases-empty">Failed to load purchases</div>'
+          + '<button class="close-btn" style="display:block;margin:12px auto 0" onclick="closePurchases()">Close</button>'
+          + '</div>';
+      }
+    }
+
+    /**
+     * Render the purchase list inside the overlay.
+     * @param {HTMLElement} overlay — the overlay container
+     * @param {string} drawDate — YYYY-MM-DD of the draw
+     * @param {Array} purchases — [{name, number, bet}]
+     */
+    function renderPurchaseList(overlay, drawDate, purchases) {
+      const totalBets = purchases.reduce((sum, p) => sum + p.bet, 0);
+
+      let html = '<div class="purchases-box">';
+      html += '<h3>👥 Purchases</h3>';
+      html += '<div class="purchases-summary">Draw: ' + drawDate
+        + ' · ' + purchases.length + ' player' + (purchases.length !== 1 ? 's' : '')
+        + ' · Total bets: ' + totalBets.toLocaleString() + ' coins</div>';
+
+      if (purchases.length === 0) {
+        html += '<div class="purchases-empty">No one has placed a bet yet for this draw.</div>';
+      } else {
+        html += '<div class="purchases-list">';
+        for (const p of purchases) {
+          // First letter of the name as avatar
+          const initial = p.name.charAt(0).toUpperCase();
+          html += '<div class="purchase-item">';
+          html += '<div class="purchase-avatar">' + initial + '</div>';
+          html += '<div class="purchase-info">';
+          html += '<div class="purchase-name">' + escapeHtml(p.name) + '</div>';
+          html += '</div>';
+          html += '<span class="purchase-number">' + p.number + '</span>';
+          html += '<span class="purchase-bet">' + p.bet.toLocaleString() + ' coins</span>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      html += '<button class="close-btn" style="display:block;margin:12px auto 0" onclick="closePurchases()">Close</button>';
+      html += '</div>';
+
+      overlay.innerHTML = html;
+    }
+
+    /** Escape HTML to prevent XSS in user-supplied displayName. */
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /** Close the purchases overlay. */
+    function closePurchases() {
+      const overlay = document.getElementById('purchasesOverlay');
       if (overlay) overlay.classList.add('hidden');
     }
 
