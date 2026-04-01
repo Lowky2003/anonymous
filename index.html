@@ -751,6 +751,46 @@
         }
       });
 
+      /* ── Click interaction ── */
+      var MEOW_TEXTS = ['Meow~', 'Mew!', 'Purr~', 'Nya~', 'Mrrp!', '♪ Meow', 'Miao~'];
+      var clickCooldown = false;
+
+      pet.addEventListener('click', function(e) {
+        if (clickCooldown) return;
+        clickCooldown = true;
+
+        /* Show meow bubble */
+        var bubble = document.createElement('div');
+        bubble.className = 'cat-meow-bubble';
+        bubble.textContent = MEOW_TEXTS[Math.floor(Math.random() * MEOW_TEXTS.length)];
+        pet.appendChild(bubble);
+        setTimeout(function() { bubble.remove(); }, 1900);
+
+        /* Happy jump reaction */
+        clearClasses();
+        pet.classList.add('click-react');
+        state = 'idle';
+
+        /* Spawn heart particles */
+        for (var i = 0; i < 3; i++) {
+          var heart = document.createElement('div');
+          heart.className = 'cat-heart';
+          heart.textContent = '❤️';
+          heart.style.left = (10 + Math.random() * 28) + 'px';
+          heart.style.top = (5 + Math.random() * 10) + 'px';
+          heart.style.setProperty('--hx', (Math.random() * 20 - 10) + 'px');
+          heart.style.animationDelay = (i * 0.15) + 's';
+          pet.appendChild(heart);
+          (function(h) { setTimeout(function() { h.remove(); }, 1400); })(heart);
+        }
+
+        setTimeout(function() {
+          pet.classList.remove('click-react');
+          startWalk();
+          clickCooldown = false;
+        }, 800);
+      });
+
       /* Start */
       startWalk();
       applyPos();
