@@ -2455,14 +2455,15 @@ countdownRef.onSnapshot((snap) => {
     const existing = getLocalMood();
     if (existing) renderChecked(existing);
 
-    // After auth ready, check Firestore for actual vote
-    const unsubAuth = auth.onAuthStateChanged(() => {
+    // After auth ready, check Firestore for actual vote and start chart listener
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+    if (!user) return; // Wait for authenticated state
     checkExistingVote();
+    todayDocRef().onSnapshot(
+        (snap) => { updateChart(snap.exists ? snap.data() : {}); },
+        (err) => { console.warn('Mood chart listener error:', err); }
+    );
     unsubAuth();
-    });
-
-    todayDocRef().onSnapshot((snap) => {
-    updateChart(snap.exists ? snap.data() : {});
     });
 })();
 
