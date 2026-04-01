@@ -2027,7 +2027,7 @@ function _subscribeFood() {
 }
 
 function _unsubAllListeners() {
-    if (_unsubAnswers) { _unsubAnswers(); _unsubAnswers = null; }
+    // Keep answers listener active for browser push notifications
     if (_unsubFood) { _unsubFood(); _unsubFood = null; }
 }
 
@@ -2035,7 +2035,7 @@ function _unsubAllListeners() {
 _subscribeAnswers();
 _subscribeFood();
 
-// Detach listeners when tab is hidden, reattach when visible
+// Detach non-essential listeners when tab is hidden, reattach when visible
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
     _unsubAllListeners();
@@ -2043,7 +2043,6 @@ document.addEventListener('visibilitychange', () => {
     if (_lastSeenInterval) { clearInterval(_lastSeenInterval); _lastSeenInterval = null; }
     if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
     } else {
-    _subscribeAnswers();
     _subscribeFood();
     // Resume heartbeat
     if (auth.currentUser) {
