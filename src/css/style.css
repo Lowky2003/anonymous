@@ -1721,6 +1721,142 @@ body.sidebar-open .bubble-wrap {
     transition: margin-left 0.3s ease;
 }
 
+/* ── Walking pet on bottom bar ── */
+.walking-pet {
+    position: fixed;
+    bottom: 68px;
+    left: 0;
+    z-index: 99;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+}
+
+/* SVG cat — tail wag */
+.cat-svg-tail {
+    transform-origin: 38px 22px;
+    animation: svgTailWag 1.2s ease-in-out infinite;
+}
+@keyframes svgTailWag {
+    0%, 100% { transform: rotate(-8deg); }
+    50%      { transform: rotate(12deg); }
+}
+
+/* SVG cat — leg walk cycle (active only during walk phase) */
+.walking-pet.walking .cat-svg-leg-fl,
+.walking-pet.walking .cat-svg-paw-fl { animation: svgLegF 0.35s ease-in-out infinite; transform-origin: 13.75px 32px; }
+.walking-pet.walking .cat-svg-leg-fr,
+.walking-pet.walking .cat-svg-paw-fr { animation: svgLegB 0.35s ease-in-out infinite; transform-origin: 19.75px 32px; }
+.walking-pet.walking .cat-svg-leg-bl,
+.walking-pet.walking .cat-svg-paw-bl { animation: svgLegB 0.35s ease-in-out infinite; transform-origin: 27.75px 32px; }
+.walking-pet.walking .cat-svg-leg-br,
+.walking-pet.walking .cat-svg-paw-br { animation: svgLegF 0.35s ease-in-out infinite; transform-origin: 32.75px 32px; }
+
+@keyframes svgLegF {
+    0%, 100% { transform: rotate(12deg); }
+    50%      { transform: rotate(-12deg); }
+}
+@keyframes svgLegB {
+    0%, 100% { transform: rotate(-12deg); }
+    50%      { transform: rotate(12deg); }
+}
+
+/* Gentle body bob while walking */
+.walking-pet.walking .pet-cat-svg {
+    animation: svgBodyBob 0.35s ease-in-out infinite;
+}
+@keyframes svgBodyBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.5px); }
+}
+
+/* Idle state — no leg/body animation, just tail wag */
+.walking-pet:not(.walking) .cat-svg-leg-fl,
+.walking-pet:not(.walking) .cat-svg-leg-fr,
+.walking-pet:not(.walking) .cat-svg-leg-bl,
+.walking-pet:not(.walking) .cat-svg-leg-br,
+.walking-pet:not(.walking) .cat-svg-paw-fl,
+.walking-pet:not(.walking) .cat-svg-paw-fr,
+.walking-pet:not(.walking) .cat-svg-paw-bl,
+.walking-pet:not(.walking) .cat-svg-paw-br {
+    animation: none;
+}
+
+/* Sitting action — body tilts slightly */
+.walking-pet.sitting .pet-cat-svg {
+    animation: svgSit 3s ease-in-out 1;
+}
+@keyframes svgSit {
+    0%, 100% { transform: rotate(0) translateY(0); }
+    15%, 85% { transform: rotate(-3deg) translateY(2px); }
+}
+
+/* Licking paw action — head bobs down */
+.walking-pet.licking .cat-svg-head-group {
+    animation: svgLick 0.6s ease-in-out 4;
+}
+@keyframes svgLick {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50%      { transform: translateY(2px) rotate(5deg); }
+}
+
+/* Sleeping action — gentle breathing */
+.walking-pet.sleeping .pet-cat-svg {
+    animation: svgSleep 2s ease-in-out infinite;
+}
+.walking-pet.sleeping .cat-svg-zzz { display: block; }
+@keyframes svgSleep {
+    0%, 100% { transform: scaleY(1); }
+    50%      { transform: scaleY(0.97) translateY(1px); }
+}
+
+/* Jump action */
+.walking-pet.jumping .pet-cat-svg {
+    animation: svgJump 0.6s ease-out 1;
+}
+@keyframes svgJump {
+    0%   { transform: translateY(0); }
+    35%  { transform: translateY(-18px) scaleY(1.05); }
+    65%  { transform: translateY(-12px); }
+    100% { transform: translateY(0) scaleY(0.95); }
+}
+
+/* Stretch action — cat elongates forward */
+.walking-pet.stretching .pet-cat-svg {
+    animation: svgStretch 2.5s ease-in-out 1;
+}
+@keyframes svgStretch {
+    0%, 100% { transform: scaleX(1) scaleY(1) translateY(0); }
+    20%, 60% { transform: scaleX(1.15) scaleY(0.9) translateY(2px); }
+    80%      { transform: scaleX(0.95) scaleY(1.05); }
+}
+
+/* Look around action — head tilts side to side */
+.walking-pet.looking .cat-svg-head-group {
+    animation: svgLookAround 2.5s ease-in-out 1;
+}
+@keyframes svgLookAround {
+    0%, 100% { transform: rotate(0); }
+    20%      { transform: rotate(-8deg); }
+    50%      { transform: rotate(8deg); }
+    80%      { transform: rotate(-3deg); }
+}
+
+/* Running — faster leg animation */
+.walking-pet.running .cat-svg-leg-fl,
+.walking-pet.running .cat-svg-paw-fl { animation: svgLegF 0.18s ease-in-out infinite; transform-origin: 13.75px 32px; }
+.walking-pet.running .cat-svg-leg-fr,
+.walking-pet.running .cat-svg-paw-fr { animation: svgLegB 0.18s ease-in-out infinite; transform-origin: 19.75px 32px; }
+.walking-pet.running .cat-svg-leg-bl,
+.walking-pet.running .cat-svg-paw-bl { animation: svgLegB 0.18s ease-in-out infinite; transform-origin: 27.75px 32px; }
+.walking-pet.running .cat-svg-leg-br,
+.walking-pet.running .cat-svg-paw-br { animation: svgLegF 0.18s ease-in-out infinite; transform-origin: 32.75px 32px; }
+.walking-pet.running .pet-cat-svg {
+    animation: svgBodyBob 0.18s ease-in-out infinite;
+}
+
+/* Zzz text hidden by default */
+.cat-svg-zzz { display: none; }
+
 /* ── Responsive ── */
 @media (max-width: 480px) {
     .page-title { font-size: 22px; }
