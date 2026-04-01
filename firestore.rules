@@ -26,8 +26,9 @@ service cloud.firestore {
     //    jukeboxTrack, jukeboxVol, lastSeen, updatedAt,
     //    unlockedLayers (int 1–3), layerData (map: floor→{wallPattern,windowStyle,placedDecors,plantPosition})
     //    NOTE: pets[].layer (int|null) assigns pet to a floor; null = unplaced, 1-3 = floor number (max 2 per floor)
-    //    NOTE: TOTO Lottery — daily pick stored as totoPick: {date,number,bet,checked,winnings,resultTier}
-    //          totoHistory: [{date,number,bet,winnings,tier}] — capped to recent entries
+    //    NOTE: TOTO Lottery — picks stored as totoPicks: [{drawDate,number,bet,checked,winnings,resultTier}]
+    //          totoDrawDate: string (YYYY-MM-DD) — flat field for Firestore query in purchases list
+    //          totoHistory: [{date,picks[],totalBet,totalWinnings}] — capped to recent entries
     //          coins are deducted on bet and added on win (owner write rules cover this)
     // ═══════════════════════════════════════
     match /rooms/{uid} {

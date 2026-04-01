@@ -240,7 +240,7 @@
   <div id="mainContent" style="display:none">
     <div class="game-header">
       <h1>🎱 TOTO Lottery</h1>
-      <p>Bet 9 AM – 12 AM · Draw at 8 AM · Pick 4 digits and win!</p>
+      <p>Bet 8 AM – 4 PM · Draw at 5 PM · Pick 4 digits and win!</p>
     </div>
 
     <!-- Coin display -->
@@ -322,10 +322,10 @@
     const MIN_BET = 10;
 
 
-    // Schedule: betting 9 AM–midnight, draw at 8 AM next morning, results 8–9 AM
-    const DRAW_HOUR     = 8;   // 8 AM — results are generated
-    const BET_OPEN_HOUR = 9;   // 9 AM — betting opens
-    // Betting closes at midnight (hour 0 of the next day)
+    // Schedule: betting 8 AM – 4 PM, draw at 5 PM same day
+    const DRAW_HOUR      = 17;  // 5 PM — results are generated
+    const BET_OPEN_HOUR  = 8;   // 8 AM — betting opens
+    const BET_CLOSE_HOUR = 16;  // 4 PM — betting closes
 
     // Stagger delay between revealing each number in animation (ms)
     const REVEAL_DELAY_MS = 200;
@@ -339,8 +339,8 @@
     let currentUid = null;
     let playerCoins = 0;
     let currentBet = MIN_BET;
-    // todayPick: { number: '1234', bet: 50, checked: false } or null
-    let todayPick = null;
+    // todayPicks: array of { number: '1234', bet: 50, checked: false, winnings: 0 }
+    let todayPicks = [];
     // pickHistory: [{ date, number, bet, result, winnings }]
     let pickHistory = [];
     let countdownTimer = null;
@@ -403,10 +403,11 @@
        Date / Time Helpers
        ═══════════════════════════════
        Schedule (local time):
-         9:00 AM – 11:59 PM  →  Betting open (for TOMORROW's draw)
-         12:00 AM – 7:59 AM  →  Bets closed, waiting for draw
-         8:00 AM – 8:59 AM   →  Draw results available; can check yesterday's bet
-       The "draw date" is always the NEXT morning after a bet is placed. */
+         8:00 AM – 3:59 PM   →  Betting open (for today's 5 PM draw)
+         4:00 PM – 4:59 PM   →  Bets closed, waiting for draw
+         5:00 PM – 11:59 PM  →  Draw results available; can check today's bets
+         12:00 AM – 7:59 AM  →  Closed; next cycle starts at 8 AM
+       The "draw date" is the same day the bet is placed. */
 
     /** Format a Date as YYYY-MM-DD. */
     function formatDateStr(d) {
@@ -422,56 +423,32 @@
 
     /**
      * Determine the current phase of the TOTO cycle.
-     * @returns {'betting'|'waiting'|'results'}
+     * @returns {'betting'|'waiting'|'results'|'closed'}
      */
     function getCurrentPhase() {
       const hour = getServerNow().getHours();
-      if (hour >= BET_OPEN_HOUR) return 'betting';   // 9 AM – midnight
-      if (hour >= DRAW_HOUR) return 'results';        // 8 AM – 8:59 AM
-      return 'waiting';                                // 12 AM – 7:59 AM
+      if (hour >= BET_OPEN_HOUR && hour < BET_CLOSE_HOUR) return 'betting';  // 8 AM – 3:59 PM
+      if (hour >= BET_CLOSE_HOUR && hour < DRAW_HOUR) return 'waiting';      // 4 PM – 4:59 PM
+      if (hour >= DRAW_HOUR) return 'results';                                // 5 PM – 11:59 PM
+      return 'closed';                                                        // 12 AM – 7:59 AM
     }
 
     /**
      * Get the draw date that a bet placed NOW would target.
-     * Bets placed between 9 AM and midnight target TOMORROW's draw.
+     * Same-day draw: bets placed 8 AM – 4 PM target TODAY's 5 PM draw.
      * @returns {string} YYYY-MM-DD
      */
     function getTargetDrawDate() {
-      const now = getServerNow();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      return formatDateStr(tomorrow);
+      return getTodayDateStr();
     }
 
     /**
      * Get the draw date whose results are currently available (during 'results' phase).
-     * That's TODAY (results come out at 8 AM today for bets placed yesterday).
+     * Same-day draw: results at 5 PM today for bets placed today.
      * @returns {string} YYYY-MM-DD
      */
     function getCurrentResultDate() {
       return getTodayDateStr();
-    }
-
-    /** Get a Date object for the next upcoming draw. */
-    function getNextDrawDate() {
-      const now = getServerNow();
-      const draw = new Date(now);
-      draw.setHours(DRAW_HOUR, 0, 0, 0);
-      if (now >= draw) {
-        draw.setDate(draw.getDate() + 1);
-      }
-      return draw;
-    }
-
-    /** Get a Date object for when betting opens next. */
-    function getNextBetOpenDate() {
-      const now = getServerNow();
-      const open = new Date(now);
-      open.setHours(BET_OPEN_HOUR, 0, 0, 0);
-      if (now >= open) {
-        open.setDate(open.getDate() + 1);
-      }
-      return open;
     }
 
     /** Format remaining time as HH:MM:SS. */
@@ -565,7 +542,7 @@
        Firestore — Load / Save
        ═══════════════════════════════ */
 
-    /** Load player coins and today's TOTO pick from Firestore. */
+    /** Load player coins and today's TOTO picks from Firestore. */
     async function loadPlayerData() {
       if (!currentUid) return;
       try {
@@ -573,26 +550,17 @@
         if (roomDoc.exists) {
           const data = roomDoc.data();
           playerCoins = data.coins || 0;
-          const savedPick = data.totoPick || null;
           const phase = getCurrentPhase();
+          const relevantDate = (phase === 'betting') ? getTargetDrawDate() : getCurrentResultDate();
 
-          if (savedPick) {
-            if (phase === 'betting') {
-              // During betting phase, show pick only if it targets tomorrow's draw
-              const targetDate = getTargetDrawDate();
-              todayPick = (savedPick.drawDate === targetDate) ? savedPick : null;
-            } else if (phase === 'results') {
-              // During results phase, show pick if it targets today's draw (placed yesterday)
-              const resultDate = getCurrentResultDate();
-              todayPick = (savedPick.drawDate === resultDate) ? savedPick : null;
-            } else {
-              // Waiting phase (midnight–8 AM): show pick if it targets today's draw (placed yesterday before midnight)
-              const resultDate = getTodayDateStr();
-              todayPick = (savedPick.drawDate === resultDate) ? savedPick : null;
-            }
-          } else {
-            todayPick = null;
+          // Load picks array (backwards compat with single-pick `totoPick` field)
+          let savedPicks = data.totoPicks || [];
+          if (!savedPicks.length && data.totoPick && data.totoPick.number) {
+            savedPicks = [data.totoPick];
           }
+
+          // Filter to only picks for the relevant draw date
+          todayPicks = savedPicks.filter(p => p.drawDate === relevantDate);
           pickHistory = data.totoHistory || [];
         }
       } catch (err) {
@@ -600,14 +568,18 @@
       }
     }
 
-    /** Save the player's TOTO pick and coins to Firestore. */
+    /** Save the player's TOTO picks and coins to Firestore. */
     async function savePlayerData() {
       if (!currentUid) return;
       try {
         await db.collection('rooms').doc(currentUid).set({
           coins: playerCoins,
-          totoPick: todayPick,
-          totoHistory: pickHistory
+          totoPicks: todayPicks,
+          // Flat field for Firestore query in purchases list
+          totoDrawDate: todayPicks.length ? todayPicks[0].drawDate : null,
+          totoHistory: pickHistory,
+          // Clear old single-pick field on save (migration)
+          totoPick: null
         }, { merge: true });
       } catch (err) {
         console.error('Failed to save player data:', err);
@@ -632,38 +604,39 @@
       const phase = getCurrentPhase();
 
       if (phase === 'betting') {
-        // Show time until bets close (midnight)
-        const midnight = getServerNow();
-        midnight.setDate(midnight.getDate() + 1);
-        midnight.setHours(0, 0, 0, 0);
-        const diff = midnight.getTime() - getServerNow().getTime();
+        // Show time until bets close (4 PM)
+        const closeTime = new Date(getServerNow());
+        closeTime.setHours(BET_CLOSE_HOUR, 0, 0, 0);
+        const diff = closeTime.getTime() - getServerNow().getTime();
         timeEl.textContent = formatCountdown(diff);
         bar.classList.remove('draw-ready');
-        if (todayPick) {
-          cdLabel.textContent = 'Bet placed! Bets close in';
+        if (todayPicks.length) {
+          cdLabel.textContent = todayPicks.length + ' bet(s) placed! Bets close in';
         } else {
-          cdLabel.textContent = '🎱 Bets open (9 AM – 12 AM) · Closing in';
+          cdLabel.textContent = '🎱 Bets open (8 AM – 4 PM) · Closing in';
         }
       } else if (phase === 'results') {
-        // Show time until bets reopen (9 AM)
-        const betOpen = getNextBetOpenDate();
-        const diff = betOpen.getTime() - getServerNow().getTime();
+        // Results available — show until next betting opens
         timeEl.textContent = '✨ RESULTS READY';
         bar.classList.add('draw-ready');
-        cdLabel.textContent = 'Draw complete! Bets reopen at ' + BET_OPEN_HOUR + ':00 AM';
+        cdLabel.textContent = 'Draw complete! Next bets open tomorrow at ' + BET_OPEN_HOUR + ':00 AM';
         renderUI();
+      } else if (phase === 'waiting') {
+        // Waiting phase (4 PM – 5 PM) — show time until draw
+        const drawTime = new Date(getServerNow());
+        drawTime.setHours(DRAW_HOUR, 0, 0, 0);
+        const diff = drawTime.getTime() - getServerNow().getTime();
+        timeEl.textContent = formatCountdown(diff);
+        bar.classList.remove('draw-ready');
+        cdLabel.textContent = 'Bets closed · Draw at ' + DRAW_HOUR + ':00 (5 PM) · Countdown';
       } else {
-        // Waiting phase (midnight–8 AM) — show time until draw
-        const nextDraw = getNextDrawDate();
-        const diff = nextDraw.getTime() - getServerNow().getTime();
-        if (diff <= 0) {
-          timeEl.textContent = 'DRAWING...';
-          bar.classList.add('draw-ready');
-        } else {
-          timeEl.textContent = formatCountdown(diff);
-          bar.classList.remove('draw-ready');
-        }
-        cdLabel.textContent = 'Draw at ' + DRAW_HOUR + ':00 AM · Countdown';
+        // Closed phase (midnight – 8 AM)
+        const openTime = new Date(getServerNow());
+        openTime.setHours(BET_OPEN_HOUR, 0, 0, 0);
+        const diff = openTime.getTime() - getServerNow().getTime();
+        timeEl.textContent = formatCountdown(diff);
+        bar.classList.remove('draw-ready');
+        cdLabel.textContent = '💤 Bets open at ' + BET_OPEN_HOUR + ':00 AM';
       }
     }
 
@@ -678,67 +651,69 @@
 
     /**
      * Render the main TOTO card based on current phase:
-     * - 'betting' (9 AM–midnight): show input form or pick summary
-     * - 'results' (8–9 AM): show results check or already-checked summary
-     * - 'waiting' (midnight–8 AM): show waiting message
+     * - 'betting' (8 AM–4 PM): show input form and/or placed picks summary
+     * - 'waiting' (4 PM–5 PM): show waiting message with placed picks
+     * - 'results' (5 PM–midnight): show results check or already-checked summary
+     * - 'closed' (midnight–8 AM): show closed message
      */
     function renderCard() {
       const card = document.getElementById('totoCard');
       const phase = getCurrentPhase();
+      const allChecked = todayPicks.length > 0 && todayPicks.every(p => p.checked);
 
       let html = '';
 
       if (phase === 'betting') {
-        if (!todayPick) {
-          // Betting is open, no pick placed yet
-          html += '<div class="status-badge"><span class="badge-open">🎱 Bets Open (9 AM – 12 AM)</span></div>';
-          html += renderInputForm();
-        } else {
-          // Already placed a bet for tomorrow's draw
-          html += '<div class="status-badge"><span class="badge-waiting">✅ Bet Placed for Tomorrow</span></div>';
-          html += renderPickSummary();
+        // Show placed picks (if any) + input form for more bets
+        if (todayPicks.length) {
+          html += '<div class="status-badge"><span class="badge-waiting">✅ ' + todayPicks.length + ' Bet(s) Placed</span></div>';
+          html += renderPicksSummary();
+        }
+        // Always show input form during betting (can add more bets)
+        html += '<div class="status-badge"><span class="badge-open">🎱 Bets Open (8 AM – 4 PM)</span></div>';
+        html += renderInputForm();
+      } else if (phase === 'waiting') {
+        if (todayPicks.length) {
+          html += '<div class="status-badge"><span class="badge-waiting">⏳ Waiting for 5 PM Draw</span></div>';
+          html += renderPicksSummary();
           html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">';
-          html += 'Results at ' + DRAW_HOUR + ':00 AM tomorrow morning';
+          html += 'Draw at 5:00 PM today — hang tight!';
+          html += '</div>';
+        } else {
+          html += '<div class="status-badge"><span class="badge-done">🌙 Bets Closed</span></div>';
+          html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
+          html += 'No bets placed today. Draw at 5:00 PM.';
           html += '</div>';
         }
       } else if (phase === 'results') {
-        if (todayPick && !todayPick.checked) {
+        if (todayPicks.length && !allChecked) {
           // Draw happened, results available to check
           html += '<div class="status-badge"><span class="badge-done">✨ Results Available!</span></div>';
-          html += renderPickSummary();
+          html += renderPicksSummary();
           html += '<button class="main-btn btn-check" onclick="checkTodayResults()">🎱 Reveal Results</button>';
-        } else if (todayPick && todayPick.checked) {
+        } else if (todayPicks.length && allChecked) {
           // Already checked results
           html += '<div class="status-badge"><span class="badge-done">✅ Checked Today\'s Draw</span></div>';
-          html += renderPickSummary();
-          const resultLabel = todayPick.winnings > 0
-            ? '<span style="color:#34d399;font-weight:700">Won +' + todayPick.winnings.toLocaleString() + ' coins 🎉</span>'
+          html += renderPicksSummary();
+          const totalWinnings = todayPicks.reduce((sum, p) => sum + (p.winnings || 0), 0);
+          const resultLabel = totalWinnings > 0
+            ? '<span style="color:#34d399;font-weight:700">Total won +' + totalWinnings.toLocaleString() + ' coins 🎉</span>'
             : '<span style="color:rgba(255,255,255,0.5)">No match today 😔</span>';
           html += '<div style="text-align:center;margin-top:8px;font-size:14px">' + resultLabel + '</div>';
-          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">New bets open at ' + BET_OPEN_HOUR + ':00 AM</div>';
+          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">New bets open at ' + BET_OPEN_HOUR + ':00 AM tomorrow</div>';
         } else {
-          // No bet was placed yesterday
-          html += '<div class="status-badge"><span class="badge-done">📅 No Bet Yesterday</span></div>';
+          // No bet was placed today
+          html += '<div class="status-badge"><span class="badge-done">📅 No Bet Today</span></div>';
           html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
-          html += 'You didn\'t place a bet yesterday.<br>Bets reopen at ' + BET_OPEN_HOUR + ':00 AM!';
+          html += 'You didn\'t place a bet today.<br>Bets open at ' + BET_OPEN_HOUR + ':00 AM tomorrow!';
           html += '</div>';
         }
       } else {
-        // Waiting phase (midnight–8 AM)
-        if (todayPick && !todayPick.checked) {
-          // Bet placed (yesterday), waiting for draw
-          html += '<div class="status-badge"><span class="badge-waiting">⏳ Waiting for Draw</span></div>';
-          html += renderPickSummary();
-          html += '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">';
-          html += 'Draw at ' + DRAW_HOUR + ':00 AM this morning — hang tight!';
-          html += '</div>';
-        } else {
-          // No bet or already checked
-          html += '<div class="status-badge"><span class="badge-done">🌙 Bets Closed</span></div>';
-          html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
-          html += 'Betting is closed until ' + BET_OPEN_HOUR + ':00 AM.<br>Draw at ' + DRAW_HOUR + ':00 AM!';
-          html += '</div>';
-        }
+        // Closed phase (midnight – 8 AM)
+        html += '<div class="status-badge"><span class="badge-done">🌙 Closed</span></div>';
+        html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.5);font-size:14px">';
+        html += 'Betting opens at ' + BET_OPEN_HOUR + ':00 AM.<br>Draw at 5:00 PM.';
+        html += '</div>';
       }
 
       card.innerHTML = html;
@@ -801,17 +776,28 @@
       return html;
     }
 
-    /** Render the summary of today's placed pick. */
-    function renderPickSummary() {
-      if (!todayPick) return '';
+    /** Render the summary of all placed picks for today. */
+    function renderPicksSummary() {
+      if (!todayPicks.length) return '';
+      const totalBet = todayPicks.reduce((sum, p) => sum + p.bet, 0);
       let html = '<div class="pick-summary">';
-      html += '<div class="ps-label">Your Pick for Today</div>';
-      html += '<div class="ps-number">';
-      for (let i = 0; i < 4; i++) {
-        html += '<span class="ps-digit">' + todayPick.number[i] + '</span>';
+      html += '<div class="ps-label">Your Picks (' + todayPicks.length + ' bet' + (todayPicks.length > 1 ? 's' : '') + ' · Total: ' + totalBet + ' coins)</div>';
+      for (const pick of todayPicks) {
+        html += '<div style="margin-bottom:6px">';
+        html += '<div class="ps-number">';
+        for (let i = 0; i < 4; i++) {
+          html += '<span class="ps-digit">' + pick.number[i] + '</span>';
+        }
+        html += '</div>';
+        html += '<div class="ps-bet">' + pick.bet + ' coins';
+        if (pick.checked && pick.winnings > 0) {
+          html += ' → <span style="color:#34d399">Won +' + pick.winnings + '</span>';
+        } else if (pick.checked) {
+          html += ' → <span style="color:rgba(255,255,255,0.4)">No match</span>';
+        }
+        html += '</div>';
+        html += '</div>';
       }
-      html += '</div>';
-      html += '<div class="ps-bet">Bet: ' + todayPick.bet + ' coins</div>';
       html += '</div>';
       return html;
     }
@@ -840,30 +826,39 @@
       for (const dateStr of days) {
         // Generate that day's draw results (deterministic)
         const drawResults = generateDrawForDate(dateStr);
-        // Find the player's pick for that date (if any)
-        const pick = pickHistory.find(h => h.date === dateStr);
+        // Find the player's history for that date (if any)
+        const hist = pickHistory.find(h => h.date === dateStr);
+        // Build array of picks for this date (support both old and new format)
+        const histPicks = hist ? (hist.picks || [{ number: hist.number, bet: hist.bet, winnings: hist.winnings, tier: hist.tier }]) : [];
+        const totalWin = hist ? (hist.totalWinnings ?? hist.winnings ?? 0) : 0;
+        const totalBet = hist ? (hist.totalBet ?? hist.bet ?? 0) : 0;
 
         html += '<div class="history-day">';
         html += '<div class="hd-header">';
         html += '<span class="hd-date">' + dateStr + '</span>';
 
-        if (pick) {
-          if (pick.winnings > 0) {
-            html += '<span class="hd-result win">Won +' + pick.winnings + '</span>';
+        if (hist) {
+          if (totalWin > 0) {
+            html += '<span class="hd-result win">Won +' + totalWin + '</span>';
           } else {
-            html += '<span class="hd-result lose">Lost -' + pick.bet + '</span>';
+            html += '<span class="hd-result lose">Lost -' + totalBet + '</span>';
           }
         } else {
           html += '<span class="hd-result no-bet">No Bet</span>';
         }
         html += '</div>';
 
-        // Player's pick
-        if (pick) {
-          html += '<div class="hd-pick">';
-          html += 'Your pick: <span class="hd-pick-num">' + pick.number + '</span>';
-          html += ' · <span class="hd-pick-bet">' + pick.bet + ' coins</span>';
-          html += '</div>';
+        // Player's picks
+        if (histPicks.length) {
+          for (const p of histPicks) {
+            html += '<div class="hd-pick">';
+            html += 'Pick: <span class="hd-pick-num">' + p.number + '</span>';
+            html += ' · <span class="hd-pick-bet">' + p.bet + ' coins</span>';
+            if (p.winnings > 0) {
+              html += ' → <span style="color:#34d399;font-weight:600">+' + p.winnings + '</span>';
+            }
+            html += '</div>';
+          }
         }
 
         // Winning numbers grouped by tier
@@ -875,7 +870,8 @@
           html += '</div>';
           html += '<div class="hd-tier-nums">';
           for (const r of tierResults) {
-            const isMatch = pick && r.number === pick.number;
+            // Check if any pick matches this draw number
+            const isMatch = histPicks.some(p => p.number === r.number);
             html += '<span class="hd-num ' + (isMatch ? 'hd-match' : '') + '">' + r.number + '</span>';
           }
           html += '</div>';
@@ -904,12 +900,18 @@
 
     /**
      * Determine which draw date to show purchases for based on current phase.
-     * - Betting phase: show purchases for tomorrow's draw (active bets)
-     * - Waiting/results phase: show purchases for today's draw
+     * - Betting/waiting phase: show purchases for today's draw (same-day)
+     * - Results phase: show purchases for today's draw
+     * - Closed phase: show yesterday's draw
      */
     function getPurchaseDrawDate() {
       const phase = getCurrentPhase();
-      if (phase === 'betting') return getTargetDrawDate();
+      if (phase === 'closed') {
+        // Midnight to 8 AM: show yesterday's draw
+        const yesterday = new Date(getServerNow());
+        yesterday.setDate(yesterday.getDate() - 1);
+        return formatDateStr(yesterday);
+      }
       return getTodayDateStr();
     }
 
@@ -928,20 +930,28 @@
       overlay.classList.remove('hidden');
 
       try {
-        // Query all rooms with a totoPick for this draw date
+        // Query all rooms with a totoDrawDate matching this draw date
         const snap = await db.collection('rooms')
-          .where('totoPick.drawDate', '==', drawDate)
+          .where('totoDrawDate', '==', drawDate)
           .get();
 
         const purchases = [];
         snap.forEach(doc => {
           const data = doc.data();
-          if (data.totoPick && data.totoPick.number) {
-            purchases.push({
-              name: data.displayName || 'Anonymous',
-              number: data.totoPick.number,
-              bet: data.totoPick.bet || 0
-            });
+          // Support multi-pick format
+          const picks = data.totoPicks || [];
+          // Backwards compat: old single-pick format
+          if (!picks.length && data.totoPick && data.totoPick.number) {
+            picks.push(data.totoPick);
+          }
+          for (const pick of picks) {
+            if (pick.number && pick.drawDate === drawDate) {
+              purchases.push({
+                name: data.displayName || 'Anonymous',
+                number: pick.number,
+                bet: pick.bet || 0
+              });
+            }
           }
         });
 
@@ -1071,14 +1081,11 @@
        Game Actions
        ═══════════════════════════════ */
 
-    /** Submit today's pick — deduct coins and save to Firestore. */
+    /** Submit a new pick — deduct coins and add to todayPicks array. */
     async function submitPick() {
       if (!currentUid) return;
       if (getCurrentPhase() !== 'betting') {
-        return showToast('Bets are closed! Open ' + BET_OPEN_HOUR + ':00 AM – 12:00 AM.', 'error');
-      }
-      if (todayPick) {
-        return showToast('You already placed a bet for tomorrow\'s draw!', 'error');
+        return showToast('Bets are closed! Open ' + BET_OPEN_HOUR + ':00 AM – ' + BET_CLOSE_HOUR + ':00 PM.', 'error');
       }
 
       const number = getPlayerNumber();
@@ -1092,58 +1099,73 @@
         return showToast('Not enough coins!', 'error');
       }
 
-      // Deduct coins and record pick
+      // Check for duplicate number in existing picks
+      if (todayPicks.some(p => p.number === number)) {
+        return showToast('You already picked ' + number + '! Choose a different number.', 'error');
+      }
+
+      // Deduct coins and add pick to array
       playerCoins -= bet;
-      todayPick = {
+      todayPicks.push({
         drawDate: getTargetDrawDate(),
         number: number,
         bet: bet,
         checked: false,
         winnings: 0
-      };
+      });
 
       await savePlayerData();
       renderUI();
-      showToast('Bet placed! Results at ' + DRAW_HOUR + ':00 AM tomorrow 🎱', 'success');
+      showToast('Bet #' + todayPicks.length + ' placed (' + number + ')! Draw at 5:00 PM 🎱', 'success');
     }
 
     /**
-     * Check draw results — runs the seeded PRNG for the pick's draw date,
-     * compares with player's pick, calculates winnings, and shows animation.
+     * Check draw results for ALL picks — runs the seeded PRNG for the draw date,
+     * compares with each pick, calculates winnings, and shows animation.
      */
     async function checkTodayResults() {
-      if (!currentUid || !todayPick || todayPick.checked) return;
+      if (!currentUid || !todayPicks.length) return;
       if (getCurrentPhase() !== 'results') {
-        return showToast('Results aren\'t ready yet! Draw at ' + DRAW_HOUR + ':00 AM.', 'error');
+        return showToast('Results aren\'t ready yet! Draw at 5:00 PM.', 'error');
       }
 
-      const drawDate = todayPick.drawDate;
+      const drawDate = todayPicks[0].drawDate;
       const drawResults = generateDrawForDate(drawDate);
-      const outcome = checkResult(todayPick.number, drawResults);
 
-      // Calculate winnings
-      let winnings = 0;
-      if (outcome.matched) {
-        winnings = todayPick.bet * outcome.multiplier;
-        playerCoins += winnings;
+      let totalWinnings = 0;
+      const pickOutcomes = [];
+
+      for (const pick of todayPicks) {
+        if (pick.checked) continue;
+        const outcome = checkResult(pick.number, drawResults);
+        let winnings = 0;
+        if (outcome.matched) {
+          winnings = pick.bet * outcome.multiplier;
+          playerCoins += winnings;
+        }
+        pick.checked = true;
+        pick.winnings = winnings;
+        pick.resultTier = outcome.tier;
+        totalWinnings += winnings;
+        pickOutcomes.push({ number: pick.number, bet: pick.bet, outcome, winnings });
       }
 
-      // Mark as checked and record result
-      todayPick.checked = true;
-      todayPick.winnings = winnings;
-      todayPick.resultTier = outcome.tier;
-
-      // Add to history (avoid duplicates)
+      // Add to history (one entry per draw date, aggregate all picks)
       const historyExists = pickHistory.some(h => h.date === drawDate);
       if (!historyExists) {
+        const totalBet = todayPicks.reduce((s, p) => s + p.bet, 0);
         pickHistory.push({
           date: drawDate,
-          number: todayPick.number,
-          bet: todayPick.bet,
-          winnings: winnings,
-          tier: outcome.tier
+          picks: todayPicks.map(p => ({ number: p.number, bet: p.bet, winnings: p.winnings, tier: p.resultTier })),
+          totalBet: totalBet,
+          totalWinnings: totalWinnings,
+          // Legacy single-pick fields for history display compat
+          number: todayPicks[0].number,
+          bet: totalBet,
+          winnings: totalWinnings,
+          tier: todayPicks.find(p => p.winnings > 0)?.resultTier || null
         });
-        // Trim old history to keep Firestore document small
+        // Trim old history
         if (pickHistory.length > MAX_HISTORY_DISPLAY) {
           pickHistory = pickHistory
             .sort((a, b) => b.date.localeCompare(a.date))
@@ -1154,7 +1176,7 @@
       await savePlayerData();
 
       // Show animated results overlay
-      showResultsAnimation(todayPick.number, todayPick.bet, drawResults, outcome, winnings);
+      showResultsAnimation(todayPicks, drawResults, totalWinnings);
     }
 
     /* ═══════════════════════════════
@@ -1163,24 +1185,31 @@
 
     /**
      * Render and display the draw results with staggered reveal animation.
-     * Each winning number flips in one at a time, then outcome fades in.
+     * Supports multiple picks — each pick's number is shown with match status.
      */
-    function showResultsAnimation(playerNumber, bet, drawResults, outcome, winnings) {
+    function showResultsAnimation(picks, drawResults, totalWinnings) {
       const overlay = document.getElementById('resultOverlay');
       if (!overlay) return;
 
       let html = '<div class="result-box">';
       html += '<h3>🎱 Today\'s Draw Results</h3>';
 
-      // Player's number
-      html += '<div class="res-player">';
-      html += '<span class="res-label-sm">Your Number</span>';
-      html += '<div class="res-number ' + (outcome.matched ? 'winner' : '') + '">';
-      for (let i = 0; i < 4; i++) {
-        html += '<span class="res-digit">' + playerNumber[i] + '</span>';
+      // Player's picks
+      for (let pIdx = 0; pIdx < picks.length; pIdx++) {
+        const pick = picks[pIdx];
+        const outcome = checkResult(pick.number, drawResults);
+        html += '<div class="res-player" style="margin-bottom:12px">';
+        html += '<span class="res-label-sm">Pick #' + (pIdx + 1) + ' (Bet: ' + pick.bet + ')</span>';
+        html += '<div class="res-number ' + (outcome.matched ? 'winner' : '') + '">';
+        for (let i = 0; i < 4; i++) {
+          html += '<span class="res-digit">' + pick.number[i] + '</span>';
+        }
+        html += '</div>';
+        if (outcome.matched) {
+          html += '<div style="font-size:12px;color:#ffd700;margin-top:4px">' + outcome.tier + ' Prize! ×' + outcome.multiplier + '</div>';
+        }
+        html += '</div>';
       }
-      html += '</div>';
-      html += '</div>';
 
       // Winning numbers grouped by tier, each with staggered animation delay
       let delayIdx = 0;
@@ -1192,7 +1221,8 @@
         html += '</div>';
         html += '<div class="tier-nums">';
         for (const r of tierResults) {
-          const isMatch = r.number === playerNumber;
+          // Check if any pick matches this draw number
+          const isMatch = picks.some(p => p.number === r.number);
           const delay = delayIdx * REVEAL_DELAY_MS;
           html += '<span class="draw-num ' + (isMatch ? 'match' : '') + '" ' +
             'style="animation-delay:' + delay + 'ms">' + r.number + '</span>';
@@ -1205,14 +1235,18 @@
       // Outcome message — appears after all numbers are revealed
       const totalNumbers = drawResults.length;
       const outcomeDelay = totalNumbers * REVEAL_DELAY_MS + 300;
+      const totalBet = picks.reduce((s, p) => s + p.bet, 0);
       html += '<div class="outcome" style="animation-delay:' + outcomeDelay + 'ms">';
-      if (outcome.matched) {
-        html += '<div class="win-msg">🎉 You matched the ' + outcome.tier + ' Prize!</div>';
-        html += '<div class="win-amount">+' + winnings.toLocaleString() + ' coins!</div>';
-        html += '<div class="win-detail">Bet ' + bet + ' × ' + outcome.multiplier + ' = ' + winnings.toLocaleString() + '</div>';
+      if (totalWinnings > 0) {
+        const matchedPicks = picks.filter(p => p.winnings > 0);
+        html += '<div class="win-msg">🎉 ' + matchedPicks.length + ' pick(s) matched!</div>';
+        html += '<div class="win-amount">+' + totalWinnings.toLocaleString() + ' coins!</div>';
+        for (const p of matchedPicks) {
+          html += '<div class="win-detail">' + p.number + ': ' + p.bet + ' × ' + (p.winnings / p.bet) + ' = ' + p.winnings.toLocaleString() + '</div>';
+        }
       } else {
-        html += '<div class="lose-msg">😔 No match today!</div>';
-        html += '<div class="lose-amount">Lost ' + bet + ' coins</div>';
+        html += '<div class="lose-msg">😔 No matches today!</div>';
+        html += '<div class="lose-amount">Lost ' + totalBet + ' coins across ' + picks.length + ' bet(s)</div>';
       }
       html += '</div>';
 
@@ -1222,7 +1256,6 @@
       overlay.innerHTML = html;
       overlay.classList.remove('hidden');
     }
-
     /** Close the results overlay and refresh the card. */
     function closeResults() {
       const overlay = document.getElementById('resultOverlay');
