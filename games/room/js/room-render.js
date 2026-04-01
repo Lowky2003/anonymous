@@ -1072,7 +1072,7 @@
         const coinsPerCycle = lvl * (plantDef ? plantDef.coinRate : 1);
         plantHtml += '<div class="shop-section"><div class="shop-section-title">🌱 ' + (plantDef?.name || 'Plant') + ' — Lv.' + lvl + '</div>';
         plantHtml += '<div style="text-align:center;font-size:11px;color:#98e4b0;padding:4px 0 8px">' +
-          '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (even offline!)</div>';
+          '💰 Earning ' + coinSVG(12) + ' ' + coinsPerCycle + ' coins every 5 min (offline up to 2 hrs)</div>';
         if (nextDef && scaledCost !== null) {
           const nextCoins = nextDef.level * (plantDef ? plantDef.coinRate : 1);
           plantHtml += '<div class="shop-card" style="text-align:center">' +

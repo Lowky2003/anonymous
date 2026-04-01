@@ -154,7 +154,7 @@
             }
             if (changed) saveRoom();
           }
-          // Plant passive coin generation (offline earnings)
+          // Plant passive coin generation (offline earnings, capped to 2 hours)
           if (!_offlineCoinsCollected && roomData.plant) {
             _offlineCoinsCollected = true;
             const plantLvl = roomData.plantLevels[roomData.plant] || 1;
@@ -162,16 +162,23 @@
             const baseRate = plantDef ? plantDef.coinRate : 1;
             const coinsPerCycle = plantLvl * baseRate;
             const lastCollect = roomData.lastCoinCollect || Date.now();
-            const elapsed = Date.now() - lastCollect;
+            // Cap offline elapsed time to PLANT_OFFLINE_CAP_MS (2 hours)
+            const rawElapsed = Date.now() - lastCollect;
+            const elapsed = Math.min(rawElapsed, PLANT_OFFLINE_CAP_MS);
             const cycles = Math.floor(elapsed / (5 * 60 * 1000));
             if (cycles > 0) {
               const earned = cycles * coinsPerCycle;
               roomData.coins += earned;
+              // Reset lastCoinCollect to now so timer restarts from page load
               roomData.lastCoinCollect = Date.now();
               saveRoom();
               setTimeout(() => {
                 showToast('🌱 Your Lv.' + plantLvl + ' ' + (plantDef ? plantDef.name : 'plant') + ' earned ' + earned + ' coins while you were away!', 'success');
               }, 800);
+            } else {
+              // No cycles earned but reset the timer on page load
+              roomData.lastCoinCollect = Date.now();
+              saveRoom();
             }
           }
           _roomLoaded = true;

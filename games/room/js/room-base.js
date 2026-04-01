@@ -96,6 +96,9 @@
       { id: 'cherry',   emoji: '🌸', name: 'Cherry Tree', cost: 1500, coinRate: 10 },
     ];
 
+    // Maximum offline coin generation time for plants (2 hours in ms)
+    const PLANT_OFFLINE_CAP_MS = 2 * 60 * 60 * 1000;
+
     const PET_SIZES = {
       cat: 72, dog: 80, bunny: 64, hamster: 58, fox: 76, panda: 86
     };
