@@ -2191,6 +2191,8 @@ function tickCountdown(targetTs, type) {
         countdownLabel.textContent = 'Time to go home!';
         showCelebration('offwork');
         }
+        // Auto-clean expired custom countdown after showing celebration
+        setTimeout(() => countdownRef.delete().catch(() => {}), 5 * 60 * 1000);
         return;
     }
     const h = Math.floor(diff / 3600000);
@@ -2264,7 +2266,13 @@ countdownRef.onSnapshot((snap) => {
     applyDefaultCountdown();
     return;
     }
-    tickCountdown(snap.data().targetTs);
+    const targetTs = snap.data().targetTs;
+    // If the custom countdown already expired, delete it and fall back to default schedule
+    if (targetTs <= Date.now()) {
+    countdownRef.delete().catch(() => {});
+    return; // The delete triggers another onSnapshot which calls applyDefaultCountdown
+    }
+    tickCountdown(targetTs);
 });
 
 /* ── Cleanup: delete expired docs (runs once on each page load) ── */
