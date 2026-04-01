@@ -1975,8 +1975,8 @@ function fireNotification(count, bodyText, title, tag) {
 /* ═══════════════════════════════════════════
     Real-time listeners
     ═══════════════════════════════════════════ */
-// Bubble answers (gossip, etc.)
-answersRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
+// Bubble answers (gossip, etc.) — limited to 50 most recent to reduce reads
+answersRef.orderBy('ts', 'desc').limit(50).onSnapshot((snapshot) => {
     const now = Date.now();
     const items = [];
     snapshot.forEach((doc) => {
@@ -1985,6 +1985,8 @@ answersRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
         items.push({ id: doc.id, text: d.text ?? '', ts: d.ts, image: d.image ?? null, replies: d.replies ?? [], reactions: d.reactions ?? {}, type: d.type ?? null, pollOptions: d.pollOptions ?? null, pollVotes: d.pollVotes ?? {} });
     }
     });
+    // Reverse to chronological order (query fetched desc for limit efficiency)
+    items.reverse();
     // Cache to localStorage (strip large images from replies to save space)
     try {
     const lite = items.map(a => ({
@@ -2002,8 +2004,8 @@ answersRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
     showToast('Connection error — check console (F12)', 'error');
 });
 
-// Food suggestions (vote & random)
-foodRef.orderBy('ts', 'asc').onSnapshot((snapshot) => {
+// Food suggestions (vote & random) — limited to 50 to reduce reads
+foodRef.orderBy('ts', 'asc').limit(50).onSnapshot((snapshot) => {
     foodItems = [];
     snapshot.forEach((doc) => {
     const d = doc.data();
@@ -2047,13 +2049,12 @@ async function dailyReset() {
     // Mark reset day in Firestore FIRST to prevent other clients from also resetting
     await metaRef.set({ day: today });
 
-    const allFood = await foodRef.get();
-    if (allFood.empty) return;
+    // Only fetch food docs that actually have votes to reset (avoids full collection scan)
+    const votedFood = await foodRef.where('votes', '>', 0).get();
+    if (votedFood.empty) return;
     const batch = db.batch();
-    allFood.forEach((doc) => {
-        if ((doc.data().votes ?? 0) !== 0) {
+    votedFood.forEach((doc) => {
         batch.update(doc.ref, { votes: 0 });
-        }
     });
     await batch.commit();
     resetInfoEl.textContent = '\uD83D\uDD04 Votes reset for today (' + today + ')';

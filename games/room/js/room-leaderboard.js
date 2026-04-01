@@ -2,6 +2,9 @@
        10. MINI-GAME LEADERBOARD
        ═══════════════════════════════ */
     let _lbCurrentGame = 'flappy';
+    // In-memory leaderboard cache to avoid re-reading on every tab switch
+    const _lbCache = {}; // { gameId: { html, ts } }
+    const LB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
     function showLeaderboard() {
       document.getElementById('settingsOverlay').classList.add('hidden');
@@ -25,14 +28,24 @@
 
     async function loadLeaderboard(gameId) {
       const listEl = document.getElementById('lbList');
-      listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">Loading...</div>';
       const game = LB_GAMES.find(g => g.id === gameId);
       if (!game) return;
+
+      // Return cached HTML if still fresh (avoids Firestore read on tab switch)
+      const cached = _lbCache[gameId];
+      if (cached && (Date.now() - cached.ts) < LB_CACHE_TTL) {
+        listEl.innerHTML = cached.html;
+        return;
+      }
+
+      listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">Loading...</div>';
       try {
         const snap = await db.collection(game.key)
           .orderBy('score', 'desc').limit(20).get();
         if (snap.empty) {
-          listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">No scores yet!</div>';
+          const emptyHtml = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">No scores yet!</div>';
+          _lbCache[gameId] = { html: emptyHtml, ts: Date.now() };
+          listEl.innerHTML = emptyHtml;
           return;
         }
         let html = '';
@@ -47,10 +60,17 @@
             '<div class="lb-name">' + escapeHtml(d.name || 'Anonymous') + '</div>' +
             '<div class="lb-score">' + (d.score || 0) + '</div></div>';
         });
+        _lbCache[gameId] = { html, ts: Date.now() };
         listEl.innerHTML = html;
       } catch(e) {
         listEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:20px">Could not load scores</div>';
       }
+    }
+
+    /** Invalidate a specific leaderboard cache (call after score submission) */
+    function invalidateLbCache(gameId) {
+      if (gameId) delete _lbCache[gameId];
+      else Object.keys(_lbCache).forEach(k => delete _lbCache[k]);
     }
 
     document.getElementById('lbCloseBtn').addEventListener('click', () => {

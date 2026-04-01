@@ -275,10 +275,10 @@
           const docs = [];
           snap.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
 
-          // Load replies for all entries in parallel
+          // Load only the 3 most recent replies per entry to reduce reads; user can expand on demand
           const replySnaps = await Promise.all(
             docs.map(d => db.collection('rooms').doc(uid).collection('guestbook').doc(d.id)
-              .collection('replies').orderBy('createdAt', 'asc').limit(10).get())
+              .collection('replies').orderBy('createdAt', 'desc').limit(3).get())
           );
 
           docs.forEach((e, idx) => {
@@ -289,9 +289,10 @@
               (e.text ? '<div class="gb-msg">' + escapeHtml(e.text) + '</div>' : '') +
               '<div class="gb-time">' + timeAgo + '</div>';
 
-            // Replies
+            // Replies (fetched desc, reverse to chronological)
             const replies = [];
             replySnaps[idx].forEach(r => replies.push(r.data()));
+            replies.reverse();
             if (replies.length) {
               html += '<div class="gb-replies">';
               replies.forEach(r => {
