@@ -69,6 +69,7 @@ auth.onAuthStateChanged(async (user) => {
     // Heartbeat: update lastSeen every 2 min so others see you online
     if (_lastSeenInterval) clearInterval(_lastSeenInterval);
     _lastSeenInterval = setInterval(() => {
+        if (document.hidden) return; // Skip when tab is hidden to reduce Firestore reads
         if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
     }, 120000);
     } else {

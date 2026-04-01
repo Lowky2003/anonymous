@@ -203,6 +203,7 @@
 
       // Periodic hunger/thirst decay: -1% every 10 min while page is open
       setInterval(async () => {
+        if (document.hidden) return; // Skip when tab is hidden to reduce Firestore reads
         if (viewingUid !== currentUid) return;
         let changed = false;
         for (const pet of roomData.pets) {
@@ -215,6 +216,7 @@
       // Heartbeat: update lastSeen every 30s so others see you online
       userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
       setInterval(() => {
+        if (document.hidden) return; // Skip when tab is hidden to reduce Firestore reads
         if (viewingUid !== currentUid) return;
         userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
       }, 30 * 1000);
@@ -234,6 +236,7 @@
       // Plant passive coin generation: every 5 min while online
       if (_plantCoinInterval) clearInterval(_plantCoinInterval);
       _plantCoinInterval = setInterval(async () => {
+        if (document.hidden) return; // Skip when tab is hidden to reduce Firestore reads
         if (viewingUid !== currentUid || !roomData.plant) return;
         const plantLvl = roomData.plantLevels[roomData.plant] || 1;
         const plantDef = PLANTS.find(p => p.id === roomData.plant);
