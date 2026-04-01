@@ -736,8 +736,50 @@
         ctx.restore();
       }
 
+      // Wall Calendar — canvas-drawn paper calendar with current date
+      if (hasDecor('calendar')) {
+        ctx.save();
+        const pos = getDecorPos('calendar');
+        const cx = pos.x * rw, cy = pos.y * floorY;
+        const cw = rw * 0.065, ch = cw * 1.2;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        roundRectPath(ctx, cx - cw / 2 + 2, cy - ch / 2 + 2, cw, ch, 3);
+        ctx.fill();
+        // Paper body
+        ctx.fillStyle = '#fff';
+        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch, 3);
+        ctx.fill();
+        ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch, 3);
+        ctx.stroke();
+        // Red header bar
+        ctx.fillStyle = '#e04040';
+        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch * 0.28, 3);
+        ctx.fill();
+        // Clip bottom corners of the header
+        ctx.fillStyle = '#e04040';
+        ctx.fillRect(cx - cw / 2, cy - ch / 2 + ch * 0.18, cw, ch * 0.1);
+        // Month text
+        const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        const now = new Date();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold ' + Math.round(cw * 0.22) + 'px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(months[now.getMonth()], cx, cy - ch / 2 + ch * 0.14);
+        // Day number
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold ' + Math.round(cw * 0.45) + 'px sans-serif';
+        ctx.fillText(String(now.getDate()), cx, cy + ch * 0.12);
+        // Small binding holes at top
+        ctx.fillStyle = '#bbb';
+        ctx.beginPath(); ctx.arc(cx - cw * 0.22, cy - ch / 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + cw * 0.22, cy - ch / 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
       // Generic fallback: draw emoji for any wall decoration with no specific drawing code
-      const knownWallDecors = ['stringlights','clock','shelf','hangplant','banner','photo','mirror','antlers','neon','poster','dartboard','wreath','tapestry','sconce','map','cuckoo','macrame','thermometer','plate'];
+      const knownWallDecors = ['stringlights','clock','shelf','hangplant','banner','photo','mirror','antlers','neon','poster','dartboard','wreath','tapestry','sconce','map','cuckoo','macrame','thermometer','plate','calendar'];
       (roomData.placedDecors || []).filter(d => {
         const def = DECORATIONS.find(x => x.id === d.id);
         return def && def.category === 'wall' && !knownWallDecors.includes(d.id);
@@ -1458,8 +1500,92 @@
         ctx.restore();
       }
 
+      // Christmas Tree — canvas-drawn evergreen with ornaments and star
+      if (hasDecor('xmastree')) {
+        ctx.save();
+        const pos = getDecorPos('xmastree');
+        const tx = pos.x * rw, baseY = pos.y * rh;
+        const tw = rw * 0.10; // slightly wider than hit box for visual presence
+        const th = (rh - floorY) * 0.55; // taller tree
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.beginPath(); ctx.ellipse(tx, baseY, tw * 0.35, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Trunk
+        ctx.fillStyle = '#6d4c2f';
+        ctx.fillRect(tx - tw * 0.06, baseY - th * 0.12, tw * 0.12, th * 0.12);
+
+        // Tree layers (3 triangles, bottom to top)
+        const layers = [
+          { w: tw * 0.50, h: th * 0.30, y: baseY - th * 0.12 },
+          { w: tw * 0.38, h: th * 0.30, y: baseY - th * 0.35 },
+          { w: tw * 0.26, h: th * 0.30, y: baseY - th * 0.58 },
+        ];
+        for (const l of layers) {
+          // Dark green layer
+          ctx.fillStyle = '#1e7a34';
+          ctx.beginPath();
+          ctx.moveTo(tx - l.w / 2, l.y);
+          ctx.lineTo(tx, l.y - l.h);
+          ctx.lineTo(tx + l.w / 2, l.y);
+          ctx.closePath(); ctx.fill();
+          // Lighter overlay for depth
+          ctx.fillStyle = 'rgba(80,180,100,0.25)';
+          ctx.beginPath();
+          ctx.moveTo(tx - l.w / 2 + 3, l.y);
+          ctx.lineTo(tx, l.y - l.h + 4);
+          ctx.lineTo(tx + l.w / 4, l.y - l.h * 0.4);
+          ctx.closePath(); ctx.fill();
+        }
+
+        // Ornaments — small colorful balls on the tree
+        const ornColors = ['#e04040','#ffd700','#4090e0','#ff69b4','#ff8c00'];
+        const ornaments = [
+          { x: -0.12, y: 0.18 }, { x: 0.10, y: 0.15 },
+          { x: -0.06, y: 0.38 }, { x: 0.14, y: 0.35 },
+          { x: -0.16, y: 0.55 }, { x: 0.08, y: 0.52 }, { x: 0.20, y: 0.60 },
+          { x: -0.08, y: 0.72 }, { x: 0.15, y: 0.75 },
+        ];
+        const ornR = Math.max(2.5, tw * 0.04);
+        for (let i = 0; i < ornaments.length; i++) {
+          const ox = tx + ornaments[i].x * tw;
+          const oy = baseY - ornaments[i].y * th;
+          // Glow
+          ctx.fillStyle = ornColors[i % ornColors.length];
+          ctx.globalAlpha = 0.3 + Math.sin(t / 800 + i * 1.2) * 0.15;
+          ctx.beginPath(); ctx.arc(ox, oy, ornR * 2, 0, Math.PI * 2); ctx.fill();
+          // Ball
+          ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.arc(ox, oy, ornR, 0, Math.PI * 2); ctx.fill();
+          // Shine
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.beginPath(); ctx.arc(ox - ornR * 0.25, oy - ornR * 0.25, ornR * 0.35, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Star on top
+        const starY = baseY - th * 0.88;
+        const starR = Math.max(4, tw * 0.07);
+        ctx.fillStyle = '#ffd700';
+        ctx.globalAlpha = 0.8 + Math.sin(t / 500) * 0.2;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+          const aInner = a + Math.PI / 5;
+          ctx.lineTo(tx + Math.cos(a) * starR, starY + Math.sin(a) * starR);
+          ctx.lineTo(tx + Math.cos(aInner) * starR * 0.4, starY + Math.sin(aInner) * starR * 0.4);
+        }
+        ctx.closePath(); ctx.fill();
+        // Star glow
+        ctx.globalAlpha = 0.15 + Math.sin(t / 500) * 0.08;
+        ctx.beginPath(); ctx.arc(tx, starY, starR * 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+      }
+
       // Generic emoji fallback for new floor decorations without specific drawing code
-      const knownFloorDecors = ['floorlamp','sidetable','cushion','toybox','bookcase','aquarium','guitar','globe','trashcan','fan','beanpillow','tv','piano','telescope','cactus','candles','skateboard','vinylplayer','umbrella','terrarium'];
+      const knownFloorDecors = ['floorlamp','sidetable','cushion','toybox','bookcase','aquarium','guitar','globe','trashcan','fan','beanpillow','tv','piano','telescope','cactus','candles','skateboard','vinylplayer','umbrella','terrarium','xmastree'];
       (roomData.placedDecors || []).filter(d => {
         const def = DECORATIONS.find(x => x.id === d.id);
         return def && def.category === 'floor' && !knownFloorDecors.includes(d.id);

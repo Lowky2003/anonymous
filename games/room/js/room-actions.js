@@ -574,7 +574,7 @@
       bonsai: { w: 0.12, h: 0.14, base: true },
       speaker2: { w: 0.12, h: 0.18, base: true },
       shoe_rack: { w: 0.16, h: 0.16, base: true },
-      xmastree: { w: 0.14, h: 0.28, base: true },
+      xmastree: { w: 0.18, h: 0.36, base: true },
       rocket: { w: 0.10, h: 0.22, base: true },
       minifridge: { w: 0.12, h: 0.16, base: true },
       // New rugs
