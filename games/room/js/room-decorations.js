@@ -736,45 +736,155 @@
         ctx.restore();
       }
 
-      // Wall Calendar — canvas-drawn paper calendar with current date
+      // Wall Calendar — detailed canvas-drawn monthly calendar
       if (hasDecor('calendar')) {
         ctx.save();
         const pos = getDecorPos('calendar');
         const cx = pos.x * rw, cy = pos.y * floorY;
-        const cw = rw * 0.065, ch = cw * 1.2;
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.08)';
-        roundRectPath(ctx, cx - cw / 2 + 2, cy - ch / 2 + 2, cw, ch, 3);
+        const cw = rw * 0.10, ch = cw * 1.35;
+        const left = cx - cw / 2, top = cy - ch / 2;
+
+        // Hanging nail
+        ctx.fillStyle = '#888';
+        ctx.beginPath(); ctx.arc(cx, top - 4, 2, 0, Math.PI * 2); ctx.fill();
+        // String from nail to calendar
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(cx, top - 3); ctx.lineTo(cx, top + 2); ctx.stroke();
+
+        // Drop shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        roundRectPath(ctx, left + 2, top + 3, cw, ch, 3);
         ctx.fill();
-        // Paper body
-        ctx.fillStyle = '#fff';
-        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch, 3);
+
+        // Main paper body with subtle paper texture
+        const paperGrad = ctx.createLinearGradient(left, top, left, top + ch);
+        paperGrad.addColorStop(0, '#faf8f3');
+        paperGrad.addColorStop(1, '#f0ece4');
+        ctx.fillStyle = paperGrad;
+        roundRectPath(ctx, left, top, cw, ch, 3);
         ctx.fill();
-        ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch, 3);
+        // Paper border
+        ctx.strokeStyle = '#c8c0b0'; ctx.lineWidth = 1;
+        roundRectPath(ctx, left, top, cw, ch, 3);
         ctx.stroke();
-        // Red header bar
-        ctx.fillStyle = '#e04040';
-        roundRectPath(ctx, cx - cw / 2, cy - ch / 2, cw, ch * 0.28, 3);
+
+        // Red header area
+        const headerH = ch * 0.18;
+        ctx.fillStyle = '#c0392b';
+        roundRectPath(ctx, left, top, cw, headerH + 2, 3);
         ctx.fill();
-        // Clip bottom corners of the header
-        ctx.fillStyle = '#e04040';
-        ctx.fillRect(cx - cw / 2, cy - ch / 2 + ch * 0.18, cw, ch * 0.1);
-        // Month text
-        const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        // Clean bottom edge of header (square corners)
+        ctx.fillStyle = '#c0392b';
+        ctx.fillRect(left, top + headerH - 2, cw, 4);
+        // Subtle gradient on header
+        const hGrad = ctx.createLinearGradient(left, top, left, top + headerH);
+        hGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
+        hGrad.addColorStop(1, 'rgba(0,0,0,0.05)');
+        ctx.fillStyle = hGrad;
+        ctx.fillRect(left, top, cw, headerH);
+
+        // Month & year in header
+        const months = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
         const now = new Date();
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold ' + Math.round(cw * 0.22) + 'px sans-serif';
+        ctx.font = 'bold ' + Math.round(cw * 0.11) + 'px sans-serif';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(months[now.getMonth()], cx, cy - ch / 2 + ch * 0.14);
-        // Day number
-        ctx.fillStyle = '#333';
-        ctx.font = 'bold ' + Math.round(cw * 0.45) + 'px sans-serif';
-        ctx.fillText(String(now.getDate()), cx, cy + ch * 0.12);
-        // Small binding holes at top
-        ctx.fillStyle = '#bbb';
-        ctx.beginPath(); ctx.arc(cx - cw * 0.22, cy - ch / 2, 2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + cw * 0.22, cy - ch / 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillText(months[now.getMonth()], cx, top + headerH * 0.35);
+        ctx.font = Math.round(cw * 0.08) + 'px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillText(String(now.getFullYear()), cx, top + headerH * 0.72);
+
+        // Spiral binding between header and body
+        const spiralY = top + headerH + 1;
+        const spiralCount = 7;
+        const spiralStep = (cw - 8) / (spiralCount - 1);
+        for (let i = 0; i < spiralCount; i++) {
+          const sx = left + 4 + i * spiralStep;
+          // Ring shadow
+          ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.arc(sx, spiralY + 1, 3, 0, Math.PI * 2); ctx.stroke();
+          // Metal ring
+          ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(sx, spiralY, 3, 0, Math.PI * 2); ctx.stroke();
+          // Highlight
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.arc(sx, spiralY, 2.5, -0.8, 0.5); ctx.stroke();
+        }
+
+        // Day grid area
+        const gridTop = spiralY + 8;
+        const gridBottom = top + ch - 4;
+        const gridH = gridBottom - gridTop;
+        const cols = 7, rows = 6;
+        const gridInset = 4;
+        const gridLeft = left + gridInset;
+        const gridW = cw - gridInset * 2;
+        const cellW = gridW / cols;
+        const cellH = gridH / (rows + 1); // +1 for header row
+
+        // Day-of-week header row — gray background
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.fillRect(gridLeft, gridTop, gridW, cellH);
+        // Bottom border for header row
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(gridLeft, gridTop + cellH); ctx.lineTo(gridLeft + gridW, gridTop + cellH); ctx.stroke();
+
+        const dayLabels = ['S','M','T','W','T','F','S'];
+        ctx.font = 'bold ' + Math.round(cellW * 0.42) + 'px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (let c = 0; c < 7; c++) {
+          ctx.fillStyle = (c === 0 || c === 6) ? '#c0392b' : '#888';
+          ctx.fillText(dayLabels[c], gridLeft + c * cellW + cellW / 2, gridTop + cellH * 0.5);
+        }
+
+        // Grid lines (horizontal)
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 0.5;
+        for (let r = 2; r <= rows; r++) {
+          const ly = gridTop + r * cellH;
+          ctx.beginPath(); ctx.moveTo(gridLeft, ly); ctx.lineTo(gridLeft + gridW, ly); ctx.stroke();
+        }
+        // Grid lines (vertical)
+        for (let c = 1; c < cols; c++) {
+          const lx = gridLeft + c * cellW;
+          ctx.beginPath(); ctx.moveTo(lx, gridTop + cellH); ctx.lineTo(lx, gridBottom); ctx.stroke();
+        }
+
+        // Day numbers
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const today = now.getDate();
+
+        ctx.font = Math.round(cellW * 0.40) + 'px sans-serif';
+        let day = 1;
+        for (let r = 0; r < rows && day <= daysInMonth; r++) {
+          for (let c = 0; c < 7 && day <= daysInMonth; c++) {
+            if (r === 0 && c < firstDay) continue;
+            const dx = gridLeft + c * cellW + cellW / 2;
+            const dy = gridTop + (r + 1) * cellH + cellH / 2;
+
+            // Highlight current day with red circle
+            if (day === today) {
+              ctx.fillStyle = '#c0392b';
+              ctx.beginPath(); ctx.arc(dx, dy, cellW * 0.38, 0, Math.PI * 2); ctx.fill();
+              ctx.fillStyle = '#fff';
+              ctx.font = 'bold ' + Math.round(cellW * 0.40) + 'px sans-serif';
+            } else {
+              ctx.fillStyle = (c === 0 || c === 6) ? '#c0392b' : '#444';
+              ctx.font = Math.round(cellW * 0.40) + 'px sans-serif';
+            }
+            ctx.fillText(String(day), dx, dy);
+            day++;
+          }
+        }
+
+        // Subtle page curl at bottom-right corner
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
+        ctx.beginPath();
+        ctx.moveTo(left + cw, top + ch);
+        ctx.lineTo(left + cw - 6, top + ch);
+        ctx.quadraticCurveTo(left + cw - 3, top + ch - 3, left + cw, top + ch - 6);
+        ctx.closePath(); ctx.fill();
+
         ctx.restore();
       }
 
@@ -1500,87 +1610,228 @@
         ctx.restore();
       }
 
-      // Christmas Tree — canvas-drawn evergreen with ornaments and star
+      // Christmas Tree — detailed canvas-drawn tree with branches, ornaments, tinsel, and presents
       if (hasDecor('xmastree')) {
         ctx.save();
         const pos = getDecorPos('xmastree');
         const tx = pos.x * rw, baseY = pos.y * rh;
-        const tw = rw * 0.10; // slightly wider than hit box for visual presence
-        const th = (rh - floorY) * 0.55; // taller tree
+        const tw = rw * 0.16;
+        const th = (rh - floorY) * 0.80;
 
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.06)';
-        ctx.beginPath(); ctx.ellipse(tx, baseY, tw * 0.35, 4, 0, 0, Math.PI * 2); ctx.fill();
+        // Ground shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.beginPath(); ctx.ellipse(tx, baseY, tw * 0.45, 5, 0, 0, Math.PI * 2); ctx.fill();
 
-        // Trunk
-        ctx.fillStyle = '#6d4c2f';
-        ctx.fillRect(tx - tw * 0.06, baseY - th * 0.12, tw * 0.12, th * 0.12);
-
-        // Tree layers (3 triangles, bottom to top)
-        const layers = [
-          { w: tw * 0.50, h: th * 0.30, y: baseY - th * 0.12 },
-          { w: tw * 0.38, h: th * 0.30, y: baseY - th * 0.35 },
-          { w: tw * 0.26, h: th * 0.30, y: baseY - th * 0.58 },
+        // ── Presents at base ──
+        const presents = [
+          { x: -0.22, w: 14, h: 10, color: '#e04040', ribbon: '#ffd700' },
+          { x: 0.18, w: 12, h: 12, color: '#4090e0', ribbon: '#fff' },
+          { x: -0.05, w: 10, h: 8, color: '#ff69b4', ribbon: '#ffe0f0' },
         ];
-        for (const l of layers) {
-          // Dark green layer
-          ctx.fillStyle = '#1e7a34';
+        for (const p of presents) {
+          const px = tx + p.x * tw, py = baseY - p.h;
+          // Box
+          ctx.fillStyle = p.color;
+          roundRectPath(ctx, px - p.w / 2, py, p.w, p.h, 2);
+          ctx.fill();
+          // Darker bottom edge
+          ctx.fillStyle = 'rgba(0,0,0,0.1)';
+          ctx.fillRect(px - p.w / 2, py + p.h - 2, p.w, 2);
+          // Ribbon vertical
+          ctx.fillStyle = p.ribbon;
+          ctx.fillRect(px - 1.2, py, 2.4, p.h);
+          // Ribbon horizontal
+          ctx.fillRect(px - p.w / 2, py + p.h * 0.45, p.w, 2);
+          // Bow on top
+          ctx.fillStyle = p.ribbon;
           ctx.beginPath();
-          ctx.moveTo(tx - l.w / 2, l.y);
-          ctx.lineTo(tx, l.y - l.h);
-          ctx.lineTo(tx + l.w / 2, l.y);
+          ctx.ellipse(px - 3, py - 1, 3, 2, -0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(px + 3, py - 1, 3, 2, 0.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // ── Pot / tree stand ──
+        const potW = tw * 0.18, potH = th * 0.06;
+        const potTop = baseY - potH;
+        // Pot body (trapezoid)
+        ctx.fillStyle = '#6d3a1f';
+        ctx.beginPath();
+        ctx.moveTo(tx - potW * 0.6, potTop);
+        ctx.lineTo(tx - potW * 0.45, baseY);
+        ctx.lineTo(tx + potW * 0.45, baseY);
+        ctx.lineTo(tx + potW * 0.6, potTop);
+        ctx.closePath(); ctx.fill();
+        // Pot rim
+        ctx.fillStyle = '#8B4513';
+        roundRectPath(ctx, tx - potW * 0.65, potTop - 3, potW * 1.3, 5, 2);
+        ctx.fill();
+        // Pot highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(tx - potW * 0.3, potTop, potW * 0.2, potH);
+
+        // ── Trunk ──
+        const trunkH = th * 0.05;
+        const trunkW = tw * 0.06;
+        ctx.fillStyle = '#5a3a1a';
+        ctx.fillRect(tx - trunkW / 2, potTop - trunkH, trunkW, trunkH);
+        // Bark lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(tx - 1, potTop - trunkH); ctx.lineTo(tx - 1, potTop); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 2, potTop - trunkH + 2); ctx.lineTo(tx + 2, potTop); ctx.stroke();
+
+        // ── Tree body — 4 layers of branches with jagged edges ──
+        const treeBase = potTop - trunkH;
+        const layerDefs = [
+          { widthRatio: 1.00, heightRatio: 0.22, yOffset: 0 },
+          { widthRatio: 0.80, heightRatio: 0.22, yOffset: 0.18 },
+          { widthRatio: 0.58, heightRatio: 0.22, yOffset: 0.36 },
+          { widthRatio: 0.36, heightRatio: 0.22, yOffset: 0.54 },
+        ];
+
+        for (let li = 0; li < layerDefs.length; li++) {
+          const ld = layerDefs[li];
+          const lw = tw * ld.widthRatio * 0.55;
+          const lh = th * ld.heightRatio;
+          const ly = treeBase - th * ld.yOffset;
+          const peakY = ly - lh;
+
+          // Main branch shape with jagged bottom edge (needle-like)
+          ctx.fillStyle = li % 2 === 0 ? '#1a7830' : '#1e8a38';
+          ctx.beginPath();
+          ctx.moveTo(tx, peakY);
+          // Right side with slight curve
+          ctx.quadraticCurveTo(tx + lw * 0.3, peakY + lh * 0.4, tx + lw, ly);
+          // Jagged bottom edge (right to left)
+          const jags = 6 + li * 2;
+          for (let j = jags; j >= 0; j--) {
+            const jx = tx - lw + (j / jags) * lw * 2;
+            const jy = ly + (j % 2 === 0 ? 0 : -lh * 0.08);
+            ctx.lineTo(jx, jy);
+          }
+          // Left side
+          ctx.quadraticCurveTo(tx - lw * 0.3, peakY + lh * 0.4, tx, peakY);
           ctx.closePath(); ctx.fill();
-          // Lighter overlay for depth
-          ctx.fillStyle = 'rgba(80,180,100,0.25)';
+
+          // Branch shadow / depth
+          ctx.fillStyle = 'rgba(0,50,0,0.15)';
           ctx.beginPath();
-          ctx.moveTo(tx - l.w / 2 + 3, l.y);
-          ctx.lineTo(tx, l.y - l.h + 4);
-          ctx.lineTo(tx + l.w / 4, l.y - l.h * 0.4);
+          ctx.moveTo(tx + lw * 0.1, peakY + lh * 0.3);
+          ctx.lineTo(tx + lw, ly);
+          ctx.lineTo(tx + lw * 0.3, ly);
+          ctx.closePath(); ctx.fill();
+
+          // Branch highlight (left)
+          ctx.fillStyle = 'rgba(100,200,120,0.15)';
+          ctx.beginPath();
+          ctx.moveTo(tx, peakY);
+          ctx.lineTo(tx - lw * 0.6, ly - lh * 0.2);
+          ctx.lineTo(tx - lw * 0.2, peakY + lh * 0.5);
           ctx.closePath(); ctx.fill();
         }
 
-        // Ornaments — small colorful balls on the tree
-        const ornColors = ['#e04040','#ffd700','#4090e0','#ff69b4','#ff8c00'];
+        // ── Tinsel / garland — wavy gold lines ──
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 1.2;
+        ctx.globalAlpha = 0.7;
+        for (let g = 0; g < 3; g++) {
+          const gRatio = 0.18 + g * 0.20;
+          const gY = treeBase - th * gRatio;
+          const gHalfW = tw * (0.50 - gRatio * 0.40) * 0.55;
+          ctx.beginPath();
+          ctx.moveTo(tx - gHalfW, gY);
+          for (let step = 0; step <= 10; step++) {
+            const frac = step / 10;
+            const sx = tx - gHalfW + frac * gHalfW * 2;
+            const sy = gY + Math.sin(frac * Math.PI * 3 + g) * 4;
+            ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        // ── Ornaments ──
+        const ornColors = ['#e04040','#4090e0','#ff69b4','#ff8c00','#a855f7','#34d399','#ffd700'];
         const ornaments = [
-          { x: -0.12, y: 0.18 }, { x: 0.10, y: 0.15 },
-          { x: -0.06, y: 0.38 }, { x: 0.14, y: 0.35 },
-          { x: -0.16, y: 0.55 }, { x: 0.08, y: 0.52 }, { x: 0.20, y: 0.60 },
-          { x: -0.08, y: 0.72 }, { x: 0.15, y: 0.75 },
+          // Layer 1 (bottom)
+          { x: -0.28, y: 0.12 }, { x: 0.00, y: 0.10 }, { x: 0.24, y: 0.14 },
+          // Layer 2
+          { x: -0.18, y: 0.28 }, { x: 0.10, y: 0.26 }, { x: 0.22, y: 0.30 },
+          // Layer 3
+          { x: -0.12, y: 0.44 }, { x: 0.05, y: 0.42 }, { x: 0.16, y: 0.46 },
+          // Layer 4 (top)
+          { x: -0.06, y: 0.58 }, { x: 0.08, y: 0.57 },
         ];
-        const ornR = Math.max(2.5, tw * 0.04);
+        const ornR = Math.max(3, tw * 0.035);
         for (let i = 0; i < ornaments.length; i++) {
           const ox = tx + ornaments[i].x * tw;
-          const oy = baseY - ornaments[i].y * th;
-          // Glow
-          ctx.fillStyle = ornColors[i % ornColors.length];
-          ctx.globalAlpha = 0.3 + Math.sin(t / 800 + i * 1.2) * 0.15;
-          ctx.beginPath(); ctx.arc(ox, oy, ornR * 2, 0, Math.PI * 2); ctx.fill();
-          // Ball
+          const oy = treeBase - ornaments[i].y * th;
+          const color = ornColors[i % ornColors.length];
+
+          // Animated glow
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.18 + Math.sin(t / 650 + i * 1.3) * 0.10;
+          ctx.beginPath(); ctx.arc(ox, oy, ornR * 2.5, 0, Math.PI * 2); ctx.fill();
+
+          // Ornament ball
           ctx.globalAlpha = 1;
+          const ballGrad = ctx.createRadialGradient(ox - ornR * 0.3, oy - ornR * 0.3, 0, ox, oy, ornR);
+          ballGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+          ballGrad.addColorStop(0.5, color);
+          ballGrad.addColorStop(1, color);
+          ctx.fillStyle = ballGrad;
           ctx.beginPath(); ctx.arc(ox, oy, ornR, 0, Math.PI * 2); ctx.fill();
-          // Shine
-          ctx.fillStyle = 'rgba(255,255,255,0.4)';
-          ctx.beginPath(); ctx.arc(ox - ornR * 0.25, oy - ornR * 0.25, ornR * 0.35, 0, Math.PI * 2); ctx.fill();
+
+          // Small highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.beginPath(); ctx.arc(ox - ornR * 0.25, oy - ornR * 0.3, ornR * 0.28, 0, Math.PI * 2); ctx.fill();
+
+          // Tiny hook/cap on top
+          ctx.fillStyle = '#ccc';
+          ctx.fillRect(ox - 1, oy - ornR - 2, 2, 3);
         }
 
-        // Star on top
-        const starY = baseY - th * 0.88;
-        const starR = Math.max(4, tw * 0.07);
+        // ── Star on top ──
+        const starCy = treeBase - th * 0.76;
+        const starR = Math.max(6, tw * 0.065);
+
+        // Star glow (outer)
         ctx.fillStyle = '#ffd700';
-        ctx.globalAlpha = 0.8 + Math.sin(t / 500) * 0.2;
+        ctx.globalAlpha = 0.10 + Math.sin(t / 400) * 0.06;
+        ctx.beginPath(); ctx.arc(tx, starCy, starR * 3.5, 0, Math.PI * 2); ctx.fill();
+
+        // Star body
+        ctx.globalAlpha = 0.9 + Math.sin(t / 400) * 0.1;
+        ctx.fillStyle = '#ffd700';
         ctx.beginPath();
         for (let i = 0; i < 5; i++) {
           const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
           const aInner = a + Math.PI / 5;
-          ctx.lineTo(tx + Math.cos(a) * starR, starY + Math.sin(a) * starR);
-          ctx.lineTo(tx + Math.cos(aInner) * starR * 0.4, starY + Math.sin(aInner) * starR * 0.4);
+          ctx.lineTo(tx + Math.cos(a) * starR, starCy + Math.sin(a) * starR);
+          ctx.lineTo(tx + Math.cos(aInner) * starR * 0.4, starCy + Math.sin(aInner) * starR * 0.4);
         }
         ctx.closePath(); ctx.fill();
-        // Star glow
-        ctx.globalAlpha = 0.15 + Math.sin(t / 500) * 0.08;
-        ctx.beginPath(); ctx.arc(tx, starY, starR * 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
 
+        // Star inner highlight
+        ctx.fillStyle = 'rgba(255,255,200,0.5)';
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+          const aInner = a + Math.PI / 5;
+          ctx.lineTo(tx + Math.cos(a) * starR * 0.6, starCy + Math.sin(a) * starR * 0.6);
+          ctx.lineTo(tx + Math.cos(aInner) * starR * 0.25, starCy + Math.sin(aInner) * starR * 0.25);
+        }
+        ctx.closePath(); ctx.fill();
+
+        // Light rays from star
+        ctx.strokeStyle = 'rgba(255,215,0,0.15)'; ctx.lineWidth = 1;
+        for (let i = 0; i < 8; i++) {
+          const a = (Math.PI * 2 / 8) * i + t / 3000;
+          ctx.beginPath();
+          ctx.moveTo(tx + Math.cos(a) * starR * 1.3, starCy + Math.sin(a) * starR * 1.3);
+          ctx.lineTo(tx + Math.cos(a) * starR * 2.2, starCy + Math.sin(a) * starR * 2.2);
+          ctx.stroke();
+        }
+
+        ctx.globalAlpha = 1;
         ctx.restore();
       }
 
