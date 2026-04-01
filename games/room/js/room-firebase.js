@@ -241,6 +241,23 @@
           _unsubscribeRoomSnap();
         } else if (document.visibilityState === 'visible' && currentUid) {
           userDocRef().update({ lastSeen: Date.now() }).catch(() => {});
+          // Collect plant coins earned while tab was hidden (capped at 2 hours)
+          if (viewingUid === currentUid && roomData.plant && roomData.lastCoinCollect) {
+            const plantLvl = roomData.plantLevels[roomData.plant] || 1;
+            const plantDef = PLANTS.find(p => p.id === roomData.plant);
+            const baseRate = plantDef ? plantDef.coinRate : 1;
+            const coinsPerCycle = plantLvl * baseRate;
+            const rawElapsed = Date.now() - roomData.lastCoinCollect;
+            const elapsed = Math.min(rawElapsed, PLANT_OFFLINE_CAP_MS);
+            const cycles = Math.floor(elapsed / (5 * 60 * 1000));
+            if (cycles > 0) {
+              const earned = cycles * coinsPerCycle;
+              roomData.coins += earned;
+              roomData.lastCoinCollect = Date.now();
+              saveRoom();
+              showToast('🌱 ' + (plantDef ? plantDef.name : 'Plant') + ' earned ' + earned + ' coins while tab was hidden!', 'success');
+            }
+          }
           // Reattach room listener to resume real-time updates
           _subscribeRoomSnap();
         }
