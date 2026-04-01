@@ -1974,10 +1974,14 @@ function fireNotification(count, bodyText, title, tag) {
 })();
 
 /* ═══════════════════════════════════════════
-    Real-time listeners
+    Real-time listeners (detach when tab hidden to reduce Firestore reads)
     ═══════════════════════════════════════════ */
-// Bubble answers (gossip, etc.) — limited to 50 most recent to reduce reads
-answersRef.orderBy('ts', 'desc').limit(50).onSnapshot((snapshot) => {
+let _unsubAnswers = null;
+let _unsubFood = null;
+
+function _subscribeAnswers() {
+    if (_unsubAnswers) return; // already subscribed
+    _unsubAnswers = answersRef.orderBy('ts', 'desc').limit(50).onSnapshot((snapshot) => {
     const now = Date.now();
     const items = [];
     snapshot.forEach((doc) => {
@@ -2000,13 +2004,15 @@ answersRef.orderBy('ts', 'desc').limit(50).onSnapshot((snapshot) => {
     notifyNewMessages(items);
     firstSnapshotFired = true;
     render(items);
-}, (err) => {
+    }, (err) => {
     console.error('Firestore error:', err);
     showToast('Connection error — check console (F12)', 'error');
-});
+    });
+}
 
-// Food suggestions (vote & random) — limited to 50 to reduce reads
-foodRef.orderBy('ts', 'asc').limit(50).onSnapshot((snapshot) => {
+function _subscribeFood() {
+    if (_unsubFood) return; // already subscribed
+    _unsubFood = foodRef.orderBy('ts', 'asc').limit(50).onSnapshot((snapshot) => {
     foodItems = [];
     snapshot.forEach((doc) => {
     const d = doc.data();
@@ -2015,8 +2021,41 @@ foodRef.orderBy('ts', 'asc').limit(50).onSnapshot((snapshot) => {
     cacheSet('cache_food', foodItems);
     renderVoteList();
     updateRestoreBtn();
-}, (err) => {
+    }, (err) => {
     console.error('Food Firestore error:', err);
+    });
+}
+
+function _unsubAllListeners() {
+    if (_unsubAnswers) { _unsubAnswers(); _unsubAnswers = null; }
+    if (_unsubFood) { _unsubFood(); _unsubFood = null; }
+}
+
+// Initial subscribe
+_subscribeAnswers();
+_subscribeFood();
+
+// Detach listeners when tab is hidden, reattach when visible
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+    _unsubAllListeners();
+    // Also pause heartbeat writes
+    if (_lastSeenInterval) { clearInterval(_lastSeenInterval); _lastSeenInterval = null; }
+    if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: 0 }).catch(() => {});
+    } else {
+    _subscribeAnswers();
+    _subscribeFood();
+    // Resume heartbeat
+    if (auth.currentUser) {
+        db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
+        if (!_lastSeenInterval) {
+        _lastSeenInterval = setInterval(() => {
+            if (document.hidden) return;
+            if (auth.currentUser) db.collection('rooms').doc(auth.currentUser.uid).update({ lastSeen: Date.now() }).catch(() => {});
+        }, 120000);
+        }
+    }
+    }
 });
 
 /* ═══════════════════════════════════════════
@@ -2428,17 +2467,17 @@ countdownRef.onSnapshot((snap) => {
     });
 })();
 
-// ═══ Chinese Chess invite listener ═══
+// ═══ Chinese Chess invite listener (pauses when tab is hidden) ═══
 (function() {
     let chessInvUnsub = null;
+    let _chessInvUid = null; // track current user for resubscribe
     const _auth = firebase.auth();
     const _db = firebase.firestore();
-    _auth.onAuthStateChanged((u) => {
-    if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
-    if (!u) return;
-    console.log('[ChessInvite] Listening for invites on index, uid:', u.uid);
+
+    function _subscribeChessInvites() {
+    if (chessInvUnsub || !_chessInvUid) return; // already subscribed or no user
     chessInvUnsub = _db.collection('chess_invites')
-        .where('toUid', '==', u.uid)
+        .where('toUid', '==', _chessInvUid)
         .where('status', '==', 'pending')
         .onSnapshot((snap) => {
         snap.docChanges().forEach(ch => {
@@ -2469,5 +2508,26 @@ countdownRef.onSnapshot((snap) => {
             });
         });
         }, (err) => { console.error('[ChessInvite] onSnapshot error on index:', err); });
+    }
+
+    function _unsubscribeChessInvites() {
+    if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
+    }
+
+    _auth.onAuthStateChanged((u) => {
+    _unsubscribeChessInvites();
+    if (!u) { _chessInvUid = null; return; }
+    _chessInvUid = u.uid;
+    console.log('[ChessInvite] Listening for invites on index, uid:', u.uid);
+    _subscribeChessInvites();
+    });
+
+    // Pause/resume on visibility change
+    document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        _unsubscribeChessInvites();
+    } else {
+        _subscribeChessInvites();
+    }
     });
 })();

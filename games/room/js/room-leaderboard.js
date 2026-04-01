@@ -77,17 +77,17 @@
       document.getElementById('lbOverlay').classList.add('hidden');
     });
 
-    // ═══ Chinese Chess invite listener ═══
+    // ═══ Chinese Chess invite listener (pauses when tab is hidden) ═══
     (function() {
       let chessInvUnsub = null;
+      let _chessInvUid = null; // track current user for resubscribe
       const _auth = firebase.auth();
       const _db = firebase.firestore();
-      _auth.onAuthStateChanged((u) => {
-        if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
-        if (!u) return;
-        console.log('[ChessInvite] Listening for invites on room, uid:', u.uid);
+
+      function _subscribeChessInvites() {
+        if (chessInvUnsub || !_chessInvUid) return; // already subscribed or no user
         chessInvUnsub = _db.collection('chess_invites')
-          .where('toUid', '==', u.uid)
+          .where('toUid', '==', _chessInvUid)
           .where('status', '==', 'pending')
           .onSnapshot((snap) => {
             snap.docChanges().forEach(ch => {
@@ -118,5 +118,26 @@
               });
             });
           }, (err) => { console.error('[ChessInvite] onSnapshot error on room:', err); });
+      }
+
+      function _unsubscribeChessInvites() {
+        if (chessInvUnsub) { chessInvUnsub(); chessInvUnsub = null; }
+      }
+
+      _auth.onAuthStateChanged((u) => {
+        _unsubscribeChessInvites();
+        if (!u) { _chessInvUid = null; return; }
+        _chessInvUid = u.uid;
+        console.log('[ChessInvite] Listening for invites on room, uid:', u.uid);
+        _subscribeChessInvites();
+      });
+
+      // Pause/resume on visibility change
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          _unsubscribeChessInvites();
+        } else {
+          _subscribeChessInvites();
+        }
       });
     })();
