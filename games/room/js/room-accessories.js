@@ -213,12 +213,43 @@
           ctx.beginPath(); ctx.arc(hx, hy - hr, s*0.025, 0, Math.PI*2); ctx.fill();
           break;
         case 'scarf':
+          // Scarf wraps around the neck area (positioned relative to body, below the head)
           ctx.fillStyle = '#e74c3c';
-          ctx.fillRect(hx - s*0.2, hy + hr - s*0.02, s*0.4, s*0.08);
+          // Main scarf band (sits at neck level, just below the head)
+          ctx.beginPath();
+          ctx.ellipse(hx, hy + hr + s*0.02, s*0.22, s*0.05, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Scarf knot
           ctx.fillStyle = '#c0392b';
-          ctx.fillRect(hx + s*0.1, hy + hr - s*0.02, s*0.08, s*0.2);
+          ctx.beginPath(); ctx.arc(hx + s*0.08, hy + hr + s*0.04, s*0.035, 0, Math.PI * 2); ctx.fill();
+          // Hanging tail piece 1
+          ctx.fillStyle = '#e74c3c';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.06, hy + hr + s*0.06);
+          ctx.quadraticCurveTo(hx + s*0.14, hy + hr + s*0.14, hx + s*0.10, hy + hr + s*0.24);
+          ctx.lineTo(hx + s*0.04, hy + hr + s*0.22);
+          ctx.quadraticCurveTo(hx + s*0.08, hy + hr + s*0.12, hx + s*0.02, hy + hr + s*0.06);
+          ctx.closePath(); ctx.fill();
+          // Hanging tail piece 2 (shorter)
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.08, hy + hr + s*0.06);
+          ctx.quadraticCurveTo(hx + s*0.18, hy + hr + s*0.10, hx + s*0.16, hy + hr + s*0.18);
+          ctx.lineTo(hx + s*0.12, hy + hr + s*0.16);
+          ctx.quadraticCurveTo(hx + s*0.14, hy + hr + s*0.08, hx + s*0.08, hy + hr + s*0.06);
+          ctx.closePath(); ctx.fill();
+          // Green stripe pattern on the scarf
           ctx.fillStyle = '#27ae60';
-          for (let i = 0; i < 3; i++) ctx.fillRect(hx - s*0.15 + i*s*0.12, hy + hr, s*0.06, s*0.02);
+          ctx.beginPath();
+          ctx.ellipse(hx, hy + hr + s*0.02, s*0.20, s*0.015, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Fringe at end of tail
+          ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = s*0.01; ctx.lineCap = 'round';
+          for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(hx + s*0.08 + i*s*0.025, hy + hr + s*0.22);
+            ctx.lineTo(hx + s*0.08 + i*s*0.025, hy + hr + s*0.27);
+            ctx.stroke();
+          }
           break;
         case 'flower': {
           const fc = ['#ff69b4','#ff69b4','#ff69b4','#ff69b4','#ff69b4'];
@@ -303,75 +334,263 @@
           ctx.beginPath(); ctx.moveTo(hx - s*0.02, hy); ctx.lineTo(hx + s*0.02, hy); ctx.stroke();
           break;
         case 'devil':
+          // Left horn — curved, tapered with depth shading
           ctx.fillStyle = '#dc2626';
-          // Left horn
           ctx.beginPath();
-          ctx.moveTo(hx - s*0.14, hy - hr + s*0.02);
-          ctx.quadraticCurveTo(hx - s*0.2, hy - hr - s*0.2, hx - s*0.08, hy - hr - s*0.12);
-          ctx.lineTo(hx - s*0.1, hy - hr + s*0.02);
+          ctx.moveTo(hx - s*0.12, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx - s*0.22, hy - hr - s*0.18, hx - s*0.10, hy - hr - s*0.14);
+          ctx.lineTo(hx - s*0.08, hy - hr + s*0.02);
           ctx.closePath(); ctx.fill();
-          // Right horn
+          // Left horn dark inner side
+          ctx.fillStyle = '#991b1b';
           ctx.beginPath();
-          ctx.moveTo(hx + s*0.14, hy - hr + s*0.02);
-          ctx.quadraticCurveTo(hx + s*0.2, hy - hr - s*0.2, hx + s*0.08, hy - hr - s*0.12);
-          ctx.lineTo(hx + s*0.1, hy - hr + s*0.02);
+          ctx.moveTo(hx - s*0.10, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx - s*0.18, hy - hr - s*0.12, hx - s*0.10, hy - hr - s*0.10);
+          ctx.lineTo(hx - s*0.09, hy - hr + s*0.02);
           ctx.closePath(); ctx.fill();
+          // Left horn highlight
+          ctx.fillStyle = 'rgba(255,100,100,0.3)';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.13, hy - hr);
+          ctx.quadraticCurveTo(hx - s*0.20, hy - hr - s*0.14, hx - s*0.12, hy - hr - s*0.12);
+          ctx.lineTo(hx - s*0.11, hy - hr);
+          ctx.closePath(); ctx.fill();
+          // Right horn — curved, tapered with depth shading
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.12, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.22, hy - hr - s*0.18, hx + s*0.10, hy - hr - s*0.14);
+          ctx.lineTo(hx + s*0.08, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Right horn dark inner side
+          ctx.fillStyle = '#991b1b';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.10, hy - hr + s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.18, hy - hr - s*0.12, hx + s*0.10, hy - hr - s*0.10);
+          ctx.lineTo(hx + s*0.09, hy - hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Right horn highlight
+          ctx.fillStyle = 'rgba(255,100,100,0.3)';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.13, hy - hr);
+          ctx.quadraticCurveTo(hx + s*0.20, hy - hr - s*0.14, hx + s*0.12, hy - hr - s*0.12);
+          ctx.lineTo(hx + s*0.11, hy - hr);
+          ctx.closePath(); ctx.fill();
+          // Horn base ring
+          ctx.fillStyle = '#b91c1c';
+          ctx.beginPath(); ctx.ellipse(hx - s*0.10, hy - hr + s*0.02, s*0.04, s*0.015, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(hx + s*0.10, hy - hr + s*0.02, s*0.04, s*0.015, 0, 0, Math.PI * 2); ctx.fill();
           break;
         case 'wings':
-          ctx.globalAlpha = 0.7;
-          ctx.fillStyle = '#e0e7ff';
-          // Left wing
-          ctx.beginPath();
-          ctx.moveTo(hx - s*0.18, hy + s*0.1);
-          ctx.quadraticCurveTo(hx - s*0.45, hy - s*0.1, hx - s*0.35, hy + s*0.2);
-          ctx.quadraticCurveTo(hx - s*0.3, hy + s*0.3, hx - s*0.18, hy + s*0.15);
-          ctx.closePath(); ctx.fill();
-          // Right wing
-          ctx.beginPath();
-          ctx.moveTo(hx + s*0.18, hy + s*0.1);
-          ctx.quadraticCurveTo(hx + s*0.45, hy - s*0.1, hx + s*0.35, hy + s*0.2);
-          ctx.quadraticCurveTo(hx + s*0.3, hy + s*0.3, hx + s*0.18, hy + s*0.15);
-          ctx.closePath(); ctx.fill();
+          // Angel wings — layered feathers with depth and glow
+          ctx.save();
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = '#fff';
+          // Wing glow
+          ctx.beginPath(); ctx.arc(hx - s*0.3, hy + s*0.08, s*0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(hx + s*0.3, hy + s*0.08, s*0.2, 0, Math.PI * 2); ctx.fill();
           ctx.globalAlpha = 1;
+          ctx.restore();
+          // Left wing — outer layer
+          ctx.fillStyle = '#e0e7ff';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.16, hy + s*0.06);
+          ctx.quadraticCurveTo(hx - s*0.50, hy - s*0.18, hx - s*0.42, hy + s*0.12);
+          ctx.quadraticCurveTo(hx - s*0.48, hy + s*0.22, hx - s*0.36, hy + s*0.22);
+          ctx.quadraticCurveTo(hx - s*0.30, hy + s*0.32, hx - s*0.16, hy + s*0.18);
+          ctx.closePath(); ctx.fill();
+          // Left wing — middle feather layer
+          ctx.fillStyle = 'rgba(200,210,240,0.7)';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.16, hy + s*0.08);
+          ctx.quadraticCurveTo(hx - s*0.40, hy - s*0.08, hx - s*0.34, hy + s*0.14);
+          ctx.quadraticCurveTo(hx - s*0.28, hy + s*0.24, hx - s*0.16, hy + s*0.16);
+          ctx.closePath(); ctx.fill();
+          // Left wing — inner feather highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.16, hy + s*0.10);
+          ctx.quadraticCurveTo(hx - s*0.30, hy + s*0.02, hx - s*0.26, hy + s*0.14);
+          ctx.quadraticCurveTo(hx - s*0.22, hy + s*0.20, hx - s*0.16, hy + s*0.14);
+          ctx.closePath(); ctx.fill();
+          // Right wing — outer layer
+          ctx.fillStyle = '#e0e7ff';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.16, hy + s*0.06);
+          ctx.quadraticCurveTo(hx + s*0.50, hy - s*0.18, hx + s*0.42, hy + s*0.12);
+          ctx.quadraticCurveTo(hx + s*0.48, hy + s*0.22, hx + s*0.36, hy + s*0.22);
+          ctx.quadraticCurveTo(hx + s*0.30, hy + s*0.32, hx + s*0.16, hy + s*0.18);
+          ctx.closePath(); ctx.fill();
+          // Right wing — middle feather layer
+          ctx.fillStyle = 'rgba(200,210,240,0.7)';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.16, hy + s*0.08);
+          ctx.quadraticCurveTo(hx + s*0.40, hy - s*0.08, hx + s*0.34, hy + s*0.14);
+          ctx.quadraticCurveTo(hx + s*0.28, hy + s*0.24, hx + s*0.16, hy + s*0.16);
+          ctx.closePath(); ctx.fill();
+          // Right wing — inner feather highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.16, hy + s*0.10);
+          ctx.quadraticCurveTo(hx + s*0.30, hy + s*0.02, hx + s*0.26, hy + s*0.14);
+          ctx.quadraticCurveTo(hx + s*0.22, hy + s*0.20, hx + s*0.16, hy + s*0.14);
+          ctx.closePath(); ctx.fill();
+          // Feather line details on both wings
+          ctx.strokeStyle = 'rgba(180,190,220,0.4)'; ctx.lineWidth = s*0.006;
+          [-1, 1].forEach(dir => {
+            for (let i = 0; i < 3; i++) {
+              ctx.beginPath();
+              ctx.moveTo(hx + dir*s*0.18, hy + s*0.08 + i*s*0.04);
+              ctx.lineTo(hx + dir*s*(0.32 + i*0.04), hy + s*0.06 + i*s*0.06);
+              ctx.stroke();
+            }
+          });
           break;
         case 'cape':
-          ctx.globalAlpha = 0.8;
+          ctx.save();
+          // Cape shadow
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = '#000';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.13, hy + hr);
+          ctx.lineTo(hx + s*0.13, hy + hr);
+          ctx.quadraticCurveTo(hx + s*0.22, hy + hr + s*0.32, hx + s*0.06, hy + hr + s*0.38);
+          ctx.lineTo(hx - s*0.06, hy + hr + s*0.38);
+          ctx.quadraticCurveTo(hx - s*0.22, hy + hr + s*0.32, hx - s*0.13, hy + hr);
+          ctx.closePath(); ctx.fill();
+          ctx.globalAlpha = 1;
+          // Cape body — gradient purple
+          const capeGrad = ctx.createLinearGradient(hx, hy + hr, hx, hy + hr + s*0.36);
+          capeGrad.addColorStop(0, '#7c3aed');
+          capeGrad.addColorStop(0.6, '#6d28d9');
+          capeGrad.addColorStop(1, '#4c1d95');
+          ctx.fillStyle = capeGrad;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.15, hy + hr - s*0.02);
+          ctx.lineTo(hx + s*0.15, hy + hr - s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.22, hy + hr + s*0.30, hx + s*0.06, hy + hr + s*0.36);
+          ctx.lineTo(hx - s*0.06, hy + hr + s*0.36);
+          ctx.quadraticCurveTo(hx - s*0.22, hy + hr + s*0.30, hx - s*0.15, hy + hr - s*0.02);
+          ctx.closePath(); ctx.fill();
+          // Cape inner lining — dark red
+          ctx.fillStyle = '#881337';
+          ctx.globalAlpha = 0.4;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.10, hy + hr + s*0.02);
+          ctx.lineTo(hx + s*0.10, hy + hr + s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.14, hy + hr + s*0.24, hx + s*0.02, hy + hr + s*0.30);
+          ctx.lineTo(hx - s*0.02, hy + hr + s*0.30);
+          ctx.quadraticCurveTo(hx - s*0.14, hy + hr + s*0.24, hx - s*0.10, hy + hr + s*0.02);
+          ctx.closePath(); ctx.fill();
+          ctx.globalAlpha = 1;
+          // Cape edge detail — scalloped bottom
+          ctx.strokeStyle = '#9333ea'; ctx.lineWidth = s*0.008;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.06, hy + hr + s*0.36);
+          for (let i = 0; i < 4; i++) {
+            const sx2 = hx - s*0.06 + i*s*0.04;
+            ctx.quadraticCurveTo(sx2 + s*0.02, hy + hr + s*0.38, sx2 + s*0.04, hy + hr + s*0.36);
+          }
+          ctx.stroke();
+          // Collar / shoulder piece
           ctx.fillStyle = '#7c3aed';
           ctx.beginPath();
-          ctx.moveTo(hx - s*0.14, hy + hr - s*0.02);
-          ctx.lineTo(hx + s*0.14, hy + hr - s*0.02);
-          ctx.quadraticCurveTo(hx + s*0.2, hy + hr + s*0.3, hx + s*0.05, hy + hr + s*0.35);
-          ctx.lineTo(hx - s*0.05, hy + hr + s*0.35);
-          ctx.quadraticCurveTo(hx - s*0.2, hy + hr + s*0.3, hx - s*0.14, hy + hr - s*0.02);
-          ctx.closePath(); ctx.fill();
-          // Collar clasp
+          ctx.ellipse(hx, hy + hr - s*0.02, s*0.17, s*0.03, 0, 0, Math.PI);
+          ctx.fill();
+          // Gold clasp
           ctx.fillStyle = '#fbbf24';
-          ctx.beginPath(); ctx.arc(hx, hy + hr, s*0.025, 0, Math.PI*2); ctx.fill();
-          ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.arc(hx, hy + hr, s*0.03, 0, Math.PI*2); ctx.fill();
+          // Clasp gem
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath(); ctx.arc(hx, hy + hr, s*0.015, 0, Math.PI*2); ctx.fill();
+          // Clasp highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.beginPath(); ctx.arc(hx - s*0.008, hy + hr - s*0.008, s*0.006, 0, Math.PI*2); ctx.fill();
+          ctx.restore();
           break;
         case 'ninja':
+          // Dark ninja mask/hood covering face
           ctx.fillStyle = '#1a1a2e';
-          // Mask across face
-          ctx.fillRect(hx - s*0.18, hy - s*0.04, s*0.36, s*0.1);
-          // Eye slit
-          ctx.fillStyle = 'rgba(255,255,255,0.5)';
-          ctx.fillRect(hx - s*0.14, hy - s*0.01, s*0.28, s*0.035);
-          // Tail flap
+          // Full head wrap
+          ctx.beginPath();
+          ctx.arc(hx, hy, hr * 1.05, -Math.PI * 0.8, Math.PI * 0.8);
+          ctx.closePath(); ctx.fill();
+          // Forehead headband
+          ctx.fillStyle = '#2d2d4e';
+          ctx.fillRect(hx - s*0.20, hy - s*0.06, s*0.40, s*0.06);
+          // Forehead plate (metal)
+          ctx.fillStyle = '#6b7280';
+          roundRectPath(ctx, hx - s*0.06, hy - s*0.055, s*0.12, s*0.05, 2);
+          ctx.fill();
+          // Plate engraving
+          ctx.strokeStyle = 'rgba(200,200,200,0.4)'; ctx.lineWidth = s*0.005;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.03, hy - s*0.035);
+          ctx.lineTo(hx + s*0.03, hy - s*0.035);
+          ctx.stroke();
+          // Eye slit opening
+          ctx.fillStyle = 'rgba(20,20,30,0.9)';
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.16, hy + s*0.01);
+          ctx.quadraticCurveTo(hx, hy - s*0.02, hx + s*0.16, hy + s*0.01);
+          ctx.quadraticCurveTo(hx, hy + s*0.04, hx - s*0.16, hy + s*0.01);
+          ctx.closePath(); ctx.fill();
+          // Eyes visible through slit
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.beginPath(); ctx.ellipse(hx - s*0.06, hy + s*0.01, s*0.025, s*0.012, 0, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(hx + s*0.06, hy + s*0.01, s*0.025, s*0.012, 0, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#1a1a2e';
+          ctx.beginPath(); ctx.arc(hx - s*0.06, hy + s*0.01, s*0.012, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(hx + s*0.06, hy + s*0.01, s*0.012, 0, Math.PI*2); ctx.fill();
+          // Tail flaps (two cloth tails trailing behind)
           ctx.fillStyle = '#1a1a2e';
           ctx.beginPath();
-          ctx.moveTo(hx + s*0.18, hy); ctx.lineTo(hx + s*0.3, hy + s*0.08);
-          ctx.lineTo(hx + s*0.28, hy - s*0.04); ctx.closePath(); ctx.fill();
+          ctx.moveTo(hx + s*0.18, hy - s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.32, hy - s*0.04, hx + s*0.34, hy + s*0.06);
+          ctx.lineTo(hx + s*0.30, hy + s*0.08);
+          ctx.quadraticCurveTo(hx + s*0.26, hy, hx + s*0.18, hy + s*0.02);
+          ctx.closePath(); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(hx + s*0.18, hy + s*0.02);
+          ctx.quadraticCurveTo(hx + s*0.28, hy + s*0.02, hx + s*0.32, hy + s*0.12);
+          ctx.lineTo(hx + s*0.28, hy + s*0.14);
+          ctx.quadraticCurveTo(hx + s*0.22, hy + s*0.06, hx + s*0.18, hy + s*0.04);
+          ctx.closePath(); ctx.fill();
           break;
         case 'pirate':
-          // Eye patch
-          ctx.fillStyle = '#1a1a2e';
-          ctx.beginPath(); ctx.ellipse(hx - s*0.08, hy, s*0.055, s*0.045, 0, 0, Math.PI*2); ctx.fill();
-          // Strap
-          ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = s*0.012;
+          // Eye patch — leather with stitching
+          ctx.fillStyle = '#1a1a1a';
+          ctx.beginPath(); ctx.ellipse(hx - s*0.08, hy, s*0.065, s*0.055, 0.1, 0, Math.PI*2); ctx.fill();
+          // Patch border
+          ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = s*0.008;
+          ctx.beginPath(); ctx.ellipse(hx - s*0.08, hy, s*0.065, s*0.055, 0.1, 0, Math.PI*2); ctx.stroke();
+          // Stitch lines on the patch
+          ctx.strokeStyle = '#555'; ctx.lineWidth = s*0.004;
+          ctx.beginPath(); ctx.moveTo(hx - s*0.08, hy - s*0.04); ctx.lineTo(hx - s*0.08, hy + s*0.04); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(hx - s*0.12, hy); ctx.lineTo(hx - s*0.04, hy); ctx.stroke();
+          // Skull & crossbones on patch
+          ctx.fillStyle = '#aaa';
+          ctx.beginPath(); ctx.arc(hx - s*0.08, hy - s*0.005, s*0.015, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#666';
+          ctx.fillRect(hx - s*0.105, hy + s*0.01, s*0.05, s*0.006);
+          // Strap — leather band going over head
+          ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = s*0.018;
           ctx.beginPath();
-          ctx.moveTo(hx - s*0.08, hy - s*0.04);
-          ctx.quadraticCurveTo(hx, hy - hr - s*0.02, hx + s*0.12, hy - s*0.02);
+          ctx.moveTo(hx - s*0.08, hy - s*0.05);
+          ctx.quadraticCurveTo(hx + s*0.02, hy - hr - s*0.06, hx + s*0.14, hy - s*0.02);
           ctx.stroke();
+          // Strap edge highlight
+          ctx.strokeStyle = '#3a2a1e'; ctx.lineWidth = s*0.006;
+          ctx.beginPath();
+          ctx.moveTo(hx - s*0.08, hy - s*0.05);
+          ctx.quadraticCurveTo(hx + s*0.02, hy - hr - s*0.07, hx + s*0.14, hy - s*0.02);
+          ctx.stroke();
+          // Strap buckle
+          ctx.fillStyle = '#c9952a';
+          roundRectPath(ctx, hx + s*0.10, hy - s*0.035, s*0.04, s*0.035, 1);
+          ctx.fill();
+          ctx.fillStyle = '#a07820';
+          ctx.fillRect(hx + s*0.115, hy - s*0.025, s*0.01, s*0.02);
           break;
         case 'tiara':
           ctx.fillStyle = '#f0abfc';
@@ -393,16 +612,58 @@
           ctx.beginPath(); ctx.arc(hx + s*0.1, hy - hr - s*0.04, s*0.015, 0, Math.PI*2); ctx.fill();
           break;
         case 'starbadge':
-          ctx.fillStyle = '#fbbf24';
-          const sx = hx + s*0.14, sy = hy - s*0.02;
+          // Gold star badge with depth, shine, and pin
+          const sx3 = hx + s*0.14, sy3 = hy - s*0.02;
+          const badgeR = s*0.07;
+          // Badge shadow
+          ctx.fillStyle = 'rgba(0,0,0,0.15)';
           ctx.beginPath();
           for (let i = 0; i < 5; i++) {
             const a = -Math.PI/2 + i * Math.PI*2/5;
             const ai = a + Math.PI/5;
-            ctx.lineTo(sx + Math.cos(a)*s*0.06, sy + Math.sin(a)*s*0.06);
-            ctx.lineTo(sx + Math.cos(ai)*s*0.025, sy + Math.sin(ai)*s*0.025);
+            ctx.lineTo(sx3 + 1 + Math.cos(a)*badgeR, sy3 + 1 + Math.sin(a)*badgeR);
+            ctx.lineTo(sx3 + 1 + Math.cos(ai)*badgeR*0.42, sy3 + 1 + Math.sin(ai)*badgeR*0.42);
           }
           ctx.closePath(); ctx.fill();
+          // Star body — gradient gold
+          const starGrad = ctx.createRadialGradient(sx3 - s*0.015, sy3 - s*0.015, 0, sx3, sy3, badgeR);
+          starGrad.addColorStop(0, '#ffe066');
+          starGrad.addColorStop(0.5, '#fbbf24');
+          starGrad.addColorStop(1, '#d97706');
+          ctx.fillStyle = starGrad;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a = -Math.PI/2 + i * Math.PI*2/5;
+            const ai = a + Math.PI/5;
+            ctx.lineTo(sx3 + Math.cos(a)*badgeR, sy3 + Math.sin(a)*badgeR);
+            ctx.lineTo(sx3 + Math.cos(ai)*badgeR*0.42, sy3 + Math.sin(ai)*badgeR*0.42);
+          }
+          ctx.closePath(); ctx.fill();
+          // Star outline
+          ctx.strokeStyle = '#b45309'; ctx.lineWidth = s*0.006;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a = -Math.PI/2 + i * Math.PI*2/5;
+            const ai = a + Math.PI/5;
+            ctx.lineTo(sx3 + Math.cos(a)*badgeR, sy3 + Math.sin(a)*badgeR);
+            ctx.lineTo(sx3 + Math.cos(ai)*badgeR*0.42, sy3 + Math.sin(ai)*badgeR*0.42);
+          }
+          ctx.closePath(); ctx.stroke();
+          // Centre circle
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath(); ctx.arc(sx3, sy3, badgeR * 0.25, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#92400e'; ctx.lineWidth = s*0.004;
+          ctx.beginPath(); ctx.arc(sx3, sy3, badgeR * 0.25, 0, Math.PI * 2); ctx.stroke();
+          // Shine highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.beginPath();
+          ctx.moveTo(sx3 - s*0.02, sy3 - badgeR * 0.6);
+          ctx.quadraticCurveTo(sx3, sy3 - badgeR * 0.4, sx3 + s*0.01, sy3 - badgeR * 0.3);
+          ctx.quadraticCurveTo(sx3 - s*0.01, sy3 - badgeR * 0.4, sx3 - s*0.02, sy3 - badgeR * 0.6);
+          ctx.closePath(); ctx.fill();
+          // Pin on back (small line)
+          ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = s*0.006;
+          ctx.beginPath(); ctx.moveTo(sx3, sy3 + badgeR * 0.6); ctx.lineTo(sx3 + s*0.02, sy3 + badgeR * 0.9); ctx.stroke();
           break;
       }
     }
