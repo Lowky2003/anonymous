@@ -128,6 +128,7 @@
     }
 
     async function confirmSwap(deactivatePetId) {
+      if (viewingUid !== currentUid) return;
       if (!_swapNewTypeId) return;
 
       // Remove the chosen pet from the current layer
@@ -722,6 +723,7 @@
       if (!room) return;
 
       el.addEventListener('mousedown', (e) => {
+        if (viewingUid !== currentUid) return;
         if (e.target.closest('.empty-slot')) return;
         e.preventDefault();
         const roomRect = room.getBoundingClientRect();
@@ -737,6 +739,7 @@
       });
 
       el.addEventListener('touchstart', (e) => {
+        if (viewingUid !== currentUid) return;
         if (e.target.closest('.empty-slot')) return;
         if (e.touches.length !== 1) return;
         const touch = e.touches[0];

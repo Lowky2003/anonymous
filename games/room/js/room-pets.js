@@ -318,7 +318,9 @@
       const pet = getPet(_selectedPetId);
       if (!pet) { closePetStatus(); return; }
 
-      document.getElementById('petStatusName').value = pet.name || '';
+      const nameInput = document.getElementById('petStatusName');
+      nameInput.value = pet.name || '';
+      nameInput.readOnly = viewingUid !== currentUid;
 
       const hunger = pet.hunger ?? 100;
       const hBar = document.getElementById('petStatusHunger');
@@ -338,24 +340,29 @@
       document.getElementById('petStatusAffection').style.width = Math.min(100, (aff / maxAff) * 100) + '%';
       document.getElementById('petStatusAffectionVal').textContent = '♥' + aff + ' ' + ms.title;
 
-      // Color dots
+      // Color dots (owner only)
       const colorsEl = document.getElementById('petStatusColors');
-      const colors = PET_COLORS[pet.type];
-      if (colors && colors.length) {
-        colorsEl.innerHTML = colors.map(c =>
-          '<div onclick="setPetColor(\'' + pet.id + '\',\'' + c.key + '\')" title="' + c.name + '" style="' +
-          'width:20px;height:20px;border-radius:50%;background:' + (c.body || c.key) + ';cursor:pointer;' +
-          'border:2px solid ' + (c.key === pet.color ? '#fff' : 'rgba(255,255,255,0.2)') + ';' +
-          'box-shadow:' + (c.key === pet.color ? '0 0 6px rgba(255,255,255,0.5)' : 'none') +
-          '"></div>'
-        ).join('');
-      } else {
+      if (viewingUid !== currentUid) {
         colorsEl.innerHTML = '';
+      } else {
+        const colors = PET_COLORS[pet.type];
+        if (colors && colors.length) {
+          colorsEl.innerHTML = colors.map(c =>
+            '<div onclick="setPetColor(\'' + pet.id + '\',\'' + c.key + '\')" title="' + c.name + '" style="' +
+            'width:20px;height:20px;border-radius:50%;background:' + (c.body || c.key) + ';cursor:pointer;' +
+            'border:2px solid ' + (c.key === pet.color ? '#fff' : 'rgba(255,255,255,0.2)') + ';' +
+            'box-shadow:' + (c.key === pet.color ? '0 0 6px rgba(255,255,255,0.5)' : 'none') +
+            '"></div>'
+          ).join('');
+        } else {
+          colorsEl.innerHTML = '';
+        }
       }
     }
 
     let _petNameTimer = null;
     function onPetNameChange(val) {
+      if (viewingUid !== currentUid) return;
       if (!_selectedPetId) return;
       const pet = getPet(_selectedPetId);
       if (!pet) return;

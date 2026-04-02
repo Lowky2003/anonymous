@@ -23,6 +23,7 @@
     }
 
     function playJukeboxTrack(trackId) {
+      if (viewingUid !== currentUid) return;
       stopJukebox();
       const track = JUKEBOX_TRACKS.find(t => t.id === trackId);
       if (!track) return;
@@ -172,6 +173,7 @@
     }
 
     function setJukeboxVol(val) {
+      if (viewingUid !== currentUid) return;
       const v = Math.max(0, Math.min(1, val / 100));
       roomData.jukeboxVol = v;
       if (_jukeboxGain) _jukeboxGain.gain.value = v;

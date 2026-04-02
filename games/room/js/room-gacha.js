@@ -170,6 +170,7 @@
     }
 
     async function revealGachaPrize(prize) {
+      if (viewingUid !== currentUid) return;
       const revealEl = document.getElementById('gachaTabResult');
       if (!revealEl) return;
       const showRarity = prize.rarity !== 'common' && prize.rarity !== 'uncommon';
