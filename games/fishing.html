@@ -656,6 +656,7 @@
         isReeling = false;
         phase = 'hooked';
         tensionWrap.style.display = 'block';
+        if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
         showToast('🐟 Fish on the line! Hold to reel!', 'success');
       }
     }

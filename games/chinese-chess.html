@@ -122,6 +122,26 @@ body{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;font-
 .board-wrapper{position:relative;display:inline-block}
 canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
 .game-status{margin-top:12px;font-size:14px;font-weight:600;min-height:24px;text-align:center}
+
+/* ── Move history ── */
+.move-history{margin-top:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;max-width:400px;width:100%;margin-left:auto;margin-right:auto}
+.move-history-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);margin-bottom:6px}
+.move-history-list{display:flex;flex-direction:column;gap:4px}
+.move-entry{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,.03)}
+.move-entry .move-num{font-size:11px;color:rgba(255,255,255,.35);min-width:20px}
+.move-entry .move-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.move-entry .move-color.red{background:#d32f2f}
+.move-entry .move-color.black{background:#555}
+.move-entry .move-text{color:rgba(255,255,255,.8)}
+.move-entry .move-capture{color:#ff6b6b;font-weight:600}
+.move-history-empty{font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:4px 0}
+
+/* ── Turn reminder ── */
+.turn-reminder{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9500;font-size:22px;font-weight:800;padding:16px 32px;border-radius:16px;pointer-events:none;animation:turnPop .8s ease forwards}
+.turn-reminder.red{background:rgba(211,47,47,.85);color:#fff;box-shadow:0 0 40px rgba(211,47,47,.5)}
+.turn-reminder.black{background:rgba(60,60,60,.9);color:#fff;box-shadow:0 0 40px rgba(0,0,0,.5)}
+@keyframes turnPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
+
 .game-buttons{display:flex;gap:10px;margin-top:12px}
 .game-buttons button{padding:10px 20px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
 .resign-btn{background:rgba(255,80,80,.15);color:#ff6b6b}
@@ -283,6 +303,12 @@ canvas#chessBoard{display:block;border-radius:8px;touch-action:none}
     <canvas id="chessBoard"></canvas>
   </div>
   <div class="game-status" id="gameStatus"></div>
+  <div class="move-history" id="moveHistory">
+    <div class="move-history-title">📜 Move History</div>
+    <div class="move-history-list" id="moveHistoryList">
+      <div class="move-history-empty">No moves yet</div>
+    </div>
+  </div>
   <div class="spectator-bar" id="spectatorBar">👁️ Watching as spectator</div>
   <div class="game-buttons" id="gameButtons">
     <button class="resign-btn" id="resignBtn">🏳️ Resign</button>
@@ -353,6 +379,68 @@ let unsubPresence   = null;
 let unsubInvites    = null;
 let unsubCoins      = null;
 let presenceDocRef  = null;
+
+// ── Move history tracking (local) ──
+let moveHistory = []; // keeps last 3 moves: { piece, fromRow, fromCol, toRow, toCol, captured, color }
+let lastMoveKey = ''; // detect new moves from snapshot
+let lastTurnColor = null; // detect turn changes for reminder
+
+function addMoveToHistory(lm) {
+  if (!lm || !lm.piece) return;
+  moveHistory.push({
+    piece: lm.piece,
+    fromRow: lm.fromRow,
+    fromCol: lm.fromCol,
+    toRow: lm.toRow,
+    toCol: lm.toCol,
+    captured: lm.captured || null,
+    color: lm.color || 'red'
+  });
+  if (moveHistory.length > 3) moveHistory.shift();
+  renderMoveHistory();
+}
+
+function renderMoveHistory() {
+  const el = document.getElementById('moveHistoryList');
+  if (!el) return;
+  if (moveHistory.length === 0) {
+    el.innerHTML = '<div class="move-history-empty">No moves yet</div>';
+    return;
+  }
+  const colNames = ['1','2','3','4','5','6','7','8','9'];
+  const rowNames = ['10','9','8','7','6','5','4','3','2','1'];
+  el.innerHTML = moveHistory.map((m, i) => {
+    const pName = isRed(m.piece) ? (PIECE_NAMES[m.piece] || m.piece) : (PIECE_NAMES_BLACK[m.piece.toLowerCase()] || m.piece);
+    const fromStr = colNames[m.fromCol] + ',' + rowNames[m.fromRow];
+    const toStr = colNames[m.toCol] + ',' + rowNames[m.toRow];
+    const capText = m.captured ? ' ✕ ' + (isRed(m.captured) ? (PIECE_NAMES[m.captured] || m.captured) : (PIECE_NAMES_BLACK[m.captured.toLowerCase()] || m.captured)) : '';
+    const colorClass = m.color === 'red' ? 'red' : 'black';
+    return '<div class="move-entry">' +
+      '<span class="move-color ' + colorClass + '"></span>' +
+      '<span class="move-text">' + pName + ' ' + fromStr + ' → ' + toStr + '</span>' +
+      (capText ? '<span class="move-capture">' + capText + '</span>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function showTurnReminder(color) {
+  const existing = document.querySelector('.turn-reminder');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'turn-reminder ' + color;
+  el.textContent = '🎯 Your Turn!';
+  document.body.appendChild(el);
+  // Vibrate
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  setTimeout(() => el.remove(), 900);
+}
+
+function resetMoveHistory() {
+  moveHistory = [];
+  lastMoveKey = '';
+  lastTurnColor = null;
+  renderMoveHistory();
+}
 
 // ── Helpers ──
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -923,11 +1011,21 @@ waitLeaveBtn.addEventListener('click', async () => {
 function spectateGame(gameId) {
   currentGameId = gameId;
   myColor = null;
+  resetMoveHistory();
   if (unsubGame) unsubGame();
   unsubGame = gamesRef.doc(gameId).onSnapshot((snap) => {
     if (!snap.exists) { showToast('Game ended', 'info'); enterLobby(); return; }
     currentGameData = snap.data();
     if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
+    // Track moves for history (spectator view)
+    const lm = currentGameData.lastMove;
+    if (lm) {
+      const moveKey = lm.fromRow + ',' + lm.fromCol + ',' + lm.toRow + ',' + lm.toCol + ',' + (lm.piece || '');
+      if (moveKey !== lastMoveKey) {
+        lastMoveKey = moveKey;
+        addMoveToHistory(lm);
+      }
+    }
     if (currentGameData.status === 'finished' || currentGameData.status === 'waiting') {
       // Go back to lobby after game ends
     }
@@ -999,12 +1097,27 @@ function enterGame() {
   backLobbyBtn.style.display = 'none';
   resetWinAnim();
   oppLeftShown = false;
+  resetMoveHistory();
   initCanvas();
   if (unsubGame) unsubGame();
   unsubGame = gamesRef.doc(currentGameId).onSnapshot((snap) => {
     if (!snap.exists) { showToast('Game was deleted', 'error'); enterLobby(); return; }
     currentGameData = snap.data();
     if (currentGameData.board) currentGameData.board = boardFromFirestore(currentGameData.board);
+    // Track new moves for history
+    const lm = currentGameData.lastMove;
+    if (lm) {
+      const moveKey = lm.fromRow + ',' + lm.fromCol + ',' + lm.toRow + ',' + lm.toCol + ',' + (lm.piece || '');
+      if (moveKey !== lastMoveKey) {
+        lastMoveKey = moveKey;
+        addMoveToHistory(lm);
+      }
+    }
+    // Turn reminder + vibration when it becomes the player's turn
+    if (myColor && currentGameData.status === 'playing' && currentGameData.turn === myColor && lastTurnColor !== myColor) {
+      showTurnReminder(myColor);
+    }
+    lastTurnColor = currentGameData.turn;
     renderGameUI();
     drawBoard();
     // Check if game ended
@@ -1486,6 +1599,7 @@ function processClick(x, y) {
 // ── Make a move ──
 async function makeMove(fromRow, fromCol, toRow, toCol) {
   const board = JSON.parse(JSON.stringify(currentGameData.board));
+  const movedPiece = board[fromRow][fromCol];
   const captured = board[toRow][toCol];
   board[toRow][toCol] = board[fromRow][fromCol];
   board[fromRow][fromCol] = null;
@@ -1503,7 +1617,7 @@ async function makeMove(fromRow, fromCol, toRow, toCol) {
   const update = {
     board: boardToFirestore(board),
     turn: nextTurn,
-    lastMove: { fromRow, fromCol, toRow, toCol }
+    lastMove: { fromRow, fromCol, toRow, toCol, piece: movedPiece, captured: captured || null, color: currentGameData.turn }
   };
 
   if (winner) {
