@@ -2418,8 +2418,9 @@ countdownRef.onSnapshot((snap) => {
 
         // Record this user's vote
         await votersRef.set({ mood, ts: Date.now() });
-    } catch {
-        showToast('Mood submit failed', 'error');
+    } catch (err) {
+        console.error('Mood submit error:', err, 'code:', err.code, 'msg:', err.message);
+        showToast('Mood fail: ' + (err.code || '') + ' ' + (err.message || 'unknown'), 'error');
     }
     }
 
