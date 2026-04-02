@@ -126,6 +126,22 @@
       if (decorPanel && decorPanel.classList.contains('active')) renderDecorShop();
     }
 
+    function drawPetPreview(cvs, petType) {
+      const w = cvs.width = 64, h = cvs.height = 52;
+      const ctx = cvs.getContext('2d');
+      // Soft background
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, 'rgba(200,210,220,0.3)'); bg.addColorStop(1, 'rgba(180,160,140,0.3)');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Floor
+      ctx.fillStyle = 'rgba(139,115,85,0.2)'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      ctx.save();
+      ctx.translate(w / 2, h * 0.65);
+      const size = 18;
+      drawPetCanvas(ctx, petType, size, 0, false, 100, 0, null, 0);
+      ctx.restore();
+    }
+
     function renderPetShop() {
       const el = document.getElementById('petShop');
       const titleEl = el.previousElementSibling;
@@ -152,7 +168,7 @@
         const hasUnplaced = ownedPetsOfType.some(p => !p.layer || p.layer === 0);
 
         return '<div class="shop-card' + (ownedCount > 0 ? ' owned' : '') + '">' +
-          '<span class="shop-emoji">' + item.emoji + '</span>' +
+          '<canvas class="shop-preview" data-preview="pet" data-pid="' + item.id + '"></canvas>' +
           '<div class="shop-name">' + item.name + '</div>' +
           (ownedCount > 0 ? '<div style="font-size:11px;color:#34d399">Owned: ' + ownedCount + ' / 2</div>' : '') +
           (placementInfo ? '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px">' + placementInfo + '</div>' : '') +
@@ -184,6 +200,7 @@
           }).join('') +
           '</div>';
       }).join('');
+      el.querySelectorAll('canvas[data-preview="pet"]').forEach(c => _lazyDrawPreview(c, 'pet'));
     }
 
     function renderShopSection(containerId, items, owned, equippedArr, type, slotHtml) {
@@ -705,16 +722,77 @@
         sg.addColorStop(0, '#2c3e6b'); sg.addColorStop(0.5, '#3d6b8a'); sg.addColorStop(1, '#2c3e6b');
         ctx.fillStyle = sg; roundRectPath(ctx, tx + 2, base - th - 4, tw - 4, th - 6, 1); ctx.fill();
       } else if (decorId === 'piano') {
-        const pw = 28, ph = 32, px = cx - pw / 2, base = h - 6;
-        ctx.fillStyle = '#1a1a1a'; roundRectPath(ctx, px, base - ph, pw, ph - 4, 2); ctx.fill();
-        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(px + 1, base - ph, pw - 2, 8);
-        ctx.fillStyle = '#333'; ctx.fillRect(px + 6, base - ph + 6, pw - 12, 6);
-        ctx.fillStyle = '#f5f0e0'; ctx.fillRect(px + 8, base - ph + 7, pw - 16, 4);
-        ctx.fillStyle = '#f5f0e0'; ctx.fillRect(px + 2, base - 12, pw - 4, 8);
+        // Detailed Upright Piano preview
+        const pw = 32, ph = 38, px = cx - pw / 2, base = h - 4;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.06)'; roundRectPath(ctx, px + 2, base - ph + 2, pw, ph - 2, 2); ctx.fill();
+        // Main body
+        const bodyGrad = ctx.createLinearGradient(px, 0, px + pw, 0);
+        bodyGrad.addColorStop(0, '#1a1a1a'); bodyGrad.addColorStop(0.3, '#282828'); bodyGrad.addColorStop(0.7, '#222'); bodyGrad.addColorStop(1, '#111');
+        ctx.fillStyle = bodyGrad; roundRectPath(ctx, px, base - ph, pw, ph - 4, 3); ctx.fill();
+        // Top panel with lid detail
+        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(px + 1, base - ph + 1, pw - 2, 6);
+        ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(px + 2, base - ph + 1, pw - 4, 2);
+        // Music stand area
+        ctx.fillStyle = '#333'; roundRectPath(ctx, px + 4, base - ph + 8, pw - 8, 8, 1); ctx.fill();
+        // Sheet music page
+        ctx.fillStyle = '#f5f0e0'; ctx.fillRect(px + 6, base - ph + 9, pw - 12, 6);
+        // Staff lines on sheet music
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.3;
+        for (let i = 0; i < 5; i++) {
+          const ly = base - ph + 10 + i * 1;
+          ctx.beginPath(); ctx.moveTo(px + 7, ly); ctx.lineTo(px + pw - 7, ly); ctx.stroke();
+        }
+        // Tiny notes on the sheet
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        [0, 3, 5, 8, 11, 14].forEach(ox => {
+          ctx.beginPath(); ctx.ellipse(px + 8 + ox, base - ph + 11 + (ox % 3), 1, 0.6, -0.3, 0, Math.PI * 2); ctx.fill();
+        });
+        // Panel middle section (dark wood feel)
+        ctx.fillStyle = '#1e1e1e'; ctx.fillRect(px + 2, base - ph + 17, pw - 4, ph - 30);
+        // Subtle wood grain lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.015)'; ctx.lineWidth = 0.5;
+        for (let i = 0; i < 3; i++) {
+          const gx = px + 6 + i * 8;
+          ctx.beginPath(); ctx.moveTo(gx, base - ph + 18); ctx.lineTo(gx, base - 12); ctx.stroke();
+        }
+        // Key area frame
+        ctx.fillStyle = '#2a2a2a'; roundRectPath(ctx, px + 2, base - 14, pw - 4, 10, 1); ctx.fill();
+        // White keys
+        ctx.fillStyle = '#f5f0e0'; ctx.fillRect(px + 3, base - 13, pw - 6, 8);
+        // White key divisions
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.4;
+        const wkw = (pw - 6) / 14;
+        for (let i = 1; i < 14; i++) {
+          const kx = px + 3 + i * wkw;
+          ctx.beginPath(); ctx.moveTo(kx, base - 13); ctx.lineTo(kx, base - 5); ctx.stroke();
+        }
+        // Black keys with proper pattern (2-3-2-3)
         ctx.fillStyle = '#111';
-        for (let i = 0; i < 6; i++) { if (i !== 2) ctx.fillRect(px + 5 + i * 4, base - 12, 2, 5); }
-        ctx.fillStyle = '#111'; ctx.fillRect(px + 2, base - 4, 3, 4); ctx.fillRect(px + pw - 5, base - 4, 3, 4);
-        ctx.fillStyle = '#B8860B'; ctx.fillRect(cx - 4, base - 2, 2, 2); ctx.fillRect(cx + 2, base - 2, 2, 2);
+        const blackKeyPattern = [1, 2, 4, 5, 6, 8, 9, 11, 12, 13];
+        blackKeyPattern.forEach(i => {
+          if (i < 14) {
+            const bkGrad = ctx.createLinearGradient(0, base - 13, 0, base - 8);
+            bkGrad.addColorStop(0, '#111'); bkGrad.addColorStop(1, '#222');
+            ctx.fillStyle = bkGrad;
+            ctx.fillRect(px + 3 + i * wkw - wkw * 0.32, base - 13, wkw * 0.64, 5);
+          }
+        });
+        // Key reflection
+        ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(px + 3, base - 13, pw - 6, 1);
+        // Legs
+        ctx.fillStyle = '#0e0e0e';
+        ctx.fillRect(px + 2, base - 4, 4, 4); ctx.fillRect(px + pw - 6, base - 4, 4, 4);
+        // Pedals (3 brass pedals)
+        ctx.fillStyle = '#B8860B';
+        ctx.fillRect(cx - 6, base - 2, 2.5, 2); ctx.fillRect(cx - 1.5, base - 2, 2.5, 2); ctx.fillRect(cx + 3, base - 2, 2.5, 2);
+        // Pedal rods
+        ctx.strokeStyle = '#8B6914'; ctx.lineWidth = 0.4;
+        [-4.5, 0, 4.5].forEach(ox => {
+          ctx.beginPath(); ctx.moveTo(cx + ox, base - 4); ctx.lineTo(cx + ox, base - 2); ctx.stroke();
+        });
+        // Top highlight edge
+        ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(px + 1, base - ph, pw - 2, 1);
       } else if (decorId === 'telescope') {
         const base = h - 6;
         ctx.strokeStyle = '#8B7355'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
@@ -1177,6 +1255,127 @@
         ctx.fillStyle = '#ccc'; ctx.beginPath(); ctx.arc(cx, base - 30, 2, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(cx - 4, base - 16, 3, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#55efc4'; roundRectPath(ctx, cx + 2, base - 12, 6, 5, 1); ctx.fill();
+      } else if (decorId === 'calendar') {
+        // Wall Calendar preview
+        const cw2 = 38, ch2 = 44;
+        const cl = cx - cw2 / 2, ct = cy - ch2 / 2 + 2;
+        // Nail
+        ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(cx, ct - 3, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(cx, ct - 2); ctx.lineTo(cx, ct + 1); ctx.stroke();
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.1)'; roundRectPath(ctx, cl + 1, ct + 2, cw2, ch2, 2); ctx.fill();
+        // Paper body
+        ctx.fillStyle = '#faf8f3'; roundRectPath(ctx, cl, ct, cw2, ch2, 2); ctx.fill();
+        ctx.strokeStyle = '#c8c0b0'; ctx.lineWidth = 0.6; roundRectPath(ctx, cl, ct, cw2, ch2, 2); ctx.stroke();
+        // Red header
+        const hH = ch2 * 0.18;
+        ctx.fillStyle = '#c0392b'; roundRectPath(ctx, cl, ct, cw2, hH + 1, 2); ctx.fill();
+        ctx.fillStyle = '#c0392b'; ctx.fillRect(cl, ct + hH - 1, cw2, 2);
+        // Month text
+        const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 5px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(months[new Date().getMonth()], cx, ct + hH * 0.5);
+        // Spiral rings
+        const spY = ct + hH + 2;
+        for (let i = 0; i < 5; i++) {
+          const sx = cl + 4 + i * (cw2 - 8) / 4;
+          ctx.strokeStyle = '#aaa'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.arc(sx, spY, 2, 0, Math.PI * 2); ctx.stroke();
+        }
+        // Day grid
+        const gTop = spY + 5, gH = ct + ch2 - 3 - gTop;
+        const cellW2 = (cw2 - 6) / 7, cellH2 = gH / 7;
+        // Day-of-week headers
+        ctx.font = '3px sans-serif'; ctx.fillStyle = '#999';
+        ['S','M','T','W','T','F','S'].forEach((d, i) => {
+          ctx.fillText(d, cl + 3 + i * cellW2 + cellW2 / 2, gTop + cellH2 * 0.4);
+        });
+        // Day numbers
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        ctx.font = '3px sans-serif';
+        for (let d = 1; d <= daysInMonth && d <= 31; d++) {
+          const cellIdx = firstDay + d - 1;
+          const col = cellIdx % 7, row = Math.floor(cellIdx / 7) + 1;
+          if (row >= 7) break;
+          ctx.fillStyle = d === now.getDate() ? '#c0392b' : '#555';
+          if (d === now.getDate()) {
+            ctx.fillStyle = 'rgba(192,57,43,0.15)';
+            ctx.beginPath(); ctx.arc(cl + 3 + col * cellW2 + cellW2 / 2, gTop + row * cellH2 + cellH2 * 0.35, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#c0392b';
+          }
+          ctx.fillText(String(d), cl + 3 + col * cellW2 + cellW2 / 2, gTop + row * cellH2 + cellH2 * 0.4);
+        }
+      } else if (decorId === 'xmastree') {
+        // Christmas Tree preview
+        const base = h - 4;
+        // Presents at base
+        ctx.fillStyle = '#e04040'; roundRectPath(ctx, cx - 14, base - 6, 8, 5, 1); ctx.fill();
+        ctx.fillStyle = '#ffd700'; ctx.fillRect(cx - 11, base - 6, 1.5, 5); ctx.fillRect(cx - 14, base - 4, 8, 1);
+        ctx.fillStyle = '#4090e0'; roundRectPath(ctx, cx + 5, base - 7, 7, 6, 1); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillRect(cx + 8, base - 7, 1.2, 6); ctx.fillRect(cx + 5, base - 5, 7, 1);
+        // Pot
+        ctx.fillStyle = '#6d3a1f';
+        ctx.beginPath(); ctx.moveTo(cx - 5, base - 8); ctx.lineTo(cx - 4, base); ctx.lineTo(cx + 4, base); ctx.lineTo(cx + 5, base - 8); ctx.fill();
+        ctx.fillStyle = '#8B4513'; ctx.fillRect(cx - 6, base - 9, 12, 2);
+        // Trunk
+        ctx.fillStyle = '#5a3a1a'; ctx.fillRect(cx - 1.5, base - 12, 3, 3);
+        // Tree layers (4 triangular tiers with jagged edges)
+        const tiers = [
+          { w: 22, y: base - 12, h: 8 },
+          { w: 17, y: base - 18, h: 8 },
+          { w: 12, y: base - 24, h: 8 },
+          { w: 7, y: base - 30, h: 8 },
+        ];
+        tiers.forEach((tier, i) => {
+          ctx.fillStyle = i % 2 === 0 ? '#1a7830' : '#1e8a38';
+          ctx.beginPath();
+          ctx.moveTo(cx, tier.y - tier.h);
+          ctx.lineTo(cx + tier.w / 2, tier.y);
+          // Jagged bottom
+          const jags = 4;
+          for (let j = jags; j >= 0; j--) {
+            const jx = cx - tier.w / 2 + (j / jags) * tier.w;
+            const jy = tier.y + (j % 2 === 0 ? 0 : -1.5);
+            ctx.lineTo(jx, jy);
+          }
+          ctx.closePath(); ctx.fill();
+          // Darker edge
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.beginPath();
+          ctx.moveTo(cx, tier.y - tier.h);
+          ctx.lineTo(cx + tier.w / 2, tier.y);
+          ctx.lineTo(cx, tier.y); ctx.closePath(); ctx.fill();
+        });
+        // Star on top
+        ctx.fillStyle = '#ffd700';
+        const starY = base - 38;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+          ctx[i === 0 ? 'moveTo' : 'lineTo'](cx + Math.cos(a) * 4, starY + Math.sin(a) * 4);
+        }
+        ctx.closePath(); ctx.fill();
+        // Star glow
+        ctx.fillStyle = 'rgba(255,215,0,0.2)'; ctx.beginPath(); ctx.arc(cx, starY, 6, 0, Math.PI * 2); ctx.fill();
+        // Ornaments
+        const ornaments = [
+          { x: cx - 6, y: base - 16, c: '#e04040' },
+          { x: cx + 4, y: base - 14, c: '#ffd700' },
+          { x: cx - 3, y: base - 22, c: '#4090e0' },
+          { x: cx + 2, y: base - 26, c: '#ff69b4' },
+          { x: cx, y: base - 19, c: '#55efc4' },
+        ];
+        ornaments.forEach(o => {
+          ctx.fillStyle = o.c; ctx.beginPath(); ctx.arc(o.x, o.y, 2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(o.x - 0.5, o.y - 0.5, 0.8, 0, Math.PI * 2); ctx.fill();
+        });
+        // Tinsel
+        ctx.strokeStyle = 'rgba(255,215,0,0.3)'; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(cx - 8, base - 14); ctx.quadraticCurveTo(cx, base - 18, cx + 6, base - 15); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 5, base - 22); ctx.quadraticCurveTo(cx, base - 25, cx + 4, base - 22); ctx.stroke();
       } else {
         // Generic fallback: draw the emoji
         const item = DECORATIONS.find(d => d.id === decorId);
@@ -1200,6 +1399,7 @@
             if (c.dataset.preview === 'wall') drawWallPreview(c, pid);
             else if (c.dataset.preview === 'window') drawWindowPreview(c, pid);
             else if (c.dataset.preview === 'decor') drawDecorPreview(c, pid, c.dataset.cat);
+            else if (c.dataset.preview === 'pet') drawPetPreview(c, pid);
           });
         }, { rootMargin: '100px' });
       }
