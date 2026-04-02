@@ -108,6 +108,11 @@ service cloud.firestore {
     // ═══════════════════════════════════════
     // 6. APP STATE — spin result, countdown
     // ═══════════════════════════════════════
+    match /app_state/access_code {
+      // Allow unauthenticated read for the access gate (runs before login)
+      allow read: if true;
+      allow write: if isAuth() && isDeveloper(request.auth.uid);
+    }
     match /app_state/{docId} {
       allow read: if isAuth();
       allow write: if isAuth();

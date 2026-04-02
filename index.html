@@ -588,9 +588,29 @@
         return;
       }
 
+      // Fetch access code from Firestore (unauthenticated read allowed for this doc)
+      var _accessCode = null;
+      db.collection('app_state').doc('access_code').get().then(function(doc) {
+        if (doc.exists && doc.data().code) {
+          _accessCode = doc.data().code;
+        }
+      }).catch(function(err) {
+        console.error('Failed to fetch access code:', err);
+      });
+
       function verifyCode() {
         var code = (input.value || '').trim();
-        if (code === 'PbgoldMisTouchFishWeb') {
+        if (!_accessCode) {
+          errorEl.textContent = 'Loading... please try again.';
+          // Retry fetch
+          db.collection('app_state').doc('access_code').get().then(function(doc) {
+            if (doc.exists && doc.data().code) {
+              _accessCode = doc.data().code;
+            }
+          });
+          return;
+        }
+        if (code === _accessCode) {
           localStorage.setItem(ACCESS_CODE_KEY, 'true');
           gate.classList.add('hidden');
           errorEl.textContent = '';
