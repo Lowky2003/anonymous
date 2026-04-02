@@ -232,10 +232,12 @@
             applyActionTransform(ctx, p.type, currentAction, actionProgress, size, t);
           }
 
-          drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress, color);
-          // Draw accessory on top
+          // Draw back-layer accessories (cape, wings) behind the pet
           const accId = petInst ? petInst.accessory : null;
-          if (accId) drawPetAccessory(ctx, p.type, accId, size);
+          if (accId) drawPetAccessory(ctx, p.type, accId, size, 'back');
+          drawPetCanvas(ctx, p.type, size, legPhase, moving, hunger, t, currentAction, actionProgress, color);
+          // Draw front-layer accessories on top of the pet
+          if (accId) drawPetAccessory(ctx, p.type, accId, size, 'front');
           ctx.restore();
 
           // Action floating effects
