@@ -171,6 +171,8 @@
     .history-day .hd-result.win { background: rgba(52,211,153,0.15); color: #34d399; }
     .history-day .hd-result.lose { background: rgba(248,113,113,0.1); color: #f87171; }
     .history-day .hd-result.no-bet { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+    .history-day .hd-result.pending { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .history-day .hd-result.ready { background: rgba(99,102,241,0.15); color: #a5b4fc; }
 
     .history-day .hd-pick { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.5); }
     .history-day .hd-pick-num { font-weight: 700; color: #a5b4fc; font-family: monospace; letter-spacing: 2px; font-size: 14px; }
@@ -449,6 +451,19 @@
      */
     function getCurrentResultDate() {
       return getTodayDateStr();
+    }
+
+    /**
+     * Whether a draw date can be revealed yet.
+     * Past draws are always available. Today's draw unlocks at 5 PM server time.
+     * @param {string} dateStr
+     * @returns {boolean}
+     */
+    function isDrawReleased(dateStr) {
+      const today = getTodayDateStr();
+      if (dateStr < today) return true;
+      if (dateStr > today) return false;
+      return getCurrentPhase() === 'results';
     }
 
     /** Format remaining time as HH:MM:SS. */
@@ -824,25 +839,41 @@
       html += '<h3>📜 Last ' + HISTORY_DAYS + ' Days</h3>';
 
       for (const dateStr of days) {
-        // Generate that day's draw results (deterministic)
-        const drawResults = generateDrawForDate(dateStr);
+        const drawReleased = isDrawReleased(dateStr);
+        const activePicks = todayPicks
+          .filter(p => p.drawDate === dateStr)
+          .map(p => ({ number: p.number, bet: p.bet, winnings: p.winnings || 0, tier: p.resultTier || null }));
         // Find the player's history for that date (if any)
         const hist = pickHistory.find(h => h.date === dateStr);
         // Build array of picks for this date (support both old and new format)
-        const histPicks = hist ? (hist.picks || [{ number: hist.number, bet: hist.bet, winnings: hist.winnings, tier: hist.tier }]) : [];
-        const totalWin = hist ? (hist.totalWinnings ?? hist.winnings ?? 0) : 0;
-        const totalBet = hist ? (hist.totalBet ?? hist.bet ?? 0) : 0;
+        const histPicks = hist
+          ? (hist.picks || [{ number: hist.number, bet: hist.bet, winnings: hist.winnings, tier: hist.tier }])
+          : activePicks;
+        const totalWin = hist
+          ? (hist.totalWinnings ?? hist.winnings ?? 0)
+          : histPicks.reduce((sum, pick) => sum + (pick.winnings || 0), 0);
+        const totalBet = hist
+          ? (hist.totalBet ?? hist.bet ?? 0)
+          : histPicks.reduce((sum, pick) => sum + (pick.bet || 0), 0);
+        const hasPendingPicks = !hist && histPicks.length > 0;
+        const drawResults = drawReleased ? generateDrawForDate(dateStr) : [];
 
         html += '<div class="history-day">';
         html += '<div class="hd-header">';
         html += '<span class="hd-date">' + dateStr + '</span>';
 
-        if (hist) {
+        if (!drawReleased && hasPendingPicks) {
+          html += '<span class="hd-result pending">Pending Draw</span>';
+        } else if (!drawReleased) {
+          html += '<span class="hd-result no-bet">Not Released</span>';
+        } else if (hist) {
           if (totalWin > 0) {
             html += '<span class="hd-result win">Won +' + totalWin + '</span>';
           } else {
             html += '<span class="hd-result lose">Lost -' + totalBet + '</span>';
           }
+        } else if (hasPendingPicks) {
+          html += '<span class="hd-result ready">Results Ready</span>';
         } else {
           html += '<span class="hd-result no-bet">No Bet</span>';
         }
@@ -854,28 +885,36 @@
             html += '<div class="hd-pick">';
             html += 'Pick: <span class="hd-pick-num">' + p.number + '</span>';
             html += ' · <span class="hd-pick-bet">' + p.bet + ' coins</span>';
-            if (p.winnings > 0) {
+            if (drawReleased && p.winnings > 0) {
               html += ' → <span style="color:#34d399;font-weight:600">+' + p.winnings + '</span>';
             }
             html += '</div>';
           }
         }
 
-        // Winning numbers grouped by tier
-        for (const prize of TOTO_PRIZES) {
-          const tierResults = drawResults.filter(r => r.tier === prize.tier);
-          html += '<div class="hd-tier">';
-          html += '<div class="hd-tier-label" style="color:' + prize.color + '">';
-          html += prize.emoji + ' ' + prize.tier;
+        if (!drawReleased) {
+          html += '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:8px;text-align:center">';
+          html += histPicks.length
+            ? 'Winning numbers will appear after 5:00 PM.'
+            : 'This draw has not been released yet.';
           html += '</div>';
-          html += '<div class="hd-tier-nums">';
-          for (const r of tierResults) {
-            // Check if any pick matches this draw number
-            const isMatch = histPicks.some(p => p.number === r.number);
-            html += '<span class="hd-num ' + (isMatch ? 'hd-match' : '') + '">' + r.number + '</span>';
+        } else {
+          // Winning numbers grouped by tier
+          for (const prize of TOTO_PRIZES) {
+            const tierResults = drawResults.filter(r => r.tier === prize.tier);
+            html += '<div class="hd-tier">';
+            html += '<div class="hd-tier-label" style="color:' + prize.color + '">';
+            html += prize.emoji + ' ' + prize.tier;
+            html += '</div>';
+            html += '<div class="hd-tier-nums">';
+            for (const r of tierResults) {
+              // Check if any pick matches this draw number
+              const isMatch = histPicks.some(p => p.number === r.number);
+              html += '<span class="hd-num ' + (isMatch ? 'hd-match' : '') + '">' + r.number + '</span>';
+            }
+            html += '</div>';
+            html += '</div>';
           }
-          html += '</div>';
-          html += '</div>';
         }
 
         html += '</div>'; // .history-day
