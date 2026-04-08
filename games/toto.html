@@ -828,7 +828,10 @@
       // Build the last 3 days (most recent first)
       const HISTORY_DAYS = 3;
       const days = [];
-      const now = getServerNow();
+      const now = new Date(getServerNow());
+      if (!isDrawReleased(formatDateStr(now))) {
+        now.setDate(now.getDate() - 1);
+      }
       for (let i = 0; i < HISTORY_DAYS; i++) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
