@@ -197,6 +197,29 @@ service cloud.firestore {
     }
 
     // ═══════════════════════════════════════
+    // 13. DAILY QUOTE COMMENTS
+    //     Path: quote_comments/{dateStr}/comments/{commentId}
+    //     Fields: uid, displayName, text (≤200 chars), createdAt
+    // ═══════════════════════════════════════
+    match /quote_comments/{dateStr} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+
+      match /comments/{commentId} {
+        allow read: if isAuth();
+        allow create: if isAuth()
+                      && request.resource.data.uid == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() >= 1
+                      && request.resource.data.text.size() <= 200
+                      && request.resource.data.createdAt is number;
+        allow update: if false;
+        allow delete: if isAuth()
+                      && resource.data.uid == request.auth.uid;
+      }
+    }
+
+    // ═══════════════════════════════════════
     // DEFAULT — deny everything else
     // ═══════════════════════════════════════
     match /{document=**} {

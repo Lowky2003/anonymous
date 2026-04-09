@@ -109,6 +109,90 @@
     body.light-theme .daily-quote-label { color: rgba(168,85,247,0.5); }
     body.light-theme .daily-quote-text { color: rgba(0,0,0,0.55); }
 
+    /* ── Quote Comment Section ── */
+    .qc-toggle {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.4); font-size: 12px;
+      margin-top: 8px; padding: 4px 8px; border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .qc-toggle:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+    body.light-theme .qc-toggle { color: rgba(0,0,0,0.35); }
+    body.light-theme .qc-toggle:hover { color: rgba(0,0,0,0.6); background: rgba(0,0,0,0.04); }
+
+    .qc-section {
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
+      margin-top: 0;
+    }
+    .qc-section.open {
+      max-height: 400px; opacity: 1; margin-top: 10px;
+      overflow-y: auto;
+    }
+    .qc-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .qc-empty { color: rgba(255,255,255,0.3); font-size: 12px; text-align: center; padding: 10px 0; }
+    body.light-theme .qc-empty { color: rgba(0,0,0,0.3); }
+
+    .qc-item {
+      position: relative;
+      background: rgba(255,255,255,0.04); border-radius: 8px;
+      padding: 6px 10px; text-align: left;
+    }
+    body.light-theme .qc-item { background: rgba(0,0,0,0.03); }
+    .qc-name { font-size: 11px; font-weight: 600; color: rgba(168,85,247,0.7); margin-right: 6px; }
+    .qc-time { font-size: 10px; color: rgba(255,255,255,0.25); }
+    body.light-theme .qc-time { color: rgba(0,0,0,0.25); }
+    .qc-text { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 2px; word-break: break-word; }
+    body.light-theme .qc-text { color: rgba(0,0,0,0.6); }
+    .qc-delete {
+      position: absolute; top: 4px; right: 6px;
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.2); font-size: 11px; padding: 2px 4px; border-radius: 4px;
+      transition: color 0.2s;
+    }
+    .qc-delete:hover { color: #f87171; }
+    body.light-theme .qc-delete { color: rgba(0,0,0,0.2); }
+    body.light-theme .qc-delete:hover { color: #ef4444; }
+
+    .qc-input-row { display: flex; gap: 6px; }
+    .qc-input {
+      flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .qc-input:focus { border-color: rgba(168,85,247,0.4); }
+    .qc-input::placeholder { color: rgba(255,255,255,0.25); }
+    body.light-theme .qc-input {
+      background: rgba(0,0,0,0.04); color: #333; border-color: rgba(0,0,0,0.1);
+    }
+    body.light-theme .qc-input::placeholder { color: rgba(0,0,0,0.3); }
+    .qc-send {
+      padding: 8px 14px; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .qc-send:hover { opacity: 0.85; }
+    .qc-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .qc-anon-toggle {
+      display: flex; align-items: center; gap: 4px;
+      margin-top: 6px; cursor: pointer; user-select: none;
+    }
+    .qc-anon-toggle input[type="checkbox"] {
+      width: 14px; height: 14px; accent-color: #a855f7; cursor: pointer;
+    }
+    .qc-anon-text { font-size: 11px; color: rgba(255,255,255,0.4); }
+    body.light-theme .qc-anon-text { color: rgba(0,0,0,0.4); }
+
+    .qc-toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.8); color: #fff; padding: 8px 18px;
+      border-radius: 10px; font-size: 13px; pointer-events: none;
+      opacity: 0; transition: opacity 0.3s; z-index: 9999;
+    }
+    .qc-toast.show { opacity: 1; }
+
     /* ── Access Code Gate ── */
     .access-gate {
       position: fixed; inset: 0; z-index: 10000;
@@ -405,6 +489,25 @@
   <div class="daily-quote-banner" id="dailyQuoteBanner">
     <div class="daily-quote-label">🐔 每日毒鸡汤</div>
     <div class="daily-quote-text" id="dailyQuoteText"></div>
+    <!-- Comment toggle -->
+    <button class="qc-toggle" id="quoteCommentToggle">
+      💬 评论 <span id="quoteCommentArrow">▼</span>
+    </button>
+    <!-- Expandable comment section -->
+    <div class="qc-section" id="quoteCommentSection">
+      <div class="qc-list" id="quoteCommentList">
+        <div class="qc-empty">还没有评论，来抢沙发吧！</div>
+      </div>
+      <div class="qc-input-row">
+        <input type="text" class="qc-input" id="quoteCommentInput" placeholder="说点什么…" maxlength="200" autocomplete="off">
+        <button class="qc-send" id="quoteCommentSendBtn">发送</button>
+      </div>
+      <label class="qc-anon-toggle" id="quoteCommentAnonLabel">
+        <input type="checkbox" id="quoteCommentAnon" checked>
+        <span class="qc-anon-text">🕶️ 匿名</span>
+      </label>
+      <div class="qc-toast" id="quoteCommentToast"></div>
+    </div>
   </div>
 
   <div class="bubble-wrap" id="bubbleWrap"></div>
@@ -564,6 +667,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="./src/js/firebase-config.js"></script>
   <script src="./src/js/daily-quotes.js"></script>
+  <script src="./src/js/quote-comments.js"></script>
   <script src="./src/js/app.js"></script>
   <script>
     // Initialize daily quote banner
@@ -573,6 +677,11 @@
         el.textContent = getDailyQuote();
       }
     })();
+
+    // Initialize quote comments (binds events; lazy-loads data on expand)
+    if (typeof QuoteComments !== 'undefined') {
+      QuoteComments.init();
+    }
 
     // ── Access Code Gate ──
     (function() {
